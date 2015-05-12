@@ -1,0 +1,13 @@
+from distutils.core import setup, Extension
+
+args = {
+    'name': 'modena',
+    'version': '${PACKAGE_VERSION}',
+    'package_dir': { 'modena': '${CMAKE_CURRENT_SOURCE_DIR}' },
+    'packages': ['modena'],
+}
+
+if not '${PYMODENA_LIB_LOCATION}' == '':
+    args['package_data'] = {'modena': ['${PYMODENA_LIB_LOCATION}']}
+
+setup(**args)

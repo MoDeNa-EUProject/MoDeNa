@@ -1,3 +1,15 @@
+# git-ls-files --others --exclude-from=.git/info/exclude
+# Lines that start with '#' are comments.
+
+# editor and misc backup files - anywhere
+*~
+.*~
+*.bak
+*.bak[0-9][0-9]
+*.orig
+*.orig[0-9][0-9]
+\#*\#
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -55,3 +67,49 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# file-browser settings - anywhere
+.directory
+
+# CVS recovered versions - anywhere
+.#*
+
+# SVN directories - anywhere
+
+.svn/
+
+# objects and archives - anywhere
+*.[oa]
+*.la
+*.so
+*.jar
+*.pyc
+
+# derived files
+lex.yy.c
+
+# Corefiles
+core
+
+# source packages - anywhere
+*.tar.bz2
+*.tar.gz
+*.tar
+*.tgz
+*.gtgz
+
+# ignore the persistent .build tag in the main directory
+/.build
+
+# ignore .timeStamp in the main directory
+/.timeStamp
+
+# ignore .tags in the main directory
+/.tags
+
+# FireWorks output
+FW.json
+launcher_*/
+func_*/
+
+# end-of-file
