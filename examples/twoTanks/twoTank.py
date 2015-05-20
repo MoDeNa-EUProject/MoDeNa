@@ -38,6 +38,7 @@ Contributors
 
 import os
 import modena
+from modena import BackwardMappingModel
 from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
 from fireworks import Firework, Workflow, FWAction
 from fireworks.utilities.fw_utilities import explicit_serialize
@@ -53,44 +54,6 @@ __version__ = '0.2'
 __maintainer__ = 'Henrik Rusche'
 __email__ = 'h.rusche@wikki.co.uk.'
 __date__ = 'Sep 4, 2014'
-
-
-# ********************************* Class ********************************** #
-@explicit_serialize
-class FlowRateExactSim(FireTaskBase):
-    """
-    A FireTask that starts a microscopic code and updates the database.
-    """
-
-    def run_task(self, fw_spec):
-        print(
-            term.yellow
-          + "Performing exact simulation (microscopic code recipe)"
-          + term.normal
-        )
-
-        D = self['point']['D']
-        rho0 = self['point']['rho0']
-        p0 = self['point']['p0']
-        p1Byp0 = self['point']['p1Byp0']
-
-        # Write input
-        f = open('in.txt', 'w')
-        f.write('%g\n%g\n%g\n%g\n' % (D, rho0, p0, p1Byp0))
-        f.close()
-
-        # Execute the application
-        # In this simple example, this call stands for a complex microscopic
-        # code - such as full 3D CFD simulation.
-        # Source code in src/flowRateExact.C
-        os.system('../src/flowRateExact')
-
-        # Analyse output
-        f = open('out.txt', 'r')
-        self['point']['flowRate'] = float(f.readline())
-        f.close()
-
-        return FWAction(mod_spec=[{'_push': self['point']}])
 
 
 # ********************************* Class ********************************** #
@@ -135,3 +98,8 @@ class ModenaBackwardMappingTask(ScriptTask):
         else:
             print('We are done')
             return ret
+
+m = ModenaBackwardMappingTask(
+    script='../src/twoTanksMacroscopicProblem'
+)
+            
