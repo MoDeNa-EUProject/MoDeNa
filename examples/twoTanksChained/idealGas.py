@@ -36,7 +36,17 @@ Authors
 Contributors
 '''
 
-from modena.Strategy import BackwardMappingScriptTask
+import os
+import modena
+from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, CFunction
+import modena.Strategy as Strategy
+from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
+from fireworks import Firework, Workflow, FWAction
+from fireworks.utilities.fw_utilities import explicit_serialize
+from blessings import Terminal
+
+# Create terminal for colour output
+term = Terminal()
 
 
 __author__ = 'Henrik Rusche'
@@ -47,8 +57,51 @@ __email__ = 'h.rusche@wikki.co.uk.'
 __date__ = 'Sep 4, 2014'
 
 
-# Source code in src/twoTanksMacroscopicProblem.C
-m = BackwardMappingScriptTask(
-    script='../src/twoTanksMacroscopicProblem'
+f = CFunction(
+    Ccode= '''
+#include "modena.h"
+#include "math.h"
+
+void idealGas
+(
+    const double* parameters,
+    const double* inherited_inputs,
+    const double* inputs,
+    double *outputs
+)
+{
+    const double p0 = inputs[0];
+    const double T0 = inputs[1];
+
+    const double R = parameters[0];
+
+    outputs[0] = p0/R/T0;
+}
+''',
+    # These are global bounds for the function
+    inputs={
+        'p0': { 'min': 0, 'max': 9e99, 'argPos': 0 },
+        'T0': { 'min': 0, 'max': 9e99, 'argPos': 1 },
+    },
+    outputs={
+        'rho0': { 'min': 9e99, 'max': -9e99, 'argPos': 0 },
+    },
+    parameters={
+        'R': { 'min': 0.0, 'max': 9e99, 'argPos': 0 }
+    },
+)
+
+m = ForwardMappingModel(
+    _id= 'idealGas',
+    surrogateFunction= f,
+    substituteModels= [ ],
+    parameters= [ 287.0 ],
+    inputs={
+        'p0': { 'min': 0, 'max': 9e99 },
+        'T0': { 'min': 0, 'max': 9e99 },
+    },
+    outputs={
+        'rho0': {'min': 0, 'max': 9e99 },
+    },
 )
 
