@@ -55,6 +55,32 @@ Contributors
 
 __BEGIN_DECLS
 
+enum modena_error_t
+{
+    MODENA_SUCCESS,
+    MODENA_MODEL_NOT_FOUND,
+    MODENA_MODEL_LAST
+};
+
+struct modena_errordesc
+{
+    int  code;
+    const char *message;
+} modena_errordesc[] =
+{
+    { MODENA_SUCCESS, "No error" },
+    { MODENA_MODEL_NOT_FOUND, "Surrogate model not found in database" }
+};
+
+// Returns error and resets it
+int modena_error();
+
+// Returns true when an error has been raised
+bool modena_error_occurred();
+
+// Returns error message for error code
+const char* modena_error_message(int error_code);
+
 #define Modena_PyErr_Print() \
     fprintf(stderr, "Error in python catched in %i of %s\n", __LINE__, __FILE__); \
     PyErr_Print(); \

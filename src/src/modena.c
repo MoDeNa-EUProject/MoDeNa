@@ -31,8 +31,52 @@ License
 #include "modena.h"
 #include "structmember.h"
 
-// Forward declarations
+#ifndef thread_local
+# if __STDC_VERSION__ >= 201112 && !defined __STDC_NO_THREADS__
+#  define thread_local _Thread_local
+# elif defined _WIN32 && ( \
+       defined _MSC_VER || \
+       defined __ICL || \
+       defined __DMC__ || \
+       defined __BORLANDC__ )
+#  define thread_local __declspec(thread)
+/* note that ICC (linux) and Clang are covered by __GNUC__ */
+# elif defined __GNUC__ || \
+       defined __SUNPRO_C || \
+       defined __xlC__
+#  define thread_local __thread
+# else
+#  error "Cannot define thread_local"
+# endif
+#endif
+
+
+thread_local int modena_error_code;
+
+// Returns error and resets it
+int modena_error()
+{
+    int ret = modena_error_code;
+    modena_error_code = 0;
+    return ret;
+}
+
+// Returns true when an error has been raised
+bool modena_error_occurred()
+{
+    return modena_error_code != MODENA_SUCCESS;
+};
+
+// Returns error message for error code
+const char* modena_error_message(int error_code)
+{
+    return modena_errordesc[modena_error_code].message;
+};
+
+// Static variables
 static PyTypeObject modena_model_tType;
+static PyObject *modena_DoesNotExist = NULL;
+static PyObject *modena_SurrogateModel = NULL;
 
 modena_siunits_t *modena_siunits_new()
 {
@@ -215,9 +259,18 @@ modena_model_t_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
     modena_model_t *self;
 
     self = (modena_model_t *)type->tp_alloc(type, 0);
-    if (self != NULL)
+    if (self)
     {
-        // Init to null required?
+        // Set everything to zero
+        self->substituteModels_size = 0;
+        self->substituteModels = NULL;
+        self->parameters = NULL;
+        self->inputs_minMax_size = 0;
+        self->inputs_min = NULL;
+        self->inputs_max = NULL;
+        self->argPos_used = NULL;
+        self->mf = NULL;
+        self->pModel = NULL;
     }
 
     return (PyObject *)self;
@@ -244,40 +297,21 @@ modena_model_t_init(modena_model_t *self, PyObject *args, PyObject *kwds)
 
     if(!pModel)
     {
-        PyObject *pName = PyString_FromString("modena.SurrogateModel");
-        if(!pName){ Modena_PyErr_Print(); }
+        self->pModel = PyObject_CallMethod(modena_SurrogateModel, "load", "(z)", modelId);
+        if(!self->pModel)
+        {
+            PyErr_SetString(modena_DoesNotExist, "Surrogate model does not exist");
 
-        PyObject *pModule = PyImport_Import(pName);
-        Py_DECREF(pName);
-        if(!pModule){ Modena_PyErr_Print(); }
-
-        PyObject *pDict = PyModule_GetDict(pModule); // Borrowed ref
-        if(!pDict){ Modena_PyErr_Print(); }
-
-        pName = PyString_FromString("SurrogateModel");
-        if(!pName){ Modena_PyErr_Print(); }
-
-        PyObject *sModel = PyObject_GetItem(pDict, pName);
-        Py_DECREF(pName);
-        if(!sModel){ Modena_PyErr_Print(); }
-
-        self->pModel = PyObject_CallMethod(sModel, "load", "(z)", modelId);
-        Py_DECREF(sModel);
-        if(!self->pModel){ Modena_PyErr_Print(); }
+            //Modena_PyErr_Print();
+            return -1;
+        }
 
         modena_model_get_minMax(self);
-
-        Py_DECREF(pModule);
     }
     else
     {
         Py_INCREF(pModel);
         self->pModel = pModel;
-
-        // Set everything to zero
-        self->inputs_minMax_size = 0;
-        self->inputs_min = NULL;
-        self->inputs_max = NULL;
     }
 
     //PyObject_Print(self->pModel, stdout, 0);
@@ -503,13 +537,41 @@ initlibmodena(void)
         "Example module that creates an extension type."
     );
 
-    if(m == NULL)
+    if(!m)
     {
         return;
     }
 
-    Py_INCREF(&modena_model_tType);
-    PyModule_AddObject(m, "modena_model_t", (PyObject *) &modena_model_tType);
+    if(!modena_DoesNotExist)
+    {
+        Py_INCREF(&modena_model_tType);
+        PyModule_AddObject(m, "modena_model_t", (PyObject *) &modena_model_tType);
+
+        PyObject *pName = PyString_FromString("modena.SurrogateModel");
+        if(!pName){ Modena_PyErr_Print(); }
+
+        PyObject *pModule = PyImport_Import(pName);
+        Py_DECREF(pName);
+        if(!pModule){ Modena_PyErr_Print(); }
+
+        PyObject *pDict = PyModule_GetDict(pModule); // Borrowed ref
+        if(!pDict){ Modena_PyErr_Print(); }
+
+        pName = PyString_FromString("SurrogateModel");
+        if(!pName){ Modena_PyErr_Print(); }
+
+        modena_SurrogateModel = PyObject_GetItem(pDict, pName);
+        Py_DECREF(pName);
+        if(!modena_SurrogateModel){ Modena_PyErr_Print(); }
+
+        pName = PyString_FromString("DoesNotExist");
+        if(!pName){ Modena_PyErr_Print(); }
+
+        modena_DoesNotExist = PyObject_GetItem(pDict, pName);
+        if(!modena_DoesNotExist){ Modena_PyErr_Print(); }
+        Py_DECREF(pName);
+        Py_DECREF(pModule);
+    }
 }
 
 // modena_model_t instantiates the surrogate model
@@ -533,7 +595,28 @@ modena_model_t *modena_model_new
     PyObject *m = PyObject_Call((PyObject *) &modena_model_tType, args, kw);
     Py_DECREF(args);
     Py_DECREF(kw);
-    if(!m){ Modena_PyErr_Print(); }
+    if(!m)
+    {
+        if(PyErr_ExceptionMatches(modena_DoesNotExist))
+        {
+            PyErr_Clear();
+
+            PyObject *pRet = PyObject_CallMethod
+            (
+                modena_SurrogateModel, "exceptionModelLoad", "(z)", modelId
+            );
+            if(!pRet){ Modena_PyErr_Print(); }
+            int ret = PyInt_AsLong(pRet);
+            Py_DECREF(pRet);
+
+            modena_error_code = ret;
+            return NULL;
+        }
+        else
+        {
+            Modena_PyErr_Print();
+        }
+    }
 
     return (modena_model_t *) m;
 }
@@ -747,13 +830,14 @@ int modena_model_call
 
             PyObject *pRet = PyObject_CallMethod
             (
-                m->pModel, "outOfBounds", "(O)", pOutside
+                m->pModel, "exceptionOutOfBounds", "(O)", pOutside
             );
             Py_DECREF(pOutside);
             if(!pRet){ Modena_PyErr_Print(); }
             int ret = PyInt_AsLong(pRet);
             Py_DECREF(pRet);
 
+            modena_error_code = ret;
             return ret;
         }
     }
@@ -810,9 +894,12 @@ void modena_model_destroy(modena_model_t *m)
 
     free(m->argPos_used);
 
-    modena_function_destroy(m->mf);
+    if(m->mf)
+    {
+        modena_function_destroy(m->mf);
+    }
 
-    Py_DECREF(m->pModel);
+    Py_XDECREF(m->pModel);
 
     m->ob_type->tp_free((PyObject*)m);
 }

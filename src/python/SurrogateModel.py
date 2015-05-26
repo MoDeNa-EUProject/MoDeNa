@@ -43,14 +43,13 @@ import six
 import abc
 import hashlib
 import modena
+from modena.Strategy import *
 import weakref
 import re
 import sys
 from mongoengine import *
 from mongoengine.document import TopLevelDocumentMetaclass
-from fireworks import Firework, Workflow, FWAction, FireTaskBase
-from fireworks.utilities.fw_serializers import load_object
-from fireworks.utilities.fw_utilities import explicit_serialize
+from fireworks import Firework, FWAction, FireTaskBase
 from collections import defaultdict
 from blessings import Terminal
 
@@ -67,22 +66,38 @@ term = Terminal()
 def existsAndHasArgPos(i, name):
     return name in i and hasattr(i[name], 'argPos')
 
-def checkAndConvertType(kwargs, strategyName, strategyClass):
-    if not strategyName in kwargs:
-        raise Exception('Need ' + strategyName)
-    elif not isinstance(kwargs[strategyName], strategyClass):
-        raise TypeError('Need ' + strategyName)
+
+def checkAndConvertType(kwargs, name, cls):
+    if not name in kwargs:
+        raise Exception('Need ' + name)
+    elif not isinstance(kwargs[name], cls):
+        raise TypeError('Need ' + name)
     else:
-        kwargs[strategyName] = kwargs[strategyName].to_dict();
+        kwargs['meth_' + name] = kwargs[name].to_dict()
+        del kwargs[name]
+
+
+def loadType(obj, name, cls):
+    n = '___' + name
+    if(hasattr(obj, n)):
+        return getattr(obj, n)
+    else:
+        var = getattr(obj, 'meth_' + name)
+        var = load_object(var)
+        setattr(obj, n, var)
+        return var
+
 
 class EmbDoc(DynamicEmbeddedDocument):
     meta = {'allow_inheritance': False}
+
 
 class GrowingList(list):
     def __setitem__(self, index, value):
         if index >= len(self):
             self.extend([None]*(index + 1 - len(self)))
         list.__setitem__(self, index, value)
+
 
 # Fitting data is not stored here to allow excluding it in load since it
 # is not possible to exclude inputs.*.fitData
@@ -91,10 +106,12 @@ class MinMax(EmbeddedDocument):
     max = FloatField(required=True)
     meta = {'allow_inheritance': False}
 
+
 class MinMaxOpt(EmbeddedDocument):
     min = FloatField()
     max = FloatField()
     meta = {'allow_inheritance': False}
+
 
 class MinMaxArgPos(EmbeddedDocument):
     min = FloatField(required=True, default=None)
@@ -102,14 +119,17 @@ class MinMaxArgPos(EmbeddedDocument):
     argPos = IntField(required=True)
     meta = {'allow_inheritance': False}
 
+
 class MinMaxArgPosOpt(EmbeddedDocument):
     min = FloatField()
     max = FloatField()
     argPos = IntField()
     meta = {'allow_inheritance': False}
 
+
 class combinedMeta(abc.ABCMeta, TopLevelDocumentMetaclass):
    pass
+
 
 class SurrogateFunction(DynamicDocument):
 
@@ -177,7 +197,6 @@ class CFunction(SurrogateFunction):
             kwargs['functionName'] = fn
 
             SurrogateFunction.__init__(self, *args, **kwargs)
-            self.save()
 
 
     def compileCcode(self, Ccode):
@@ -225,7 +244,7 @@ install(TARGETS %(h)s DESTINATION ${CMAKE_INSTALL_PREFIX}/lib )
 class SurrogateModel(DynamicDocument):
 
     # List of all instances (for initialisation)
-    __refs__ = []
+    ___refs___ = []
 
     # Database definition
     _id = StringField(primary_key=True)
@@ -234,12 +253,7 @@ class SurrogateModel(DynamicDocument):
     meta = {'allow_inheritance': True}
 
     def __init__(self, *args, **kwargs):
-        self.__refs__.append(weakref.ref(self))
-
-
-    @abc.abstractmethod
-    def initialisationFw(self):
-        raise NotImplementedError("initialisationFw not implemented!")
+        self.___refs___.append(weakref.ref(self))
 
 
     def outputsToModels(self):
@@ -301,7 +315,37 @@ class SurrogateModel(DynamicDocument):
         return minValues, maxValues
 
 
-    def outOfBounds(self, oPoint):
+    def __getattribute__(self, name):
+        if name.startswith( '___' ):
+            return object.__getattribute__(self, name)
+        else:
+            return super(DynamicDocument, self).__getattribute__(name)
+
+
+    def __setattribute__(self, name, value):
+        if name.startswith( '___' ):
+            object.__setattribute__(self, name, value)
+        else:
+            super(DynamicDocument, self).__setattribute__(name, value)
+
+
+    @classmethod
+    def exceptionModelLoad(self, surrogateModelId):
+        # TODO
+        # Finding the 'unitialised' models using this method will fail
+        # eventually fail when running in parallel. Need to pass id of
+        # calling FireTask. However, this requires additional code in the
+        # library as well as cooperation of the recipie
+        collection = self._get_collection()
+        collection.update(
+            { '_id': surrogateModelId },
+            { '_id': surrogateModelId },
+            upsert=True
+        )
+        return 201
+
+
+    def exceptionOutOfBounds(self, oPoint):
         oPointDict = {
             k: oPoint[v.argPos]
             for k, v in self.inputs.iteritems()
@@ -352,8 +396,19 @@ class SurrogateModel(DynamicDocument):
 
 
     @classmethod
+    def loadFromModule(self):
+        collection = self._get_collection()
+        doc = collection.find_one({ '_cls': { '$exists': False}})
+        modelId = doc['_id']
+        mod = __import__(modelId)
+        # TODO:
+        # Give a better name to the variable a model is imported from
+        return mod.m
+
+
+    @classmethod
     def get_instances(self):
-        for inst_ref in self.__refs__:
+        for inst_ref in self.___refs___:
             inst = inst_ref()
             if inst is not None:
                 yield inst
@@ -431,19 +486,18 @@ class ForwardMappingModel(SurrogateModel):
 
     def exactTasks(self, points):
         '''
-        Build a workflow to excute an exactTask for each point
+        Return an empty workflow
         '''
 
-        return ([], {}, None)
+        return Workflow2([])
 
 
-    def initialisationFw(self):
-        return Firework(
-            Initialisation(
-                surrogateModelId=self._id,
-                points= []
-            )
-        )
+    def initialisationStrategy(self):
+        '''
+        Return an empty workflow
+        '''
+
+        return EmptyInitialisationStrategy()
 
 
 class BackwardMappingModel(SurrogateModel):
@@ -524,43 +578,23 @@ class BackwardMappingModel(SurrogateModel):
             checkAndConvertType(
                 kwargs,
                 'initialisationStrategy',
-                modena.Strategy.InitialisationStrategy
+                InitialisationStrategy
             );
 
             checkAndConvertType(
                 kwargs,
                 'outOfBoundsStrategy',
-                modena.Strategy.OutOfBoundsStrategy
+                OutOfBoundsStrategy
             );
 
             checkAndConvertType(
                 kwargs,
                 'parameterFittingStrategy',
-                modena.Strategy.ParameterFittingStrategy
+                ParameterFittingStrategy
             );
 
             DynamicDocument.__init__(self, *args, **kwargs)
             self.save()
-
-
-    def initialisationFw(self):
-        obj = load_object(self.initialisationStrategy)
-        return Firework(
-            Initialisation(
-                surrogateModelId=self._id,
-                points=obj.newPoints()
-            )
-        )
-
-
-    def outOfBoundsFwAction(self, model, caller, **kwargs):
-        obj = load_object(self.outOfBoundsStrategy)
-        return obj.newPointsFWAction(model, caller, **kwargs)
-
-
-    def parameterFittingFwAction(self, model, **kwargs):
-        obj = load_object(self.parameterFittingStrategy)
-        return obj.newPointsFWAction(model, **kwargs)
 
 
     def exactTasks(self, points):
@@ -569,10 +603,9 @@ class BackwardMappingModel(SurrogateModel):
         '''
 
         # De-serialise the exact task from dict
-        et = load_object(self.exactTask)
+        et = load_object(self.meth_exactTask)
 
-        tl = [ Firework(ParameterFitting(surrogateModelId=self._id)) ]
-        dep = {}
+        tl = []
         e = six.next(six.itervalues(points))
         for i in xrange(len(e)):
             p = {}
@@ -587,9 +620,32 @@ class BackwardMappingModel(SurrogateModel):
             fw = Firework(t)
 
             tl.append(fw)
-            dep[fw] = tl[0]
 
-        return (tl, dep, tl[0])
+        return Workflow2(tl, name='exact tasks for new points')
+
+
+    def initialisationStrategy(self):
+        return loadType(
+            self,
+            'initialisationStrategy',
+            InitialisationStrategy
+        )
+
+
+    def parameterFittingStrategy(self):
+        return loadType(
+            self,
+            'parameterFittingStrategy',
+            ParameterFittingStrategy
+        )
+
+
+    def outOfBoundsStrategy(self):
+        return loadType(
+            self,
+            'outOfBoundsStrategy',
+            OutOfBoundsStrategy
+        )
 
 
     def updateFitDataFromFwSpec(self, fw_spec):
@@ -701,60 +757,4 @@ class BackwardMappingModel(SurrogateModel):
                 sampleRange[k]['max'] = v['max']
 
         return sampleRange
-
-
-@explicit_serialize
-class Initialisation(FireTaskBase):
-    '''
-    @summary: A FireTask that performs the initialisation
-
-    @author: Henrik Rusche
-    '''
-
-    def __init__(self, *args, **kwargs):
-        FireTaskBase.__init__(self, *args, **kwargs)
-
-        if kwargs.has_key('surrogateModel'):
-            if isinstance(kwargs['surrogateModel'], SurrogateModel):
-                self['surrogateModelId'] = kwargs['surrogateModel']['_id']
-                del self['surrogateModel']
-
-
-    def run_task(self, fw_spec):
-        print term.cyan + "Performing initialisation" + term.normal
-
-        model=SurrogateModel.load(self['surrogateModelId'])
-
-        (tl, dep, last) = model.exactTasks(self['points'])
-
-        return FWAction(
-            detours=Workflow(tl, dep, "initialisation")
-        )
-
-
-@explicit_serialize
-class ParameterFitting(FireTaskBase):
-    '''
-    @summary: A FireTask that performs parameter fitting
-
-    @author: Henrik Rusche
-    '''
-
-    def __init__(self, *args, **kwargs):
-        FireTaskBase.__init__(self, *args, **kwargs)
-
-        if kwargs.has_key('surrogateModel'):
-            if isinstance(kwargs['surrogateModel'], SurrogateModel):
-                self['surrogateModelId'] = kwargs['surrogateModel']['_id']
-                del self['surrogateModel']
-
-
-    def run_task(self, fw_spec):
-        print term.cyan + "Performing parameter fitting" + term.normal
-
-        model=SurrogateModel.load(self['surrogateModelId'])
-
-        model.updateFitDataFromFwSpec(fw_spec)
-
-        return model.parameterFittingFwAction(model)
 
