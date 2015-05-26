@@ -77,7 +77,7 @@ class FlowRateExactSim(FireTaskBase):
         p1Byp0 = self['point']['p1Byp0']
 
         # Write input
-        f = open(os.path.dirname(os.path.realpath(__file__)) + 'in.txt', 'w')
+        f = open('in.txt', 'w')
         f.write('%g\n%g\n%g\n%g\n' % (D, rho0, p0, p1Byp0))
         f.close()
 
