@@ -39,7 +39,7 @@ Contributors
 
 from fireworks import Firework, Workflow, LaunchPad
 from fireworks.core.rocket_launcher import rapidfire
-import twoTank
+from twoTank import m as sim
 from modulefinder import ModuleFinder
 
 # set up the LaunchPad and reset it
@@ -48,10 +48,9 @@ launchpad.reset('', require_password=False)
 
 # create the individual FireWorks and Workflow
 # Source code in src/twoTanksMacroscopicProblem.C
-fw1 = Firework(twoTank.m)
+fw1 = Firework(sim)
 wf = Workflow([fw1], {}, name="simulation")
 
 # store workflow and launch it locally
 launchpad.add_wf(wf)
 rapidfire(launchpad)
-
