@@ -150,10 +150,10 @@ m = BackwardMappingModel(
         },
     ),
     outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(
-        nNewPoints= 5
+        nNewPoints= 4
     ),
     parameterFittingStrategy= Strategy.NonLinFitWithErrorContol(
-        testDataPercentage= 0.5,
+        testDataPercentage= 0.2,
         maxError= 0.05,
         improveErrorStrategy= Strategy.StochasticSampling(
             nNewPoints= 2

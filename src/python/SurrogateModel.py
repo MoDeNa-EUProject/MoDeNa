@@ -249,6 +249,8 @@ class SurrogateModel(DynamicDocument):
     _id = StringField(primary_key=True)
     surrogateFunction = ReferenceField(SurrogateFunction, required=True)
     parameters = ListField(FloatField())
+    upperBound = ListField(FloatField())
+    lowerBound = ListField(FloatField())
     meta = {'allow_inheritance': True}
 
     def __init__(self, *args, **kwargs):
