@@ -40,6 +40,7 @@ Contributors
 
 import six
 import abc
+import sys
 import modena
 from fireworks.core.firework import FireTaskMeta
 from fireworks import Firework, Workflow, FWAction, FireTaskBase, ScriptTask
@@ -374,7 +375,7 @@ class NonLinFitWithErrorContol(ParameterFittingStrategy):
                 model=model,
                 parameters=list(parameters)
             )
-
+            print testIndices
             return FloatVector(
                 list(
                     model.error(

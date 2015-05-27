@@ -157,7 +157,6 @@ class SurrogateFunction(DynamicDocument):
 
         DynamicDocument.__init__(self, **kwargs)
 
-
     def modena_function(self):
         return pymodena.modena_function_new(
             str(self.functionName),
@@ -197,7 +196,7 @@ class CFunction(SurrogateFunction):
             kwargs['functionName'] = fn
 
             SurrogateFunction.__init__(self, *args, **kwargs)
-
+            self.save()
 
     def compileCcode(self, Ccode):
         """
