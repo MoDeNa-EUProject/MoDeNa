@@ -699,7 +699,8 @@ class BackwardMappingModel(SurrogateModel):
                  i[v.argPos] = self.fitData[k][j]
 
             # Call the surrogate model
-            out = cModel.call(in_i, i, checkBounds=False)
+            # out = cModel.call(in_i, i, checkBounds=False)
+            out = cModel.call(in_i, i)
 
             #print "%i %f - %f = %f" % (j, out[0], output[j], out[0] - output[j])
             yield out[0] - output[j]

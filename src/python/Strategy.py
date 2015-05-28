@@ -410,16 +410,16 @@ class NonLinFitWithErrorContol(ParameterFittingStrategy):
         # ------------------------------------------------------------------- #
 
         new_parameters = model.parameters
-        min_parameters = model.lowerBound
-        max_parameters = model.upperBound
+#        min_parameters = model.lowerBound
+#        max_parameters = model.upperBound
         if not len(new_parameters):
             new_parameters = [None] * len(model.surrogateFunction.parameters)
-            min_parameters = [None] * len(model.surrogateFunction.parameters)
-            max_parameters = [None] * len(model.surrogateFunction.parameters)
+#            min_parameters = [None] * len(model.surrogateFunction.parameters)
+#            max_parameters = [None] * len(model.surrogateFunction.parameters)
             for k, v in model.surrogateFunction.parameters.iteritems():
                 new_parameters[v.argPos] = (v.min + v.max)/2
-                min_parameters[v.argPos] = v.min
-                max_parameters[v.argPos] = v.max
+#                min_parameters[v.argPos] = v.min
+#                max_parameters[v.argPos] = v.max
 
         # make objects usable in R
         R_par = FloatVector(new_parameters)
@@ -427,12 +427,12 @@ class NonLinFitWithErrorContol(ParameterFittingStrategy):
 
         # perform fitting (nonlinear MSSQ)
         nlfb = nlmrt.nlfb(
-            R_par,
-            R_res,
+            start=R_par,
+            resfn=R_res,
             jacfn=rinterface.NULL,
             trace=rinterface.FALSE,
-            lower=min_parameters,
-            upper=max_parameters,
+#            lower=min_parameters,
+#            upper=max_parameters,
             maskidx=rinterface.NULL
         )
 
