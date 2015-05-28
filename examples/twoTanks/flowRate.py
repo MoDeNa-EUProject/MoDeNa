@@ -85,7 +85,8 @@ class FlowRateExactSim(FireTaskBase):
         # In this simple example, this call stands for a complex microscopic
         # code - such as full 3D CFD simulation.
         # Source code in src/flowRateExact.C
-        os.system('../src/flowRateExact')
+        os.system( os.path.dirname(os.path.realpath(__file__)) + \
+                   '/src/flowRateExact')
 
         # Analyse output
         f = open('out.txt', 'r')
