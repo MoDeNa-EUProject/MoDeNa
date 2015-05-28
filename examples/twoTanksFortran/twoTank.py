@@ -36,15 +36,7 @@ Authors
 Contributors
 '''
 
-import os
-import modena
-from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
-from fireworks import Firework, Workflow, FWAction
-from fireworks.utilities.fw_utilities import explicit_serialize
-from blessings import Terminal
-
-# Create terminal for colour output
-term = Terminal()
+from modena.Strategy import BackwardMappingScriptTask
 
 
 __author__ = 'Henrik Rusche'
@@ -55,83 +47,7 @@ __email__ = 'h.rusche@wikki.co.uk.'
 __date__ = 'Sep 4, 2014'
 
 
-# ********************************* Class ********************************** #
-@explicit_serialize
-class FlowRateExactSim(FireTaskBase):
-    """
-    A FireTask that starts a microscopic code and updates the database.
-    """
-
-    def run_task(self, fw_spec):
-        print(
-            term.yellow
-          + "Performing exact simulation (microscopic code recipe)"
-          + term.normal
-        )
-
-        D = self['point']['D']
-        rho0 = self['point']['rho0']
-        p0 = self['point']['p0']
-        p1Byp0 = self['point']['p1Byp0']
-
-        # Write input
-        f = open('in.txt', 'w')
-        f.write('%g\n%g\n%g\n%g\n' % (D, rho0, p0, p1Byp0))
-        f.close()
-
-        # Execute the application
-        # In this simple example, this call stands for a complex microscopic
-        # code - such as full 3D CFD simulation.
-        # Source code in src/flowRateExact.C
-        os.system('../src/flowRateExact')
-
-        # Analyse output
-        f = open('out.txt', 'r')
-        self['point']['flowRate'] = float(f.readline())
-        f.close()
-
-        return FWAction(mod_spec=[{'_push': self['point']}])
-
-
-# ********************************* Class ********************************** #
-@explicit_serialize
-class ModenaBackwardMappingTask(ScriptTask):
-    """
-    A FireTask that starts a macroscopic code and catches its return code.
-    @author: Henrik Rusche
-    """
-    required_params = ['script']
-
-    def run_task(self, fw_spec):
-        print(
-            term.yellow
-          + "Performing backward mapping simulation (macroscopic code recipe)"
-          + term.normal
-        )
-
-        self['defuse_bad_rc'] = True
-
-        # Execute the macroscopic code by calling function in base class
-        ret = super(ModenaBackwardMappingTask, self).run_task(fw_spec)
-
-        # Analyse return code
-
-        print('return code = %i' % ret.stored_data['returncode'])
-        if ret.stored_data['returncode'] > 199:
-            print term.cyan + "Performing Design of Experiments" + term.normal
-            # TODO
-            # Finding the 'failing' model using the outsidePoint will fail
-            # eventually fail when running in parallel. Need to pass id of
-            # calling FireTask. However, this requires additional code in the
-            # library as well as cooperation of the recipie
-            model = modena.SurrogateModel.loadFailing()
-
-            return model.outOfBoundsFwAction(
-                model,
-                self,
-                outsidePoint= model.outsidePoint
-            )
-
-        else:
-            print('We are done')
-            return ret
+# Source code in src/twoTanksMacroscopicProblem.C
+m = BackwardMappingScriptTask(
+    script='../src/twoTanksMacroscopicProblem'
+)

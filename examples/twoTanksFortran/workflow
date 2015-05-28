@@ -37,23 +37,21 @@ Authors
 Contributors
 '''
 
-from fireworks import FireWork, Workflow, LaunchPad
+from fireworks import Firework, Workflow, LaunchPad
 from fireworks.core.rocket_launcher import rapidfire
-from twoTank import *
+import twoTank
 from modulefinder import ModuleFinder
+
 
 # set up the LaunchPad and reset it
 launchpad = LaunchPad()
 launchpad.reset('', require_password=False)
 
 # create the individual FireWorks and Workflow
-# Source code in src/twoTanksMacroscopicProblemFortran.f90
-fw1 = Firework(ModenaBackwardMappingTask(
-    script='../src/twoTanksMacroscopicProblemFortran'), name="macro"
-)
-wf = Workflow([fw1], {}, name="test workflow")
+# Source code in src/twoTanksMacroscopicProblem.C
+
+wf = Workflow([Firework(twoTank.m)], {}, name="simulation")
 
 # store workflow and launch it locally
 launchpad.add_wf(wf)
 rapidfire(launchpad)
-
