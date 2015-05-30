@@ -198,7 +198,7 @@ class SamplingStrategy():
                 sr[key]['min'] +
                 (sr[key]['max'] - sr[key]['min']) * points[i][j]
                 for i in xrange(nPoints)
-            ] for (j, key) in enumerate(sr)
+            ] for j, key in enumerate(sr)
         }
 
 
