@@ -538,11 +538,7 @@ modena_model_t *modena_model_new
     return (modena_model_t *) m;
 }
 
-size_t modena_model_inputs_argPos
-(
-    const modena_model_t *m,
-    const char *name
-)
+size_t modena_model_inputs_argPos(const modena_model_t *m, const char *name)
 {
     PyObject *pRet = PyObject_CallMethod
     (
@@ -572,7 +568,10 @@ size_t modena_model_inherited_inputs_argPos
 
 size_t modena_model_outputs_argPos(const modena_model_t *m, const char *name)
 {
-    PyObject *pRet = PyObject_CallMethod(m->pModel, "outputs_argPos", NULL);
+    PyObject *pRet = PyObject_CallMethod
+    (
+        m->pModel, "outputs_argPos", "(z)", name
+    );
     if(!pRet){ Modena_PyErr_Print(); }
     size_t ret = PyInt_AsSsize_t(pRet);
     Py_DECREF(pRet);
