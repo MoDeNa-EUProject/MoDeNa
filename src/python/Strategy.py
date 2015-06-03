@@ -252,6 +252,7 @@ class ParameterFittingStrategy(dict, FWSerializable):
         return '<{}>:{}'.format(self.fw_name, dict(self))
 
 
+
 class SamplingStrategy():
 
     def newPoints(self):
@@ -281,6 +282,46 @@ class InitialPoints(InitialisationStrategy):
 
     def newPoints(self):
         return self['initialPoints']
+
+
+@explicit_serialize
+class InitialData(InitialisationStrategy):
+    """
+    Class initialising a SurrogateModel given a dataset of input-output
+    relations.
+    """
+    def __init__(self, *args, **kwargs):
+        InitialisationStrategy.__init__(self, *args, **kwargs)
+
+
+    def newPoints(self):
+        return self['initialData']
+
+    def workflow(self, model):
+
+        et = load_object({'_fw_name': '{{modena.Strategy.InitialDataPoints}}'})
+
+        points = self.newPoints()
+
+        e = six.next(six.itervalues(points))
+        p = { k:[0]*len(points[k]) for k in points }
+        for i in xrange(len(e)):
+             for k in points:
+                p[k][i] = points[k][i]
+
+             for m in model.substituteModels:
+                p.update(m.callModel(p))
+
+        t = et
+        t['point'] = p
+        fw = Firework(t)
+        wf = Workflow2( [fw], name='initialising to dataset')
+        
+        # pf = load_object({'_fw_name': '{{modena.Strategy.NonLinFitToPointWithSmallestError}}'})
+        # NonLinFitToPointWithSmallestError
+        wf.addAfterAll(model.parameterFittingStrategy().workflow(model))
+
+        return wf
 
 
 @explicit_serialize
@@ -410,32 +451,34 @@ class NonLinFitWithErrorContol(ParameterFittingStrategy):
         # ------------------------------------------------------------------- #
 
         new_parameters = model.parameters
-#        min_parameters = model.lowerBound
-#        max_parameters = model.upperBound
         if not len(new_parameters):
             new_parameters = [None] * len(model.surrogateFunction.parameters)
-#            min_parameters = [None] * len(model.surrogateFunction.parameters)
-#            max_parameters = [None] * len(model.surrogateFunction.parameters)
             for k, v in model.surrogateFunction.parameters.iteritems():
                 new_parameters[v.argPos] = (v.min + v.max)/2
-#                min_parameters[v.argPos] = v.min
-#                max_parameters[v.argPos] = v.max
 
         # make objects usable in R
         R_par = FloatVector(new_parameters)
         R_res = rinterface.rternalize(errorFit)
 
+        max_parameters = [None]*len(new_parameters)
+        min_parameters = [None]*len(new_parameters)
+        for k, v in model.surrogateFunction.parameters.iteritems():
+            min_parameters[v.argPos] = v.min
+            max_parameters[v.argPos] = v.max
+        
         # perform fitting (nonlinear MSSQ)
         nlfb = nlmrt.nlfb(
             start=R_par,
             resfn=R_res,
             jacfn=rinterface.NULL,
             trace=rinterface.FALSE,
-#            lower=min_parameters,
-#            upper=max_parameters,
+            lower=FloatVector(min_parameters),
+            upper=FloatVector(max_parameters),
             maskidx=rinterface.NULL
         )
-
+        del max_parameters
+        del min_parameters
+        
         # optimised coefficients and sum of squares
         nlfb_coeffs = nlfb[nlfb.names.index('coefficients')]
         nlfb_ssqres = nlfb[nlfb.names.index('ssquares')]
@@ -479,6 +522,143 @@ class NonLinFitWithErrorContol(ParameterFittingStrategy):
 
             # return nothing to restart normal operation
             return FWAction()
+
+
+@explicit_serialize
+class NonLinFitToPointWithSmallestError(ParameterFittingStrategy):
+    """
+    Performs parameter fitting of a set of samples and returns the parameters
+    that yield the smallest error.
+    
+    TODO: The strategy does **not** allow for error to be improved, but this 
+          can be changed in the future.
+    """
+
+    def __init__(self, *args, **kwargs):
+
+        # TODO: access tuple correctly
+        #if '_fw_name' in args[0]:
+        #    ParameterFittingStrategy.__init__(self, *args, **kwargs)
+
+        #if not kwargs.has_key('improveErrorStrategy'):
+        #    raise Exception('Need improveErrorStrategy')
+        #if not isinstance(
+        #    kwargs['improveErrorStrategy'], ImproveErrorStrategy
+        #):
+        #    raise TypeError('Need improveErrorStrategy')
+
+        ParameterFittingStrategy.__init__(self, *args, **kwargs)
+
+
+    def newPointsFWAction(self, model, **kwargs):
+
+        new_parameters = model.parameters
+        if not len(new_parameters):
+            new_parameters = [None] * len(model.surrogateFunction.parameters)
+            for k, v in model.surrogateFunction.parameters.iteritems():
+                new_parameters[v.argPos] = (v.min + v.max)/2
+
+        max_parameters = [None]*len(new_parameters)
+        min_parameters = [None]*len(new_parameters)
+        for k, v in model.surrogateFunction.parameters.iteritems():
+            min_parameters[v.argPos] = v.min
+            max_parameters[v.argPos] = v.max
+
+        maxError = 1000
+        coeffs = None
+        for i in xrange(model.nSamples):
+            testPoint = [i]
+
+            # ------------------------------ Function --------------------------- #
+            def errorTest(parameters):
+
+                def fitData(testIndices):
+                    for i in testPoint:
+                         yield i
+
+                # Instantiate the surrogate model
+                cModel = modena.libmodena.modena_model_t(
+                    model,
+                    parameters=list(parameters)
+                )
+
+                return max(
+                    abs(i) for i in model.error(
+                        cModel,
+                        idxGenerator=fitData(testPoint)
+                    ))
+            # ------------------------------------------------------------------- #
+
+            # ------------------------------ Function ----------------------------#
+            def errorFit(parameters):
+
+                def fitData(n, testPoint):
+                    for i in xrange(n):
+                        if i not in testPoint:
+                             yield i
+
+                # Instantiate the surrogate model
+                cModel = modena.libmodena.modena_model_t(
+                    model=model,
+                    parameters=list(parameters)
+                )
+
+                return FloatVector(
+                    list(
+                        model.error(
+                            cModel,
+                            idxGenerator=fitData(model.nSamples, testPoint)
+                        )))
+            # ------------------------------------------------------------------- #
+
+            # make objects usable in R
+            R_res = rinterface.rternalize(errorFit)
+            R_par = FloatVector(new_parameters)
+
+            # perform fitting (nonlinear MSSQ)
+            nlfb = nlmrt.nlfb(
+                start=R_par,
+                resfn=R_res,
+                jacfn=rinterface.NULL,
+                trace=rinterface.FALSE,
+                lower=FloatVector(min_parameters),
+                upper=FloatVector(max_parameters),
+                maskidx=rinterface.NULL
+            )
+
+            parameterError = errorTest(nlfb[nlfb.names.index('coefficients')])
+            if parameterError < maxError:
+                maxError = parameterError
+                new_parameters = list(nlfb[nlfb.names.index('coefficients')])
+                coeffs = nlfb
+
+
+        # optimised coefficients and sum of squares
+        nlfb_coeffs = coeffs[nlfb.names.index('coefficients')]
+        nlfb_ssqres = coeffs[nlfb.names.index('ssquares')]
+
+        print "Maximum Error = %s" % maxError
+        print('old parameters = [%s]' % ' '.join(
+            '%g' % k for k in model.parameters)
+        )
+        print('new parameters = [%s]' % ' '.join(
+            '%g' % k for k in new_parameters)
+        )
+
+        # Update database
+        # TODO: This is not save if the model is updated by another fitting
+        #                                         task running concurrently
+        model.parameters = new_parameters
+        model.updateMinMax()
+        model.save()
+
+        del parameterError
+        del max_parameters
+        del min_parameters
+        del coeffs
+
+        # return nothing to restart normal operation
+        return FWAction()
 
 
 @explicit_serialize
@@ -589,6 +769,25 @@ class BackwardMappingTask:
         else:
             print('Success - We are done')
             return FWAction()
+
+
+@explicit_serialize
+class InitialDataPoints(FireTaskBase):
+    """
+    Pushes **all** "points" to the next firework. 
+    
+    TODO: See the method `updateFitDataFromFwSpec` in SurrogateModel.py
+          This class returns: 
+                     {key: array} 
+          this results in the following representation in fw_spec:
+                     {key: [array]}
+          **How to fix this?**
+          The temporary solution checks the __class__ in `updateFitData...`
+          however this is neither beautiful or fool proof. 
+    """
+    
+    def run_task(self, fw_spec):
+        return FWAction(mod_spec=[{'_push': self['point']}])
 
 
 @explicit_serialize

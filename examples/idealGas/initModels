@@ -1,3 +1,4 @@
+#!/usr/bin/python
 '''
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
@@ -21,14 +22,16 @@ License
 
     Modena is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
+    FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+    details.
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
-    Python library of FireTasks
+    Initialisation script for the flowRate model. The script calculates a few
+    data points and fits the surrogate model. Then the model is inserted into
+    the database.
 
 Authors
     Henrik Rusche
@@ -36,18 +39,23 @@ Authors
 Contributors
 '''
 
-from modena.Strategy import BackwardMappingScriptTask
+from modena import SurrogateModel
+from modena.Strategy import Workflow2
+from idealGas import *
+from fireworks import LaunchPad
+from fireworks.core.rocket_launcher import rapidfire
+from fireworks.utilities.fw_serializers import load_object
 
 
-__author__ = 'Henrik Rusche'
-__copyright__ = 'Copyright 2014, MoDeNa Project'
-__version__ = '0.2'
-__maintainer__ = 'Henrik Rusche'
-__email__ = 'h.rusche@wikki.co.uk.'
-__date__ = 'Sep 4, 2014'
+# set up the LaunchPad and reset it
+launchpad = LaunchPad()
+launchpad.reset('', require_password=False)
 
+initWfs = Workflow2([])
+for m in SurrogateModel.get_instances():
+    initWfs.addNoLink(m.initialisationStrategy().workflow(m))
 
-# Source code in src/twoTanksMacroscopicProblem.C
-m = BackwardMappingScriptTask(
-    script='../src/twoTanksMacroscopicProblemFortran'
-)
+# store workflow and launch it locally
+launchpad.add_wf(initWfs)
+rapidfire(launchpad)
+

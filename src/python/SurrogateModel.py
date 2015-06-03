@@ -249,8 +249,6 @@ class SurrogateModel(DynamicDocument):
     _id = StringField(primary_key=True)
     surrogateFunction = ReferenceField(SurrogateFunction, required=True)
     parameters = ListField(FloatField())
-    upperBound = ListField(FloatField())
-    lowerBound = ListField(FloatField())
     meta = {'allow_inheritance': True}
 
     def __init__(self, *args, **kwargs):
@@ -418,8 +416,8 @@ class SurrogateModel(DynamicDocument):
 class ForwardMappingModel(SurrogateModel):
 
     # Database definition
-    inputs = MapField(EmbeddedDocumentField(MinMaxOpt))
-    outputs = MapField(EmbeddedDocumentField(MinMaxOpt))
+    inputs = MapField(EmbeddedDocumentField(MinMaxArgPosOpt))
+    outputs = MapField(EmbeddedDocumentField(MinMaxArgPosOpt))
     substituteModels = ListField(ReferenceField(SurrogateModel))
     meta = {'allow_inheritance': True}
 
@@ -447,7 +445,7 @@ class ForwardMappingModel(SurrogateModel):
             kwargs['outputs'] = {}
             for k, v in kwargs['surrogateFunction'].outputs.iteritems():
                 kwargs['fitData'][k] = []
-                kwargs['outputs'][k] = MinMaxOpt(**{})
+                kwargs['outputs'][k] = MinMaxArgPosOpt(**{})
 
             subOutputs = {}
             for m in kwargs['substituteModels']:
@@ -479,26 +477,103 @@ class ForwardMappingModel(SurrogateModel):
             nInputs = 0
             for k, v in kwargs['inputs'].iteritems():
                 kwargs['fitData'][k] = []
-                kwargs['inputs'][k] = MinMaxOpt(**v)
+                kwargs['inputs'][k] = MinMaxArgPosOpt(**v)
+
+            if 'initialisationStrategy' not in kwargs:
+                kwargs['initialisationStrategy'] = EmptyInitialisationStrategy()
+            
+            checkAndConvertType(
+                kwargs,
+                'initialisationStrategy',
+                InitialisationStrategy
+            );
 
             DynamicDocument.__init__(self, *args, **kwargs)
             self.save()
 
+    def updateMinMax(self):
+        if not self.nSamples:
+            for v in self.inputs.values():
+                v.min = 9e99
+                v.max = -9e99
+
+            for v in self.outputs.values():
+                v.min = 9e99
+                v.max = -9e99
+
+        for k, v in self.inputs.iteritems():
+            v.min = min(self.fitData[k])
+            v.max = max(self.fitData[k])
+
+        for k, v in self.outputs.iteritems():
+            v.min = min(self.fitData[k])
+            v.max = max(self.fitData[k])
+
+    def updateFitDataFromFwSpec(self, fw_spec):
+        # Load the fitting data
+        # Removed temporarily, probably bug in mongo engine
+        #self.reload('fitData')
+
+        for k in self.inputs:
+            if fw_spec[k][0].__class__ == list:
+                self.fitData[k].extend(fw_spec[k][0])
+            else:
+                self.fitData[k].extend(fw_spec[k])
+                
+        for k in self.outputs:
+            if fw_spec[k][0].__class__ == list:
+                self.fitData[k].extend(fw_spec[k][0])
+            else:
+                self.fitData[k].extend(fw_spec[k])
+
+        # Get first set
+        firstSet = six.next(six.itervalues(self.fitData))
+        self.nSamples = len(firstSet)
+
+    def error(self, cModel, **kwargs):
+        idxGenerator = kwargs.pop('idxGenerator', xrange(self.nSamples))
+
+        in_i = list()
+        i = [0] * (1 + self.inputs_max_argPos())
+
+        # TODO: Deal with multivalued functions
+        output = self.fitData[six.next(six.iterkeys(self.outputs))]
+
+        for j in idxGenerator:
+            # Load inputs
+            for k, v in self.inputs.iteritems():
+                i[v.argPos] = self.fitData[k][j]
+
+            # Call the surrogate model
+            # out = cModel.call(in_i, i, checkBounds=False)
+            out = cModel.call(in_i, i)
+
+            #print "%i %f - %f = %f" % (j, out[0], output[j], out[0] - output[j])
+            yield out[0] - output[j]
 
     def exactTasks(self, points):
         '''
         Return an empty workflow
         '''
-
         return Workflow2([])
 
-
     def initialisationStrategy(self):
-        '''
-        Return an empty workflow
-        '''
+        return loadType(
+            self,
+            'initialisationStrategy',
+            InitialisationStrategy
+        )
 
-        return EmptyInitialisationStrategy()
+
+    def parameterFittingStrategy(self):
+        return load_object({'_fw_name': '{{modena.Strategy.NonLinFitToPointWithSmallestError}}'})
+
+#     def initialisationStrategy(self):
+#         '''
+#         Return an empty workflow
+#         '''
+# 
+#         return EmptyInitialisationStrategy()
 
 
 class BackwardMappingModel(SurrogateModel):
@@ -655,15 +730,20 @@ class BackwardMappingModel(SurrogateModel):
         #self.reload('fitData')
 
         for k in self.inputs:
-            self.fitData[k].extend(fw_spec[k])
-
+            if fw_spec[k][0].__class__ == list:
+                self.fitData[k].extend(fw_spec[k][0])
+            else:
+                self.fitData[k].extend(fw_spec[k])
+                
         for k in self.outputs:
-            self.fitData[k].extend(fw_spec[k])
+            if fw_spec[k][0].__class__ == list:
+                self.fitData[k].extend(fw_spec[k][0])
+            else:
+                self.fitData[k].extend(fw_spec[k])
 
         # Get first set
         firstSet = six.next(six.itervalues(self.fitData))
         self.nSamples = len(firstSet)
-
 
     def updateMinMax(self):
         if not self.nSamples:
@@ -682,8 +762,7 @@ class BackwardMappingModel(SurrogateModel):
         for k, v in self.outputs.iteritems():
             v.min = min(self.fitData[k])
             v.max = max(self.fitData[k])
-
-
+    
     def error(self, cModel, **kwargs):
         idxGenerator = kwargs.pop('idxGenerator', xrange(self.nSamples))
 
@@ -704,7 +783,6 @@ class BackwardMappingModel(SurrogateModel):
 
             #print "%i %f - %f = %f" % (j, out[0], output[j], out[0] - output[j])
             yield out[0] - output[j]
-
 
     def extendedRange(self, outsidePoint, expansion_factor=1.2):
         """

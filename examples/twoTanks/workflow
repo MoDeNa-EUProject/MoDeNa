@@ -39,7 +39,7 @@ Contributors
 
 from fireworks import Firework, Workflow, LaunchPad
 from fireworks.core.rocket_launcher import rapidfire
-import twoTank
+#import twoTank
 from modulefinder import ModuleFinder
 
 
@@ -55,4 +55,3 @@ wf = Workflow([Firework(twoTank.m)], {}, name="simulation")
 # store workflow and launch it locally
 launchpad.add_wf(wf)
 rapidfire(launchpad)
-
