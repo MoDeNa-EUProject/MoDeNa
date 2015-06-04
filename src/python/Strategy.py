@@ -252,7 +252,6 @@ class ParameterFittingStrategy(dict, FWSerializable):
         return '<{}>:{}'.format(self.fw_name, dict(self))
 
 
-
 class SamplingStrategy():
 
     def newPoints(self):
@@ -297,6 +296,7 @@ class InitialData(InitialisationStrategy):
     def newPoints(self):
         return self['initialData']
 
+
     def workflow(self, model):
 
         et = load_object({'_fw_name': '{{modena.Strategy.InitialDataPoints}}'})
@@ -316,7 +316,7 @@ class InitialData(InitialisationStrategy):
         t['point'] = p
         fw = Firework(t)
         wf = Workflow2( [fw], name='initialising to dataset')
-        
+
         # pf = load_object({'_fw_name': '{{modena.Strategy.NonLinFitToPointWithSmallestError}}'})
         # NonLinFitToPointWithSmallestError
         wf.addAfterAll(model.parameterFittingStrategy().workflow(model))
@@ -465,7 +465,7 @@ class NonLinFitWithErrorContol(ParameterFittingStrategy):
         for k, v in model.surrogateFunction.parameters.iteritems():
             min_parameters[v.argPos] = v.min
             max_parameters[v.argPos] = v.max
-        
+
         # perform fitting (nonlinear MSSQ)
         nlfb = nlmrt.nlfb(
             start=R_par,
@@ -478,7 +478,7 @@ class NonLinFitWithErrorContol(ParameterFittingStrategy):
         )
         del max_parameters
         del min_parameters
-        
+
         # optimised coefficients and sum of squares
         nlfb_coeffs = nlfb[nlfb.names.index('coefficients')]
         nlfb_ssqres = nlfb[nlfb.names.index('ssquares')]
@@ -529,8 +529,8 @@ class NonLinFitToPointWithSmallestError(ParameterFittingStrategy):
     """
     Performs parameter fitting of a set of samples and returns the parameters
     that yield the smallest error.
-    
-    TODO: The strategy does **not** allow for error to be improved, but this 
+
+    TODO: The strategy does **not** allow for error to be improved, but this
           can be changed in the future.
     """
 
@@ -774,18 +774,18 @@ class BackwardMappingTask:
 @explicit_serialize
 class InitialDataPoints(FireTaskBase):
     """
-    Pushes **all** "points" to the next firework. 
-    
+    Pushes **all** "points" to the next firework.
+
     TODO: See the method `updateFitDataFromFwSpec` in SurrogateModel.py
-          This class returns: 
-                     {key: array} 
+          This class returns:
+                     {key: array}
           this results in the following representation in fw_spec:
                      {key: [array]}
           **How to fix this?**
           The temporary solution checks the __class__ in `updateFitData...`
-          however this is neither beautiful or fool proof. 
+          however this is neither beautiful or fool proof.
     """
-    
+
     def run_task(self, fw_spec):
         return FWAction(mod_spec=[{'_push': self['point']}])
 

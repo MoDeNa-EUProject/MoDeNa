@@ -198,6 +198,7 @@ class CFunction(SurrogateFunction):
             SurrogateFunction.__init__(self, *args, **kwargs)
             self.save()
 
+
     def compileCcode(self, Ccode):
         """
         Helper function to compile a model into local library
@@ -481,7 +482,7 @@ class ForwardMappingModel(SurrogateModel):
 
             if 'initialisationStrategy' not in kwargs:
                 kwargs['initialisationStrategy'] = EmptyInitialisationStrategy()
-            
+
             checkAndConvertType(
                 kwargs,
                 'initialisationStrategy',
@@ -490,6 +491,7 @@ class ForwardMappingModel(SurrogateModel):
 
             DynamicDocument.__init__(self, *args, **kwargs)
             self.save()
+
 
     def updateMinMax(self):
         if not self.nSamples:
@@ -509,6 +511,7 @@ class ForwardMappingModel(SurrogateModel):
             v.min = min(self.fitData[k])
             v.max = max(self.fitData[k])
 
+
     def updateFitDataFromFwSpec(self, fw_spec):
         # Load the fitting data
         # Removed temporarily, probably bug in mongo engine
@@ -519,7 +522,7 @@ class ForwardMappingModel(SurrogateModel):
                 self.fitData[k].extend(fw_spec[k][0])
             else:
                 self.fitData[k].extend(fw_spec[k])
-                
+
         for k in self.outputs:
             if fw_spec[k][0].__class__ == list:
                 self.fitData[k].extend(fw_spec[k][0])
@@ -529,6 +532,7 @@ class ForwardMappingModel(SurrogateModel):
         # Get first set
         firstSet = six.next(six.itervalues(self.fitData))
         self.nSamples = len(firstSet)
+
 
     def error(self, cModel, **kwargs):
         idxGenerator = kwargs.pop('idxGenerator', xrange(self.nSamples))
@@ -551,11 +555,13 @@ class ForwardMappingModel(SurrogateModel):
             #print "%i %f - %f = %f" % (j, out[0], output[j], out[0] - output[j])
             yield out[0] - output[j]
 
+
     def exactTasks(self, points):
         '''
         Return an empty workflow
         '''
         return Workflow2([])
+
 
     def initialisationStrategy(self):
         return loadType(
@@ -572,7 +578,7 @@ class ForwardMappingModel(SurrogateModel):
 #         '''
 #         Return an empty workflow
 #         '''
-# 
+#
 #         return EmptyInitialisationStrategy()
 
 
@@ -734,7 +740,7 @@ class BackwardMappingModel(SurrogateModel):
                 self.fitData[k].extend(fw_spec[k][0])
             else:
                 self.fitData[k].extend(fw_spec[k])
-                
+
         for k in self.outputs:
             if fw_spec[k][0].__class__ == list:
                 self.fitData[k].extend(fw_spec[k][0])
@@ -744,6 +750,7 @@ class BackwardMappingModel(SurrogateModel):
         # Get first set
         firstSet = six.next(six.itervalues(self.fitData))
         self.nSamples = len(firstSet)
+
 
     def updateMinMax(self):
         if not self.nSamples:
@@ -762,7 +769,8 @@ class BackwardMappingModel(SurrogateModel):
         for k, v in self.outputs.iteritems():
             v.min = min(self.fitData[k])
             v.max = max(self.fitData[k])
-    
+
+
     def error(self, cModel, **kwargs):
         idxGenerator = kwargs.pop('idxGenerator', xrange(self.nSamples))
 
@@ -783,6 +791,7 @@ class BackwardMappingModel(SurrogateModel):
 
             #print "%i %f - %f = %f" % (j, out[0], output[j], out[0] - output[j])
             yield out[0] - output[j]
+
 
     def extendedRange(self, outsidePoint, expansion_factor=1.2):
         """
