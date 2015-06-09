@@ -166,9 +166,8 @@ class SurrogateFunction(DynamicDocument):
 
     @classmethod
     def load(self, surrogateFunctionId):
-        return self.objects.get(_id=surrogateFunctionId)
-
-
+        return self.objects.get(_id=surrogateFunctionId)        
+        
 class CFunction(SurrogateFunction):
 
     def __init__(self, *args, **kwargs):
@@ -239,6 +238,130 @@ install(TARGETS %(h)s DESTINATION ${CMAKE_INSTALL_PREFIX}/lib )
             os.chdir('..')
 
             return ln
+
+class Function(CFunction):
+    """
+    TODO: This is a draft for a class that can parse simple functions and
+          write the Ccode that is compiled by CFunction.
+    """
+    def __init__(self, *args, **kwargs):
+        if kwargs.has_key('_cls'):
+            SurrogateFunction.__init__(self, *args, **kwargs)
+        if kwargs.has_key('libraryName'):
+            SurrogateFunction.__init__(self, *args, **kwargs)
+        else:
+            # This is a bad check, make a better one...
+            if not kwargs.has_key('function'):
+                raise Exception('Algebraic representation not found')
+
+        # lambda function writing inputs, parameters
+        cDouble = lambda VAR: '\n'.join(["const double %s = %s[%s];" \
+                                         %(V, VAR, kwargs[VAR][V]['argPos'] )\
+                                                        for V in kwargs[VAR]])
+
+        # lambda function parsing 'function' and writing outputs
+        outPut = lambda OUT: '\n'.join(["outputs[%s] = %s;" \
+                                 %(kwargs['outputs'][O]['argPos'],\
+                                           self.Parse(kwargs['function'][O]))\
+                                                     for O in kwargs[OUT] ] )
+        
+        # Main body of the Ccode
+        Ccode='''
+#include "modena.h"
+#include "math.h"
+
+void {name}
+(
+    const double* parameters,
+    const double* inherited_inputs,
+    const double* inputs,
+    double *outputs
+)
+{{
+{inputs}
+{parameters}
+{outputs}
+}}
+'''
+        kwargs['Ccode'] = Ccode.format(\
+                              name=kwargs['function']['name'],\
+                              inputs=cDouble('inputs'),\
+                              parameters=cDouble('parameters'),\
+                              outputs=outPut('outputs')\
+                          )
+
+        CFunction.__init__(self, *args, **kwargs)
+
+    def Parse(self, formula, debug=False, model='', stack={}, delim=0, \
+              var=r'[A-Za-z]+\d*',add=r'\+',sub=r'-',mul=r'\*',\
+              div=r'/',pow=r'\^',dig=r'\d+\.?\d*'\
+        ):
+        operators=r'%s|%s|%s|%s|%s' %(add,sub,mul,div,pow)
+        ldel=r'\('
+        rdel=r'\)'
+
+        #Test explicitly for empty string. Returning error.
+        # ----------------------- function ------------------------------ #
+        empty = re.match('\s',formula)
+        if empty:
+            print 'Error: The string is empty'
+            return
+
+        formula = re.sub(r'\s+','',formula)
+
+        # Initialise a dictionary stack. 
+        stack = stack or {}
+
+        # Python has no  switch - case construct.  Match all possibilities first and
+        # test afterwards:
+        re_var = re.match(var,formula)
+        re_dig = re.match(dig,formula)
+        re_ldel = re.match(ldel,formula)
+        re_rdel = re.match(rdel,formula)
+        re_oper = re.match(operators,formula)
+
+        # Parameter followed by an optional number. Allow 'p' or 'p0' as variable names
+        if re_var:
+            tail = formula[len(re_var.group(0)):]
+            head = re_var.group(0)
+
+        elif re_dig:
+            tail = formula[len(re_dig.group(0)):]
+            head = re_dig.group(0)
+
+        elif re_oper:
+            head = re_oper.group(0)
+            tail = formula[1:]
+
+        # Left delimiter.
+        elif re_ldel:
+            head = re_ldel.group(0)    
+            tail  = formula[1:]
+            delim += 1
+
+        # Right delimiter followed by an optional number (default is 1).
+        elif re_rdel:
+            head = re_rdel.group(0)
+            tail  = formula[len(re_rdel.group(0)):]
+            delim -= 1
+
+            # Testing if there is a parenthesis imbalance.
+            if delim < 0:
+                raise Exception('Unmatched parenthesis.')
+
+        # Wrong syntax. Returning an error message.
+        else:
+            raise Exception('The expression syntax not suported.')
+
+        model += head
+        
+        # The formula has not been consumed yet. Continue recursive parsing.
+        if len(tail) > 0:
+            return self.Parse(tail,debug,model,stack,delim)
+
+        # Nothing left to parse. Stop recursion.
+        else:
+            return model
 
 
 class SurrogateModel(DynamicDocument):

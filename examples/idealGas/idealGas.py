@@ -39,6 +39,7 @@ Contributors
 import os
 import modena
 from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, CFunction
+from modena.SurrogateModel import Function
 import modena.Strategy as Strategy
 from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
 from fireworks import Firework, Workflow, FWAction
@@ -57,7 +58,25 @@ __email__ = 'h.rusche@wikki.co.uk.'
 __date__ = 'Sep 4, 2014'
 
 
-f = CFunction(
+f1 = Function(
+    function= {
+        'name':'idealGas',
+        'rho0':'p0/R/T0',
+    },
+    # These are global bounds for the function
+    inputs={
+        'p0': { 'min': 0, 'max': 9e99, 'argPos': 0 },
+        'T0': { 'min': 0, 'max': 9e99, 'argPos': 1 },
+    },
+    outputs={
+        'rho0': { 'min': 9e99, 'max': -9e99, 'argPos': 0 },
+    },
+    parameters={
+        'R': { 'min': 0.0, 'max': 9e99, 'argPos': 0 }
+    },
+)
+
+f2 = CFunction(
     Ccode= '''
 #include "modena.h"
 #include "math.h"
@@ -94,7 +113,7 @@ void idealGas
 m1 = ForwardMappingModel(
     _id= 'idealGas',
     #exactTask= Strategy.InitialDataPoints(),
-    surrogateFunction= f,
+    surrogateFunction= f2,
     substituteModels= [ ],
     parameters= [ 287.0 ],
     inputs={
@@ -116,7 +135,7 @@ m1 = ForwardMappingModel(
 m2 = BackwardMappingModel(
     _id= 'idealGasBackward',
     exactTask= Strategy.InitialDataPoints(),
-    surrogateFunction= f,
+    surrogateFunction= f1,
     substituteModels= [ ],
     parameters= [ 287.0 ],
     inputs={

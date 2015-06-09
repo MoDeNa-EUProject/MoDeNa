@@ -93,45 +93,6 @@ class FlowRateExactSim(FireTaskBase):
         return FWAction(mod_spec=[{'_push': self['point']}])
 
 
-# ********************************* Class ********************************** #
-@explicit_serialize
-class ModenaBackwardMappingTask(ScriptTask):
-    """
-    A FireTask that starts a macroscopic code and catches its return code.
-    @author: Henrik Rusche
-    """
-    required_params = ['script']
-
-    def run_task(self, fw_spec):
-        print(
-            term.yellow
-          + "Performing backward mapping simulation (macroscopic code recipe)"
-          + term.normal
-        )
-
-        self['defuse_bad_rc'] = True
-
-        # Execute the macroscopic code by calling function in base class
-        ret = super(ModenaBackwardMappingTask, self).run_task(fw_spec)
-
-        # Analyse return code
-
-        print('return code = %i' % ret.stored_data['returncode'])
-        if ret.stored_data['returncode'] > 199:
-            print term.cyan + "Performing design of experiments" + term.normal
-            # TODO
-            # Finding the 'failing' model using the outsidePoint will fail
-            # eventually fail when running in parallel. Need to pass id of
-            # calling FireTask. However, this requires additional code in the
-            # library as well as cooperation of the recipie
-            model = modena.SurrogateModel.loadFailing()
-
-            return model.outOfBoundsFwAction(
-                model,
-                self,
-                outsidePoint= model.outsidePoint
-            )
-
-        else:
-            print('We are done')
-            return ret
+m = modena.BackwardMappingScriptTask(
+        script='../src/twoTanksMacroscopicProblem'
+)
