@@ -11,3 +11,6 @@ make
 ```
 ./walldrainage
 ```
+
+## Postprocess
+visualize results using plot.py
