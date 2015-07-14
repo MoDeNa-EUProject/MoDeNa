@@ -1,0 +1,43 @@
+
+
+%TODO: \label{grouping for administrative purposes}
+	\newenvironment{Group}{}{}
+
+
+
+%TODO: \label{formating}
+	\newskip\NarrowerIndent
+	\newenvironment{hapnarrower}[1]{\NarrowerIndent=10pt \global\advance \leftskip by \NarrowerIndent
+		 \global\advance \rightskip by\NarrowerIndent}{\global\advance \leftskip by -\NarrowerIndent
+		 \global\advance \rightskip by -\NarrowerIndent}
+
+
+
+
+%TODO: \label{Definitions}
+  \newenvironment{definition}[1]{\textbf{Definition - #1 : }}{}
+  \newenvironment{property}[1]{\textbf{Property - #1 : }}{}
+  \newenvironment{Definition}[1]{\parindent=20pt\narrower{\noindent
+	\bf{Definition -- #1:~}}}{\par\parindent=0pt}
+  \newtheorem{theorem}{Theorem}[section]
+  \def\th{\ensuremath{^\textbf{th}\,}}
+  
+	
+
+
+%TODO:convert date
+    \def\today{\number \day -\ifcase\month not initialized !\or%
+     January\or February\or March\or April\or May\or June\or July\or %
+     August\or September\or October\or November\or December\fi %
+     -\number\year}
+
+
+
+%TODO: in-text notes
+  \newdimen{\NoteBoxWidth}
+  \NoteBoxWidth=\textwidth
+  \advance\NoteBoxWidth by-24pt
+
+  \def\NoteBox#1{\framebox{\quad\parbox{\NoteBoxWidth}{\begin{center}#1\end{center}}\quad}}
+  \long\def\CF#1\EndCF{\par\textbf{CF : }#1\marginpar{cf}\par}
+  

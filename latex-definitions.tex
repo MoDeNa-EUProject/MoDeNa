@@ -1,0 +1,259 @@
+\newcommand{\CriterionGeneric}{\ensuremath{\mathbf{g}}}
+\newcommand{\Model}{\ensuremath{\mathcal{M}}}
+\newcommand{\MolarMass}{\ensuremath{M}}
+\newcommand{\RealNumbers}{\ensuremath{\mathcal{R}}}
+\newcommand{\ScaleLevel}{\ensuremath{i}}
+\newcommand{\SpaceBehaviour}{B}
+\newcommand{\SpaceInput}{\ensuremath{\mathbf{U}}}
+\newcommand{\SpaceUniverse}{\ensuremath{U}}
+\newcommand{\SurrogateModel}{\ensuremath{\hat{\mathcal{M}}}}
+\newcommand{\VecAllowedError}{\ensuremath{\mathbf{e}}}
+\newcommand{\VecInput}{\ensuremath{\mathbf{u}}}
+\newcommand{\VecOutput}{\ensuremath{\mathbf{y}}}
+\newcommand{\VecOutputSurrogate}{\ensuremath{\mathbf{\hat{u}}}}
+\newcommand{\VecSurrogateOutput}{\ensuremath{\mathbf{\hat{y}}}}
+\newcommand{\Volume}{\ensuremath{V}}
+\newcommand{\Pressure}{\ensuremath{p}}
+\newcommand{\Temperature}{T}
+\newcommand{\aConstant}{\ensuremath{\mathrm{a}}}
+\newcommand{\Concentration}{\ensuremath{\mathrm{C}}}
+\newcommand{\Fireworks}{\textsc{Fireworks}}
+\newcommand{\MongoDB}{\textsc{MongoDB}}
+\newcommand{\SQL}{\textsc{SQL}}
+\newcommand{\NoSQL}{\textsc{NoSQL}}
+\newcommand{\BSON}{\textsc{BSON}}
+\newcommand{\JSON}{\textsc{JSON}}
+\newcommand{\CPP}{\textsc{C++}}
+\newcommand{\Clang}{\textsc{C}}
+\newcommand{\CRUD}{\textsc{CRUD}}
+\newcommand{\ArrheniusPreexponentialFactor}[1]{\ensuremath{A_{#1}}}
+\newcommand{\ConcentrationInitial}[1]{\ensuremath{C^0_{#1}}}
+\newcommand{\Diameter}{\ensuremath{D}}
+\newcommand{\ThermodynamicConstant}{\ensuremath{\phi}}
+\newcommand{\HeatFlow}{\ensuremath{Q}}
+\newcommand{\SurrogateParameter}{\ensuremath{\Theta}}
+%
+%% Latin Symbols
+%
+\newcommand{\SpecificHeatCapacity}{\ensuremath{\mathrm{c}_p}}
+\newcommand{\ModelGrowthRateConstant}[1]{\ensuremath{c_{#1}}}
+\newcommand{\MeanBubbleSize}{\ensuremath{\mathrm{d}_b}}
+\newcommand{\ArrheniusActivationEnergy}[1]{\ensuremath{E_{#1}}}
+\newcommand{\BubbleGrowthRate}{\ensuremath{\mathrm{G}}}
+\newcommand{\SpecieGrowthRateMoment}[2]{\ensuremath{\overline{\mathrm{G}}_{#1}^{#2}}}
+\newcommand{\hConstant}{\ensuremath{\mathrm{h}}}
+\newcommand{\HeatOfReaction}[1]{\ensuremath{\Delta \mathrm{H}_{#1}}}
+\newcommand{\InitialWeightFractionBlowingAgent}{\ensuremath{\mathrm{L}_0}}
+\newcommand{\MolarWeight}[1]{\ensuremath{Mw_{#1}}}
+\newcommand{\MomentOfOrder}[1]{\ensuremath{\mathrm{m}_{#1}}}
+\newcommand{\VolumeMomentOfOrder}[1]{\ensuremath{\mathrm{M}_{#1}}}
+\newcommand{\NumberOfQuadratureNodes}{\ensuremath{\mathrm{N}}}
+\newcommand{\NumberDensityFunction}[1]{\ensuremath{n\left({#1}\right)}}
+\newcommand{\GasConstant}{\ensuremath{R}}
+\newcommand{\SourceTermDueToCoalescence}{\ensuremath{\overline{\mathrm{S}}_k}}
+\newcommand{\Time}{\ensuremath{t}}
+\newcommand{\TemperatureInitial}{\ensuremath{T_0}}
+\newcommand{\BubbleVolume}{\ensuremath{\mathrm{v}}}
+\newcommand{\wConstant}{\ensuremath{\mathrm{w}}}
+\newcommand{\MassFractionLiquid}[1]{\ensuremath{\mathrm{W}_{#1}}}
+\newcommand{\QuadratureWeights}[1]{\ensuremath{w_{#1}}}
+\newcommand{\EquilibriumMassFractionLiquid}[1]{\ensuremath{\mathrm{W}^D_{#1}}}
+\newcommand{\Conversion}[1]{\ensuremath{\mathrm{X}_{#1}}}
+%
+\newcommand{\Unit}[1]{\ensuremath{\left[ #1 \right]}}
+\newcommand{\PerCubicmeter}{\Unit{m^{-3}}}
+\newcommand{\celsius}{\Unit{^oC}}
+\newcommand{\second}{\Unit{s}}
+\newcommand{\cubicmeter}{\Unit{m^{3}}}
+\newcommand{\cubicmeterPerSecond}{\Unit{m^{3} s^{-1}}}
+\newcommand{\molePerCubicmeter}{\Unit{mol m^{-3}}}
+\newcommand{\molePerCubicmeterSecond}{\Unit{mol m^{-3} s^{-1}}}
+\newcommand{\kelvin}{\Unit{K}}
+\newcommand{\kelvinsquared}{\Unit{K^2}}
+\newcommand{\mole}{\Unit{mol}}
+\newcommand{\joulePerMoleKelvin}{\Unit{J mol K^{-1}}}
+\newcommand{\joulePerKelvin}{\Unit{J K^{-1}}}
+\newcommand{\joulePerKilogramKelvin}{\Unit{J kg^{-1} K^{-1}}}
+\newcommand{\joulePerMole}{\Unit{J mol^{-1}}}
+\newcommand{\joulePerKilogram}{\Unit{J kg^{-1}}}
+\newcommand{\PerSecond}{\Unit{s^{-1}}}
+\newcommand{\PerMeter}{\Unit{m^{-1}}}
+\newcommand{\gramPerMole}{\Unit{g mol^{-1}}}
+\newcommand{\kilogramPerCubicmeter}{\Unit{g m^{-3}}}
+\newcommand{\newtonPerMetersquared}{\Unit{N m^{-2}}}
+%
+%% Greek symbols
+%
+\newcommand{\CoalescenceKernelConstant}{\ensuremath{\beta_0}} 
+\newcommand{\CoalescenceKernel}{\ensuremath{\beta}} 
+\newcommand{\Density}[1]{\ensuremath{\rho_{#1}}}
+\newcommand{\HeatOfVaporisation}{\ensuremath{\lambda}}
+\newcommand{\CpOverCv}{\ensuremath{\kappa}}
+\newcommand{\ValveConstant}{\ensuremath{C_d}}
+\newcommand{\QuadratureNodes}[1]{\ensuremath{\nu_{#1}}}
+%
+%% Acronyms
+%
+\newcommand{\BubbleSizeDistribution}{\textsf{BSD}}
+\newcommand{\PopulationBalanceEquation}{\textsf{PBE}}
+\newcommand{\ComputationalFluidDynamics}{\textsf{CFD}}
+\newcommand{\QuadratureMethodOfMoments}{\textsf{QMOM}}
+%
+%%Atoms and conventions
+%
+\newcommand{\HydrogenAtom}{\ensuremath{\mathrm{H}}}
+\newcommand{\OxygenAtom}{\ensuremath{\mathrm{O}}}
+\newcommand{\CarbonAtom}{\ensuremath{\mathrm{C}}}
+\newcommand{\NitrogenAtom}{\ensuremath{\mathrm{N}}}
+\newcommand{\GenericHydrocarbonChainBase}{\ensuremath{\mathrm{R}}}
+\newcommand{\GenericHydrocarbonChainOne}{\ensuremath{\mathrm{R'}}}
+%
+%% Chemical Species
+%
+\newcommand{\HydrogenDiOxide}{\ensuremath{\HydrogenAtom_2\OxygenAtom}}
+\newcommand{\CarbonDiOxide}{\ensuremath{\CarbonAtom\OxygenAtom_2}}
+\newcommand{\CarbonMonOxide}{\ensuremath{\CarbonAtom\OxygenAtom}}
+%
+\newcommand{\CyanateGroup}{\ensuremath{\NitrogenAtom\CarbonAtom\OxygenAtom}}
+\newcommand{\HydroxylGroup}{\ensuremath{\OxygenAtom\HydrogenAtom}}
+%
+\newcommand{\Polyol}{\ensuremath{\GenericHydrocarbonChainOne-\HydroxylGroup}}
+\newcommand{\Isocyanate}{\ensuremath{\GenericHydrocarbonChainBase-\CyanateGroup}}
+\newcommand{\Polyurethane}{\ensuremath{\GenericHydrocarbonChainBase-\NitrogenAtom\HydrogenAtom-\CarbonAtom\OxygenAtom-\OxygenAtom-\GenericHydrocarbonChainOne}}
+\newcommand{\IsoCyanate}{\ensuremath{\GenericHydrocarbonChainBase-\CyanateGroup}}
+\newcommand{\Urea}{\ensuremath{\GenericHydrocarbonChainBase-\NitrogenAtom\HydrogenAtom-\CarbonAtom\HydrogenAtom-\NitrogenAtom\HydrogenAtom-\GenericHydrocarbonChainBase}}
+%
+%% Sub/superscripts
+%
+\newcommand{\Bubble}{\ensuremath{b}}
+\newcommand{\BlowingAgent}{\ensuremath{BL}}
+\newcommand{\MathCarbonDiOxide}{\ensuremath{\CarbonDiOxide}}
+\newcommand{\FoamPhase}{\ensuremath{foam}}
+\newcommand{\GasPhase}{\ensuremath{\mathrm{gas}}}
+\newcommand{\Water}{\ensuremath{\HydrogenDiOxide}}
+\newcommand{\GenericOrder}{\ensuremath{\mathrm{k}}}
+\newcommand{\PolymerisingLiquid}{\ensuremath{\mathrm{no}}}
+\newcommand{\Cyanate}{\ensuremath{\CyanateGroup}}
+\newcommand{\Hydroxyl}{\ensuremath{\HydroxylGroup}}
+\newcommand{\PolyurethaneNotaton}{\ensuremath{\mathrm{pet}}}
+%
+%% For Equations 
+%
+\newcommand{\SpecieGrowthRateMomentOne}[1]{\ensuremath{\SpecieGrowthRateMoment{1}{#1}}}
+\newcommand{\SpecieGrowthRateMomentGeneric}[1]{\ensuremath{\SpecieGrowthRateMoment{\GenericOrder}{#1}}}
+\newcommand{\TimeDerivative}[1]{\ensuremath{\frac{\mathrm{d}#1}{\mathrm{d}\Time}}}
+\newcommand{\TimeDerivativeConversion}[1]{\ensuremath{\frac{\mathrm{d} \Conversion_{#1}}{\mathrm{d}\Time}}}
+\newcommand{\TimeDerivativeMassFractionLiquid}[1]{\ensuremath{\frac{\mathrm{d} \MassFractionLiquid{#1}}{\mathrm{d}\Time}}}
+%
+\newcommand{\Function}[2]{\ensuremath{{#1}\left( #2 \right)}}
+\newcommand{\Integrate}[4]{\ensuremath{\int_{#1}^{#2}#3\mathrm{d}#4}}
+%
+\newcommand{\Arrhenius}[1]{\ensuremath{\ArrheniusPreexponentialFactor{#1}\exp{\left(\frac{\ArrheniusActivationEnergy{#1}}{\GasConstant\Temperature}\right)}}}
+\newcommand{\TimeDerivativeTemperature}{\ensuremath{\TimeDerivative{\Temperature}}}
+%
+% Hydroxyl
+\newcommand{\ModelGrowthRateConstantHydroxy}{\ensuremath{\ModelGrowthRateConstant{\Hydroxyl}}} 
+\newcommand{\SpecieGrowthRateMomentHydroxyl}{\ensuremath{\SpecieGrowthRateMoment{\Hydroxyl}}}
+\newcommand{\ConcentrationInitialHydroxyl}{\ensuremath{\ConcentrationInitial{\Hydroxyl}}}
+\newcommand{\MassFractionLiquidHydroxyl}{\ensuremath{\MassFractionLiquid{\Hydroxyl}}}
+\newcommand{\ArrheniusHydroxyl}{\ensuremath{\Arrhenius{\Hydroxyl}}}
+\newcommand{\DensityHydroxyl}{\ensuremath{\Density{\Hydroxyl}}}
+\newcommand{\ConversionHydroxyl}{\ensuremath{\Conversion{\Hydroxyl}}}
+\newcommand{\TimeDerivativeConversionHydroxyl}{\ensuremath{\TimeDerivative{\ConversionHydroxyl}}}
+\newcommand{\TimeDerivativeMassFractionLiquidHydroxyl}{\ensuremath{\TimeDerivativeMassFractionLiquid{\Hydroxyl}}}
+\newcommand{\MolarWeightHydroxyl}{\ensuremath{\MolarWeight{\Hydroxyl}}}
+\newcommand{\EquilibriumMassFractionLiquidHydroxyl}{\ensuremath{\EquilibriumMassFractionLiquid{\Hydroxyl}}}
+\newcommand{\SpecieGrowthRateMomentOneHydroxyl}{\ensuremath{\SpecieGrowthRateMoment{\Hydroxyl}}}
+%
+% Water
+\newcommand{\ModelGrowthRateConstantWater}{\ensuremath{\ModelGrowthRateConstant{\Water}}} 
+\newcommand{\ConcentrationInitialWater}{\ensuremath{\ConcentrationInitial{\Water}}}
+\newcommand{\MassFractionLiquidWater}{\ensuremath{\MassFractionLiquid{\Water}}}
+\newcommand{\ArrheniusWater}{\ensuremath{\Arrhenius{\Water}}}
+\newcommand{\DensityWater}{\ensuremath{\Density{\Water}}}
+\newcommand{\ConversionWater}{\ensuremath{\Conversion{\Water}}}
+\newcommand{\TimeDerivativeConversionWater}{\ensuremath{\TimeDerivative{\ConversionWater}}}
+\newcommand{\TimeDerivativeMassFractionLiquidWater}{\ensuremath{\TimeDerivativeMassFractionLiquid{\Water}}}
+\newcommand{\MolarWeightWater}{\ensuremath{\MolarWeight{\Water}}}
+\newcommand{\EquilibriumMassFractionLiquidWater}{\ensuremath{\EquilibriumMassFractionLiquid{\Water}}}
+\newcommand{\SpecieGrowthRateMomentOneWater}{\ensuremath{\SpecieGrowthRateMoment{\Water}}}
+%
+% Cyanate
+\newcommand{\ModelGrowthRateConstantCyanate}{\ensuremath{\ModelGrowthRateConstant{\Cyanate}}} 
+\newcommand{\SpecieGrowthRateMomentCyanate}{\ensuremath{\SpecieGrowthRateMoment{\Cyanate}}}
+\newcommand{\ConcentrationInitialCyanate}{\ensuremath{\ConcentrationInitial{\Cyanate}}}
+\newcommand{\MassFractionLiquidCyanate}{\ensuremath{\MassFractionLiquid{\Cyanate}}}
+\newcommand{\ArrheniusCyanate}{\ensuremath{\Arrhenius{\Cyanate}}}
+\newcommand{\DensityCyanate}{\ensuremath{\Density{\Cyanate}}}
+\newcommand{\ConversionCyanate}{\ensuremath{\Conversion{\Cyanate}}}
+\newcommand{\TimeDerivativeConversionCyanate}{\ensuremath{\TimeDerivative{\ConversionCyanate}}}
+\newcommand{\TimeDerivativeMassFractionLiquidCyanate}{\ensuremath{\TimeDerivativeMassFractionLiquid{\Cyanate}}}
+\newcommand{\MolarWeightCyanate}{\ensuremath{\MolarWeight{\Cyanate}}}
+\newcommand{\EquilibriumMassFractionLiquidCyanate}{\ensuremath{\EquilibriumMassFractionLiquid{\Cyanate}}}
+\newcommand{\SpecieGrowthRateMomentOneCyanate}{\ensuremath{\SpecieGrowthRateMoment{\Cyanate}}}
+%
+% Polyurethane
+\newcommand{\ModelGrowthRateConstantPolyurethaneNotaton}{\ensuremath{\ModelGrowthRateConstant{\PolyurethaneNotaton}}} 
+\newcommand{\ConcentrationInitialPolyurethane}{\ensuremath{\ConcentrationInitial{\PolyurethaneNotaton}}}
+\newcommand{\MassFractionLiquidPolyurethane}{\ensuremath{\MassFractionLiquid{\PolyurethaneNotaton}}}
+\newcommand{\ArrheniusPolyurethane}{\ensuremath{\Arrhenius{\PolyurethaneNotaton}}}
+\newcommand{\DensityPolyurethane}{\ensuremath{\Density{\PolyurethaneNotaton}}}
+\newcommand{\ConversionPolyurethane}{\ensuremath{\Conversion{\PolyurethaneNotaton}}}
+\newcommand{\TimeDerivativeConversionPolyurethane}{\ensuremath{\TimeDerivative{\ConversionPolyurethaneNotaton}}}
+\newcommand{\TimeDerivativeMassFractionLiquidPolyurethane}{\ensuremath{\TimeDerivativeMassFractionLiquid{\PolyurethaneNotaton}}}
+\newcommand{\MolarWeightPolyurethane}{\ensuremath{\MolarWeight{\PolyurethaneNotaton}}}
+\newcommand{\EquilibriumMassFractionLiquidPolyurethane}{\ensuremath{\EquilibriumMassFractionLiquid{\PolyurethaneNotaton}}}
+\newcommand{\SpecieGrowthRateMomentOnePolyurethane}{\ensuremath{\SpecieGrowthRateMomentOne{\PolyurethaneNotaton}}}
+%
+% Carbondioxide
+\newcommand{\ModelGrowthRateConstantCarbonDiOxide}{\ensuremath{\ModelGrowthRateConstant{\CarbonDiOxide}}} 
+\newcommand{\SpecieGrowthRateMomentCarbonDiOxide}{\ensuremath{\SpecieGrowthRateMoment{\MathCarbonDiOxide}}}
+\newcommand{\ConcentrationInitialCarbonDiOxide}{\ensuremath{\ConcentrationInitial{\MathCarbonDiOxide}}}
+\newcommand{\MassFractionLiquidCarbonDiOxide}{\ensuremath{\MassFractionLiquid{\MathCarbonDiOxide}}}
+\newcommand{\ArrheniusCarbonDiOxide}{\ensuremath{\Arrhenius{\MathCarbonDiOxide}}}
+\newcommand{\DensityCarbonDiOxide}{\ensuremath{\Density{\MathCarbonDiOxide}}}
+\newcommand{\ConversionCarbonDiOxide}{\ensuremath{\Conversion{\MathCarbonDiOxide}}}
+\newcommand{\TimeDerivativeConversionCarbonDiOxide}{\ensuremath{\TimeDerivative{\MathCarbonDiOxide}}}
+\newcommand{\TimeDerivativeMassFractionLiquidCarbonDiOxide}{\ensuremath{\TimeDerivativeMassFractionLiquid{\MathCarbonDiOxide}}}
+\newcommand{\MolarWeightCarbonDiOxide}{\ensuremath{\MolarWeight{\MathCarbonDiOxide}}}
+\newcommand{\EquilibriumMassFractionLiquidCarbonDiOxide}{\ensuremath{\EquilibriumMassFractionLiquid{\MathCarbonDiOxide}}}
+\newcommand{\SpecieGrowthRateMomentOneCarbonDiOxide}{\ensuremath{\SpecieGrowthRateMomentOne{\MathCarbonDiOxide}}}
+\newcommand{\SpecieGrowthRateMomentGenericCarbonDiOxide}{\ensuremath{\SpecieGrowthRateMomentGeneric{\MathCarbonDiOxide}}}
+%
+% Blowing Agent
+\newcommand{\ModelGrowthRateConstantBlowingAgent}{\ensuremath{\ModelGrowthRateConstant{\BlowingAgent}}} 
+\newcommand{\ConcentrationInitialBlowingAgent}{\ensuremath{\ConcentrationInitial{\BlowingAgent}}}
+\newcommand{\MassFractionLiquidBlowingAgent}{\ensuremath{\MassFractionLiquid{\BlowingAgent}}}
+\newcommand{\ArrheniusBlowingAgent}{\ensuremath{\Arrhenius{\BlowingAgent}}}
+\newcommand{\DensityBlowingAgent}{\ensuremath{\Density{\BlowingAgent}}}
+\newcommand{\ConversionBlowingAgent}{\ensuremath{\Conversion{\BlowingAgent}}}
+\newcommand{\TimeDerivativeConversionBlowingAgent}{\ensuremath{\TimeDerivative{\BlowingAgent}}}
+\newcommand{\TimeDerivativeMassFractionLiquidBlowingAgent}{\ensuremath{\TimeDerivativeMassFractionLiquid{\BlowingAgent}}}
+\newcommand{\MolarWeightBlowingAgent}{\ensuremath{\MolarWeight{\BlowingAgent}}}
+\newcommand{\EquilibriumMassFractionLiquidBlowingAgent}{\ensuremath{\EquilibriumMassFractionLiquid{\BlowingAgent}}}
+\newcommand{\SpecieGrowthRateMomentOneBlowingAgent}{\ensuremath{\SpecieGrowthRateMomentOne{\BlowingAgent}}}
+\newcommand{\SpecieGrowthRateMomentGenericBlowingAgent}{\ensuremath{\SpecieGrowthRateMomentGeneric{\BlowingAgent}}}
+%% Reactions
+%
+%
+\newcommand{\GellingRx}{\ensuremath{\underbrace{\Isocyanate}_{\text{Isocyanate}}+\underbrace{\Polyol}_{\text{Polyol}}\rightarrow\underbrace{\Polyurethane}_{\text{Polyurethane}}}}
+\newcommand{\GlobalRx}{\ensuremath{2\underbrace{\Isocyanate}_{\text{Isocyanate}}+\HydrogenDiOxide\rightarrow\underbrace{\Urea}_{\text{Urea}}+\CarbonDiOxide}}
+%
+% Generic stuff
+\newcommand{\MomentOfOrderGeneric}{\ensuremath{\MomentOfOrder{k}}}
+\newcommand{\MomentOfOrderZero}{\ensuremath{\MomentOfOrder{0}}}
+\newcommand{\MomentOfOrderOne}{\ensuremath{\MomentOfOrder{1}}}
+\newcommand{\MomentOfOrderTwo}{\ensuremath{\MomentOfOrder{2}}}
+\newcommand{\MomentOfOrderThree}{\ensuremath{\MomentOfOrder{3}}}
+%
+\newcommand{\dTdt}{\ensuremath{\TimeDerivative{\Temperature}}}
+\newcommand{\dGenericOrderdt}{\ensuremath{\TimeDerivative{\MomentOfOrderGeneric}}}
+%
+\newcommand{\PoverRT}{\ensuremath{\frac{\Pressure}{\GasConstant \Temperature}}}
+\newcommand{\QuadratureWeightOne}{\ensuremath{\QuadratureWeights{\alpha}}}
+\newcommand{\QuadratureWeightTwo}{\ensuremath{\QuadratureWeights{\beta}}}
+%
+\newcommand{\QuadratureNodeOne}{\ensuremath{\QuadratureNodes{\alpha}}}
+\newcommand{\QuadratureNodeTwo}{\ensuremath{\QuadratureNodes{\beta}}}
+%
+\newcommand{\VolumeMomentOfOrderGeneric}{\ensuremath{\VolumeMomentOfOrder{k}}}
