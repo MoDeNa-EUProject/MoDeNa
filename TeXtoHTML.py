@@ -31,10 +31,14 @@
 port install ghc, hs-cabal-install
 cabal update
 cabal install pandoc, pandoc-citeproc, pandoc-crossref
+echo "export PATH=${PATH}:~/.cabal/bin/" >> ~/.profile
+
 
 apt-get install ghc, cabal-install
 cabal update
 cabal install pandoc, pandoc-citeproc, pandoc-crossref
+echo "export PATH=${PATH}:~/.cabal/bin/" >> ~/.bashrc
+
 """
 
 import os, sys, re
@@ -53,30 +57,60 @@ with open('tmp.tex','w') as tmp:
   for f in files:
     with open('%s' %(f)) as FILE:
       for line in FILE:
-        eps=re.match(r'^\s*\\includegraphics.*\{(.*)(\.eps|\.pdf)\}',line)
-        if eps:
-          os.system("convert %s%s %s.png" %(eps.group(1),eps.group(2),eps.group(1)) )
-          line=re.sub(r'%s' %(eps.group(2)),'.png',line)
+        fig=re.match(r'^\s*\\includegraphics.*\{(.*)(\.eps|\.pdf)\}',line)
+        if fig:
+          os.system("convert %s%s %s.png" %(fig.group(1),fig.group(2),fig.group(1)))
+          line = re.sub(r'%s' %(fig.group(2)), '.png', line)
 
         tmp.write(line)
 
+#os.system("pandoc --standalone --from=latex --toc --filter pandoc-crossref --bibliography=./Content/Bibliography/bibliography.bib --highlight-style tango --to=markdown_github --output=tmp.md tmp.tex")
 
-os.system("pandoc --from=latex --toc --filter pandoc-crossref --bibliography=./Content/Bibliography/bibliography.bib --highlight-style tango --to=markdown_github --output=tmp.md tmp.tex")
+os.system("pandoc --standalone --from=latex --bibliography=./Content/Bibliography/bibliography.bib --to=markdown_github --output=tmp.md tmp.tex")
 os.remove('tmp.tex')
 
 
 with open('edit.md','w') as newFILE:
   with open('tmp.md','r') as oldFILE:
+
     for line in oldFILE:
-      line=re.sub(r'\\hspace\{.*\}','',line)
+
+      if re.match(r'^!.*data-label.*', line):
+        lbl = re.match(r'.*fig:(.*)".*', line)
+        line = re.sub(r'\n' ,'{#fig:%s}\n' %lbl.group(1), line)
+
+      while re.match(r'.*\\\[[A-Za-z]+:[A-Za-z0-9]+\\\].*',line):
+        ref = re.match(r'.*(\\\[([A-Za-z]+):([A-Za-z0-9]+)\\\]).*',line)
+        line = re.sub(r'%s' %'\\\[[A-Za-z]+:[A-Za-z0-9]+\\\]', '[@%s:%s]' %(ref.group(2),ref.group(3)), line)
+
+      eqStart=re.match(r'.*(\\\[).*',line)
+      eqStop =re.match(r'.*(\\\]).*',line)
+      
+      while re.match(r'^\n{0,1}.*(\\\[).*',line):
+        pos=eqStart.start()
+        line = re.sub(r'\\\[', r'\n\n\[', line)
+
+      if re.match(r'.*(\\\]).*',line):
+        pos = eqStop.start()
+        line = re.sub(r'\\\]', r'\]\n\n', line)
+
+#      if eqStart:
+#        pos=eqStart.start()
+#        line = re.sub(r'\\\[', r'\n\n\[', line)
+#
+#      if eqStop:
+#        pos = eqStop.start()
+#        line = re.sub(r'\\\]', r'\]\n\n', line)
 
       newFILE.write(line)
 
+
+
 os.remove("tmp.md")
-os.system("pandoc --standalone --smart --self-contained --toc --filter pandoc-crossref --bibliography=./Content/Bibliography/bibliography.bib --highlight-style tango --mathml --from=markdown_github --to=html --output=Main.html edit.md")
+
+os.system("pandoc --standalone --number-sections --smart --self-contained --toc --filter pandoc-crossref --highlight-style tango --mathml --from=markdown_github --to=html --output=Main.html edit.md")
+
 os.system("pandoc --standalone --smart --toc --filter pandoc-crossref --bibliography=./Content/Bibliography/bibliography.bib --highlight-style tango --from=markdown_github --to=docx --output=Main.docx edit.md")
 
-#os.system("pandoc --standalone --smart --highlight-style=tango --mathml --from=markdown_github --to=html --output=Main.html edit.md")
-#os.system("pandoc --standalone --smart --highlight-style=tango --from=markdown_github --to=docx --output=Main.docx edit.md")
 #os.remove("edit.md")
 
