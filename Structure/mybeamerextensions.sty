@@ -1,0 +1,84 @@
+% beamer extensions =================================================
+
+\hypersetup{%
+%pdfpagemode=FullScreen,
+colorlinks=true,
+linkcolor=blue
+}
+
+%\usetheme{Boadilla} %AnnArbor}
+%\usetheme[numbers,compress]{Trondheim}
+\usetheme{default}
+
+% ==========================Beamer specific        ===========
+\def\PartTableOfConentsRef{P:\insertpartstartpage+2}
+
+\setbeamertemplate{navigation symbols}{}% eliminate navigation bar
+\setbeamertemplate{footline}{%
+	\begin{beamercolorbox}{section in head/foot}
+		\vskip2pt\hskip5pt%
+		\hyperlink{root}{\beamerreturnbutton{select part}}
+		\hfill%
+		\hyperlink{\PartTableOfConentsRef}{\beamergotobutton{select section}}%
+		\hskip5pt\vskip2pt%
+	\end{beamercolorbox}%
+	}
+% alternative put it at the end of the slide
+%\setbeamertemplate{navigation symbols}{\hyperlink{root}{\beamergotobutton{}}} %puts button to contents in every slide
+
+
+\setbeamerfont{section title}{parent=title}
+\setbeamercolor{section title}{parent=titlelike}
+
+% \defbeamertemplate*{section page}{default}[1][]{%
+%   \centering
+%     \begin{beamercolorbox}[sep=8pt,center,#1]{section title}
+%       \usebeamerfont{section title}\insertsection\par
+%     \end{beamercolorbox}
+%   }%
+
+%\newcommand*{\sectionpage}{\usebeamertemplate*{section page}}
+
+\setbeamertemplate{part page}{% defines the looks of the part page
+	\hfill
+	\begin{center}
+		\hyperlink{root}{\LARGE\bf\partname} \quad \LARGE\insertpartnumber\\
+		\insertpart
+	\end{center}
+	\hfill
+	}
+
+\makeatletter
+\AtBeginPart{% add to every part a part page and a unique link
+	\addtocontents{toc}{\protect\beamer@partintoc{\the\c@part}{\beamer@partnameshort}{\the\c@page}}%
+	\hypertarget{P:\the\c@page}{}% target for parts table of contents
+	\partpage
+	\PartContents{\beamer@partnameshort}
+	\setcounter{section}{0}
+	}
+
+\providecommand\beamer@partintoc[3]{%%% number, shortname, page.
+  \ifnum\c@tocdepth=-1\relax
+    %\hyperlink{P:#3}{\beamerbutton{\scriptsize{#1: #2}}} \hfill \hyperlink{P:#3}{\red{#3}}
+    %\scriptsize%
+    \hyperlink{P:#3}{{{#1: #2}}} \hfill \hyperlink{P:#3}{\red{#3}}
+    \par
+  \fi
+}
+% requesting onlyparts.
+\define@key{beamertoc}{onlyparts}[]{%
+  \c@tocdepth=-1\relax
+}
+\makeatother%
+
+\def\PartContents#1{%
+	\begin{frame}
+		\frametitle{#1 -- Contents\hypertarget{\PartTableOfConentsRef}{}}
+		\tableofcontents
+	\end{frame}
+	}
+
+\setbeamertemplate{blocks}[rounded][shadow=true]
+\setbeamercolor*{block body}{bg=normal text.bg!95!blue}
+\setbeamercolor*{block title}{parent=structure,bg=normal text.bg!90!blue}
+\setbeamercolor*{button}{bg=white}%{bg=white!95!blue!95!red!95!yellow}
