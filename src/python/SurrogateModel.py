@@ -64,22 +64,25 @@ term = Terminal()
 
 
 def existsAndHasArgPos(i, name):
-    return name in i and hasattr(i[name], 'argPos')
+    try:
+        return i[name]['argPos']
+    except:    
+        raise Exception('[%s][\'argPos\'] not found' % name)
 
 
 def checkAndConvertType(kwargs, name, cls):
-    if not name in kwargs:
-        raise Exception('Need ' + name)
-    elif not isinstance(kwargs[name], cls):
-        raise TypeError('Need ' + name)
-    else:
+    try:
+        if not isinstance(kwargs[name], cls):
+            raise TypeError('%s must be of type %s' % (name, cls))
         kwargs['meth_' + name] = kwargs[name].to_dict()
         del kwargs[name]
+    except:
+        raise Exception('%s not found' % name)
 
 
 def loadType(obj, name, cls):
     n = '___' + name
-    if(hasattr(obj, n)):
+    if hasattr(obj, n):
         return getattr(obj, n)
     else:
         var = getattr(obj, 'meth_' + name)
@@ -99,6 +102,25 @@ class GrowingList(list):
         list.__setitem__(self, index, value)
 
 
+class IndexSet(Document):
+    name = StringField(primary_key=True)
+    names = ListField(StringField(required=True))
+    meta = {'allow_inheritance': True}
+
+    @abc.abstractmethod
+    def __init__(self, *args, **kwargs):
+        self.___index___ = {j:i for i,j in enumerate(kwargs['names'])}
+        Document.__init__(self, *args, **kwargs)
+        self.save()
+
+    def argPos(self, name):
+        try:
+            return self.___index___[name]
+        except:
+            raise Exception('%s is not in index set %s' % (name, self.name))
+        
+
+
 # Fitting data is not stored here to allow excluding it in load since it
 # is not possible to exclude inputs.*.fitData
 class MinMax(EmbeddedDocument):
@@ -116,8 +138,13 @@ class MinMaxOpt(EmbeddedDocument):
 class MinMaxArgPos(EmbeddedDocument):
     min = FloatField(required=True, default=None)
     max = FloatField(required=True, default=None)
+    #index = IndexSet()
+    #index = ReferenceField(IndexSet)
     argPos = IntField(required=True)
     meta = {'allow_inheritance': False}
+
+    def __init__(self, *args, **kwargs):
+        EmbeddedDocument.__init__(self, **kwargs)
 
 
 class MinMaxArgPosOpt(EmbeddedDocument):
@@ -126,10 +153,8 @@ class MinMaxArgPosOpt(EmbeddedDocument):
     argPos = IntField()
     meta = {'allow_inheritance': False}
 
-
 class combinedMeta(abc.ABCMeta, TopLevelDocumentMetaclass):
    pass
-
 
 class SurrogateFunction(DynamicDocument):
 
@@ -138,6 +163,7 @@ class SurrogateFunction(DynamicDocument):
     parameters = MapField(EmbeddedDocumentField(MinMaxArgPos))
     functionName = StringField(required=True)
     libraryName = StringField(required=True)
+    indices = MapField(ReferenceField(IndexSet))
     meta = {'allow_inheritance': True}
 
     @abc.abstractmethod
@@ -157,6 +183,22 @@ class SurrogateFunction(DynamicDocument):
 
         DynamicDocument.__init__(self, **kwargs)
 
+        for k in self.inputs.keys():
+            self.checkVariableName(k);
+
+        for k in self.outputs.keys():
+            self.checkVariableName(k);
+
+        for k in self.parameters.keys():
+            self.checkVariableName(k);
+
+
+    def checkVariableName(self, name):
+        m = re.search('\[(.*)\]', name)
+        if m and not m.group(1) in self.indices:
+            raise Exception('Index %s not defined' % m.group(1))
+
+
     def modena_function(self):
         return pymodena.modena_function_new(
             str(self.functionName),
@@ -166,8 +208,9 @@ class SurrogateFunction(DynamicDocument):
 
     @classmethod
     def load(self, surrogateFunctionId):
-        return self.objects.get(_id=surrogateFunctionId)        
-        
+        return self.objects.get(_id=surrogateFunctionId)
+
+
 class CFunction(SurrogateFunction):
 
     def __init__(self, *args, **kwargs):
@@ -335,7 +378,7 @@ void {name}
 
         # Left delimiter.
         elif re_ldel:
-            head = re_ldel.group(0)    
+            head = re_ldel.group(0)
             tail  = formula[1:]
             delim += 1
 
@@ -387,19 +430,33 @@ class SurrogateModel(DynamicDocument):
 
 
     def inputs_argPos(self, name):
-        if existsAndHasArgPos(self.inputs, name):
-            return self.inputs[name].argPos
-        elif existsAndHasArgPos(self.surrogateFunction.inputs, name):
-            return self.surrogateFunction.inputs[name].argPos
-        raise Exception(name + ' not found')
+        try:
+            return existsAndHasArgPos(self.inputs, name)
+        except:
+            try:
+                return existsAndHasArgPos(self.surrogateFunction.inputs, name)
+            except:
+                raise Exception(name + ' not found in inputs')
 
 
     def outputs_argPos(self, name):
-        if existsAndHasArgPos(self.outputs, name):
-            return self.outputs[name].argPos
-        elif existsAndHasArgPos(self.surrogateFunction.outputs, name):
-            return self.surrogateFunction.outputs[name].argPos
-        raise Exception(name + ' not found')
+        try:
+            return existsAndHasArgPos(self.outputs, name)
+        except:
+            try:
+                return existsAndHasArgPos(self.surrogateFunction.outputs, name)
+            except:
+                raise Exception(name + ' not found in outputs')
+
+
+    def parameters_argPos(self, name):
+        try:
+            return existsAndHasArgPos(self.parameters, name)
+        except:
+            try:
+                return existsAndHasArgPos(self.surrogateFunction.parameters, name)
+            except:
+                raise Exception(name + ' not found in parameters')
 
 
     def inputs_max_argPos(self):
@@ -540,8 +597,8 @@ class SurrogateModel(DynamicDocument):
 class ForwardMappingModel(SurrogateModel):
 
     # Database definition
-    inputs = MapField(EmbeddedDocumentField(MinMaxArgPosOpt))
-    outputs = MapField(EmbeddedDocumentField(MinMaxArgPosOpt))
+    inputs = MapField(EmbeddedDocumentField(MinMaxOpt))
+    outputs = MapField(EmbeddedDocumentField(MinMaxOpt))
     substituteModels = ListField(ReferenceField(SurrogateModel))
     meta = {'allow_inheritance': True}
 
@@ -559,6 +616,15 @@ class ForwardMappingModel(SurrogateModel):
             if not isinstance(kwargs['surrogateFunction'], SurrogateFunction):
                 raise TypeError('Need surrogateFunction')
 
+            m = re.search('.*\[(.*)\]', kwargs['_id'])
+            if m:
+                for exp in m.group(1).split(','):
+                    m = re.search('(.*)=(.*)', exp)
+                    if m:
+                        kwargs['surrogateFunction'].indices[m.group(1)].argPos(m.group(2))
+                    else:
+                        raise Exception('Unable to parse %s' % exp)
+
             kwargs['inherited_inputs'] = 0
 
             kwargs['fitData'] = {}
@@ -569,7 +635,7 @@ class ForwardMappingModel(SurrogateModel):
             kwargs['outputs'] = {}
             for k, v in kwargs['surrogateFunction'].outputs.iteritems():
                 kwargs['fitData'][k] = []
-                kwargs['outputs'][k] = MinMaxArgPosOpt(**{})
+                kwargs['outputs'][k] = MinMaxOpt(**{})
 
             subOutputs = {}
             for m in kwargs['substituteModels']:
@@ -601,7 +667,7 @@ class ForwardMappingModel(SurrogateModel):
             nInputs = 0
             for k, v in kwargs['inputs'].iteritems():
                 kwargs['fitData'][k] = []
-                kwargs['inputs'][k] = MinMaxArgPosOpt(**v)
+                kwargs['inputs'][k] = MinMaxOpt(**v)
 
             if 'initialisationStrategy' not in kwargs:
                 kwargs['initialisationStrategy'] = EmptyInitialisationStrategy()
@@ -694,17 +760,6 @@ class ForwardMappingModel(SurrogateModel):
         )
 
 
-    def parameterFittingStrategy(self):
-        return load_object({'_fw_name': '{{modena.Strategy.NonLinFitToPointWithSmallestError}}'})
-
-#     def initialisationStrategy(self):
-#         '''
-#         Return an empty workflow
-#         '''
-#
-#         return EmptyInitialisationStrategy()
-
-
 class BackwardMappingModel(SurrogateModel):
 
     # Database definition
@@ -733,6 +788,15 @@ class BackwardMappingModel(SurrogateModel):
                 raise Exception('Need surrogateFunction')
             if not isinstance(kwargs['surrogateFunction'], SurrogateFunction):
                 raise TypeError('Need surrogateFunction')
+
+            m = re.search('.*\[(.*)\]', kwargs['_id'])
+            if m:
+                for exp in m.group(1).split(','):
+                    m = re.search('(.*)=(.*)', exp)
+                    if m:
+                        kwargs['surrogateFunction'].indices[m.group(1)].argPos(m.group(2))
+                    else:
+                        raise Exception('Unable to parse %s' % exp)
 
             kwargs['inherited_inputs'] = 0
 

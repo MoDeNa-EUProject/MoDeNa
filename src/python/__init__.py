@@ -36,14 +36,18 @@ __version__ = get_distribution('modena').version
 MODENA_INSTALL_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 from Strategy import BackwardMappingScriptTask, BackwardMappingTask
-from SurrogateModel import SurrogateModel, ForwardMappingModel, BackwardMappingModel, CFunction
+from SurrogateModel import CFunction, IndexSet, Workflow2, \
+    SurrogateModel, ForwardMappingModel, BackwardMappingModel
 
 def import_helper():
     from os.path import dirname
     import imp
     fp = None
     try:
-        fp, pathname, description = imp.find_module('libmodena', [dirname(__file__)+"/../../../"])
+        fp, pathname, description = imp.find_module(
+            'libmodena',
+            [ dirname(__file__)+"/../../../" ]
+        )
     except ImportError:
         import libmodena
         return libmodena
