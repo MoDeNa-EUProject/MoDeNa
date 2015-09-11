@@ -38,6 +38,8 @@ Contributors
 
 import os
 import modena
+from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, CFunction
+import modena.Strategy as Strategy
 from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
 from fireworks import Firework, Workflow, FWAction
 from fireworks.utilities.fw_utilities import explicit_serialize
@@ -55,44 +57,51 @@ __email__ = 'h.rusche@wikki.co.uk.'
 __date__ = 'Sep 4, 2014'
 
 
-# ********************************* Class ********************************** #
-@explicit_serialize
-class FlowRateExactSim(FireTaskBase):
-    """
-    A FireTask that starts a microscopic code and updates the database.
-    """
+f = CFunction(
+    Ccode= '''
+#include "modena.h"
+#include "math.h"
 
-    def run_task(self, fw_spec):
-        print(
-            term.yellow
-          + "Performing exact simulation (microscopic code recipe)"
-          + term.normal
-        )
-
-        D = self['point']['D']
-        rho0 = self['point']['rho0']
-        p0 = self['point']['p0']
-        p1Byp0 = self['point']['p1Byp0']
-
-        # Write input
-        f = open('in.txt', 'w')
-        f.write('%g\n%g\n%g\n%g\n' % (D, rho0, p0, p1Byp0))
-        f.close()
-
-        # Execute the application
-        # In this simple example, this call stands for a complex microscopic
-        # code - such as full 3D CFD simulation.
-        # Source code in src/flowRateExact.C
-        os.system('../src/flowRateExact')
-
-        # Analyse output
-        f = open('out.txt', 'r')
-        self['point']['flowRate'] = float(f.readline())
-        f.close()
-
-        return FWAction(mod_spec=[{'_push': self['point']}])
-
-
-m = modena.BackwardMappingScriptTask(
-        script='../src/twoTanksMacroscopicProblem'
+void idealGas
+(
+    const double* parameters,
+    const double* inherited_inputs,
+    const double* inputs,
+    double *outputs
 )
+{
+    const double p0 = inputs[0];
+    const double T0 = inputs[1];
+
+    const double R = parameters[0];
+
+    outputs[0] = p0/R/T0;
+}
+''',
+    # These are global bounds for the function
+    inputs={
+        'p0': { 'min': 0, 'max': 9e99, 'argPos': 0 },
+        'T0': { 'min': 0, 'max': 9e99, 'argPos': 1 },
+    },
+    outputs={
+        'rho0': { 'min': 9e99, 'max': -9e99, 'argPos': 0 },
+    },
+    parameters={
+        'R': { 'min': 0.0, 'max': 9e99, 'argPos': 0 }
+    },
+)
+
+m = ForwardMappingModel(
+    _id= 'idealGas',
+    surrogateFunction= f,
+    substituteModels= [ ],
+    parameters= [ 287.0 ],
+    inputs={
+        'p0': { 'min': 0, 'max': 9e99 },
+        'T0': { 'min': 0, 'max': 9e99 },
+    },
+    outputs={
+        'rho0': {'min': 0, 'max': 9e99 },
+    },
+)
+

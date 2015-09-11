@@ -35,7 +35,7 @@ __version__ = get_distribution('modena').version
 
 MODENA_INSTALL_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-from Strategy import *
+from Strategy import BackwardMappingScriptTask, BackwardMappingTask
 from SurrogateModel import SurrogateModel, ForwardMappingModel, BackwardMappingModel, CFunction
 
 def import_helper():

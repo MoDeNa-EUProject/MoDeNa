@@ -38,6 +38,8 @@ Contributors
 
 import os
 import modena
+from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, CFunction
+import modena.Strategy as Strategy
 from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
 from fireworks import Firework, Workflow, FWAction
 from fireworks.utilities.fw_utilities import explicit_serialize
@@ -49,7 +51,7 @@ term = Terminal()
 
 __author__ = 'Henrik Rusche'
 __copyright__ = 'Copyright 2014, MoDeNa Project'
-__version__ = '0.2'
+__version__ = '0.5'
 __maintainer__ = 'Henrik Rusche'
 __email__ = 'h.rusche@wikki.co.uk.'
 __date__ = 'Sep 4, 2014'
@@ -61,6 +63,11 @@ class FlowRateExactSim(FireTaskBase):
     """
     A FireTask that starts a microscopic code and updates the database.
     """
+
+    # TODO
+    # - Create unified base class and derive ModenaBackwardMappingTask AND
+    #   FlowRateExactSim from it
+    # - Move the remainder of the method into this new class
 
     def run_task(self, fw_spec):
         print(
@@ -93,6 +100,70 @@ class FlowRateExactSim(FireTaskBase):
         return FWAction(mod_spec=[{'_push': self['point']}])
 
 
-m = modena.BackwardMappingScriptTask(
-        script='../src/twoTanksMacroscopicProblem'
+f = CFunction(
+    Ccode= '''
+#include "modena.h"
+#include "math.h"
+
+void two_tank_flowRate
+(
+    const double* parameters,
+    const double* inherited_inputs,
+    const double* inputs,
+    double *outputs
 )
+{
+    const double D = inputs[0];
+    const double rho0 = inputs[1];
+    const double p0 = inputs[2];
+    const double p1 = p0*inputs[3];
+
+    const double P0 = parameters[0];
+    const double P1 = parameters[1];
+
+    outputs[0] = M_PI*pow(D, 2.0)*P1*sqrt(P0*rho0*p0);
+}
+''',
+    # These are global bounds for the function
+    inputs={
+        'D': { 'min': 0, 'max': 9e99, 'argPos': 0 },
+        'rho0': { 'min': 0, 'max': 9e99, 'argPos': 1 },
+        'p0': { 'min': 0, 'max': 9e99, 'argPos': 2 },
+        'p1Byp0': { 'min': 0, 'max': 1.0, 'argPos': 3},
+    },
+    outputs={
+        'flowRate': { 'min': 9e99, 'max': -9e99, 'argPos': 0 },
+    },
+    parameters={
+        'param0': { 'min': 0.0, 'max': 10.0, 'argPos': 0 },
+        'param1': { 'min': 0.0, 'max': 10.0, 'argPos': 1 },
+    },
+)
+
+m = BackwardMappingModel(
+    _id= 'flowRate',
+    surrogateFunction= f,
+    exactTask= FlowRateExactSim(),
+    substituteModels= [ ],
+    initialisationStrategy= Strategy.InitialPoints(
+        initialPoints=
+        {
+            'D': [0.01, 0.01, 0.01, 0.01],
+            'rho0': [3.4, 3.5, 3.4, 3.5],
+            'p0': [2.8e5, 3.2e5, 2.8e5, 3.2e5],
+            'p1Byp0': [0.03, 0.03, 0.04, 0.04],
+        },
+    ),
+    outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(
+        nNewPoints= 4
+    ),
+    parameterFittingStrategy= Strategy.NonLinFitWithErrorContol(
+        testDataPercentage= 0.2,
+        maxError= 0.05,
+        improveErrorStrategy= Strategy.StochasticSampling(
+            nNewPoints= 2
+        ),
+        maxIterations= 5 # Currently not used
+    ),
+)
+

@@ -69,6 +69,11 @@ main(int argc, char *argv[])
 
     // Instantiate a model
     modena_model_t *model = modena_model_new("flowRate");
+    if(modena_error_occurred())
+    {
+        int ret = modena_error();
+        return ret;
+    }
 
     // Allocate memory and fetch arg positions
     modena_inputs_t *inputs = modena_inputs_new(model);
@@ -97,13 +102,13 @@ main(int argc, char *argv[])
             int ret = modena_model_call(model, inputs, outputs);
 
             // Terminate, if requested
-            if(ret != 0)
+            if(modena_error_occurred())
             {
                 modena_inputs_destroy(inputs);
                 modena_outputs_destroy(outputs);
                 modena_model_destroy(model);
 
-                return ret;
+                return modena_error();
             }
 
             // Fetch result
@@ -124,13 +129,13 @@ main(int argc, char *argv[])
             int ret = modena_model_call(model, inputs, outputs);
 
             // Terminate, if requested
-            if(ret != 0)
+            if(modena_error_occurred())
             {
                 modena_inputs_destroy(inputs);
                 modena_outputs_destroy(outputs);
                 modena_model_destroy(model);
 
-                return ret;
+                return modena_error();
             }
 
             // Fetch result

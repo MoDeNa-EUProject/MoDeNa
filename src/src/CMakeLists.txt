@@ -2,6 +2,11 @@
 add_library(modena SHARED modena.c)
 target_link_libraries(modena ${LTDL_LIBRARIES} ${PYTHON_LIBRARIES})
 
+set_property(TARGET modena APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include>
+)
+
 #include(GenerateExportHeader)
 #generate_export_header(modena)
 set_property(TARGET modena PROPERTY VERSION ${PACKAGE_VERSION})
@@ -49,7 +54,6 @@ install(
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib/static
-  INCLUDES DESTINATION include
   PUBLIC_HEADER DESTINATION include
 )
 
