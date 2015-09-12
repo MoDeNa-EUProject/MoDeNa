@@ -9,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014 MoDeNa Consortium, All rights reserved.
+    2014-2015 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -547,12 +547,12 @@ static PyTypeObject modena_model_tType = {
     0,                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /*tp_flags*/
     "modena_model_t objects", /* tp_doc */
-    0,		               /* tp_traverse */
-    0,		               /* tp_clear */
-    0,		               /* tp_richcompare */
-    0,		               /* tp_weaklistoffset */
-    0,		               /* tp_iter */
-    0,		               /* tp_iternext */
+    0,                       /* tp_traverse */
+    0,                       /* tp_clear */
+    0,                       /* tp_richcompare */
+    0,                       /* tp_weaklistoffset */
+    0,                       /* tp_iter */
+    0,                       /* tp_iternext */
     modena_model_t_methods, /* tp_methods */
     modena_model_t_members, /* tp_members */
     0,                         /* tp_getset */
@@ -603,7 +603,7 @@ static int modena_index_set_t_init
     char *indexSetId=NULL;
 
     static char *kwlist[] = {"indexSet", "indexSetId", NULL};
-    
+
     if
     (
         !PyArg_ParseTupleAndKeywords
@@ -669,12 +669,12 @@ static PyTypeObject modena_index_set_tType = {
     0,                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /*tp_flags*/
     "modena_index_set_t objects", /* tp_doc */
-    0,		               /* tp_traverse */
-    0,		               /* tp_clear */
-    0,		               /* tp_richcompare */
-    0,		               /* tp_weaklistoffset */
-    0,		               /* tp_iter */
-    0,		               /* tp_iternext */
+    0,                       /* tp_traverse */
+    0,                       /* tp_clear */
+    0,                       /* tp_richcompare */
+    0,                       /* tp_weaklistoffset */
+    0,                       /* tp_iter */
+    0,                       /* tp_iternext */
     modena_index_set_t_methods, /* tp_methods */
     modena_index_set_t_members, /* tp_members */
     0,                         /* tp_getset */
@@ -791,12 +791,12 @@ static PyTypeObject modena_function_tType = {
     0,                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /*tp_flags*/
     "modena_function_t objects", /* tp_doc */
-    0,		               /* tp_traverse */
-    0,		               /* tp_clear */
-    0,		               /* tp_richcompare */
-    0,		               /* tp_weaklistoffset */
-    0,		               /* tp_iter */
-    0,		               /* tp_iternext */
+    0,                       /* tp_traverse */
+    0,                       /* tp_clear */
+    0,                       /* tp_richcompare */
+    0,                       /* tp_weaklistoffset */
+    0,                       /* tp_iter */
+    0,                       /* tp_iternext */
     modena_function_t_methods, /* tp_methods */
     modena_function_t_members, /* tp_members */
     0,                         /* tp_getset */
@@ -814,7 +814,7 @@ static PyMethodDef module_methods[] = {
     {NULL}  /* Sentinel */
 };
 
-#ifndef PyMODINIT_FUNC	/* declarations for DLL import/export */
+#ifndef PyMODINIT_FUNC    /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
 PyMODINIT_FUNC initlibmodena(void)
@@ -1474,7 +1474,7 @@ modena_function_t *modena_function_new
             Modena_PyErr_Print();
         }
     }
-    
+
 
     modena_function_t *f = (modena_function_t *) pNewObj;
 

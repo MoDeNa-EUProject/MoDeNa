@@ -9,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014 MoDeNa Consortium, All rights reserved.
+    2014-2015 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -56,7 +56,7 @@ main(int argc, char *argv[])
         cout << "index[N2] = "
              << modena_index_set_get_index(indexSet, "N2")
              << endl;
-    
+
         // Iterate index set and print names
         size_t start = modena_index_set_iterator_start(indexSet);
         size_t end = modena_index_set_iterator_end(indexSet);
@@ -83,7 +83,7 @@ main(int argc, char *argv[])
         cout << "index[N2] = "
              << modena_index_set_get_index(indexSet, "N2")
              << endl;
-    
+
         // Iterate index set and print names
         size_t start = modena_index_set_iterator_start(indexSet);
         size_t end = modena_index_set_iterator_end(indexSet);
@@ -118,7 +118,7 @@ main(int argc, char *argv[])
     size_t TPos = modena_model_inputs_argPos(model, "T");
 
     modena_model_argPos_check(model);
-    
+
     const double p = 1e5;
     const double T = 290;
 

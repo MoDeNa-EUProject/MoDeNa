@@ -9,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014 MoDeNa Consortium, All rights reserved.
+    2014-2015 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -100,16 +100,16 @@ typedef struct
 // modena_inputs_t stores the input data - both direct and inherited
 typedef struct
 {
-	double *inputs;
+    double *inputs;
 
-	double *inherited_inputs;
+    double *inherited_inputs;
 
 } modena_inputs_t;
 
 // modena_units_t stores the outputs of a surrogate function
 typedef struct
 {
-	double *outputs;
+    double *outputs;
 
 } modena_outputs_t;
 

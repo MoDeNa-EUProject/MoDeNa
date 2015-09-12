@@ -6,7 +6,7 @@ if( CMAKE_VERSION VERSION_GREATER "3.0" )
   cmake_policy(SET CMP0026 OLD)
 endif()
 
-set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Release)
 
 find_package(MODENA REQUIRED)
 

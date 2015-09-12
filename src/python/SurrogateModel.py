@@ -9,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014 MoDeNa Consortium, All rights reserved.
+    2014-2015 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -66,7 +66,7 @@ term = Terminal()
 def existsAndHasArgPos(i, name):
     try:
         return i[name]['argPos']
-    except:    
+    except:
         raise Exception('[%s][\'argPos\'] not found' % name)
 
 
@@ -337,7 +337,7 @@ class Function(CFunction):
                                  %(kwargs['outputs'][O]['argPos'],\
                                            self.Parse(kwargs['function'][O]))\
                                                      for O in kwargs[OUT] ] )
-        
+
         # Main body of the Ccode
         Ccode='''
 #include "modena.h"
@@ -382,7 +382,7 @@ void {name}
 
         formula = re.sub(r'\s+','',formula)
 
-        # Initialise a dictionary stack. 
+        # Initialise a dictionary stack.
         stack = stack or {}
 
         # Python has no  switch - case construct.  Match all possibilities first and
@@ -427,7 +427,7 @@ void {name}
             raise Exception('The expression syntax is not suported.')
 
         model += head
-        
+
         # The formula has not been consumed yet. Continue recursive parsing.
         if len(tail) > 0:
             return self.Parse(tail,debug,model,stack,delim)
