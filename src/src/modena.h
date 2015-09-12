@@ -59,6 +59,8 @@ enum modena_error_t
 {
     MODENA_SUCCESS,
     MODENA_MODEL_NOT_FOUND,
+    MODENA_FUNCTION_NOT_FOUND,
+    MODENA_INDEX_SET_NOT_FOUND,
     MODENA_MODEL_LAST
 };
 
@@ -69,7 +71,9 @@ struct modena_errordesc
 } modena_errordesc[] =
 {
     { MODENA_SUCCESS, "No error" },
-    { MODENA_MODEL_NOT_FOUND, "Surrogate model not found in database" }
+    { MODENA_MODEL_NOT_FOUND, "Surrogate model not found in database" },
+    { MODENA_FUNCTION_NOT_FOUND, "Surrogate function not found in database" },
+    { MODENA_INDEX_SET_NOT_FOUND, "Index set not found in database" }
 };
 
 // Returns error and resets it
@@ -109,9 +113,22 @@ typedef struct
 
 } modena_outputs_t;
 
-// modena_function_t stores a surrogate function
-typedef struct
+// modena_index_set_t stores a index set
+typedef struct modena_index_set_t
 {
+    PyObject_HEAD;
+
+    PyObject *pIndexSet;
+
+} modena_index_set_t;
+
+// modena_function_t stores a surrogate function
+typedef struct modena_function_t
+{
+    PyObject_HEAD;
+
+    PyObject *pFunction;
+
     lt_dlhandle handle;
 
     void (*function)
@@ -143,7 +160,7 @@ typedef struct modena_substitute_model_t
 
 } modena_substitute_model_t;
 
-// modena_function_t stores a surrogate model
+// modena_model_t stores a surrogate model
 typedef struct modena_model_t
 {
     PyObject_HEAD;
@@ -186,45 +203,49 @@ typedef struct modena_model_t
 
 modena_siunits_t *modena_siunits_new();
 
-int modena_siunits_get(const modena_siunits_t *units, const size_t i)
+int modena_siunits_get(const modena_siunits_t *self, const size_t i)
 {
-    return units->exponents[i];
+    return self->exponents[i];
 }
 
-void modena_siunits_destroy(modena_siunits_t *units);
+void modena_siunits_destroy(modena_siunits_t *self);
 
-modena_inputs_t *modena_inputs_new(const modena_model_t *model);
+modena_inputs_t *modena_inputs_new(const modena_model_t *self);
 
-modena_outputs_t *modena_outputs_new(const modena_model_t *model);
+modena_outputs_t *modena_outputs_new(const modena_model_t *self);
 
-void modena_inputs_set(modena_inputs_t *inputs, const size_t i, double x)
+void modena_inputs_set(modena_inputs_t *self, const size_t i, double x)
 {
-    inputs->inputs[i] = x;
+    self->inputs[i] = x;
 }
 
 void modena_inherited_inputs_set
 (
-    modena_inputs_t *inputs,
+    modena_inputs_t *self,
     const size_t i,
     double x
 )
 {
-    inputs->inherited_inputs[i] = x;
+    self->inherited_inputs[i] = x;
 }
 
-double modena_inputs_get(const modena_inputs_t *inputs, const size_t i)
+double modena_inputs_get(const modena_inputs_t *self, const size_t i)
 {
-    return inputs->inputs[i];
+    return self->inputs[i];
 }
 
-double modena_inherited_inputs_get(const modena_inputs_t *inputs, const size_t i)
+double modena_inherited_inputs_get
+(
+    const modena_inputs_t *self,
+    const size_t i
+)
 {
-    return inputs->inherited_inputs[i];
+    return self->inherited_inputs[i];
 }
 
-double modena_outputs_get(const modena_outputs_t *outputs, const size_t i)
+double modena_outputs_get(const modena_outputs_t *self, const size_t i)
 {
-    return outputs->outputs[i];
+    return self->outputs[i];
 }
 
 void modena_inputs_destroy(modena_inputs_t *inputs);
@@ -236,41 +257,67 @@ modena_model_t *modena_model_new
     const char *modelId
 );
 
-size_t modena_model_inputs_argPos(const modena_model_t *model, const char *name);
-
-void modena_model_argPos_check(const modena_model_t *model);
-
-size_t modena_model_inherited_inputs_argPos
+/*
+size_t modena_model_set_index
 (
-    const modena_model_t *model,
+    modena_model_t *self,
+    const char* idxName,
+    const size_t idx
+);
+
+size_t modena_model_set_index_by_name
+(
+    modena_model_t *self,
+    const char* idxName,
+    const char* name
+);
+
+void modena_model_load_parameters(modena_model_t *self);
+*/
+
+size_t modena_model_inputs_argPos
+(
+    const modena_model_t *self,
     const char *name
 );
 
-size_t modena_model_outputs_argPos(const modena_model_t *model, const char *name);
+void modena_model_argPos_check(const modena_model_t *self);
 
-size_t modena_model_inputs_size(const modena_model_t *model);
+size_t modena_model_inherited_inputs_argPos
+(
+    const modena_model_t *self,
+    const char *name
+);
 
-size_t modena_model_inherited_inputs_size(const modena_model_t *model);
+size_t modena_model_outputs_argPos
+(
+    const modena_model_t *self,
+    const char *name
+);
 
-size_t modena_model_outputs_size(const modena_model_t *model);
+size_t modena_model_inputs_size(const modena_model_t *self);
+
+size_t modena_model_inherited_inputs_size(const modena_model_t *self);
+
+size_t modena_model_outputs_size(const modena_model_t *self);
 
 void modena_model_inputs_siunits
 (
-    const modena_model_t *model,
+    const modena_model_t *self,
     const size_t i,
     modena_siunits_t *units
 );
 
 void modena_model_inherited_inputs_siunits
 (
-    const modena_model_t *model,
+    const modena_model_t *self,
     const size_t i,
     modena_siunits_t *units
 );
 
 void modena_model_outputs_siunits
 (
-    const modena_model_t *model,
+    const modena_model_t *self,
     const size_t i,
     modena_siunits_t *units
 );
@@ -302,9 +349,49 @@ void modena_model_call_no_check
 
 void modena_model_destroy(modena_model_t *model);
 
+modena_index_set_t *modena_index_set_new
+(
+    const char *indexSetId
+);
+
+size_t modena_index_set_get_index
+(
+    const modena_index_set_t *self,
+    const char* name
+);
+
+const char* modena_index_set_get_name
+(
+    const modena_index_set_t *self,
+    const size_t index
+);
+
+size_t modena_index_set_iterator_start
+(
+    const modena_index_set_t *self
+);
+
+size_t modena_index_set_iterator_end
+(
+    const modena_index_set_t *self
+);
+
+void modena_index_set_destroy(modena_index_set_t *indexSet);
+
 modena_function_t *modena_function_new
 (
-    const modena_model_t *m
+    const char *functionId
+);
+
+modena_function_t *modena_function_new_from_model
+(
+    const modena_model_t *self
+);
+
+modena_index_set_t *modena_function_get_index_set
+(
+    const modena_function_t* self,
+    const char* name
 );
 
 void modena_function_destroy(modena_function_t *model);

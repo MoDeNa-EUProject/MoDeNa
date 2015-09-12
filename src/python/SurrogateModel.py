@@ -113,12 +113,33 @@ class IndexSet(Document):
         Document.__init__(self, *args, **kwargs)
         self.save()
 
-    def argPos(self, name):
+
+    def get_name(self, index):
+        try:
+            return self.names[index]
+        except:
+            raise Exception('%i is not in index set %s' % (index, self.name))
+
+
+    def get_index(self, name):
         try:
             return self.___index___[name]
         except:
             raise Exception('%s is not in index set %s' % (name, self.name))
-        
+
+
+    def iterator_end(self):
+        return len(self.names)
+
+
+    @classmethod
+    def exceptionLoad(self, indexSetId):
+        return 401
+
+
+    @classmethod
+    def load(self, indexSetId):
+        return self.objects.get(name=indexSetId)
 
 
 # Fitting data is not stored here to allow excluding it in load since it
@@ -193,6 +214,10 @@ class SurrogateFunction(DynamicDocument):
             self.checkVariableName(k);
 
 
+    def indexSet(self, name):
+        return self.indices[name]
+
+
     def checkVariableName(self, name):
         m = re.search('\[(.*)\]', name)
         if m and not m.group(1) in self.indices:
@@ -204,6 +229,11 @@ class SurrogateFunction(DynamicDocument):
             str(self.functionName),
             str(self.libraryName)
         )
+
+
+    @classmethod
+    def exceptionLoad(self, surrogateFunctionId):
+        return 201
 
 
     @classmethod
@@ -394,7 +424,7 @@ void {name}
 
         # Wrong syntax. Returning an error message.
         else:
-            raise Exception('The expression syntax not suported.')
+            raise Exception('The expression syntax is not suported.')
 
         model += head
         
@@ -434,7 +464,10 @@ class SurrogateModel(DynamicDocument):
             return existsAndHasArgPos(self.inputs, name)
         except:
             try:
-                return existsAndHasArgPos(self.surrogateFunction.inputs, name)
+                return existsAndHasArgPos(
+                   self.surrogateFunction.inputs,
+                   name
+                )
             except:
                 raise Exception(name + ' not found in inputs')
 
@@ -444,7 +477,10 @@ class SurrogateModel(DynamicDocument):
             return existsAndHasArgPos(self.outputs, name)
         except:
             try:
-                return existsAndHasArgPos(self.surrogateFunction.outputs, name)
+                return existsAndHasArgPos(
+                    self.surrogateFunction.outputs,
+                    name
+                )
             except:
                 raise Exception(name + ' not found in outputs')
 
@@ -454,7 +490,10 @@ class SurrogateModel(DynamicDocument):
             return existsAndHasArgPos(self.parameters, name)
         except:
             try:
-                return existsAndHasArgPos(self.surrogateFunction.parameters, name)
+                return existsAndHasArgPos(
+                    self.surrogateFunction.parameters,
+                    name
+                )
             except:
                 raise Exception(name + ' not found in parameters')
 
@@ -510,7 +549,7 @@ class SurrogateModel(DynamicDocument):
 
 
     @classmethod
-    def exceptionModelLoad(self, surrogateModelId):
+    def exceptionLoad(self, surrogateModelId):
         # TODO
         # Finding the 'unitialised' models using this method will fail
         # eventually fail when running in parallel. Need to pass id of
@@ -621,7 +660,7 @@ class ForwardMappingModel(SurrogateModel):
                 for exp in m.group(1).split(','):
                     m = re.search('(.*)=(.*)', exp)
                     if m:
-                        kwargs['surrogateFunction'].indices[m.group(1)].argPos(m.group(2))
+                        kwargs['surrogateFunction'].indices[m.group(1)].get_index(m.group(2))
                     else:
                         raise Exception('Unable to parse %s' % exp)
 

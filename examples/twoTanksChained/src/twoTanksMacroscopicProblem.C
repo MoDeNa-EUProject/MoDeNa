@@ -71,8 +71,7 @@ main(int argc, char *argv[])
     modena_model_t *model = modena_model_new("flowRate");
     if(modena_error_occurred())
     {
-        int ret = modena_error();
-        return ret;
+        return modena_error();
     }
 
     // Allocate memory and fetch arg positions

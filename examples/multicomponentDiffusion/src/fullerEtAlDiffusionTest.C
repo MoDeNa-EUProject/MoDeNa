@@ -48,11 +48,67 @@ using namespace std;
 int
 main(int argc, char *argv[])
 {
+    {
+        // Instantiate index set
+        modena_index_set_t *indexSet = modena_index_set_new("species");
+
+        // Find index
+        cout << "index[N2] = "
+             << modena_index_set_get_index(indexSet, "N2")
+             << endl;
+    
+        // Iterate index set and print names
+        size_t start = modena_index_set_iterator_start(indexSet);
+        size_t end = modena_index_set_iterator_end(indexSet);
+        for(int i = start; i < end; i++)
+        {
+            cout << "index[" << i << "] = "
+                 << modena_index_set_get_name(indexSet, i)
+                 << endl;
+        }
+
+        modena_index_set_destroy(indexSet);
+    }
+
+    {
+        // Instantiate function
+        modena_function_t *function =
+            modena_function_new("fullerEtAlDiffusion");
+
+        // Get index set from function
+        modena_index_set_t *indexSet =
+           modena_function_get_index_set(function, "A");
+
+        // Find index
+        cout << "index[N2] = "
+             << modena_index_set_get_index(indexSet, "N2")
+             << endl;
+    
+        // Iterate index set and print names
+        size_t start = modena_index_set_iterator_start(indexSet);
+        size_t end = modena_index_set_iterator_end(indexSet);
+        for(int i = start; i < end; i++)
+        {
+            cout << "index[" << i << "] = "
+                 << modena_index_set_get_name(indexSet, i)
+                 << endl;
+        }
+
+        modena_index_set_destroy(indexSet);
+        // Not working - BUG!
+        //modena_function_destroy(function);
+    }
+
     // Instantiate model
     modena_model_t *model = modena_model_new
     (
         "fullerEtAlDiffusion[A=H20,B=N2]"
     );
+
+    if(modena_error_occurred())
+    {
+        return modena_error();
+    }
 
     // Allocate memory and fetch arg positions
     modena_inputs_t *inputs = modena_inputs_new(model);
@@ -74,13 +130,13 @@ main(int argc, char *argv[])
     int ret = modena_model_call(model, inputs, outputs);
 
     // Terminate, if requested
-    if(ret != 0)
+    if(modena_error_occurred())
     {
         modena_inputs_destroy(inputs);
         modena_outputs_destroy(outputs);
         modena_model_destroy(model);
 
-        return ret;
+        return modena_error();
     }
 
     // Fetch result
