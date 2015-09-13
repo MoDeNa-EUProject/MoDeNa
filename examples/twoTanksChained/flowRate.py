@@ -44,6 +44,7 @@ from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTas
 from fireworks import Firework, Workflow, FWAction
 from fireworks.utilities.fw_utilities import explicit_serialize
 from blessings import Terminal
+from jinja2 import Template
 import idealGas
 
 # Create terminal for colour output
@@ -72,15 +73,15 @@ class FlowRateExactSim(FireTaskBase):
           + term.normal
         )
 
-        D = self['point']['D']
-        rho0 = self['point']['rho0']
-        p0 = self['point']['p0']
-        p1Byp0 = self['point']['p1Byp0']
-
         # Write input
-        f = open('in.txt', 'w')
-        f.write('%g\n%g\n%g\n%g\n' % (D, rho0, p0, p1Byp0))
-        f.close()
+
+        # See http://jinja.pocoo.org/docs/dev/templates/
+        Template('''
+{{ s['point']['D'] }}
+{{ s['point']['rho0'] }}
+{{ s['point']['p0'] }}
+{{ s['point']['p1Byp0'] }}
+        '''.strip()).stream(s=self).dump('in.txt')
 
         # Execute the application
         # In this simple example, this call stands for a complex microscopic
