@@ -6,9 +6,17 @@ if( CMAKE_VERSION VERSION_GREATER "3.0" )
   cmake_policy(SET CMP0026 OLD)
 endif()
 
+add_custom_target(debug
+  COMMAND ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=Debug ${CMAKE_SOURCE_DIR}
+  COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target all
+  COMMENT "Switch CMAKE_BUILD_TYPE to Debug"
+  )
 
-
-set(CMAKE_BUILD_TYPE Release)
+add_custom_target(release
+  COMMAND ${CMAKE_COMMAND} -DCMAKE_BUILD_TYPE=Release ${CMAKE_SOURCE_DIR}
+  COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target all
+  COMMENT "Switch CMAKE_BUILD_TYPE to Release"
+  )
 
 find_package(MODENA REQUIRED)
 

@@ -1,4 +1,4 @@
-'''
+/*
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -26,38 +26,21 @@ License
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
-'''
+*/
 
-import os
-from pkg_resources import get_distribution
+#ifndef __INLINE_H__
+#define __INLINE_H__
 
-__version__ = get_distribution('modena').version
+#ifdef HAVE_INLINE
+#  if defined(__GNUC_STDC_INLINE__) || defined(GSL_C99_INLINE) || defined(HAVE_C99_INLINE)
+#    define INLINE_DECL inline  /* use C99 inline */
+#    define INLINE_FUN inline
+#  else
+#    define INLINE_DECL         /* use GNU extern inline */
+#    define INLINE_FUN extern inline
+#  endif
+#else
+#  define INLINE_DECL /* */
+#endif
 
-MODENA_INSTALL_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-from Strategy import BackwardMappingScriptTask, BackwardMappingTask
-from SurrogateModel import CFunction, IndexSet, Workflow2, \
-    SurrogateModel, ForwardMappingModel, BackwardMappingModel
-
-def import_helper():
-    from os.path import dirname
-    import imp
-    fp = None
-    try:
-        fp, pathname, description = imp.find_module(
-            'libmodena',
-            [ dirname(__file__)+"/../../../modena" ]
-        )
-    except ImportError:
-        import libmodena
-        return libmodena
-    if fp is not None:
-        try:
-            _mod = imp.load_module('libmodena', fp, pathname, description)
-        finally:
-            fp.close()
-        return _mod
-libmodena = import_helper()
-del import_helper
-
-
+#endif /* __INLINE_H__ */

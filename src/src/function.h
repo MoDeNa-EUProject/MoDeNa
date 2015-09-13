@@ -1,4 +1,4 @@
-'''
+/*
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -26,38 +26,80 @@ License
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
-'''
 
-import os
-from pkg_resources import get_distribution
+Description
+    Interface Library
 
-__version__ = get_distribution('modena').version
+Authors
+    Henrik Rusche
 
-MODENA_INSTALL_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+Contributors
+*/
 
-from Strategy import BackwardMappingScriptTask, BackwardMappingTask
-from SurrogateModel import CFunction, IndexSet, Workflow2, \
-    SurrogateModel, ForwardMappingModel, BackwardMappingModel
+#ifndef __FUNCTION_H__
+#define __FUNCTION_H__
 
-def import_helper():
-    from os.path import dirname
-    import imp
-    fp = None
-    try:
-        fp, pathname, description = imp.find_module(
-            'libmodena',
-            [ dirname(__file__)+"/../../../modena" ]
-        )
-    except ImportError:
-        import libmodena
-        return libmodena
-    if fp is not None:
-        try:
-            _mod = imp.load_module('libmodena', fp, pathname, description)
-        finally:
-            fp.close()
-        return _mod
-libmodena = import_helper()
-del import_helper
+#include "Python.h"
+#include <ltdl.h>
+#include "indexset.h"
 
+#undef __BEGIN_DECLS
+#undef __END_DECLS
+#ifdef __cplusplus
+# define __BEGIN_DECLS extern "C" {
+# define __END_DECLS }
+#else
+# define __BEGIN_DECLS /* empty */
+# define __END_DECLS /* empty */
+#endif
+
+__BEGIN_DECLS
+
+// Forward declaration
+struct modena_model_t;
+
+extern PyTypeObject modena_function_tType;
+
+extern PyObject *modena_SurrogateFunction;
+
+// modena_function_t stores a surrogate function
+typedef struct modena_function_t
+{
+    PyObject_HEAD;
+
+    PyObject *pFunction;
+
+    lt_dlhandle handle;
+
+    void (*function)
+    (
+        const double* p,
+        const double* in_i,
+        const double* i,
+        double *o
+    );
+
+} modena_function_t;
+
+modena_function_t *modena_function_new
+(
+    const char *functionId
+);
+
+modena_function_t *modena_function_new_from_model
+(
+    const struct modena_model_t *self
+);
+
+modena_index_set_t *modena_function_get_index_set
+(
+    const modena_function_t* self,
+    const char* name
+);
+
+void modena_function_destroy(modena_function_t *model);
+
+__END_DECLS
+
+#endif /* __FUNCTION_H__ */
 

@@ -20,10 +20,7 @@ set_property(
   TARGET modena APPEND PROPERTY
   COMPATIBLE_INTERFACE_STRING MODENA_MAJOR_VERSION
 )
-
-foreach(f ${HEADERS})
-set_target_properties(modena PROPERTIES PUBLIC_HEADER ${f})
-endforeach(f)
+set_target_properties(modena PROPERTIES PUBLIC_HEADER "${HEADERS}")
 
 # Build Fortran library
 add_library(fmodena SHARED fmodena.f90)
@@ -42,11 +39,11 @@ write_basic_package_version_file(
   COMPATIBILITY AnyNewerVersion
 )
 
-export(
-  TARGETS twoTanksFullProblem modena fmodena
-  FILE ${CMAKE_CURRENT_BINARY_DIR}/MODENATargets.cmake
-  NAMESPACE MODENA::
-)
+#export(
+# TARGETS twoTanksFullProblem modena fmodena
+#  FILE ${CMAKE_CURRENT_BINARY_DIR}/MODENATargets.cmake
+#  NAMESPACE MODENA::
+#)
 
 configure_file(
   cmake/MODENAConfig.cmake
@@ -62,6 +59,7 @@ install(
   LIBRARY DESTINATION lib/modena
   ARCHIVE DESTINATION lib/static
   PUBLIC_HEADER DESTINATION include/modena
+  INCLUDES DESTINATION include/modena
 )
 
 install(FILES libmodena.pc DESTINATION lib/pkgconfig)

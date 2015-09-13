@@ -5,8 +5,8 @@ includedir=${prefix}/include/modena
 
 Name: @CMAKE_PROJECT_NAME@
 Description: MoDeNa software framework for multi-scale simulations
-URL: modena.units.it
-Version:
+URL: https://github.com/MoDeNa-EUProject/MoDeNa
+Version: @PACKAGE_VERSION@
 Requires: libmongoc-1.0
 Libs: -L${libdir} -lmodena
 Cflags: -I${includedir}
