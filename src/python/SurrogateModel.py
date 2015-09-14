@@ -1073,3 +1073,17 @@ class BackwardMappingModel(SurrogateModel):
 
         return sampleRange
 
+
+class PrediciKinetics(CFunction):
+
+    def __init__(self, *args, **kwargs):
+
+        if kwargs.has_key('_cls'):
+            CFunction.__init__(self, *args, **kwargs)
+
+        else:
+            from predici_2_modena import create_args
+
+            kwargs.update(create_args(kwargs['fileName']))
+
+            CFunction.__init__(self, *args, **kwargs)
