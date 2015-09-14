@@ -650,7 +650,7 @@ static int modena_model_t_init
                 "Surrogate model does not exist"
             );
 
-            Modena_PyErr_Print();
+            return -1;
         }
 
         modena_model_get_minMax(self);
