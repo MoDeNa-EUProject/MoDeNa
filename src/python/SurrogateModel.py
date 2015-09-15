@@ -452,6 +452,20 @@ class SurrogateModel(DynamicDocument):
         self.___refs___.append(weakref.ref(self))
 
 
+    def parseIndices(self):
+        indices = {}
+        m = re.search('.*\[(.*)\]', self._id)
+        if m:
+            for exp in m.group(1).split(','):
+                m = re.search('(.*)=(.*)', exp)
+                if m:
+                    indices[m.group(1)] = m.group(2)
+                else:
+                    raise Exception('Unable to parse %s' % exp)
+
+        return indices
+
+
     def outputsToModels(self):
         o = { k: self for k in self.outputs }
         for m in self.substituteModels:
@@ -828,15 +842,6 @@ class BackwardMappingModel(SurrogateModel):
             if not isinstance(kwargs['surrogateFunction'], SurrogateFunction):
                 raise TypeError('Need surrogateFunction')
 
-            m = re.search('.*\[(.*)\]', kwargs['_id'])
-            if m:
-                for exp in m.group(1).split(','):
-                    m = re.search('(.*)=(.*)', exp)
-                    if m:
-                        kwargs['surrogateFunction'].indices[m.group(1)].argPos(m.group(2))
-                    else:
-                        raise Exception('Unable to parse %s' % exp)
-
             kwargs['inherited_inputs'] = 0
 
             kwargs['fitData'] = {}
@@ -902,6 +907,11 @@ class BackwardMappingModel(SurrogateModel):
             );
 
             DynamicDocument.__init__(self, *args, **kwargs)
+
+            indices = self.parseIndices()
+            for k,v in indices.iteritems():
+                kwargs['surrogateFunction'].indices[k].get_index(v)
+
             self.save()
 
 
@@ -909,6 +919,8 @@ class BackwardMappingModel(SurrogateModel):
         '''
         Build a workflow to excute an exactTask for each point
         '''
+
+        indices = self.parseIndices()
 
         # De-serialise the exact task from dict
         et = load_object(self.meth_exactTask)
@@ -925,6 +937,7 @@ class BackwardMappingModel(SurrogateModel):
 
             t = et
             t['point'] = p
+            t['indices'] = indices
             fw = Firework(t)
 
             tl.append(fw)
