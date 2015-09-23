@@ -1,0 +1,8 @@
+# The fortran modules provided by this target.
+provides
+ constants
+ in_out
+ ioutils
+ model
+ modenastuff
+ tests
