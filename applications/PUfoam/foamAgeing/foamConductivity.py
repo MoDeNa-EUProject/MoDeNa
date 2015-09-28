@@ -172,7 +172,7 @@ fname='input.in'
 if (os.path.isfile(fname)):
     f=open(fname,'r')
 else:
-    f=open('../'+fname,'r')
+    f=open('example inputs/'+fname,'r')
 a=f.readline()
 a=f.readline()
 a=f.readline()

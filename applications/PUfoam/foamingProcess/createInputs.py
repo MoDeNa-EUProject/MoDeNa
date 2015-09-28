@@ -6,7 +6,7 @@ from __future__ import division
 import json
 from numpy import exp,log,pi
 # read json
-f=open("unifiedInput.json",'r')
+f=open("example inputs/physicalBlowing/unifiedInput.json",'r')
 inputs=json.load(f)
 f.close()
 # prepare input for Bubble growth model

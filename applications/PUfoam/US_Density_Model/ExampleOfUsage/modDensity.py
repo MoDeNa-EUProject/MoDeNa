@@ -77,8 +77,8 @@ class DensityExactSim(FireTaskBase):
         ff = open('in.txt', 'w')
         Tstr = str(self['point']['T'])
         ff.write('%s \n' %(Tstr))
-        
-        
+
+
         ##TODO INPUT SHOULD COME FROM IndexSet
 
         ff.write('2 \n')       #number of components in system
@@ -126,7 +126,7 @@ void surroDensity
     const double P0 = parameters[0];
     const double P1 = parameters[1];
     const double P2 = parameters[2];
-    
+
    // const double expo = 1.0 + (1.0 - T/P2);
    // const double pwr  = pow(P1,expo);
 
@@ -151,7 +151,7 @@ void surroDensity
 )
 
 m = BackwardMappingModel(
-    _id= 'Density',    
+    _id= 'Density',
     surrogateFunction= f,
     exactTask= DensityExactSim(),
     substituteModels= [ ],
