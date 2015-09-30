@@ -671,10 +671,11 @@ class ForwardMappingModel(SurrogateModel):
 
             m = re.search('.*\[(.*)\]', kwargs['_id'])
             if m:
+                sf = kwargs['surrogateFunction']
                 for exp in m.group(1).split(','):
                     m = re.search('(.*)=(.*)', exp)
                     if m:
-                        kwargs['surrogateFunction'].indices[m.group(1)].get_index(m.group(2))
+                        sf.indices[m.group(1)].get_index(m.group(2))
                     else:
                         raise Exception('Unable to parse %s' % exp)
 
@@ -723,7 +724,8 @@ class ForwardMappingModel(SurrogateModel):
                 kwargs['inputs'][k] = MinMaxOpt(**v)
 
             if 'initialisationStrategy' not in kwargs:
-                kwargs['initialisationStrategy'] = EmptyInitialisationStrategy()
+                kwargs['initialisationStrategy'] =
+                    EmptyInitialisationStrategy()
 
             checkAndConvertType(
                 kwargs,
@@ -909,7 +911,7 @@ class BackwardMappingModel(SurrogateModel):
             DynamicDocument.__init__(self, *args, **kwargs)
 
             indices = self.parseIndices()
-            for k,v in indices.iteritems():
+            for k, v in indices.iteritems():
                 kwargs['surrogateFunction'].indices[k].get_index(v)
 
             self.save()

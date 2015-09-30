@@ -117,6 +117,8 @@ main(int argc, char *argv[])
     size_t ppos = modena_model_inputs_argPos(model, "p");
     size_t TPos = modena_model_inputs_argPos(model, "T");
 
+    size_t DPos = modena_model_outputs_argPos(model, "D[A]");
+
     modena_model_argPos_check(model);
 
     const double p = 1e5;
