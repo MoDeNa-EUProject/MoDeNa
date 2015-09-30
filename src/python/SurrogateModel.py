@@ -1,4 +1,4 @@
-'''
+'''@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -26,17 +26,17 @@ License
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
+@endcond'''
 
-Description
-    Module providing functions and models
+"""
+@file
+Module providing functions and models
 
-Authors
-    Henrik Rusche
-
-Contributors
-    Sigve Karolius
-    Mandar Thombre
-'''
+@author    Henrik Rusche
+@author    Sigve Karolius
+@author    Mandar Thombre
+@copyright 2014-2015, MoDeNa Project. GNU Public License.
+"""
 
 import os
 import six
@@ -62,6 +62,9 @@ connect(database, host=MODENA_URI)
 # Create terminal for colour output
 term = Terminal()
 
+##
+# @addtogroup python_interface_library
+# @{
 
 def existsAndHasArgPos(i, name):
     try:
@@ -314,7 +317,7 @@ install(TARGETS %(h)s DESTINATION ${CMAKE_INSTALL_PREFIX}/lib )
 
 class Function(CFunction):
     """
-    TODO: This is a draft for a class that can parse simple functions and
+    @todo This is a draft for a class that can parse simple functions and
           write the Ccode that is compiled by CFunction.
     """
     def __init__(self, *args, **kwargs):
@@ -564,11 +567,12 @@ class SurrogateModel(DynamicDocument):
 
     @classmethod
     def exceptionLoad(self, surrogateModelId):
-        # TODO
-        # Finding the 'unitialised' models using this method will fail
-        # eventually fail when running in parallel. Need to pass id of
-        # calling FireTask. However, this requires additional code in the
-        # library as well as cooperation of the recipie
+        """
+        @todo Finding the 'unitialised' models using this method will fail
+              eventually fail when running in parallel. Need to pass id of
+              calling FireTask. However, this requires additional code in the
+              library as well as cooperation of the recipie
+        """
         collection = self._get_collection()
         collection.update(
             { '_id': surrogateModelId },
@@ -724,7 +728,7 @@ class ForwardMappingModel(SurrogateModel):
                 kwargs['inputs'][k] = MinMaxOpt(**v)
 
             if 'initialisationStrategy' not in kwargs:
-                kwargs['initialisationStrategy'] =
+                kwargs['initialisationStrategy'] = \
                     EmptyInitialisationStrategy()
 
             checkAndConvertType(
@@ -801,9 +805,9 @@ class ForwardMappingModel(SurrogateModel):
 
 
     def exactTasks(self, points):
-        '''
+        """
         Return an empty workflow
-        '''
+        """
         return Workflow2([])
 
 
@@ -918,9 +922,9 @@ class BackwardMappingModel(SurrogateModel):
 
 
     def exactTasks(self, points):
-        '''
+        """
         Build a workflow to excute an exactTask for each point
-        '''
+        """
 
         indices = self.parseIndices()
 
@@ -1036,7 +1040,7 @@ class BackwardMappingModel(SurrogateModel):
 
     def extendedRange(self, outsidePoint, expansion_factor=1.2):
         """
-        @summary: Method expanding the design space. The method ONLY operates
+                  Method expanding the design space. The method ONLY operates
                   on 'self.dict', this means that the database is NOT updated.
                   This is performed afterwards by 'run_task'.
 
@@ -1053,10 +1057,13 @@ class BackwardMappingModel(SurrogateModel):
                               +------------+....+ <- new global max
                               ^            ^
                         global min      new min (temporary, only for sampling)
-
-        @author:   Sigve Karolius
-        @coauthor: Mandar Thombre
-        @TODO:     Document...
+ 
+        @param    outsidePoint     The point that where found to be outside (X)
+        @retval   expansion_factor The ratio that is used to expand the space beyond X
+    
+        @author   Sigve Karolius
+        @author   Mandar Thombre
+        @todo     Document...
         """
 
         sampleRange = {}
@@ -1088,17 +1095,6 @@ class BackwardMappingModel(SurrogateModel):
 
         return sampleRange
 
+##
+# @} # end of python_interface_library
 
-class PrediciKinetics(CFunction):
-
-    def __init__(self, *args, **kwargs):
-
-        if kwargs.has_key('_cls'):
-            CFunction.__init__(self, *args, **kwargs)
-
-        else:
-            from predici_2_modena import create_args
-
-            kwargs.update(create_args(kwargs['fileName']))
-
-            CFunction.__init__(self, *args, **kwargs)

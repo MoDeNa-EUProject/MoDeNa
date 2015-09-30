@@ -1,6 +1,4 @@
-
-
-'''
+'''@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -28,15 +26,17 @@ License
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
+@endcond'''
 
-Description
-    Python library of FireTasks
+"""
+@file
+Python library of FireTasks
+@todo Document this properly
 
-Authors
-    Henrik Rusche
-
-Contributors
-'''
+@author    Jonas Mairhofer
+@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@ingroup   app_foaming
+"""
 
 import os
 import modena
@@ -52,19 +52,11 @@ from jinja2 import Template
 term = Terminal()
 
 
-__author__ = 'Henrik Rusche'
-__copyright__ = 'Copyright 2014, MoDeNa Project'
-__version__ = '0.2'
-__maintainer__ = 'Henrik Rusche'
-__email__ = 'h.rusche@wikki.co.uk.'
-__date__ = 'Sep 4, 2014'
-
-
-# ********************************* Class ********************************** #
 @explicit_serialize
 class SolubilityExactSim(FireTaskBase):
     """
     A FireTask that starts a microscopic code and updates the database.
+    @todo Document this properly
     """
 
     def run_task(self, fw_spec):
@@ -102,10 +94,6 @@ class SolubilityExactSim(FireTaskBase):
         f.close()
 
         return FWAction(mod_spec=[{'_push': self['point']}])
-
-
-
-
 
 
 f = CFunction(
@@ -149,6 +137,7 @@ void surroSolubility
         'param2': { 'min': 1.0, 'max': 1E10, 'argPos': 2 },
     },
 )
+
 
 m = BackwardMappingModel(
     _id= 'Solubility',    

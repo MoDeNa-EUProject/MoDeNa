@@ -1,0 +1,15 @@
+/**
+  @defgroup applications
+  @brief    Polyurethane foam applications using the MoDeNa framework
+*/
+
+/**
+  @defgroup app_foaming Foaming process simulation
+  @ingroup  applications
+  @brief    Foaming application
+
+  @defgroup app_aging Foam aging simulation
+  @ingroup  applications
+  @brief    Foam aging application
+*/
+

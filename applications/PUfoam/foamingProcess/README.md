@@ -1,3 +1,5 @@
+@ingroup foaming
+
 ## Foaming simulation
 Collection of software tools for the simulation of polyurethane (PU) foaming
 process. Based on a recipe the model predicts the evolution of chemical

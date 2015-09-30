@@ -1,4 +1,4 @@
-'''
+'''@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -26,17 +26,17 @@ License
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
+@endcond'''
 
-Description
-    Module providing strategies
+"""
+@file
+Module providing strategies
 
-Authors
-    Henrik Rusche
-
-Contributors
-    Sigve Karolius
-    Mandar Thombre
-'''
+@author    Henrik Rusche
+@author    Sigve Karolius
+@author    Mandar Thombre
+@copyright 2014-2015, MoDeNa Project. GNU Public License.
+"""
 
 import six
 import abc
@@ -66,6 +66,9 @@ lhs = importr('lhs')
 # Create terminal for colour output
 term = Terminal()
 
+##
+# @addtogroup python_interface_library
+# @{
 
 class Workflow2(Workflow):
 
@@ -352,10 +355,10 @@ class StochasticSampling(ImproveErrorStrategy, SamplingStrategy):
 
 
     def newPoints(self, model):
-        '''
+        """
         The function serves the following purposes:
         It will add samples to the current range if needed by ParFit.
-        '''
+        """
         # Get a sampling range from fitData. Note: Cannot use MinMax must not
         # be updated, yet
         sampleRange = {
@@ -372,8 +375,9 @@ class StochasticSampling(ImproveErrorStrategy, SamplingStrategy):
 class NonLinFitWithErrorContol(ParameterFittingStrategy):
 
     def __init__(self, *args, **kwargs):
-
-        # TODO: access tuple correctly
+        """
+        @todo access tuple correctly
+        """
         #if '_fw_name' in args[0]:
         #    ParameterFittingStrategy.__init__(self, *args, **kwargs)
 
@@ -530,7 +534,7 @@ class NonLinFitToPointWithSmallestError(ParameterFittingStrategy):
     Performs parameter fitting of a set of samples and returns the parameters
     that yield the smallest error.
 
-    TODO: The strategy does **not** allow for error to be improved, but this
+    @todo The strategy does **not** allow for error to be improved, but this
           can be changed in the future.
     """
 
@@ -663,11 +667,11 @@ class NonLinFitToPointWithSmallestError(ParameterFittingStrategy):
 
 @explicit_serialize
 class Initialisation(FireTaskBase):
-    '''
-    @summary: A FireTask that performs the initialisation
+    """
+    A FireTask that performs the initialisation
 
-    @author: Henrik Rusche
-    '''
+    @author Henrik Rusche
+    """
 
     def __init__(self, *args, **kwargs):
         FireTaskBase.__init__(self, *args, **kwargs)
@@ -690,11 +694,11 @@ class Initialisation(FireTaskBase):
 
 @explicit_serialize
 class ParameterFitting(FireTaskBase):
-    '''
-    @summary: A FireTask that performs parameter fitting
+    """
+    A FireTask that performs parameter fitting
 
-    @author: Henrik Rusche
-    '''
+    @author Henrik Rusche
+    """
 
     def __init__(self, *args, **kwargs):
         FireTaskBase.__init__(self, *args, **kwargs)
@@ -776,7 +780,7 @@ class InitialDataPoints(FireTaskBase):
     """
     Pushes **all** "points" to the next firework.
 
-    TODO: See the method `updateFitDataFromFwSpec` in SurrogateModel.py
+    @todo See the method `updateFitDataFromFwSpec` in SurrogateModel.py
           This class returns:
                      {key: array}
           this results in the following representation in fw_spec:
@@ -794,7 +798,7 @@ class InitialDataPoints(FireTaskBase):
 class BackwardMappingScriptTask(ScriptTask, BackwardMappingTask):
     """
     A FireTask that starts a macroscopic code and catches its return code.
-    @author: Henrik Rusche
+    @author Henrik Rusche
     """
     required_params = ['script']
 
@@ -811,4 +815,7 @@ class BackwardMappingScriptTask(ScriptTask, BackwardMappingTask):
         ret = super(BackwardMappingScriptTask, self).run_task(fw_spec)
 
         return self.handleReturnCode(ret.stored_data['returncode'])
+
+##
+# @} # end of python_interface_library
 

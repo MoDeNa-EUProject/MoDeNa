@@ -1,4 +1,5 @@
-/*
+/**
+@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -27,13 +28,13 @@ License
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Interface Library
+@endcond
+@file
 
-Authors
-    Henrik Rusche
+Low-level interface library
 
-Contributors
+@author Henrik Rusche
+@copyright  2014-2015, MoDeNa Project. GNU Public License.
 */
 
 #ifndef __FUNCTION_H__
@@ -62,7 +63,14 @@ extern PyTypeObject modena_function_tType;
 
 extern PyObject *modena_SurrogateFunction;
 
-// modena_function_t stores a surrogate function
+/**
+@addtogroup C_interface_library
+@{
+*/
+
+/**
+stores a surrogate function
+*/
 typedef struct modena_function_t
 {
     PyObject_HEAD;
@@ -98,6 +106,8 @@ modena_index_set_t *modena_function_get_index_set
 );
 
 void modena_function_destroy(modena_function_t *model);
+
+/** @} */ // end of C_interface_library
 
 __END_DECLS
 

@@ -1,4 +1,5 @@
 /*
+@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -27,13 +28,13 @@ License
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Interface Library
+@endcond
+@file
 
-Authors
-    Henrik Rusche
+Low-level interface library
 
-Contributors
+@author Henrik Rusche
+@copyright  2014-2015, MoDeNa Project. GNU Public License.
 */
 
 #include "inline.h"
@@ -54,17 +55,26 @@ Contributors
 
 __BEGIN_DECLS
 
+/**
+@addtogroup C_interface_library
+@{
+*/
+
 // Forward declaration
 struct modena_model_t;
 
-// modena_units_t stores the exponents of the 7 SI units
+/**
+stores the exponents of the 7 SI units
+*/
 typedef struct
 {
     int exponents[6];
 
 } modena_siunits_t;
 
-// modena_inputs_t stores the input data - both direct and inherited
+/**
+stores the input data - both direct and inherited
+*/
 typedef struct
 {
     double *inputs;
@@ -73,13 +83,18 @@ typedef struct
 
 } modena_inputs_t;
 
-// modena_units_t stores the outputs of a surrogate function
+/**
+stores the outputs of a surrogate function
+*/
 typedef struct
 {
     double *outputs;
 
 } modena_outputs_t;
 
+/**
+creates from nothing
+*/
 modena_siunits_t *modena_siunits_new();
 
 int modena_siunits_get(const modena_siunits_t *self, const size_t i);
@@ -151,7 +166,10 @@ INLINE_FUN double modena_outputs_get(const modena_outputs_t *self, const size_t 
 
 #endif /* HAVE_INLINE */
 
+/** @} */ // end of C_interface_library
+
 __END_DECLS
 
 #endif /* __INPUTSOUTPUTS_H__ */
+
 

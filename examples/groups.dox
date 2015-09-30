@@ -1,0 +1,11 @@
+/**
+  @defgroup examples
+  @brief    Examples with minimal dependencies
+*/
+
+/**
+  @defgroup ex_twoTank Two-Tank
+  @ingroup  examples
+  @brief    Two-Tank example
+*/
+

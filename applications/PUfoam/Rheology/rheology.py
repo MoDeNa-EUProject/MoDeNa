@@ -1,4 +1,4 @@
-'''
+'''@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -26,16 +26,17 @@ License
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
+@endcond'''
 
-Description
-    Python library of FireTasks
+"""
+@file
+Python library of FireTasks
+@todo Document this properly
 
-Authors
-    Henrik Rusche
-
-Contributors
-    Christos Mitrias
-'''
+@author    Christos Mitrias
+@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@ingroup   app_foaming
+"""
 
 import os
 import modena
@@ -46,22 +47,16 @@ from fireworks import Firework, Workflow, FWAction
 from fireworks.utilities.fw_utilities import explicit_serialize
 from blessings import Terminal
 from jinja2 import Template
+
 # Create terminal for colour output
 term = Terminal()
 
 
-__author__ = 'Henrik Rusche'
-__copyright__ = 'Copyright 2014, MoDeNa Project'
-__version__ = '0.2'
-__maintainer__ = 'Henrik Rusche'
-__email__ = 'h.rusche@wikki.co.uk.'
-__date__ = 'Sep 4, 2014'
-
-# ********************************* Class ************************************ #
 @explicit_serialize
 class rheologyExactTask(FireTaskBase):
     """
     A FireTask that starts a microscopic code and updates the database.
+    @todo Document this properly
     """   
     def run_task(self, fw_spec):
         print(
@@ -88,7 +83,8 @@ class rheologyExactTask(FireTaskBase):
         os.remove('rheologyExact.out')
 
         return FWAction(mod_spec=[{'_push': self['point']}])
-       
+
+
 f = CFunction(
     Ccode= '''
 #include "modena.h"
@@ -150,6 +146,7 @@ void rheology_SM
        'n_rh': { 'min': 0.2, 'max': 0.2, 'argPos': 2 },
    },
 )
+
 
 m = ForwardMappingModel(
     _id= 'rheology',

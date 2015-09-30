@@ -1,4 +1,4 @@
-'''
+'''@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -26,15 +26,16 @@ License
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
+@endcond'''
 
-Description
-    Python library of FireTasks
+"""
+@file
+Python library of FireTasks
 
-Authors
-    Henrik Rusche
-
-Contributors
-'''
+@author    Henrik Rusche
+@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@ingroup   twoTank
+"""
 
 import os
 import modena
@@ -56,7 +57,6 @@ __version__ = '0.2'
 __maintainer__ = 'Henrik Rusche'
 __email__ = 'h.rusche@wikki.co.uk.'
 __date__ = 'Sep 4, 2014'
-
 
 # ********************************* Class ********************************** #
 @explicit_serialize

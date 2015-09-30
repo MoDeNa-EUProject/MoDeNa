@@ -1,4 +1,4 @@
-'''
+'''@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -26,7 +26,14 @@ License
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
-'''
+@endcond'''
+
+"""
+@file
+Module providing the MoDeNa python interface
+
+@copyright  2014-2015, MoDeNa Project. GNU Public License.
+"""
 
 import os
 from pkg_resources import get_distribution
@@ -60,4 +67,7 @@ def import_helper():
 libmodena = import_helper()
 del import_helper
 
+##
+# @defgroup python_interface_library
+# Module providing the MoDeNa python interface
 

@@ -1,4 +1,5 @@
-/*
+/**
+@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -27,13 +28,13 @@ License
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Interface Library
-
-Authors
-    Henrik Rusche
-
-Contributors
+@endcond
+@file
+Low-level interface library
+@author    Henrik Rusche
+@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@defgroup  C_interface_library
+MoDeNa C interface library
 */
 
 #ifndef __MODENA_H__
