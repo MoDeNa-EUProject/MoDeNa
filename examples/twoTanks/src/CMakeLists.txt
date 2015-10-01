@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.6)
-project (tutorialModels C CXX)
+project (twoTankMacroscopic C CXX)
 
 if( CMAKE_VERSION VERSION_GREATER "3.0" )
   cmake_policy(SET CMP0042 OLD)
@@ -25,8 +25,6 @@ find_package(MODENA REQUIRED)
 
 include(CheckCInline)
 check_c_inline(C_INLINE)
-
-add_executable(flowRateExact flowRateExact.C)
 
 add_executable(twoTanksMacroscopicProblem twoTanksMacroscopicProblem.C)
 target_link_libraries(twoTanksMacroscopicProblem MODENA::modena)

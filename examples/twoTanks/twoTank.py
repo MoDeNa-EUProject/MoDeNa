@@ -38,7 +38,6 @@ Contributors
 
 from modena.Strategy import BackwardMappingScriptTask
 
-
 __author__ = 'Henrik Rusche'
 __copyright__ = 'Copyright 2014, MoDeNa Project'
 __version__ = '0.2'

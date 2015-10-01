@@ -39,7 +39,7 @@ Contributors
 
 from fireworks import Firework, Workflow, LaunchPad
 from fireworks.core.rocket_launcher import rapidfire
-import QmomKinetics
+import CFD_tool_0D
 from modulefinder import ModuleFinder
 from os import system
 # delete old results
@@ -52,8 +52,9 @@ launchpad.reset('', require_password=False)
 
 # create the individual FireWorks and Workflow
 # Source code in src/twoTanksMacroscopicProblem.C
-wf = Workflow([Firework(QmomKinetics.m)], {}, name="simulation")
+wf = Workflow([Firework(CFD_tool_0D.m)], {}, name="simulation")
 
 # store workflow and launch it locally
 launchpad.add_wf(wf)
 rapidfire(launchpad)
+
