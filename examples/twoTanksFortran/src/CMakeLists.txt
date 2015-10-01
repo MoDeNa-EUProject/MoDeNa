@@ -21,8 +21,6 @@ add_custom_target(release
 
 find_package(MODENA REQUIRED)
 
-add_executable(flowRateExact flowRateExact.C)
-
 add_executable(twoTanksMacroscopicProblemFortran twoTanksMacroscopicProblemFortran.f90)
 target_link_libraries(twoTanksMacroscopicProblemFortran MODENA::modena)
 

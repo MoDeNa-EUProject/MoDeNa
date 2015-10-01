@@ -103,15 +103,3 @@ m = ForwardMappingModel(
 )
 
 
-# set up the LaunchPad and reset it
-launchpad = LaunchPad()
-launchpad.reset('', require_password=False)
-
-initWfs = Workflow2([])
-for m in SurrogateModel.get_instances():
-    initWfs.addNoLink(m.initialisationStrategy().workflow(m))
-
-# store workflow and launch it locally
-launchpad.add_wf(initWfs)
-rapidfire(launchpad)
-
