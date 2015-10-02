@@ -52,7 +52,7 @@ supports application and model dependencies across multiple scales.
 The MoDeNa framework handles the communication across scales through
 recipes and adapters. Recipes perform simulations by executing
 applications (in-house codes or external software packages such as
-FOAM, Materials Studio, Predici) for a given set of inputs. Adapters
+FOAM, Materials Studio, PC-Saft) for a given set of inputs. Adapters
 handle the communication with the MoDeNa software framework. Both,
 recipes and adapters are application specific.  Adapters exist as
 outgoing and incoming adapters. Outgoing adapters are relatively

@@ -10,7 +10,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014 MoDeNa Consortium, All rights reserved.
+    2014-2015 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -40,6 +40,7 @@ Contributors
 from fireworks import Firework, Workflow, LaunchPad
 from fireworks.core.rocket_launcher import rapidfire
 import twoTank
+import flowRate_idealGas
 from modulefinder import ModuleFinder
 
 

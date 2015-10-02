@@ -9,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014 MoDeNa Consortium, All rights reserved.
+    2014-2015 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -268,7 +268,7 @@ class SamplingStrategy():
                 sr[key]['min'] +
                 (sr[key]['max'] - sr[key]['min']) * points[i][j]
                 for i in xrange(nPoints)
-            ] for (j, key) in enumerate(sr)
+            ] for j, key in enumerate(sr)
         }
 
 

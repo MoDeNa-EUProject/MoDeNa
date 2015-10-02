@@ -1,5 +1,9 @@
 # Build C library
-add_library(modena SHARED modena.c)
+
+file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
+file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.c)
+
+add_library(modena SHARED ${SOURCES})
 target_link_libraries(modena ${LTDL_LIBRARIES} ${PYTHON_LIBRARIES})
 
 set_property(TARGET modena APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES
@@ -16,7 +20,7 @@ set_property(
   TARGET modena APPEND PROPERTY
   COMPATIBLE_INTERFACE_STRING MODENA_MAJOR_VERSION
 )
-set_target_properties(modena PROPERTIES PUBLIC_HEADER modena.h)
+set_target_properties(modena PROPERTIES PUBLIC_HEADER "${HEADERS}")
 
 # Build Fortran library
 add_library(fmodena SHARED fmodena.f90)
@@ -35,11 +39,11 @@ write_basic_package_version_file(
   COMPATIBILITY AnyNewerVersion
 )
 
-export(
-  TARGETS twoTanksFullProblem modena fmodena
-  FILE ${CMAKE_CURRENT_BINARY_DIR}/MODENATargets.cmake
-  NAMESPACE MODENA::
-)
+#export(
+# TARGETS twoTanksFullProblem modena fmodena
+#  FILE ${CMAKE_CURRENT_BINARY_DIR}/MODENATargets.cmake
+#  NAMESPACE MODENA::
+#)
 
 configure_file(
   cmake/MODENAConfig.cmake
@@ -52,13 +56,14 @@ install(
   TARGETS twoTanksFullProblem modena fmodena
   EXPORT MODENATargets
   RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib
+  LIBRARY DESTINATION lib/modena
   ARCHIVE DESTINATION lib/static
-  PUBLIC_HEADER DESTINATION include
+  PUBLIC_HEADER DESTINATION include/modena
+  INCLUDES DESTINATION include/modena
 )
 
 install(FILES libmodena.pc DESTINATION lib/pkgconfig)
-install(FILES fmodena.mod DESTINATION include)
+install(FILES fmodena.mod DESTINATION include/modena)
 
 install(
   EXPORT MODENATargets

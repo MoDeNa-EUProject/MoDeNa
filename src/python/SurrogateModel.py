@@ -9,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014 MoDeNa Consortium, All rights reserved.
+    2014-2015 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -64,22 +64,25 @@ term = Terminal()
 
 
 def existsAndHasArgPos(i, name):
-    return name in i and hasattr(i[name], 'argPos')
+    try:
+        return i[name]['argPos']
+    except:
+        raise Exception('[%s][\'argPos\'] not found' % name)
 
 
 def checkAndConvertType(kwargs, name, cls):
-    if not name in kwargs:
-        raise Exception('Need ' + name)
-    elif not isinstance(kwargs[name], cls):
-        raise TypeError('Need ' + name)
-    else:
+    try:
+        if not isinstance(kwargs[name], cls):
+            raise TypeError('%s must be of type %s' % (name, cls))
         kwargs['meth_' + name] = kwargs[name].to_dict()
         del kwargs[name]
+    except:
+        raise Exception('%s not found' % name)
 
 
 def loadType(obj, name, cls):
     n = '___' + name
-    if(hasattr(obj, n)):
+    if hasattr(obj, n):
         return getattr(obj, n)
     else:
         var = getattr(obj, 'meth_' + name)
@@ -99,6 +102,46 @@ class GrowingList(list):
         list.__setitem__(self, index, value)
 
 
+class IndexSet(Document):
+    name = StringField(primary_key=True)
+    names = ListField(StringField(required=True))
+    meta = {'allow_inheritance': True}
+
+    @abc.abstractmethod
+    def __init__(self, *args, **kwargs):
+        self.___index___ = {j:i for i,j in enumerate(kwargs['names'])}
+        Document.__init__(self, *args, **kwargs)
+        self.save()
+
+
+    def get_name(self, index):
+        try:
+            return self.names[index]
+        except:
+            raise Exception('%i is not in index set %s' % (index, self.name))
+
+
+    def get_index(self, name):
+        try:
+            return self.___index___[name]
+        except:
+            raise Exception('%s is not in index set %s' % (name, self.name))
+
+
+    def iterator_end(self):
+        return len(self.names)
+
+
+    @classmethod
+    def exceptionLoad(self, indexSetId):
+        return 401
+
+
+    @classmethod
+    def load(self, indexSetId):
+        return self.objects.get(name=indexSetId)
+
+
 # Fitting data is not stored here to allow excluding it in load since it
 # is not possible to exclude inputs.*.fitData
 class MinMax(EmbeddedDocument):
@@ -116,8 +159,13 @@ class MinMaxOpt(EmbeddedDocument):
 class MinMaxArgPos(EmbeddedDocument):
     min = FloatField(required=True, default=None)
     max = FloatField(required=True, default=None)
+    #index = IndexSet()
+    #index = ReferenceField(IndexSet)
     argPos = IntField(required=True)
     meta = {'allow_inheritance': False}
+
+    def __init__(self, *args, **kwargs):
+        EmbeddedDocument.__init__(self, **kwargs)
 
 
 class MinMaxArgPosOpt(EmbeddedDocument):
@@ -126,10 +174,8 @@ class MinMaxArgPosOpt(EmbeddedDocument):
     argPos = IntField()
     meta = {'allow_inheritance': False}
 
-
 class combinedMeta(abc.ABCMeta, TopLevelDocumentMetaclass):
    pass
-
 
 class SurrogateFunction(DynamicDocument):
 
@@ -138,6 +184,7 @@ class SurrogateFunction(DynamicDocument):
     parameters = MapField(EmbeddedDocumentField(MinMaxArgPos))
     functionName = StringField(required=True)
     libraryName = StringField(required=True)
+    indices = MapField(ReferenceField(IndexSet))
     meta = {'allow_inheritance': True}
 
     @abc.abstractmethod
@@ -157,6 +204,26 @@ class SurrogateFunction(DynamicDocument):
 
         DynamicDocument.__init__(self, **kwargs)
 
+        for k in self.inputs.keys():
+            self.checkVariableName(k);
+
+        for k in self.outputs.keys():
+            self.checkVariableName(k);
+
+        for k in self.parameters.keys():
+            self.checkVariableName(k);
+
+
+    def indexSet(self, name):
+        return self.indices[name]
+
+
+    def checkVariableName(self, name):
+        m = re.search('\[(.*)\]', name)
+        if m and not m.group(1) in self.indices:
+            raise Exception('Index %s not defined' % m.group(1))
+
+
     def modena_function(self):
         return pymodena.modena_function_new(
             str(self.functionName),
@@ -165,9 +232,15 @@ class SurrogateFunction(DynamicDocument):
 
 
     @classmethod
+    def exceptionLoad(self, surrogateFunctionId):
+        return 201
+
+
+    @classmethod
     def load(self, surrogateFunctionId):
-        return self.objects.get(_id=surrogateFunctionId)        
-        
+        return self.objects.get(_id=surrogateFunctionId)
+
+
 class CFunction(SurrogateFunction):
 
     def __init__(self, *args, **kwargs):
@@ -264,7 +337,7 @@ class Function(CFunction):
                                  %(kwargs['outputs'][O]['argPos'],\
                                            self.Parse(kwargs['function'][O]))\
                                                      for O in kwargs[OUT] ] )
-        
+
         # Main body of the Ccode
         Ccode='''
 #include "modena.h"
@@ -309,7 +382,7 @@ void {name}
 
         formula = re.sub(r'\s+','',formula)
 
-        # Initialise a dictionary stack. 
+        # Initialise a dictionary stack.
         stack = stack or {}
 
         # Python has no  switch - case construct.  Match all possibilities first and
@@ -335,7 +408,7 @@ void {name}
 
         # Left delimiter.
         elif re_ldel:
-            head = re_ldel.group(0)    
+            head = re_ldel.group(0)
             tail  = formula[1:]
             delim += 1
 
@@ -351,10 +424,10 @@ void {name}
 
         # Wrong syntax. Returning an error message.
         else:
-            raise Exception('The expression syntax not suported.')
+            raise Exception('The expression syntax is not suported.')
 
         model += head
-        
+
         # The formula has not been consumed yet. Continue recursive parsing.
         if len(tail) > 0:
             return self.Parse(tail,debug,model,stack,delim)
@@ -379,6 +452,20 @@ class SurrogateModel(DynamicDocument):
         self.___refs___.append(weakref.ref(self))
 
 
+    def parseIndices(self):
+        indices = {}
+        m = re.search('.*\[(.*)\]', self._id)
+        if m:
+            for exp in m.group(1).split(','):
+                m = re.search('(.*)=(.*)', exp)
+                if m:
+                    indices[m.group(1)] = m.group(2)
+                else:
+                    raise Exception('Unable to parse %s' % exp)
+
+        return indices
+
+
     def outputsToModels(self):
         o = { k: self for k in self.outputs }
         for m in self.substituteModels:
@@ -387,19 +474,42 @@ class SurrogateModel(DynamicDocument):
 
 
     def inputs_argPos(self, name):
-        if existsAndHasArgPos(self.inputs, name):
-            return self.inputs[name].argPos
-        elif existsAndHasArgPos(self.surrogateFunction.inputs, name):
-            return self.surrogateFunction.inputs[name].argPos
-        raise Exception(name + ' not found')
+        try:
+            return existsAndHasArgPos(self.inputs, name)
+        except:
+            try:
+                return existsAndHasArgPos(
+                   self.surrogateFunction.inputs,
+                   name
+                )
+            except:
+                raise Exception(name + ' not found in inputs')
 
 
     def outputs_argPos(self, name):
-        if existsAndHasArgPos(self.outputs, name):
-            return self.outputs[name].argPos
-        elif existsAndHasArgPos(self.surrogateFunction.outputs, name):
-            return self.surrogateFunction.outputs[name].argPos
-        raise Exception(name + ' not found')
+        try:
+            return existsAndHasArgPos(self.outputs, name)
+        except:
+            try:
+                return existsAndHasArgPos(
+                    self.surrogateFunction.outputs,
+                    name
+                )
+            except:
+                raise Exception(name + ' not found in outputs')
+
+
+    def parameters_argPos(self, name):
+        try:
+            return existsAndHasArgPos(self.parameters, name)
+        except:
+            try:
+                return existsAndHasArgPos(
+                    self.surrogateFunction.parameters,
+                    name
+                )
+            except:
+                raise Exception(name + ' not found in parameters')
 
 
     def inputs_max_argPos(self):
@@ -453,7 +563,7 @@ class SurrogateModel(DynamicDocument):
 
 
     @classmethod
-    def exceptionModelLoad(self, surrogateModelId):
+    def exceptionLoad(self, surrogateModelId):
         # TODO
         # Finding the 'unitialised' models using this method will fail
         # eventually fail when running in parallel. Need to pass id of
@@ -540,8 +650,8 @@ class SurrogateModel(DynamicDocument):
 class ForwardMappingModel(SurrogateModel):
 
     # Database definition
-    inputs = MapField(EmbeddedDocumentField(MinMaxArgPosOpt))
-    outputs = MapField(EmbeddedDocumentField(MinMaxArgPosOpt))
+    inputs = MapField(EmbeddedDocumentField(MinMaxOpt))
+    outputs = MapField(EmbeddedDocumentField(MinMaxOpt))
     substituteModels = ListField(ReferenceField(SurrogateModel))
     meta = {'allow_inheritance': True}
 
@@ -559,6 +669,15 @@ class ForwardMappingModel(SurrogateModel):
             if not isinstance(kwargs['surrogateFunction'], SurrogateFunction):
                 raise TypeError('Need surrogateFunction')
 
+            m = re.search('.*\[(.*)\]', kwargs['_id'])
+            if m:
+                for exp in m.group(1).split(','):
+                    m = re.search('(.*)=(.*)', exp)
+                    if m:
+                        kwargs['surrogateFunction'].indices[m.group(1)].get_index(m.group(2))
+                    else:
+                        raise Exception('Unable to parse %s' % exp)
+
             kwargs['inherited_inputs'] = 0
 
             kwargs['fitData'] = {}
@@ -569,7 +688,7 @@ class ForwardMappingModel(SurrogateModel):
             kwargs['outputs'] = {}
             for k, v in kwargs['surrogateFunction'].outputs.iteritems():
                 kwargs['fitData'][k] = []
-                kwargs['outputs'][k] = MinMaxArgPosOpt(**{})
+                kwargs['outputs'][k] = MinMaxOpt(**{})
 
             subOutputs = {}
             for m in kwargs['substituteModels']:
@@ -601,7 +720,7 @@ class ForwardMappingModel(SurrogateModel):
             nInputs = 0
             for k, v in kwargs['inputs'].iteritems():
                 kwargs['fitData'][k] = []
-                kwargs['inputs'][k] = MinMaxArgPosOpt(**v)
+                kwargs['inputs'][k] = MinMaxOpt(**v)
 
             if 'initialisationStrategy' not in kwargs:
                 kwargs['initialisationStrategy'] = EmptyInitialisationStrategy()
@@ -692,17 +811,6 @@ class ForwardMappingModel(SurrogateModel):
             'initialisationStrategy',
             InitialisationStrategy
         )
-
-
-    def parameterFittingStrategy(self):
-        return load_object({'_fw_name': '{{modena.Strategy.NonLinFitToPointWithSmallestError}}'})
-
-#     def initialisationStrategy(self):
-#         '''
-#         Return an empty workflow
-#         '''
-#
-#         return EmptyInitialisationStrategy()
 
 
 class BackwardMappingModel(SurrogateModel):
@@ -799,6 +907,11 @@ class BackwardMappingModel(SurrogateModel):
             );
 
             DynamicDocument.__init__(self, *args, **kwargs)
+
+            indices = self.parseIndices()
+            for k,v in indices.iteritems():
+                kwargs['surrogateFunction'].indices[k].get_index(v)
+
             self.save()
 
 
@@ -806,6 +919,8 @@ class BackwardMappingModel(SurrogateModel):
         '''
         Build a workflow to excute an exactTask for each point
         '''
+
+        indices = self.parseIndices()
 
         # De-serialise the exact task from dict
         et = load_object(self.meth_exactTask)
@@ -822,6 +937,7 @@ class BackwardMappingModel(SurrogateModel):
 
             t = et
             t['point'] = p
+            t['indices'] = indices
             fw = Firework(t)
 
             tl.append(fw)
@@ -970,3 +1086,17 @@ class BackwardMappingModel(SurrogateModel):
 
         return sampleRange
 
+
+class PrediciKinetics(CFunction):
+
+    def __init__(self, *args, **kwargs):
+
+        if kwargs.has_key('_cls'):
+            CFunction.__init__(self, *args, **kwargs)
+
+        else:
+            from predici_2_modena import create_args
+
+            kwargs.update(create_args(kwargs['fileName']))
+
+            CFunction.__init__(self, *args, **kwargs)

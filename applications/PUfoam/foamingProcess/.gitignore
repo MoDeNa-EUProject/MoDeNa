@@ -1,0 +1,6 @@
+*.json
+*.in
+*~
+# directories
+func_*/
+launcher*/
