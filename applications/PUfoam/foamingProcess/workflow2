@@ -33,6 +33,7 @@ Description
 
 Authors
     Henrik Rusche
+    Pavel Ferkl
 
 Contributors
 '''
@@ -51,7 +52,6 @@ launchpad = LaunchPad()
 launchpad.reset('', require_password=False)
 
 # create the individual FireWorks and Workflow
-# Source code in src/twoTanksMacroscopicProblem.C
 wf = Workflow([Firework(QmomKinetics.m)], {}, name="simulation")
 
 # store workflow and launch it locally

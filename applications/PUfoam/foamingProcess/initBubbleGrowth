@@ -29,9 +29,8 @@ License
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
-    Initialisation script for the Bubble growth model. The script takes a few
-    data points and fits the surrogate model. Then the model is inserted into
-    the database.
+    Initialization of Bubble growth model. Detailed Bubble growth simulation
+    must be run first. Results must not be modified.
 
 Authors
     Henrik Rusche
