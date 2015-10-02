@@ -36,25 +36,5 @@ Authors
 Contributors
 '''
 
-import os
-import modena
-from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
-from fireworks import Firework, Workflow, FWAction
-from fireworks.utilities.fw_utilities import explicit_serialize
-from blessings import Terminal
+from twoTank import m
 
-# Create terminal for colour output
-term = Terminal()
-
-
-__author__ = 'Henrik Rusche'
-__copyright__ = 'Copyright 2014, MoDeNa Project'
-__version__ = '0.2'
-__maintainer__ = 'Henrik Rusche'
-__email__ = 'h.rusche@wikki.co.uk.'
-__date__ = 'Sep 4, 2014'
-
-
-m = modena.BackwardMappingScriptTask(
-        script='../src/twoTanksMacroscopicProblem'
-)
