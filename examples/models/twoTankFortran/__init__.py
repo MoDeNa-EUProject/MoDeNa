@@ -1,4 +1,3 @@
-#!/usr/bin/python
 '''
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
@@ -22,14 +21,14 @@ License
 
     Modena is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
-    details.
+    FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
-    A simple workflow
+    Python library of FireTasks
 
 Authors
     Henrik Rusche
@@ -37,21 +36,5 @@ Authors
 Contributors
 '''
 
-from fireworks import Firework, Workflow, LaunchPad
-from fireworks.core.rocket_launcher import rapidfire
-import twoTankFortran
-from modulefinder import ModuleFinder
+from twoTank import m
 
-
-# set up the LaunchPad and reset it
-launchpad = LaunchPad()
-launchpad.reset('', require_password=False)
-
-# create the individual FireWorks and Workflow
-# Source code in src/twoTanksMacroscopicProblem.C
-
-wf = Workflow([Firework(twoTank.m)], {}, name="simulation")
-
-# store workflow and launch it locally
-launchpad.add_wf(wf)
-rapidfire(launchpad)
