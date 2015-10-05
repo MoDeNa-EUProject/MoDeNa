@@ -15,3 +15,19 @@
   and its thermal properties using the combination of nano-, meso- and
   macro-scopic models.
 */
+
+/**
+  @defgroup models
+  @brief    Collection of complex mathematical models
+*/
+
+/**
+  @defgroup foam_cond Foam conductivity
+  @ingroup  models
+  @brief    Estimates the equivalent conductivity of the foam
+
+  @defgroup foam_aging Foam ageing
+  @ingroup  models
+  @brief    Predicts the evolution of composition of gas phase in foam and
+  determines the change in thermal properties.
+*/

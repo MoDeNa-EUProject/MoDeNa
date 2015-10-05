@@ -1,30 +1,29 @@
-!******************************************************BEGINNING***************************************************************
-!subroutines with special mathematical functions
-!author: pavel.ferkl@vscht.cz
+!> @file
+!! subroutines for special mathematical functions
+!! @author    Pavel Ferkl
+!! @ingroup   foam_cond
 module specfun
-!*****************************************************DECLARATION**************************************************************
     use constants, only: dp,pi,iu,eulergamma
     implicit none
     private
     public factorial,digamma,bessel,hankel
-!*********************************************************BODY*****************************************************************
 contains
-!****************************BEGINNING*******************************
-!calculates Bessel functions of the first and second kind and their derivatives for complex argument
+!********************************BEGINNING*************************************
+!> calculates Bessel functions of the first and second kind and
+!! their derivatives for complex argument
 subroutine bessel(n,x,tol,j,dj,y,dy)
-!***************************DECLARATION******************************
     use besselj, only: ZBESJ
     use bessely, only: ZBESY
     integer, intent(in) :: n  !maximum order calculated
     complex(dp), intent(in) :: x  !argument
     real(dp), intent(in) :: tol  !relative tolerance, currently not used
-    complex(dp), dimension(0:n), intent(out) :: j    !bessel function of the first kind
-    complex(dp), dimension(0:n), intent(out) :: dj    !derivative of bessel function of the first kind
-    complex(dp), dimension(0:n), intent(out) :: y    !bessel function of the second kind
-    complex(dp), dimension(0:n), intent(out) :: dy    !derivative of bessel function of the second kind
+    complex(dp), dimension(0:n), intent(out) :: &
+        j,&    !bessel function of the first kind
+        dj,&    !derivative of bessel function of the first kind
+        y,&    !bessel function of the second kind
+        dy    !derivative of bessel function of the second kind
     real(dp), dimension(n+1) :: cyr,cyi,cwr,cwi
     integer :: i,m,nz,ierr
-!******************************BODY**********************************
     call ZBESJ(realpart(x),imagpart(x),0.e0_dp,1,n+1,cyr,cyi,nz,ierr)
     if (nz>0) then
         write(*,*) 'underflow encountered'
@@ -66,24 +65,23 @@ subroutine bessel(n,x,tol,j,dj,y,dy)
         dy(m)=y(m-1)-m/x*y(m)
     enddo
 end subroutine bessel
-!********************************************************************
-!*******************************END**********************************
+!***********************************END****************************************
 
 
-!****************************BEGINNING*******************************
-!calculates Hankel functions of the first and second kind and their derivatives for complex argument
+!********************************BEGINNING*************************************
+!> calculates Hankel functions of the first and second kind and
+!! their derivatives for complex argument
 subroutine hankel(n,x,tol,h1,dh1,h2,dh2)
-!***************************DECLARATION******************************
     integer, intent(in) :: n  !maximum order calculated
     complex(dp), intent(in) :: x  !argument
     real(dp), intent(in) :: tol  !relative tolerance
-    complex(dp), dimension(0:n), intent(out) :: h1    !hankel function of the first kind
-    complex(dp), dimension(0:n), intent(out) :: dh1    !derivative of hankel function of the first kind
-    complex(dp), dimension(0:n), intent(out) :: h2    !hankel function of the second kind
-    complex(dp), dimension(0:n), intent(out) :: dh2    !derivative of hankel function of the second kind
+    complex(dp), dimension(0:n), intent(out) :: &
+        h1,&    !hankel function of the first kind
+        dh1,&    !derivative of hankel function of the first kind
+        h2,&    !hankel function of the second kind
+        dh2    !derivative of hankel function of the second kind
     integer :: i
     complex(dp), dimension(0:n) :: j,dj,y,dy
-!******************************BODY**********************************
     !http://keisan.casio.com/has10/SpecExec.cgi?id=system/2006/1222514923
     call bessel(n,x,tol,j,dj,y,dy)
     h1=j+iu*y
@@ -95,17 +93,14 @@ subroutine hankel(n,x,tol,h1,dh1,h2,dh2)
         dh2(i)=h2(i-1)-i/x*h2(i)
     enddo
 end subroutine hankel
-!********************************************************************
-!*******************************END**********************************
+!***********************************END****************************************
 
 
-!****************************BEGINNING*******************************
-!calculates factorial
+!********************************BEGINNING*************************************
+!> calculates factorial
 recursive function factorial(n) result(fact)
-!***************************DECLARATION******************************
     integer, intent(in) :: n  !argument
     real(dp) :: fact
-!******************************BODY**********************************
     if (n<0) then
         stop 'factorial defined only for nonnegative integers'
     elseif (n==0) then
@@ -114,25 +109,21 @@ recursive function factorial(n) result(fact)
         fact=n*factorial(n-1)
     endif
 end function factorial
-!********************************************************************
-!*******************************END**********************************
+!***********************************END****************************************
 
 
-!****************************BEGINNING*******************************
-!calculates digamma function
-!http://mathworld.wolfram.com/DigammaFunction.html
+!********************************BEGINNING*************************************
+!> calculates digamma function
+!! taken from http://mathworld.wolfram.com/DigammaFunction.html
 real(dp) function digamma(n)
-!***************************DECLARATION******************************
     integer, intent(in) :: n  !argument
     integer :: i
-!******************************BODY**********************************
     digamma=-eulergamma
     do i=1,n-1
         digamma=digamma+1.0_dp/i
     enddo
 end function digamma
-!********************************************************************
-!*******************************END**********************************
+!***********************************END****************************************
 
 
 !SUBROUTINE JNCOMP(Z,NS,JN)
@@ -165,11 +156,10 @@ end function digamma
 !END subroutine
 
 
-!!****************************BEGINNING*******************************
+!!********************************BEGINNING*************************************
 !!calculates Bessel functions of the first and second kind and their derivatives for complex argument
 !!doesn't work properly for high orders
 !subroutine bessel(n,x,tol,j,dj,y,dy)
-!!***************************DECLARATION******************************
 !    integer, intent(in) :: n  !maximum order calculated
 !    complex(dp), intent(in) :: x  !argument
 !    real(dp), intent(in) :: tol  !relative tolerance
@@ -179,7 +169,6 @@ end function digamma
 !    complex(dp), dimension(0:n), intent(out) :: dy    !derivative of bessel function of the second kind
 !    integer :: l,m,lmax=200
 !    complex(dp) :: jold,yold
-!!******************************BODY**********************************
 !    jold=0;yold=0
 !    j=0;dj=0;y=0;dy=0
 !!    write(*,*) x
@@ -225,7 +214,5 @@ end function digamma
 !        dy(m)=y(m-1)-m/x*y(m)
 !    enddo
 !end subroutine bessel
-!!********************************************************************
-!!*******************************END**********************************
+!!***********************************END****************************************
 end module specfun
-!**********************************************************END*****************************************************************

@@ -1,5 +1,8 @@
-!runs various parametric studies
-!author: pavel.ferkl@vscht.cz
+!> @file
+!! subroutines for calculation of equivalent conductivity of foam, loading of
+!! parameters and several parametric studies
+!! @author    Pavel Ferkl
+!! @ingroup   foam_cond
 module tests
     use constants
     use ioutils
@@ -19,7 +22,7 @@ module tests
     character(len=99) :: gasspec='gasspec.in'
 contains
 !********************************BEGINNING*************************************
-!calculate equivalent conductivity
+!> calculate equivalent conductivity for one specific foam
 subroutine eqcond
     call foam_morpholgy
     call effrad(spectra)
@@ -30,7 +33,7 @@ end subroutine eqcond
 
 
 !********************************BEGINNING*************************************
-!calculate dependance of equivalent conductivity on porosity
+!> calculate dependance of equivalent conductivity on porosity
 subroutine eqcond_por
     integer :: fi,npoints,i
     real(dp) :: pormin,pormax,dpor
@@ -51,7 +54,7 @@ end subroutine eqcond_por
 
 
 !********************************BEGINNING*************************************
-!calculate dependance of equivalent conductivity on cell size
+!> calculate dependance of equivalent conductivity on cell size
 subroutine eqcond_dcell
     integer :: fi,npoints,i
     real(dp) :: dcellmin,dcellmax,ddcell
@@ -72,7 +75,7 @@ end subroutine eqcond_dcell
 
 
 !********************************BEGINNING*************************************
-!calculate dependance of equivalent conductivity on strut content
+!> calculate dependance of equivalent conductivity on strut content
 subroutine eqcond_strut
     integer :: fi,npoints,i
     real(dp) :: strutmin,strutmax,dstrut
@@ -93,7 +96,7 @@ end subroutine eqcond_strut
 
 
 !********************************BEGINNING*************************************
-!loads parameters, usually from text file
+!> loads parameters, usually from text file
 subroutine loadParameters
     use physicalProperties
     integer :: fi,ios,i,j

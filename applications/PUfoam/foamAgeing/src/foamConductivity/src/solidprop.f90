@@ -1,5 +1,7 @@
-!subroutines for evaluation of solid radiative properties
-!author: pavel.ferkl@vscht.cz
+!> @file
+!! subroutines for evaluation of radiative properties of solid
+!! @author    Pavel Ferkl
+!! @ingroup   foam_cond
 module solidprop
     use constants
     implicit none
@@ -7,7 +9,7 @@ module solidprop
     public optconst
 contains
 !********************************BEGINNING*************************************
-!determine optical constants n,k for one wavelength
+!> determine optical constants n,k for one wavelength
 subroutine optconst(lambda,n,k)
     use quadpack
     use interpolation
@@ -70,7 +72,7 @@ end subroutine optconst
 
 
 !********************************BEGINNING*************************************
-!evaluates real part of index of refraction times emissive power
+!> evaluates real part of index of refraction times emissive power
 real(dp) function nwew ( lambda )
 !***************************DECLARATION******************************
     use interpolation
@@ -87,7 +89,7 @@ end function nwew
 
 
 !********************************BEGINNING*************************************
-!evaluates real part of index of refraction times emissive power
+!> evaluates real part of index of refraction times emissive power
 real(dp) function kwew ( lambda )
 !***************************DECLARATION******************************
     use interpolation
@@ -104,7 +106,7 @@ end function kwew
 
 
 !********************************BEGINNING*************************************
-!determines emissive power
+!> determines emissive power
 real(dp) function Planck(temp,lambda)
 !***************************DECLARATION******************************
     real(dp), intent(in) :: temp    !temperature
@@ -119,7 +121,7 @@ end function Planck
 
 
 !********************************BEGINNING*************************************
-!determines emissive power
+!> determines emissive power
 real(dp) function Planck2(lambda)
 !***************************DECLARATION******************************
     real(dp), intent(in) :: lambda  !wavelength

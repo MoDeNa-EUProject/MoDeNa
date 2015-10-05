@@ -1,5 +1,8 @@
-!subroutines for calculation of effective conductivity of the foam (conduction-only)
-!author: pavel.ferkl@vscht.cz
+!> @file
+!! subroutines for calculation of effective conductivity of the foam
+!! (conduction-only)
+!! @author    Pavel Ferkl
+!! @ingroup   foam_cond
 module conduction
     use constants
     implicit none
@@ -7,7 +10,7 @@ module conduction
     public effcond
 contains
 !********************************BEGINNING*************************************
-!determine effective conductivity of the foam
+!> determine effective conductivity of the foam
 subroutine effcond
     real(dp) :: xw,xs,f
     character(len=30) :: fmt='(2x,A,1x,es9.3,1x,A)'
