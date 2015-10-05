@@ -1,5 +1,7 @@
-!contains model subroutines for bubble growth model
-!pavel.ferkl@vscht.cz
+!> @file
+!! contains model subroutines for bubble growth model
+!! @author    Pavel Ferkl
+!! @ingroup   bblgr
 module model
     use constants
     use in_out
@@ -27,7 +29,7 @@ module model
     procedure (sub), pointer :: sub_ptr => FEX
 contains
 !********************************BEGINNING*************************************
-!FVM, nonequidistant mesh
+!> model supplied to integrator, FVM, nonequidistant mesh
 SUBROUTINE  FEX (NEQ, T, Y, YDOT)
     INTEGER :: NEQ,i,j
     real(dp) ::  T, Y(NEQ), YDOT(NEQ),z,zw,ze,zww,zee,lamw,lame,cw,ce,cww,cee,&
@@ -143,7 +145,7 @@ END subroutine FEX
 
 
 !********************************BEGINNING*************************************
-!calculates values of physical properties
+!> calculates values of physical properties
 subroutine physical_properties(Y)
     real(dp), dimension(:), intent(in) :: Y
     integer :: i
@@ -227,7 +229,7 @@ end subroutine physical_properties
 
 
 !********************************BEGINNING*************************************
-!calculates molar amount in bubble and shell and thickness of the shell
+!> calculates molar amount in bubble and shell and thickness of the shell
 subroutine molar_balance
     integer :: i,j
     call physical_properties(Y)
@@ -250,7 +252,7 @@ end subroutine molar_balance
 
 
 !********************************BEGINNING*************************************
-!restores dimensional variables
+!> restores dimensional variables
 subroutine restoreDV
 	integer :: i
     time=TOUT
@@ -273,7 +275,7 @@ end subroutine restoreDV
 
 
 !********************************BEGINNING*************************************
-!evaluates kinetic source terms
+!> evaluates kinetic source terms
 subroutine kinModel
     call modena_inputs_set(kinInputs, kinNCOPos, Y(kineq(1)));
 	call modena_inputs_set(kinInputs, kinOHPos, Y(kineq(2)));
@@ -309,7 +311,7 @@ end subroutine kinModel
 
 
 !********************************BEGINNING*************************************
-!prepares integration
+!> prepares integration
 subroutine bblpreproc
     integer :: i,j
     write(*,*) 'preparing simulation...'
@@ -456,7 +458,7 @@ end subroutine bblpreproc
 
 
 !********************************BEGINNING*************************************
-!performs integration
+!> performs integration
 subroutine bblinteg(outputs_1d,outputs_GR,outputs_GR_c,outputs_GR_p,concloc)
     character(*),intent(in) :: outputs_1d,outputs_GR,outputs_GR_c,outputs_GR_p,&
         concloc !file names

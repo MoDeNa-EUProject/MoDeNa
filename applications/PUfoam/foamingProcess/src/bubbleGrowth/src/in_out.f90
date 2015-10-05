@@ -1,5 +1,7 @@
-!handles input and output
-!pavel.ferkl@vscht.cz
+!> @file
+!! handles input and output
+!! @author    Pavel Ferkl
+!! @ingroup   bblgr
 module in_out
     use constants
     use ioutils, only:newunit,str
@@ -27,7 +29,7 @@ module in_out
         mb,mb2,mb3,avconc,pressure
 contains
 !********************************BEGINNING*************************************
-!reads input values from a file
+!> reads input values from a file
 subroutine read_inputs(inputs)
     character(len=80),intent(in) :: inputs
     integer :: fi
@@ -120,7 +122,7 @@ end subroutine read_inputs
 
 
 !********************************BEGINNING*************************************
-!saves parameters of surrogate model
+!> saves parameters of surrogate model
 subroutine save_surrogate_parameters(spar)
     character(len=80),intent(in) :: spar
     integer :: fi,i
@@ -139,7 +141,7 @@ end subroutine save_surrogate_parameters
 
 
 !********************************BEGINNING*************************************
-!opens output files and writes a header
+!> opens output files and writes a header
 subroutine save_integration_header(outputs_1d,outputs_GR,outputs_GR_c,&
     outputs_GR_p,concloc)
     character(*),intent(in) :: outputs_1d,outputs_GR,outputs_GR_c,outputs_GR_p,&
@@ -158,7 +160,7 @@ end subroutine save_integration_header
 
 
 !********************************BEGINNING*************************************
-!writes an integration step to output file
+!> writes an integration step to output file
 subroutine save_integration_step
     integer :: i
     write(fi1,"(1000es23.15)") time,radius, pressure(1), Y(xOHeq), Y(xWeq), &
@@ -171,7 +173,7 @@ end subroutine save_integration_step
 
 
 !********************************BEGINNING*************************************
-!closes output files
+!> closes output files
 subroutine save_integration_close
 !***************************DECLARATION******************************
     integer :: i

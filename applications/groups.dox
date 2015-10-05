@@ -30,4 +30,9 @@
   @ingroup  models
   @brief    Predicts the evolution of composition of gas phase in foam and
   determines the change in thermal properties.
+
+  @defgroup bblgr Bubble growth
+  @ingroup  models
+  @brief    Simulates the growth of an isolated bubble in polymerizing liquid
+  and determines the rate of bubble growth.
 */
