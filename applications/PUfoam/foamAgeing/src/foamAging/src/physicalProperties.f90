@@ -1,6 +1,9 @@
-!subroutines for calculation of physical properties of polymer and blowing
-!agents (using Modena calls)
-!author: pavel.ferkl@vscht.cz
+!> @file
+!! subroutines for calculation of physical properties of polymer and blowing
+!! agents using Modena calls
+!! @author    Michal Vonka
+!! @author    Pavel Ferkl
+!! @ingroup   foam_aging
 module physicalProperties
     use constants
     use fmodena
@@ -62,7 +65,7 @@ module physicalProperties
     integer(c_size_t) :: dn2Temppos
 contains
 !********************************BEGINNING*************************************
-!creates Modena models
+!> creates Modena models
 subroutine createModels
 !    rhopModena = modena_model_new (client, c_char_"polymerDensity"//c_null_char);
 !    rhopInputs = modena_inputs_new (rhopModena);
@@ -167,7 +170,7 @@ end subroutine createModels
 
 
 !********************************BEGINNING*************************************
-!destroys Modena models
+!> destroys Modena models
 subroutine destroyModels
 !    call modena_inputs_destroy (rhopInputs);
 !    call modena_outputs_destroy (rhopOutputs);
@@ -210,7 +213,7 @@ end subroutine destroyModels
 
 
 !********************************BEGINNING*************************************
-!calculation of density of polymer
+!> calculation of density of polymer
 real(dp) function polymerDensity(temp)
     real(dp), intent(in) :: temp
     call modena_inputs_set(rhopInputs, rhopTemppos, temp)
@@ -224,7 +227,7 @@ end function polymerDensity
 
 
 !********************************BEGINNING*************************************
-!thermal conductivity of carbon dioxide
+!> thermal conductivity of carbon dioxide
 real(dp) function cdConductivity(temp)
     real(dp), intent(in) :: temp
     call modena_inputs_set(kcdInputs, kcdTemppos, temp)
@@ -238,7 +241,7 @@ end function cdConductivity
 
 
 !********************************BEGINNING*************************************
-!thermal conductivity of air
+!> thermal conductivity of air
 real(dp) function airConductivity(temp)
     real(dp), intent(in) :: temp
     call modena_inputs_set(kairInputs, kairTemppos, temp)
@@ -252,7 +255,7 @@ end function airConductivity
 
 
 !********************************BEGINNING*************************************
-!thermal conductivity of cyclo pentane
+!> thermal conductivity of cyclo pentane
 real(dp) function cypConductivity(temp)
     real(dp), intent(in) :: temp
     call modena_inputs_set(kcypInputs, kcypTemppos, temp)
@@ -266,7 +269,7 @@ end function cypConductivity
 
 
 !********************************BEGINNING*************************************
-!solubility of carbon dioxide
+!> solubility of carbon dioxide
 real(dp) function cdSolubility(temp)
     real(dp), intent(in) :: temp
     call modena_inputs_set(scdInputs, scdTemppos, temp)
@@ -280,7 +283,7 @@ end function cdSolubility
 
 
 !********************************BEGINNING*************************************
-!solubility of air
+!> solubility of air
 real(dp) function airSolubility(temp)
     real(dp), intent(in) :: temp
     call modena_inputs_set(sairInputs, sairTemppos, temp)
@@ -294,7 +297,7 @@ end function airSolubility
 
 
 !********************************BEGINNING*************************************
-!solubility of cyclo pentane
+!> solubility of cyclo pentane
 real(dp) function cypSolubility(temp)
     real(dp), intent(in) :: temp
     call modena_inputs_set(scypInputs, scypTemppos, temp)
@@ -308,7 +311,7 @@ end function cypSolubility
 
 
 !********************************BEGINNING*************************************
-!diffusivity of carbon dioxide
+!> diffusivity of carbon dioxide
 real(dp) function cdDiffusivity(temp)
     real(dp), intent(in) :: temp
     call modena_inputs_set(dcdInputs, dcdTemppos, temp)
@@ -322,7 +325,7 @@ end function cdDiffusivity
 
 
 !********************************BEGINNING*************************************
-!diffusivity of cyclo pentane
+!> diffusivity of cyclo pentane
 real(dp) function cypDiffusivity(temp)
     real(dp), intent(in) :: temp
     call modena_inputs_set(dcypInputs, dcypTemppos, temp)
@@ -336,7 +339,7 @@ end function cypDiffusivity
 
 
 !********************************BEGINNING*************************************
-!diffusivity of air
+!> diffusivity of air
 real(dp) function airDiffusivity(temp)
     real(dp), intent(in) :: temp
     call modena_inputs_set(do2Inputs, do2Temppos, temp)

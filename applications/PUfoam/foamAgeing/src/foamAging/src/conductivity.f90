@@ -1,16 +1,18 @@
-!subroutines for calculation of equivalent conductivity of the foam
-!uses Modena calls
-!author: pavel.ferkl@vscht.cz
+!> @file
+!! subroutines for calculation of equivalent conductivity of the foam
+!! using Modena calls
+!! @author    Pavel Ferkl
+!! @ingroup   foam_aging
 module conductivity
     use constants
     use fmodena
     use physicalProperties
     implicit none
     private
-    public equcond
+    public equcond,mixtureConductivity
 contains
 !********************************BEGINNING*************************************
-!determine equivalent conductivity of the foam
+!> determine equivalent conductivity of the foam
 subroutine equcond(keq,ystate,neq,eps,fstrut,temp)
     real(dp), intent(out) :: keq
     real(dp), dimension(:), intent(in) :: ystate
@@ -68,9 +70,9 @@ end subroutine equcond
 
 
 !********************************BEGINNING*************************************
-!determine thermal conductivity of a mixture
-!Wassiljewa model, parameters calculated according to Mason and Saxena
-!see doi:10.1016/j.fluid.2007.07.059
+!> determine thermal conductivity of a mixture
+!! Wassiljewa model, parameters calculated according to Mason and Saxena
+!! [link](http://dx.doi.org/10.1016/j.fluid.2007.07.059)
 subroutine mixtureConductivity(kmix,k,yin,Tc,pc,M,T,eps)
     real(dp), intent(out) :: kmix   !thermal conductivity of the mixture
     real(dp), dimension(:), intent(in) :: k !thermal conductivities
