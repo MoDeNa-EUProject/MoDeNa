@@ -1,4 +1,4 @@
-'''
+'''@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -9,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -26,15 +26,17 @@ License
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
+@endcond'''
 
-Description
-    Python library of FireTasks
+"""
+@file
+Surrogate function and model definitions for thermal conductivity of polyurethane
 
-Authors
-    Henrik Rusche
-
-Contributors
-'''
+@author    Erik Laurini
+@author    Pavel Ferkl
+@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@ingroup   app_aging
+"""
 
 import os
 import modena
@@ -46,17 +48,11 @@ from fireworks.utilities.fw_utilities import explicit_serialize
 from blessings import Terminal
 from jinja2 import Template
 
-# Create terminal for colour output
+## Create terminal for colour output
 term = Terminal()
-
-
-__author__ = 'Henrik Rusche'
-__copyright__ = 'Copyright 2014, MoDeNa Project'
-__version__ = '0.2'
-__maintainer__ = 'Henrik Rusche'
-__email__ = 'h.rusche@wikki.co.uk.'
-__date__ = 'Sep 4, 2014'
-
+## Surrogate function for thermal conductivity of polyurethane.
+#
+# Thermal conductivity of polyurethane is a function of temperature.
 f_polymer_thermal_conductivity = CFunction(
     Ccode='''
 #include "modena.h"
@@ -92,6 +88,9 @@ void thermal_conductivity
         'param1': {'min': -9e99, 'max': +9e99, 'argPos': 1},
     },
 )
+## Surrogate model for thermal conductivity of polyurethane
+#
+# Forward mapping model is used.
 m_polymer_thermal_conductivity = ForwardMappingModel(
     _id='polymer_thermal_conductivity',
     surrogateFunction=f_polymer_thermal_conductivity,

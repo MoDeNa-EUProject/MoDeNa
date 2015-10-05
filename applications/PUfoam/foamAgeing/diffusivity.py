@@ -1,4 +1,4 @@
-'''
+'''@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -9,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -26,15 +26,18 @@ License
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
+@endcond'''
 
-Description
-    Python library of FireTasks
+"""
+@file
+Surrogate function and model definitions for diffusivity of blowing agents in
+polymer.
 
-Authors
-    Henrik Rusche
-
-Contributors
-'''
+@author    Erik Laurini
+@author    Pavel Ferkl
+@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@ingroup   app_aging
+"""
 
 import os
 import modena
@@ -47,22 +50,16 @@ from fireworks.utilities.fw_utilities import explicit_serialize
 from blessings import Terminal
 from jinja2 import Template
 
-# Create terminal for colour output
+## Create terminal for colour output
 term = Terminal()
-
-
-__author__ = 'Henrik Rusche'
-__copyright__ = 'Copyright 2014, MoDeNa Project'
-__version__ = '0.2'
-__maintainer__ = 'Henrik Rusche'
-__email__ = 'h.rusche@wikki.co.uk.'
-__date__ = 'Sep 4, 2014'
-
+## List of components, for which surrogate model is provided
 species = IndexSet(
     _id= 'diffusivity_pol_species',
     names= [ 'CO2', 'CyP', 'N2', 'O2' ]
 )
-
+## Surrogate function for diffusivity of blowing agents in polymer.
+#
+# Diffusivity is a function of temperature.
 f_diffusivity = CFunction(
     Ccode='''
 #include "modena.h"
@@ -99,24 +96,36 @@ void diffusivityPol
         'A': species,
     },
 )
+## Surrogate model for diffusivity
+#
+# Forward mapping model is used.
 m_CO2_diffusivity = ForwardMappingModel(
     _id='diffusivityPol[A=CO2]',
     surrogateFunction=f_diffusivity,
     substituteModels=[],
     parameters=[0.00123, 6156],
 )
+## Surrogate model for diffusivity
+#
+# Forward mapping model is used.
 m_CyP_diffusivity = ForwardMappingModel(
     _id='diffusivityPol[A=CyP]',
     surrogateFunction=f_diffusivity,
     substituteModels=[],
     parameters=[1.7e-7, 4236],
 )
+## Surrogate model for diffusivity
+#
+# Forward mapping model is used.
 m_N2_diffusivity = ForwardMappingModel(
     _id='diffusivityPol[A=N2]',
     surrogateFunction=f_diffusivity,
     substituteModels=[],
     parameters=[0.003235, 6927],
 )
+## Surrogate model for diffusivity
+#
+# Forward mapping model is used.
 m_O2_diffusivity = ForwardMappingModel(
     _id='diffusivityPol[A=O2]',
     surrogateFunction=f_diffusivity,

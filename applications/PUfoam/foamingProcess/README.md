@@ -1,6 +1,4 @@
 @ingroup app_foaming
-@brief Predicts the evolution of PU foam properties using the combination of
-nano-, meso- and macro- scopic models.
 
 ## Foaming simulation
 Collection of software tools for the simulation of polyurethane (PU) foaming
