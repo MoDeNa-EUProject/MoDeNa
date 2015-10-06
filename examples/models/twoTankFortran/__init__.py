@@ -36,5 +36,5 @@ Authors
 Contributors
 '''
 
-from twoTank import m
+from twoTankFortran import m
 

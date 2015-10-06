@@ -14,4 +14,4 @@ cmake_install.cmake
 *.l[ao]
 *.mod
 
-twoTanksMacroscopicProblemFortran
+flowRateExact
