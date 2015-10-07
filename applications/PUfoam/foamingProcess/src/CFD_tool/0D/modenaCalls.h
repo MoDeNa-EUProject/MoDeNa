@@ -1,3 +1,6 @@
+/** @file modenaCalls.h
+	@brief instantiates the surrogate models, allocates memory and fetches arg positions
+*/
 #ifndef MODENACALLS_H
 #define MODENACALLS_H
 /*

@@ -1,4 +1,5 @@
-/*
+/**
+@cond
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
     888b     d'888   .ooooo.   888      888  .ooooo.   8 `88b.    8   .oooo.
@@ -25,18 +26,16 @@ License
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
-
-Description
+@endcond
+@file
     This is a macro-scale modeling tool for the foaming process. The code utilizes 
     the MoDeNa interface library to connect different models including nano, and 
     meso scale models. The code returns the evolution of foam properties such as
-    density, temperature and bubble/cell size distribution.   
-Authors
-    Mohsen Karimi
-    Daniele Marchisio
-Contributors
-    Pavel Ferkl
-    Henrik Rusche
+    density, temperature and bubble/cell size distribution.
+@brief macor-scale tool for the foaming process.   
+@authors    Mohsen Karimi, Daniele Marchisio, Pavel Ferkl
+@copyright  2014-2015, MoDeNa Project. GNU Public License.
+@ingroup    app_foaming
 */
 
 #include <iostream>
@@ -59,19 +58,43 @@ extern "C"{void dsteqr_(char &, int *, double *, double *, double *, int *, doub
 
 using namespace std;
 using namespace boost::numeric::odeint;
-
+/**
+@typedef 
+typedef vector<double> to state_type 
+typedef runge_kutta_cash_karp54< state_type > error_stepper_type
+typedef controlled_runge_kutta< error_stepper_type > controlled_stepper_type
+*/
 typedef std::vector< double > state_type;
 typedef runge_kutta_cash_karp54< state_type > error_stepper_type;
 typedef controlled_runge_kutta< error_stepper_type > controlled_stepper_type;
+/**
+@var controlled_stepper
+@sa http://headmyshoulder.github.io/odeint-v2/doc/boost_numeric_odeint/concepts/controlled_stepper.html 
+*/
 controlled_stepper_type controlled_stepper;
+
 #include "partialPressure.h"
+/**
+@var dpdt[2]: global double array 
+@brief This is used to compute the partial pressures.
+
+@var pOld[2]: global double array variable 
+@brief This is to hold the old pressure values during the partial pressure calculations.
+*/
 double dpdt[2] = {};
 double pOld[2] = {};
 
 #include "modenaCalls.h"
 #include "momentsConverter.h"
 #include "write_kinetics.h"
-
+/**
+@fn QmomKinetics(const state_type &y , state_type &dydt , double t)
+@brief This is to calculate the RHD of all the ODEs.
+@param [in] const state_type &y - vector<double> to hold the results.
+@param [in] state_type &dydt -  vector<double> to hold the RHDs of ODEs.
+@param [in] double t - time
+@return void.
+*/
 void QmomKinetics( const state_type &y , state_type &dydt , double t )
 {
 	// dydt[0] : XW
@@ -414,7 +437,11 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
 	dydt[9]  	= sgBA[2] + sgCO2[2] + sc[2];
 	dydt[10] 	= sgBA[3] + sgCO2[3] + sc[3];
 }
+/**
+@fn main(int argc, char **argv)
+@brief main function, initializes the state_type variables and performs the integration.
 
+*/
 int main(int argc, char **argv)
 {
 	readParams();
@@ -457,7 +484,7 @@ int main(int argc, char **argv)
 
     for( double t=0.0 ; t<tend ; t+= dt )
     {
-
+        /// @sa http://headmyshoulder.github.io/odeint-v2/doc/boost_numeric_odeint/odeint_in_detail/steppers.html
 		integrate_adaptive( make_controlled( abs_err , rel_err , error_stepper_type() ), QmomKinetics , y , t, t+dt , 1e-9 );
         write_kinetics(y, t);
 
@@ -468,7 +495,9 @@ int main(int argc, char **argv)
     }
 }
 
-/* Different methods of integrations:
+/* 
+
+Different methods of integrations:
 
 [ define_const_stepper
     runge_kutta4< state_type > stepper;
@@ -499,4 +528,5 @@ double abs_err 	= 1.0e-12;
 	integrate_adaptive( make_controlled< error_stepper_type >(abs_err , rel_err), kinetics, y, 0.0, 300.0, 0.01, write_kinetics );
 
 ]
+
 */

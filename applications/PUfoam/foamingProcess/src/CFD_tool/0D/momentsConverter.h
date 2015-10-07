@@ -1,10 +1,13 @@
+/** @file momentsConverter.h
+	@brief Converts moments based on the unit volume of foam
+	@fn void momentsConverter(const state_type &y , const double t)
+	@param const state_type &y -  vector of all the variables
+	@param const double t - time
+*/
 void momentsConverter(const state_type &y , const double t);
 
 void momentsConverter(const state_type &y , const double t)
 {
-// momentsConverter - converts moments based on the unit volume of foam
-// @param - const state_type &y -  vector of all the variables
-// @param - const double t - time
 	double kappa 		= 1.0 - (y[8]/(1.0+y[8]));
 	double M[4] 		= {};
 	M[0]				= kappa*y[7];
