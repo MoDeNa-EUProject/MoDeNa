@@ -798,7 +798,9 @@ EXCLUDE_SYMLINKS       = NO
 # exclude all test directories for example use the pattern */test/*
 
 EXCLUDE_PATTERNS       = */src/python/build/* \
-                         */src/CMakeFiles/*
+                         */src/CMakeFiles/* \
+                         func_* \
+                         launcher*
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names
 # (namespaces, classes, functions, etc.) that should be excluded from the
