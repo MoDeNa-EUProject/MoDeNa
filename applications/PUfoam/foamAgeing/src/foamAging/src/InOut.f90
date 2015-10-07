@@ -1,5 +1,11 @@
-!   michal.vonka@seznam.cz
-	subroutine input(rpar, ipar)
+!> @file
+!! subroutines for calculation of equivalent conductivity of the foam
+!! @author    Michal Vonka
+!! @author    Pavel Ferkl
+!! @ingroup   foam_aging
+
+!> reads input file, packs variables to rpar and ipar variables
+subroutine input(rpar, ipar)
 	implicit none
 !c
 	integer i
@@ -130,9 +136,10 @@
     continue
 
     return
-	end subroutine input
+end subroutine input
 !c
-	subroutine output(iprof, time, ystate, neq)
+!> saves results to file
+subroutine output(iprof, time, ystate, neq)
 	implicit none
 	integer i, j, iprof, job
 	integer nFV, onecell, ncell, neq
@@ -211,5 +218,5 @@
     close (11)
 	return
 100   format (f8.2,F12.8,F12.6,F12.6,F12.6)
-      end subroutine output
+end subroutine output
 !c

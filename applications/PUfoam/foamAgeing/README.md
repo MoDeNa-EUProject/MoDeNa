@@ -1,4 +1,4 @@
-@ingroup aging
+@ingroup app_aging
 
 ## Aging of polyurethane foam thermal properties
 ### Physical background

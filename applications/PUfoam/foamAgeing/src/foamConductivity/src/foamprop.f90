@@ -1,5 +1,7 @@
-!subroutines for evaluation of effective radiative properties of foam
-!author: pavel.ferkl@vscht.cz
+!> @file
+!! subroutines for evaluation of effective radiative properties of foam
+!! @author    Pavel Ferkl
+!! @ingroup   foam_cond
 module foamprop
     use constants
     use ioutils
@@ -22,7 +24,7 @@ module foamprop
         kappaf,sigmaf,betaf,omegaf,betatrf
 contains
 !********************************BEGINNING*************************************
-!determine effective radiative properties of foam
+!> determine effective radiative properties of foam
 subroutine effrad(spectra)
     use quadpack
     character(len=*), intent(in) :: spectra
@@ -374,7 +376,7 @@ end subroutine effrad
 
 
 !********************************BEGINNING*************************************
-!evaluate integrand for Rosseland extinction coefficient
+!> evaluate integrand for Rosseland extinction coefficient
 real(dp) function rosextc(lambda)
     use interpolation
     real(dp), intent(in) :: lambda  !wavelength
@@ -406,7 +408,7 @@ end function rosextc
 
 
 !********************************BEGINNING*************************************
-!evaluate integrand for Planck mean extinction coefficient
+!> evaluate integrand for Planck mean extinction coefficient
 real(dp) function planckextc(lambda)
     use interpolation
     real(dp), intent(in) :: lambda  !wavelength
@@ -438,7 +440,7 @@ end function planckextc
 
 
 !********************************BEGINNING*************************************
-!evaluate integrand for scattering albedo - Planck style
+!> evaluate integrand for scattering albedo - Planck style
 real(dp) function planckalbedo(lambda)
     use interpolation
     real(dp), intent(in) :: lambda  !wavelength
@@ -470,8 +472,8 @@ end function planckalbedo
 
 
 !********************************BEGINNING*************************************
-!fraction of blackbody radiation according to eq. (1-33) in Siegel's and
-!Howell's 4th Thermal Radiation Heat Transfer
+!> fraction of blackbody radiation according to eq. (1-33) in Siegel's and
+!! Howell's 4th Thermal Radiation Heat Transfer
 real(dp) function fbep(n,lambda,T)
     integer :: i,maxit=100
     real(dp), intent(in) :: n,lambda,T !index of refraction,wavelength,temperature

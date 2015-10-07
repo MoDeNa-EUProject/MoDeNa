@@ -1,6 +1,9 @@
-!subroutines for calculation of equivalent conductivity of the foam
-!(coupled conduction-radiation simulation)
-!author: pavel.ferkl@vscht.cz
+!> @file
+!! subroutines for calculation of equivalent conductivity of the foam
+!! coupled conduction-radiation simulation
+!! non-gray 1D P1-approximation
+!! @author    Pavel Ferkl
+!! @ingroup   foam_cond
 module condrad
     use constants
     use ioutils
@@ -20,7 +23,7 @@ module condrad
     real(dp), dimension(:), allocatable :: tvec,qcon,qrad,qtot,gqrad
 contains
 !********************************BEGINNING*************************************
-!determines equivalent conductivity of the foam
+!> determines equivalent conductivity of the foam, main algorithm
 subroutine equcond
     integer :: i,maxiter=20,fi
     real(dp) :: tol=1e-5_dp,res
@@ -68,7 +71,7 @@ end subroutine equcond
 
 
 !********************************BEGINNING*************************************
-!creates matrix for calculation of incidence radiation
+!> creates matrix for calculation of incidence radiation
 subroutine make_gmatrix
     integer :: i,j,k,l
     gmatrix=0
@@ -109,7 +112,7 @@ end subroutine make_gmatrix
 
 
 !********************************BEGINNING*************************************
-!creates right hand side for calculation of incidence radiation
+!> creates right hand side for calculation of incidence radiation
 subroutine make_grhs
     integer :: i,j,k
     k=0
@@ -130,7 +133,7 @@ end subroutine make_grhs
 
 
 !********************************BEGINNING*************************************
-!creates matrix for calculation of temperature
+!> creates matrix for calculation of temperature
 subroutine make_tmatrix
     integer :: i,j
     tmatrix=0
@@ -158,7 +161,7 @@ end subroutine make_tmatrix
 
 
 !********************************BEGINNING*************************************
-!creates right hand side for calculation of temperature
+!> creates right hand side for calculation of temperature
 subroutine make_trhs
     call make_gqrad
     trhs=gqrad
@@ -169,7 +172,7 @@ end subroutine make_trhs
 
 
 !********************************BEGINNING*************************************
-!creates gradient of radiative heat flux (radiative source)
+!> creates gradient of radiative heat flux (radiative source)
 subroutine make_gqrad
     integer :: i,j,k
     call make_grhs
@@ -188,7 +191,7 @@ end subroutine make_gqrad
 
 
 !********************************BEGINNING*************************************
-!calculate heat flux
+!> calculate heat flux
 subroutine heatflux
     integer :: i,j,k
     qcon(1)=-effc*(-tvec(3)+4*tvec(2)-3*tvec(1))/(2*dz)

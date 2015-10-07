@@ -1,5 +1,7 @@
-!runs various parametric studies
-!pavel.ferkl@vscht.cz
+!> @file
+!! subroutines for growth of a single bubble and various parametric studies
+!! @author    Pavel Ferkl
+!! @ingroup   bblgr
 module tests
     use model
     implicit none
@@ -7,7 +9,7 @@ module tests
     public onegrowth
 contains
 !********************************BEGINNING*************************************
-!simulates one growth of a bubble
+!> simulates one growth of a bubble
 subroutine onegrowth
     !HORNET windows
 !    character(len=99) :: fileplacein='C:\Pavel\Dropbox\src\bubblegrowth_src\'
