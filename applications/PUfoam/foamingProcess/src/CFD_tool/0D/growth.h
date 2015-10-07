@@ -1,21 +1,25 @@
-/* Source term due to Growth */
+/** @file growth.h
+	@brief Source terms due to the bubble growth
+	@fn void growthSource(double *sgBA, double *sgCO2, double *we, double *vi, int &nNodes, int *mOrder, double &CO2_l, double &L_l, double &tmp, double &dVdt_2, double &dVdt_1)
+	@param  double *sgBA - source terms due to blowing agent
+	@param  double *sgCO2 - source terms due to CO2
+	@param  double *we - weights of quadrature approximation
+	@param  double *vi - nodes of quadrature approximation
+	@param  int &nNodes - number of nodes
+	@param  int *mOrder - order of moments
+	@param  double &CO2_l - weight fraction of CO2 in liquid
+	@param  double &L_l - weight fraction of blowing agent in liquid
+	@param  double &tmp - temperature
+	@param  double &dVdt_2 - growth rate due to generation of CO2
+	@param  double &dVdt_1 - growth rate due to evaporation of blowing agent
+	@return void
+*/
 
 void growthSource(double *, double *, double *, double *, int &, int *, double &, double &, double &, double &, double &); // function prototype 
 
 void growthSource(double *sgBA, double *sgCO2, double *we, double *vi, int &nNodes, int *mOrder, double &CO2_l, double &L_l, double &tmp, double &dVdt_2, double &dVdt_1)
 {
-// growthSource - returns the source terms due to growth
-// @param - double *sgBA - source terms due to blowing agent
-// @param - double *sgCO2 - source terms due to CO2
-// @param - double *we - weights of quadrature approximation
-// @param - double *vi - nodes of quadrature approximation
-// @param - int &nNodes - number of nodes
-// @param - int *mOrder - order of moments
-// @param - double &CO2_l - weight fraction of CO2 in liquid
-// @param - double &L_l - weight fraction of blowing agent in liquid
-// @param - double &tmp - temperature
-// @param - double &dVdt_2 - growth rate due to generation of CO2
-// @param - double &dVdt_1 - growth rate due to evaporation of blowing agent
+
 	int i;
 	int counter = 0;		
 	double k;

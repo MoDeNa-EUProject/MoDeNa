@@ -1,3 +1,6 @@
+/** @file readParameters.h
+	@brief reads the inputs from the input files.
+*/
 void readParams();
 void readParams() {
     std::ifstream inputs;

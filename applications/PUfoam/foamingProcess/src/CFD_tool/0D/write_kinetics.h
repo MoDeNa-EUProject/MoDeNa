@@ -1,3 +1,10 @@
+/** @file write_kinetics.h
+    @brief write the results into text files
+    @fn void write_kinetics( const state_type &y , const double t )
+    @param const state_type &y -  vector of all the variables
+    @param const double t - time
+    @return void
+*/
 void write_kinetics( const state_type &y , const double t );
 
 void write_kinetics( const state_type &y , const double t )
