@@ -224,13 +224,6 @@ class SurrogateFunction(DynamicDocument):
             raise Exception('Index %s not defined' % m.group(1))
 
 
-    def modena_function(self):
-        return pymodena.modena_function_new(
-            str(self.functionName),
-            str(self.libraryName)
-        )
-
-
     @classmethod
     def exceptionLoad(self, surrogateFunctionId):
         return 201
