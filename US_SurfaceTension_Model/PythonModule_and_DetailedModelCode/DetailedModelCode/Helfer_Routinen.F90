@@ -1,3 +1,8 @@
+
+!>This file contains subroutines that make printing of 
+!!local and global PETSc arrays easier.
+
+
  
 Subroutine PrintGlobalVec(GlobalVec,filename)
 Implicit None
