@@ -1,3 +1,6 @@
+!> This file contains the subroutine which starts the phase equilibrium calculation.
+!! It also prints the calculated density to the outputfile "out.txt".
+
 SUBROUTINE VLE_MIX(rhob,density,chemPot_total,compID)
 
  USE parameters, ONLY: PI, RGAS, KBOL
@@ -9,9 +12,9 @@ SUBROUTINE VLE_MIX(rhob,density,chemPot_total,compID)
  
 
 
-! ---------------------------------------------------------------------
-! Variables
-! ---------------------------------------------------------------------
+!> ---------------------------------------------------------------------
+!! Variables
+!! ---------------------------------------------------------------------
   
  !passed
  REAL                                   :: chemPot_total(nc)
@@ -28,9 +31,9 @@ SUBROUTINE VLE_MIX(rhob,density,chemPot_total,compID)
  CHARACTER (LEN=50)                     :: filename
  
 
-! ---------------------------------------------------------------------
-! prepare for phase equilibrium calculation for given T
-! ---------------------------------------------------------------------
+!> ---------------------------------------------------------------------
+!! prepare for phase equilibrium calculation for given T
+!! ---------------------------------------------------------------------
 
     dhs(1:ncomp) = parame(1:ncomp,2) * ( 1.0 - 0.12*EXP( -3.0*parame(1:ncomp,3)/t ) )  ! needed for rdf_matrix
     dhs_star(1:ncomp) = dhs(1:ncomp)/parame(1:ncomp,2)
@@ -62,9 +65,9 @@ SUBROUTINE VLE_MIX(rhob,density,chemPot_total,compID)
     CALL fugacity (lnphi)                   ! calculate fugacities
  
  
-! ---------------------------------------------------------------------
-! Output results of phase equilibrim calculation
-! ---------------------------------------------------------------------
+!> ---------------------------------------------------------------------
+!! Output results of phase equilibrim calculation
+!! ---------------------------------------------------------------------
  
    WRITE(*,*) '--------------------------------------------------'
    WRITE(*,*)'RESULT OF PHASE EQUILIBRIUM CALCULATION'
@@ -92,7 +95,7 @@ SUBROUTINE VLE_MIX(rhob,density,chemPot_total,compID)
   !output: Henrys law: xi*H(T) = yi * p -> H = yip/xi
    Henry = EXP(lnx(2,1))*p /EXP(lnx(1,1)) 
    
-   !write solubility to outputfile "out.txt"
+   !>write solubility to outputfile "out.txt"
    filename='./out.txt'
    CALL file_open(filename,78)
    write(78,*) Henry / 100000.0

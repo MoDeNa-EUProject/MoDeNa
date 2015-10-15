@@ -1,3 +1,8 @@
+!> This file contains the subroutine which starts the phase equilibrium calculation.
+!! It also prints the calculated density to the outputfile "out.txt".
+
+
+
 SUBROUTINE VLE_MIX(rhob,density,chemPot_total,user)
 
 
@@ -14,9 +19,9 @@ SUBROUTINE VLE_MIX(rhob,density,chemPot_total,user)
  USE DFT_FCN_MODULE, ONLY: chemPot_res
  IMPLICIT NONE
 
-! ---------------------------------------------------------------------
-! Variables
-! ---------------------------------------------------------------------
+!> ---------------------------------------------------------------------
+!! Variables
+!! ---------------------------------------------------------------------
   
 !passed
  type (userctx)         user 
@@ -28,9 +33,9 @@ SUBROUTINE VLE_MIX(rhob,density,chemPot_total,user)
  REAL                                   :: w(np,nc), lnphi(np,nc)
  INTEGER                                :: converg
 
- ! ---------------------------------------------------------------------
- ! prepare for phase equilibrium calculation for given T
- ! ---------------------------------------------------------------------
+ !> ---------------------------------------------------------------------
+ !! prepare for phase equilibrium calculation for given T
+ !! ---------------------------------------------------------------------
 
   dhs(1:ncomp) = parame(1:ncomp,2) * ( 1.0 - 0.12*EXP( -3.0*parame(1:ncomp,3)/t ) )  ! needed for rdf_matrix
   dhs_star(1:ncomp) = dhs(1:ncomp)/parame(1:ncomp,2)
@@ -66,9 +71,9 @@ SUBROUTINE VLE_MIX(rhob,density,chemPot_total,user)
  chemPot_total(1:ncomp) = lnphi(1,1:ncomp) + LOG( rhob(1,1:ncomp) )     ! my0 = mu_res(T,rho_bulk_L) + ln(rho_bulk_l)
 
 
-! ---------------------------------------------------------------------
-! Output results of phase equilibrim calculation
-! ---------------------------------------------------------------------
+!> ---------------------------------------------------------------------
+!! Output results of phase equilibrim calculation
+!! ---------------------------------------------------------------------
  
  
 IF(user%rank == 0) THEN

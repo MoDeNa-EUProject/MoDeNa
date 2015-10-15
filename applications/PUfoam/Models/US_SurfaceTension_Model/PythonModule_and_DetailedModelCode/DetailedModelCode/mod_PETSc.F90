@@ -1,3 +1,9 @@
+
+
+
+
+!>In this module, the application context is defined
+
 Module PetscManagement
 
       type userctx
@@ -13,7 +19,7 @@ End Module
  
 
 
-
+!>This module contains variables associated with the PETSc solver
 
 Module Global_x
 Implicit None

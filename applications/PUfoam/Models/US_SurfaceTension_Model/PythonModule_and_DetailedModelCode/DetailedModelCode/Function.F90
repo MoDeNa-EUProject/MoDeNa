@@ -1,3 +1,13 @@
+!>This file contains the residual function of the density functional theory
+!!calculation.
+
+
+
+!>The subroutine FormFunction is a wrapper function which takes care of 
+!!handling the global PETSc data structures and creates local copys for 
+!!every processor. It then calls the subroutine FormFunctionLocal which
+!!performs the actual calculation of the residual at every grid point.
+
  
 Subroutine FormFunction(snes,X,F,user,ierr)
 Use PetscManagement
@@ -65,8 +75,9 @@ End Subroutine FormFunction
 
 
 
-
-
+!>This subroutine performs the local evaluation of the residual function.
+!!It calls the subroutines which calculate the different contributions to
+!!the Helmholtz energy functional.
 
 
 Subroutine FormFunctionLocal(rhop,f,user,ierr)

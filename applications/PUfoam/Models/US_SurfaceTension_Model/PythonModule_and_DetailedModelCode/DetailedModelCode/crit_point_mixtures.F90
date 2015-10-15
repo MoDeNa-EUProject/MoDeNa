@@ -1,3 +1,6 @@
+!>This file contains the subroutines which determine the critical point of 
+!!a mixture.
+
 
 SUBROUTINE CRIT_POINT_MIX(tc,user)
 

@@ -1,8 +1,6 @@
+!>This file contains the subroutines which calculate the contribution of
+!!volume exclusion to the Helmholtz energy functional. 
 
-
-!All equations are taken from the appendix of:
-!Gross: 'A density functional theory for vapor-liquid interfaces using the PCP-SAFT eos'
-!But: here we dont treat chain-molecules!! -> no multiplications with segment number
 
 
 
