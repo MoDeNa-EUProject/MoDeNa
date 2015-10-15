@@ -55,3 +55,4 @@ for m in SurrogateModel.get_instances():
 # store workflow and launch it locally
 launchpad.add_wf(initWfs)
 rapidfire(launchpad)
+

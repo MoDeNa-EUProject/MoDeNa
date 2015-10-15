@@ -1,0 +1,10 @@
+100			! # of outputs
+1.0d8		! end time, s
+298.0d0			! temperature [K]
+101325.0d0		! pressure [Pa]
+0.0d0			! initial air pressure in foam [Pa]
+2.9d-12, 1.9d-12, 1.2d-12, 2.0d-5	! difusivities O2, N2, CO2 in PU and in gas [m2/s]
+3.6753d-7, 1.65d-7, 5.4005d-6		! solubilities O2, N2, CO2 in PU [cm3STP/cm3/Pa]
+100, 5			! number of cells & how to divide wall
+0.5d-6			! thickness of foam wall [m]
+500.0d-6		! average cell size [m]

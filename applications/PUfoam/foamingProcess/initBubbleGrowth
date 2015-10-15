@@ -194,13 +194,17 @@ m = ForwardMappingModel(
 
 # Instantiate surrogate model
 modelInLibrary = collection.find_one({"_id": 'bubbleGrowth1'})
+
 modelFunction = client.test.surrogate_function.find_one(
     {"_id": str(modelInLibrary['surrogateFunction'])})
+
 model = SurrogateModel.load('bubbleGrowth1')
+
 # Fit the data
 fittedParams1, ierr = leastsq(residual, array(
     [1, 1, 1]), args=(T, R, kH1, c1, p1, G1_exact),xtol=1e-15)
 print 'fitted parameters: ', fittedParams1
+
 # a = leastsq(residual, array(
 #         [1, 1, 1]), args=(T, R, kH1, c1, p1, G1_exact), full_output=1)
 # print a
@@ -214,15 +218,18 @@ collection.update(
         }
     }
 )
+
 # Instantiate surrogate model
 modelInLibrary = collection.find_one({"_id": 'bubbleGrowth2'})
 modelFunction = client.test.surrogate_function.find_one(
     {"_id": str(modelInLibrary['surrogateFunction'])})
 model = SurrogateModel.load('bubbleGrowth2')
+
 # Fit the data
 fittedParams2, ierr = leastsq(residual, array(
     [1, 1, 1]), args=(T, R, kH2, c2, p2, G2_exact),xtol=1e-15)
 print 'fitted parameters: ', fittedParams2
+
 # Update the model
 collection.update(
     {'_id': 'bubbleGrowth2'},
@@ -233,16 +240,20 @@ collection.update(
         }
     }
 )
+
 # Calculate growth rate by surrogate model
 G1 = []
 model = SurrogateModel.load('bubbleGrowth1')
 for i, Te in enumerate(T):
     G1.append(surrModel(fittedParams1, T[i], R[i], kH1[i], c1[i], p1[i]))
+
 G2 = []
 model = SurrogateModel.load('bubbleGrowth2')
 for i, Te in enumerate(T):
     G2.append(surrModel(fittedParams2, T[i], R[i], kH2[i], c2[i], p2[i]))
+
 f = open('./results/outputs_sGR.out', 'w')
 for i, Ge in enumerate(G1):
     f.write('{0:.8e}  {1:.8e}\n'.format(G1[i], G2[i]))
 f.close()
+
