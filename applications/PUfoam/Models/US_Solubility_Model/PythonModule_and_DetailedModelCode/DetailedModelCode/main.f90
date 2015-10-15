@@ -1,51 +1,47 @@
 
 
-!
-!THIS CODE WAS WRITTEN AT 
-!UNIVERSITY OF STUTTGART,
-!INSTITUTE OF TECHNICAL THERMODYNAMICS AND THERMAL PROCESS ENGINEERING
-!BY
-!JOACHIM GROSS
-!
-!
-!
-!
+!>
+!!THIS CODE WAS WRITTEN AT 
+!!UNIVERSITY OF STUTTGART,
+!!INSTITUTE OF TECHNICAL THERMODYNAMICS AND THERMAL PROCESS ENGINEERING
+!!BY
+!!JOACHIM GROSS AND JONAS MAIRHOFER
+!!
 
 
 
 
 
-!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-! This program calculates solubilities (Henry coefficients) using the 
-! PC-SAFT equation of state.
-! The input parameters are read from the file "in.txt" which has to
-! be in the same directory as the executable.
-!
-! The input file must have the following format:
-! Line1:       Value of temperature in Kelvin
-! Line2:       Number of components present in the system (ncomp)
-! Line3        Name of component 1
-! ...
-! Line3+ncomp Name of component ncomp
-! Line3+ncomp+1 Molar (overall) concentration of component 1
-! ...
-! Line3+2ncomp  Molar (overall) concentration of component ncomp
-!
-! For a binary system, these molar concentrations are only treated as an initial guess and may be set to e.g. 0.5
-!
-!
-! So far, pressure is set to 1bar in all calculaions
-!
-!
-!If you would like to use this code in your work, please cite the 
-!following publications:
-!
-!Gross, Joachim, and Gabriele Sadowski. "Perturbed-chain SAFT: An equation of state based on a perturbation theory for chain molecules." Industrial & engineering chemistry research 40.4 (2001): 1244-1260.
-!Gross, Joachim, and Gabriele Sadowski. "Application of the perturbed-chain SAFT equation of state to associating systems." Industrial & engineering chemistry research 41.22 (2002): 5510-5515.
-!Gross, Joachim, and Jadran Vrabec. "An equation‐of‐state contribution for polar components: Dipolar molecules." AIChE journal 52.3 (2006): 1194-1204.
-
-!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-! 
+!>WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+!! This program calculates solubilities (Henry coefficients) using the 
+!! PC-SAFT equation of state.
+!! The input parameters are read from the file "in.txt" which has to
+!! be in the same directory as the executable.
+!!
+!! The input file must have the following format:
+!! Line1:       Value of temperature in Kelvin
+!! Line2:       Number of components present in the system (ncomp)
+!! Line3        Name of component 1
+!! ...
+!! Line3+ncomp Name of component ncomp
+!! Line3+ncomp+1 Molar (overall) concentration of component 1
+!! ...
+!! Line3+2ncomp  Molar (overall) concentration of component ncomp
+!!
+!! For a binary system, these molar concentrations are only treated as an initial guess and may be set to e.g. 0.5
+!!
+!!
+!! So far, pressure is set to 1bar in all calculaions
+!!
+!!
+!!If you would like to use this code in your work, please cite the 
+!!following publications:
+!!
+!!Gross, Joachim, and Gabriele Sadowski. "Perturbed-chain SAFT: An equation of state based on a perturbation theory for chain molecules." Industrial & engineering chemistry research 40.4 (2001): 1244-1260.
+!!Gross, Joachim, and Gabriele Sadowski. "Application of the perturbed-chain SAFT equation of state to associating systems." Industrial & engineering chemistry research 41.22 (2002): 5510-5515.
+!!Gross, Joachim, and Jadran Vrabec. "An equation‐of‐state contribution for polar components: Dipolar molecules." AIChE journal 52.3 (2006): 1194-1204.
+!!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+!! 
 
 
 PROGRAM PC_SAFT
@@ -58,9 +54,9 @@ PROGRAM PC_SAFT
  IMPLICIT NONE
 
  
-! ---------------------------------------------------------------------- 
-!Variables 
-! ----------------------------------------------------------------------
+!> ---------------------------------------------------------------------- 
+!!Variables 
+!! ----------------------------------------------------------------------
 
  REAL                                   :: tc,pc,chemPot_total(nc)
  REAL                                   :: rhob(2,0:nc),density(np)
@@ -68,9 +64,9 @@ PROGRAM PC_SAFT
  INTEGER                                :: compID,i
 
 
-! ---------------------------------------------------------------------- 
-!Read information from inputfile "in.txt"
-! ----------------------------------------------------------------------
+!> ---------------------------------------------------------------------- 
+!!Read information from inputfile "in.txt"
+!! ----------------------------------------------------------------------
  
       filename='./in.txt'
       CALL file_open(filename,77)       ! open input file
@@ -89,9 +85,9 @@ PROGRAM PC_SAFT
  
  
  
-! ---------------------------------------------------------------------- 
-!General simulation set up
-! ----------------------------------------------------------------------
+!> ---------------------------------------------------------------------- 
+!!General simulation set up
+!! ----------------------------------------------------------------------
   
       num = 1                     ! (num=0: using analytical derivatives of EOS)
                                   ! (num=1: using numerical derivatives of EOS)
@@ -108,9 +104,9 @@ PROGRAM PC_SAFT
       ensemble_flag = 'tp'        ! this specifies, whether the eos-subroutines 
                               ! are executed for constant 'tp' or for constant 'tv'
  
-! ----------------------------------------------------------------------
-!Start phase equilibrium calculation
-! ----------------------------------------------------------------------
+!> ----------------------------------------------------------------------
+!!Start phase equilibrium calculation
+!! ----------------------------------------------------------------------
 
       CALL EOS_CONST (ap, bp, dnm) ! read EOS constants
 
