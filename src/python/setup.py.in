@@ -8,7 +8,6 @@ args = {
     'version': '${PACKAGE_VERSION}',
     'package_dir': { 'modena': '${CMAKE_CURRENT_SOURCE_DIR}' },
     'packages': ['modena'],
-    'keywords'='multi-scale modelling',
 } # end ARGS
 
 if not '${PYMODENA_LIB_LOCATION}' == '':
