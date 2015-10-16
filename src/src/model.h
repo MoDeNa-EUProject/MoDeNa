@@ -82,7 +82,7 @@ typedef struct modena_substitute_model_t
 // modena_model_t stores a surrogate model
 typedef struct modena_model_t
 {
-    PyObject_HEAD;
+    PyObject_HEAD
 
     PyObject *pModel;
 

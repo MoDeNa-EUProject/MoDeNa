@@ -8,13 +8,6 @@ args = {
     'version': '${PACKAGE_VERSION}',
     'package_dir': { 'modena': '${CMAKE_CURRENT_SOURCE_DIR}' },
     'packages': ['modena'],
-    'classifiers'=[
-        "License :: GNU - General Public License (GPL)",
-        "Programing Language :: Python, C, FORTRAN",
-        "Development Status :: 0 - Beta",
-        "Intended Audience :: Science and Engineering",
-        "Topic :: Multi-scale Modelling",
-    ],
     'keywords'='multi-scale modelling',
 } # end ARGS
 

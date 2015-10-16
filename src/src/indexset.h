@@ -60,7 +60,7 @@ extern PyObject *modena_IndexSet;
 // modena_index_set_t stores a index set
 typedef struct modena_index_set_t
 {
-    PyObject_HEAD;
+    PyObject_HEAD
 
     PyObject *pIndexSet;
 
