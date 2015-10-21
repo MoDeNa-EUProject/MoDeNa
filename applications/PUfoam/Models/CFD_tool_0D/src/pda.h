@@ -1,14 +1,16 @@
-
+/** @file pda.h
+    @brief Product Difference Algorithm
+    @param double *we - weights of quadrature approximation
+    @param double *vi - nodes of quadrature approximation
+    @param double *mom - moments
+    @param int &n - number of nodes
+    @return void
+*/
 void PDA(double *, double *, double *, int &);
 
 void PDA(double *we, double *vi, double *mom, int &n)
 {
-// PDA - Product Difference Algorithm
-// @param - double *we - weights of quadrature approximation
-// @param - double *vi - nodes of quadrature approximation
-// @param - double *mom - moments
-// @param - int &n - number of nodes
-    
+   
 // Construct P Matrix 
     int i,j;
 

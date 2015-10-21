@@ -1,5 +1,7 @@
-!subroutines for evaluation of gas radiative properties
-!author: pavel.ferkl@vscht.cz
+!> @file
+!! subroutines for evaluation of radiative properties of gas phase
+!! @author    Pavel Ferkl
+!! @ingroup   foam_cond
 module gasprop
     use constants
     implicit none
@@ -7,7 +9,7 @@ module gasprop
     public abscoeffgas
 contains
 !********************************BEGINNING*************************************
-!evaluates gas absorption coefficient
+!> evaluates gas absorption coefficient
 real(dp) function abscoeffgas(lambda)
     use interpolation
     real(dp), intent(in) :: lambda  !wavelength

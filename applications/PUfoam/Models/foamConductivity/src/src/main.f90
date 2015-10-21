@@ -1,5 +1,7 @@
-!homogenization approach to heat transfer in polymer foams
-!author: pavel.ferkl@vscht.cz
+!> @file
+!! Main program. Homogenization approach to heat transfer in polymer foams
+!! @author    Pavel Ferkl
+!! @ingroup   foam_cond
 program hahtf
     use tests
     use ioutils

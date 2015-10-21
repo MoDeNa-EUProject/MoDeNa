@@ -1,18 +1,21 @@
-!subroutines for evaluation of film radiative properties
-!author: pavel.ferkl@vscht.cz
+!> @file
+!! subroutines for evaluation of strut radiative properties
+!! struts are modeled as cylinders
+!! @author    Pavel Ferkl
+!! @ingroup   foam_cond
 module cylprop
     use constants
     use solidprop
     use specfun
     implicit none
     private
-    public cylconst,trextcoeffintstrut,extcoeffintstrut,scattcoeffintstrut
+    public trextcoeffintstrut,extcoeffintstrut,scattcoeffintstrut,cylconst
 contains
 !********************************BEGINNING*************************************
-!determine efficiency factors of scattering, extinction and asymmetry factor
-!of infinitely long cylinder
-!according to Dombrovsky: Thermal Radiation in Disperse Systems: An Engineering
-!Approach (2010)
+!> determine efficiency factors of scattering, extinction and asymmetry factor
+!!of infinitely long cylinder
+!!according to Dombrovsky: Thermal Radiation in Disperse Systems: An Engineering
+!!Approach (2010)
 subroutine cylconst(lambda,theta,radius,Qs,Qt,gcyl)
     real(dp), intent(in) :: &
         lambda,&  !wavelength
@@ -93,7 +96,7 @@ subroutine cylconst(lambda,theta,radius,Qs,Qt,gcyl)
 !    Qt=Qt*(0.0015_dp*(lambda/(2*radius))**3-0.0219_dp*(lambda/(2*radius))**2+&
         ! 0.0688_dp*(lambda/(2*radius))+0.7639_dp)
 
-    ! asymmetry factor is not needed, we need gcyl according to Placido, 
+    ! asymmetry factor is not needed, we need gcyl according to Placido,
     ! calculated as Dombrovsky
 !    mue=Qse*sin(theta)**2*x/(4*cos(theta)**2)
 !    muh=Qsh*sin(theta)**2*x/(4*cos(theta)**2)
@@ -159,7 +162,7 @@ end subroutine cylconst
 
 
 !********************************BEGINNING*************************************
-!evaluates transport extinction coefficient of strut integrand
+!> evaluates transport extinction coefficient of strut integrand
 real(dp) function trextcoeffintstrut ( theta )
     real(dp), intent(in) :: theta
     real(dp) :: Qs,Qt,gcyl
@@ -170,7 +173,7 @@ end function trextcoeffintstrut
 
 
 !********************************BEGINNING*************************************
-!evaluates extinction coefficient of strut integrand
+!> evaluates extinction coefficient of strut integrand
 real(dp) function extcoeffintstrut ( theta )
     real(dp), intent(in) :: theta
     real(dp) :: Qs,Qt,gcyl
@@ -181,7 +184,7 @@ end function extcoeffintstrut
 
 
 !********************************BEGINNING*************************************
-!evaluates scattering coefficient of strut integrand
+!> evaluates scattering coefficient of strut integrand
 real(dp) function scattcoeffintstrut ( theta )
     real(dp), intent(in) :: theta
     real(dp) :: Qs,Qt,gcyl

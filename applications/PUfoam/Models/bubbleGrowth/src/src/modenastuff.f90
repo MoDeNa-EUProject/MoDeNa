@@ -1,6 +1,8 @@
-!contains definitions of modena variables
-!creates and destroys modena models
-!pavel.ferkl@vscht.cz
+!> @file
+!! contains definitions of modena variables
+!! creates and destroys modena models
+!! @author    Pavel Ferkl
+!! @ingroup   bblgr
 module modenastuff
     use in_out
     use iso_c_binding
@@ -57,7 +59,7 @@ module modenastuff
     type(c_ptr) :: kinOutputs = c_null_ptr
 contains
 !********************************BEGINNING*************************************
-!creates Modena models
+!> creates Modena models
 subroutine createModenaModels
     integer :: i
     if (visc_model==3) then
@@ -174,7 +176,7 @@ end subroutine createModenaModels
 
 
 !********************************BEGINNING*************************************
-!destroys Modena models
+!> destroys Modena models
 subroutine destroyModenaModels
     integer :: i
     if (visc_model==3) then

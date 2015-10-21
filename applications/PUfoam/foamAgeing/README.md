@@ -1,3 +1,5 @@
+@ingroup app_aging
+
 ## Aging of polyurethane foam thermal properties
 ### Physical background
 PU foam is blown by CO2 and cyclo-pentane. In time, CO2 is

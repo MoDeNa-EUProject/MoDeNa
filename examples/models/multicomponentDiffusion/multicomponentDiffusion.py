@@ -53,7 +53,7 @@ f = CFunction(
         'p': { 'min': 0, 'max': 9e99, 'argPos': 1 },
     },
     outputs={
-        'D_AB': { 'min': 0, 'max': 9e99, 'argPos': 0 },
+        'D[A]': { 'min': 0, 'max': 9e99, 'argPos': 0 },
     },
     parameters={
         'W[A]': { 'min': 0, 'max': 9e99, 'argPos': 0 },

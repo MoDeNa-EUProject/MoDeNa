@@ -1,4 +1,5 @@
 /*
+@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -27,13 +28,13 @@ License
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Interface Library
+@endcond
+@file
 
-Authors
-    Henrik Rusche
+Low-level interface library
 
-Contributors
+@author Henrik Rusche
+@copyright  2014-2015, MoDeNa Project. GNU Public License.
 */
 
 #ifndef __INDEXSET_H__
@@ -57,7 +58,14 @@ extern PyTypeObject modena_index_set_tType;
 
 extern PyObject *modena_IndexSet;
 
-// modena_index_set_t stores a index set
+/**
+@addtogroup C_interface_library
+@{
+*/
+
+/**
+stores an index set
+*/
 typedef struct modena_index_set_t
 {
     PyObject_HEAD
@@ -95,6 +103,7 @@ size_t modena_index_set_iterator_end
 
 void modena_index_set_destroy(modena_index_set_t *indexSet);
 
+/** @} */ // end of C_interface_library
 
 __END_DECLS
 

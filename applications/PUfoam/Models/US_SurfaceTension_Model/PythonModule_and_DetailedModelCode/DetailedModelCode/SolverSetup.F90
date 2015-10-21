@@ -1,3 +1,9 @@
+!>This file contains the subroutine which sets the method used to
+!!solve the nonlinear system of equations depending on the specifications
+!!made in the makefile.
+
+
+
  
 Subroutine SolverSetup
 

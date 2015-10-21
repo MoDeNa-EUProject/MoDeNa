@@ -50,7 +50,7 @@ launchpad.reset('', require_password=False)
 # create the individual FireWorks and Workflow
 # Source code in src/twoTanksMacroscopicProblem.C
 
-wf = Workflow([Firework(twoTank.m)], {}, name="simulation")
+wf = Workflow([Firework(twoTankFortran.m)], {}, name="simulation")
 
 # store workflow and launch it locally
 launchpad.add_wf(wf)

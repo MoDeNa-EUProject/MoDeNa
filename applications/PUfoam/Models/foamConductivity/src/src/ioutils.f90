@@ -1,12 +1,14 @@
-!i/o utilities
-!pavel.ferkl@vscht.cz
+!> @file
+!! i/o utilities
+!! @author    Pavel Ferkl
+!! @ingroup   foam_aging
 module ioutils
     implicit none
     private
     public newunit,str
 contains
 !********************************BEGINNING*************************************
-! returns lowest i/o unit number not in use
+!> returns lowest i/o unit number not in use
 integer function newunit(unit) result(n)
     integer, intent(out), optional :: unit
     logical inuse
@@ -28,7 +30,7 @@ end function newunit
 
 
 !********************************BEGINNING*************************************
-! converts integer to string
+!> converts integer to string
 function str(k)
     character(len=20) :: str
     integer, intent(in) :: k

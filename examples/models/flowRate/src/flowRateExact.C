@@ -1,4 +1,5 @@
-/*
+/**
+@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -27,18 +28,18 @@ License
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    This code calculates the flowRate through a nozzle as a function of the
-    diameter, density and pressure upstream and pressure downstream. It uses
-    expressions from VDI Waermeatlas Lbd 4
+@endcond
+@file
+This code calculates the flowRate through a nozzle as a function of the
+diameter, density and pressure upstream and pressure downstream. It uses
+expressions from VDI Waermeatlas Lbd 4
 
-    In the simple twoTank example, this piece of code stands for a complex
-    microscopic code - such as full 3D CFD simulation.
+In the simple twoTank example, this piece of code stands for a complex
+microscopic code - such as full 3D CFD simulation.
 
-Authors
-    Henrik Rusche
-
-Contributors
+@author    Henrik Rusche
+@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@ingroup   twoTank
 */
 
 #include <stdio.h>

@@ -25,10 +25,12 @@ export PKG_CONFIG_PATH=${PKG_CONFIG_PATH:-}:${HOME}/lib/pkgconfig:/usr/local/lib
 export PYTHONPATH=${PYTHONPATH:-}:${HOME}/lib/python2.7/site-packages
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH:-}:${HOME}/lib/python2.7/site-packages:${HOME}/lib:/usr/local/lib
 
-# Compile project specific sources (only locally)
-cd src
-cmake .
-make
+# Compile project specific sources, i.e. "models":
+cmake --build "../models/flowRate/src/" --clean-first
+cmake --build "../models/twoTank/src/" --clean-first
+
+# Append path to the models directory to "PYTHONPATH":
+export PYTHONPATH="${PYTHONPATH}:../models"
 
 # Initialise the model in the database
 ./initModel

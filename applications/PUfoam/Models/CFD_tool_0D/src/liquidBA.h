@@ -1,9 +1,13 @@
+/** @file liquidBA.h
+	@brief Maximum soluble physical blowing agent in the liquid mixture
+	@fn double LMax (double tm)
+	@param double tm - the input temperature 
+	@return maximum soluble blowing agent
+*/
 double LMax(double);
 
 double LMax (double tm)
 {
-// LMax - maximum allowable amount of liquid blowing agent in liquid	
-// @param - double tm, the input temperature.
 	double lMax,aa,hh,T0,ww;
 	switch (phBL) {
 		case 1:

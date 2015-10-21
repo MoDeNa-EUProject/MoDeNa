@@ -1,15 +1,17 @@
-!subroutines for calculation of geometric properties of the foam
-!author: pavel.ferkl@vscht.cz
+!> @file
+!! subroutines for calculation of geometric properties of the foam
+!! @author    Pavel Ferkl
+!! @ingroup   foam_cond
 module foamgeom
     use constants
+    use Solve_NonLin
     implicit none
     private
     public foam_morpholgy
 contains
 !********************************BEGINNING*************************************
-!determine all geometric parameters of the foam
+!> determine all geometric parameters of the foam
 subroutine foam_morpholgy
-    use Solve_NonLin
     integer, parameter :: n=2
     integer :: info
     real (dp) :: tol=1e-8_dp
@@ -105,9 +107,8 @@ end subroutine foam_morpholgy
 
 
 !********************************BEGINNING*************************************
-!residual function for fs and dstrut
+!> residual function for fs and dstrut
 subroutine fcn_dwall(n,x,fvec,iflag)
-    use Solve_NonLin
     integer, intent(in) :: n
     real (dp), intent(in) :: x(n)
     real (dp), intent(out) :: fvec(n)
@@ -126,9 +127,8 @@ end subroutine fcn_dwall
 
 
 !********************************BEGINNING*************************************
-!residual function for dwall and dstrut
+!> residual function for dwall and dstrut
 subroutine fcn_fs(n,x,fvec,iflag)
-    use Solve_NonLin
     integer, intent(in) :: n
     real (dp), intent(in) :: x(n)
     real (dp), intent(out) :: fvec(n)
@@ -147,9 +147,8 @@ end subroutine fcn_fs
 
 
 !********************************BEGINNING*************************************
-!residual function for dwall and fs
+!> residual function for dwall and fs
 subroutine fcn_dstrut(n,x,fvec,iflag)
-    use Solve_NonLin
     integer, intent(in) :: n
     real (dp), intent(in) :: x(n)
     real (dp), intent(out) :: fvec(n)

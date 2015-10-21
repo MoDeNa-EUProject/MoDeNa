@@ -1,7 +1,12 @@
-
+!> @file
+!! Main algorithm of for diffusion of gases in the foam.
+!! @author    Michal Vonka
+!! @author    Pavel Ferkl
+!! @ingroup   foam_aging
 
 !*******************************************************************************************
 !0 pointer allocated,
+!> model supplied to the integrator
 subroutine modelPU(neq, time, ystate, yprime)	! ODEPACK call
 ! 12/07/23 - change of model to describe diffusion on H2 and N2 throug PS, wall
 !	is discretized into finite elements, pressure in cell is in equilibrium to the

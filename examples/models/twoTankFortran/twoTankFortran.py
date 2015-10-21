@@ -37,7 +37,7 @@ Contributors
 '''
 
 from modena.Strategy import BackwardMappingScriptTask
-
+import os
 
 __author__ = 'Henrik Rusche'
 __copyright__ = 'Copyright 2014, MoDeNa Project'
@@ -49,5 +49,5 @@ __date__ = 'Sep 4, 2014'
 
 # Source code in src/twoTanksMacroscopicProblem.C
 m = BackwardMappingScriptTask(
-    script='../src/twoTanksMacroscopicProblemFortran'
+    script=os.path.dirname(os.path.abspath(__file__))+'/src/twoTanksMacroscopicProblemFortran'
 )

@@ -1,4 +1,4 @@
-'''
+'''@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -26,15 +26,17 @@ License
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
+@endcond'''
 
-Description
-    Python library of FireTasks
+"""
+@file
+Surrogate function, model definition and backward mapping FireTask for
+Foam conductivity model.
 
-Authors
-    Henrik Rusche
-
-Contributors
-'''
+@author    Pavel Ferkl
+@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@ingroup   app_aging
+"""
 
 import os
 import modena
@@ -47,18 +49,9 @@ from blessings import Terminal
 from jinja2 import Template
 import polymerConductivity
 
-# Create terminal for colour output
+## Create terminal for colour output
 term = Terminal()
 
-
-__author__ = 'Henrik Rusche'
-__copyright__ = 'Copyright 2014, MoDeNa Project'
-__version__ = '0.2'
-__maintainer__ = 'Henrik Rusche'
-__email__ = 'h.rusche@wikki.co.uk.'
-__date__ = 'Sep 4, 2014'
-
-# ********************************* Class ************************************ #
 @explicit_serialize
 class FoamConductivityExactTask(FireTaskBase):
     """
@@ -119,6 +112,10 @@ class FoamConductivityExactTask(FireTaskBase):
 
         return FWAction(mod_spec=[{'_push': self['point']}])
 
+## Surrogate function for thermal conductivity of the foam.
+#
+# Foam conductivity is a function of porosity, cell size, strut content,
+# conductivity of gas and solid phase and temperature.
 f_foamConductivity = CFunction(
     Ccode='''
 #include "modena.h"
@@ -175,7 +172,7 @@ void tcfoam_SM
     },
 )
 
-
+# use input file to Foam ageing application to initialize with reasonable data.
 fname='input.in'
 
 try:
@@ -227,6 +224,9 @@ initialPoints_foamConductivity_auto = {
     'T': T,
 }
 
+## Surrogate model for foam conductivity
+#
+# Backward mapping model is used.
 m_foamConductivity = BackwardMappingModel(
     _id='foamConductivity',
     surrogateFunction=f_foamConductivity,

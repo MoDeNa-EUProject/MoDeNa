@@ -26,20 +26,18 @@
 !
 !    You should have received a copy of the GNU General Public License along
 !    with Modena.  If not, see <http://www.gnu.org/licenses/>.
-!
-!Description
-!    Solving the two tank problem the MoDeNa way.
-!
-!    A prototypical macros-scopic code embeds a micro-scale model (flowRate)
-!    through the MoDeNa interface library.
-!
-!    Re-programmed to Fortran
-!
-!Authors
-!    Henrik Rusche
-!
-!Contributors
-!    Pavel Ferkl
+
+!>
+!! Fortran bindings for MoDeNa low-level interface library
+!!
+!! @author Henrik Rusche
+!! @author Pavel Ferkl
+!! @copyright  2014-2015, MoDeNa Project. GNU Public License.
+
+!>
+!! @defgroup Fortran_interface_library
+!! @{
+
 module fmodena !command line arguments not implemented yet
     use iso_c_binding
 
@@ -111,3 +109,7 @@ module fmodena !command line arguments not implemented yet
     end interface
 
 end module fmodena
+
+!>
+!!@}
+

@@ -1,4 +1,4 @@
-'''
+'''@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -26,15 +26,16 @@ License
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
+@endcond'''
 
-Description
-    Python library of FireTasks
+"""
+@file
+Surrogate function and model definitions for polymer viscosity model.
 
-Authors
-    Henrik Rusche
-
-Contributors
-'''
+@author    Pavel Ferkl
+@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@ingroup   app_foaming
+"""
 
 import os
 import modena
@@ -47,17 +48,12 @@ from fireworks.utilities.fw_utilities import explicit_serialize
 from blessings import Terminal
 from jinja2 import Template
 
-# Create terminal for colour output
+## Create terminal for colour output
 term = Terminal()
 
-
-__author__ = 'Henrik Rusche'
-__copyright__ = 'Copyright 2014, MoDeNa Project'
-__version__ = '0.2'
-__maintainer__ = 'Henrik Rusche'
-__email__ = 'h.rusche@wikki.co.uk.'
-__date__ = 'Sep 4, 2014'
-
+## Surrogate function for polymer viscosity.
+#
+# Polymer viscosity is a function of temperature and conversion.
 f_polymerViscosity = CFunction(
     Ccode='''
 #include "modena.h"
@@ -102,16 +98,23 @@ void viscosity_SM
     },
 )
 
-# literature data http://dx.doi.org/10.1002/aic.690280213
+## [literature data](http://dx.doi.org/10.1002/aic.690280213)
 par = [4.1e-8, 38.3e3, 4.0, -2.0, 0.85]
-# alternative set of literature data http://dx.doi.org/10.1002/aic.690280213
+
+## [literature data](http://dx.doi.org/10.1002/aic.690280213)
 par2 = [10.3e-8, 41.3e3, 1.5, 1.0, 0.65]
-# http://dx.doi.org/10.1002/(SICI)1097-4628(19961017)62:3<567::AID-APP14>3.0.CO;2-W
+
+## [literature data][1]
+## [1]: http://dx.doi.org/10.1002/(SICI)1097-4628(19961017)62:3<567::AID-APP14>3.0.CO;2-W
 par3 = [3.32e-8, 42.9e3, 2.32, 1.4, 0.64]
-# literature data http://dx.doi.org/10.1002/aic.690280213,
-# gel point changed to 0.5 (Baser and Khakhar)
+
+## based on [literature data](http://dx.doi.org/10.1002/aic.690280213), but
+## gel point changed to 0.5 (Baser and Khakhar)
 par4 = [4.1e-8, 38.3e3, 4.0, -2.0, 0.5]
 
+## Surrogate model for polymer viscosity
+#
+# Forward mapping model is used.
 m_polymerViscosity = ForwardMappingModel(
     _id='polymerViscosity',
     surrogateFunction=f_polymerViscosity,
@@ -125,4 +128,3 @@ m_polymerViscosity = ForwardMappingModel(
         'mu': {'min': 0, 'max': +9e99},
     },
 )
-

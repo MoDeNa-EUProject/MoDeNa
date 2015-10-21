@@ -1,5 +1,7 @@
 *.json
 *.in
+*.txt
+!CMakeLists.txt
 *~
 # directories
 func_*/

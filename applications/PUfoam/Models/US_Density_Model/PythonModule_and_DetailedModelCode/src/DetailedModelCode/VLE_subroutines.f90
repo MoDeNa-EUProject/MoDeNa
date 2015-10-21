@@ -1,30 +1,37 @@
-!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-! SUBROUTINE start_var
-!
-! This subroutine generates a converged solution for binary systems
-! or performes a flash calculation for mixtues. This routine is a
-! fairly weak point of the program.
-!
-! IF a polymer is considered, starting values for mole fractions
-! are determined from the SUBROUTINGE POLY_STA_VAR (see below). The
-! polymer needs to be placed as component 1 (first line) in INPUT
-! file.
-!
-! A phase equilib. iteration is started at the end of this routine.
-! If no solution is found (converg=0), the program will stop within
-! this routine.
-!
-! Currently, this routine assumes two-phase equilibrium and derives
-! starting values (xi,density) only for two phases.
-!
-! Prerequisites are:
-! SUBROUTINE INPUT needs to be called prior to this routine, because
-! all pure comp. parameters as well as (T,P,kij) need to be in place.
-! Also, the variable to be iterated "it(i)" and the variables to be
-! calculated through the summation relation "sum_rel(i)" have to be
-! defined.
-!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-!
+!> This file contains the subroutines which perform and control the 
+!! phase equilibrium calculation.
+
+
+
+
+
+!>WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+!! SUBROUTINE start_var
+!!
+!! This subroutine generates a converged solution for binary systems
+!! or performes a flash calculation for mixtues. This routine is a
+!! fairly weak point of the program.
+!!
+!! IF a polymer is considered, starting values for mole fractions
+!! are determined from the SUBROUTINGE POLY_STA_VAR (see below). The
+!! polymer needs to be placed as component 1 (first line) in INPUT
+!! file.
+!!
+!! A phase equilib. iteration is started at the end of this routine.
+!! If no solution is found (converg=0), the program will stop within
+!! this routine.
+!!
+!! Currently, this routine assumes two-phase equilibrium and derives
+!! starting values (xi,density) only for two phases.
+!!
+!! Prerequisites are:
+!! SUBROUTINE INPUT needs to be called prior to this routine, because
+!! all pure comp. parameters as well as (T,P,kij) need to be in place.
+!! Also, the variable to be iterated "it(i)" and the variables to be
+!! calculated through the summation relation "sum_rel(i)" have to be
+!! defined.
+!!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+
  SUBROUTINE start_var(converg)
 !
  USE BASIC_VARIABLES
@@ -255,39 +262,39 @@ END SUBROUTINE start_var
 
 
 
-!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-! SUBROUTINE objective_ctrl
-!
-! This subroutine controls the iso-fugacity iteration. It uses
-! the variables defined in the array "val_init". If successfull,
-! the converged values are written to "val_conv", and the flag
-! converg is set to 1.
-! See also above desciption for subroutine PHASE_EQUILIB
-! This routine calls SUBROUTINE HYBRID, which is a solver (modified
-! POWELL HYBRID METHOD). HYBRID is freely available for non-commercial
-! applications. HYBRID requires three definitions:
-! 1.the number of equations to be solved (=No. of variables to be
-!   iterated). The appropriate parameter is: "n_unkw"
-! 2.the equations to be iterated, they are here gathered in the SUB-
-!   ROUTINE OBJEC_FCT (see below). Since HYBRID is a root finder,
-!   these objective functions are iterated to be zero (essentially,
-!   OBJEC_FCT contains the iso-fugacity relation.
-! 3.an array of variables is required, containing the quatities to be
-!   iterated. This array is termed "y(i)"
-!
-!   INPUT VARIABLES:
-! val_init(i)   array containing (densities,T,P,lnx's) serving as
-!               starting values for the phase equilibrium calculation
-! it(i)         contains the information, which variable is  deter-
-!               mined iteratively. For syntax refer e.g.to SUB BINMIX.
-! sum_rel(i)    indicates, which mole fraction is determined from the
-!               summation relation sum(xi)=1
-!
-!   OUTPUT VARIABLES:
-! val_conv(i)   array containing the converged system variables
-!               analogous to "val_init"
-! converg     0 if no convergence achieved, 1 if converged solution
-!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+!>WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+!! SUBROUTINE objective_ctrl
+!!
+!! This subroutine controls the iso-fugacity iteration. It uses
+!! the variables defined in the array "val_init". If successfull,
+!! the converged values are written to "val_conv", and the flag
+!! converg is set to 1.
+!! See also above desciption for subroutine PHASE_EQUILIB
+!! This routine calls SUBROUTINE HYBRID, which is a solver (modified
+!! POWELL HYBRID METHOD). HYBRID is freely available for non-commercial
+!! applications. HYBRID requires three definitions:
+!! 1.the number of equations to be solved (=No. of variables to be
+!!   iterated). The appropriate parameter is: "n_unkw"
+!! 2.the equations to be iterated, they are here gathered in the SUB-
+!!   ROUTINE OBJEC_FCT (see below). Since HYBRID is a root finder,
+!!   these objective functions are iterated to be zero (essentially,
+!!   OBJEC_FCT contains the iso-fugacity relation.
+!! 3.an array of variables is required, containing the quatities to be
+!!   iterated. This array is termed "y(i)"
+!!
+!!   INPUT VARIABLES:
+!! val_init(i)   array containing (densities,T,P,lnx's) serving as
+!!               starting values for the phase equilibrium calculation
+!! it(i)         contains the information, which variable is  deter-
+!!               mined iteratively. For syntax refer e.g.to SUB BINMIX.
+!! sum_rel(i)    indicates, which mole fraction is determined from the
+!!               summation relation sum(xi)=1
+!!
+!!   OUTPUT VARIABLES:
+!! val_conv(i)   array containing the converged system variables
+!!               analogous to "val_init"
+!! converg     0 if no convergence achieved, 1 if converged solution
+!!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
 !
  SUBROUTINE objective_ctrl (converg)
 !
@@ -409,19 +416,19 @@ END SUBROUTINE objective_ctrl
 
 
 
-!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-! SUBROUTINE objec_fct
-!
-! This subroutine contains the equations to be solved numerically
-! (iso-fugacity: fi'-fi''=0) as well as other dependent equations,
-! which can be solved analytically, namely the summation relation
-! xi=1-sum(xj) or the condition of equal charge for electrolyte
-! solutions.
-! This subroutine is required and controlled by the solver HBRD !
-! HBRD varies the variables "y(i)" and eveluates the result of
-! these changes from this routine.
-!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-!
+!>WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+!! SUBROUTINE objec_fct
+!!
+!! This subroutine contains the equations to be solved numerically
+!! (iso-fugacity: fi'-fi''=0) as well as other dependent equations,
+!! which can be solved analytically, namely the summation relation
+!! xi=1-sum(xj) or the condition of equal charge for electrolyte
+!! solutions.
+!! This subroutine is required and controlled by the solver HBRD !
+!! HBRD varies the variables "y(i)" and eveluates the result of
+!! these changes from this routine.
+!!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+!!
  SUBROUTINE objec_fct ( iter_no, y, residu, dummy )
 !
  USE BASIC_VARIABLES
@@ -500,13 +507,13 @@ END SUBROUTINE objec_fct
 
 
 
-!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-! REAL FUNCTION isofugacity
-!
-! calculates the deviation from the condition of equal fugacities in
-! logarithmic form.
-!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-!
+!>WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+!! REAL FUNCTION isofugacity
+!!
+!! calculates the deviation from the condition of equal fugacities in
+!! logarithmic form.
+!!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+!!
  REAL FUNCTION isofugacity (i,phase,lnphi)
 !
  USE BASIC_VARIABLES
@@ -659,15 +666,15 @@ CALL x_summation
 END SUBROUTINE vle_min
 
 
-!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-! SUBROUTINE phase_stability
-!
-! the index 'LLE_check' is for the starting density (which determines
-! whether a liquid or vapor phase is found) of the trial phase. The
-! feed-point exits either as a vapor or as a liquid. If it can exist as
-! both (feedphases=2), then both states are tested.
-!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-!
+!>WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+!! SUBROUTINE phase_stability
+!!
+!! the index 'LLE_check' is for the starting density (which determines
+!! whether a liquid or vapor phase is found) of the trial phase. The
+!! feed-point exits either as a vapor or as a liquid. If it can exist as
+!! both (feedphases=2), then both states are tested.
+!!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+!!
  SUBROUTINE phase_stability ( lle_check, flashcase, ph_split )
 !
  USE BASIC_VARIABLES
@@ -897,27 +904,27 @@ DEALLOCATE( optpara )
 END SUBROUTINE phase_stability
 
 
-!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-! SUBROUTINE select_sum_rel
-!
-! This subroutine determines which component of a phase "ph" is calculated
-! from the summation relation x_i = 1 - sum(x_j). The other components are,
-! by default, said to be iterated during the phase equilibrium calculation.
-!
-! Note that for flash calculations not all of these mole fractions are in
-! fact iterated - this is raken care of in "determine_flash_it".
-!
-! ph           phase
-! excl         exclude comp. n
-! startindex   assign it(startindex) for quantities to be iterated
-!              (further it(startindex+1) is assigned, for a ternary
-!              mixture, etc.)
-!
-! sum_index    indicates the component, with the largest mole
-!              fraction. If ph=1 and sum_index=2, we define
-!              sum_rel(ph=1)='x12', so that this component is
-!              calculated from the summation relation.
-!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+!>WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+!! SUBROUTINE select_sum_rel
+!!
+!! This subroutine determines which component of a phase "ph" is calculated
+!! from the summation relation x_i = 1 - sum(x_j). The other components are,
+!! by default, said to be iterated during the phase equilibrium calculation.
+!!
+!! Note that for flash calculations not all of these mole fractions are in
+!! fact iterated - this is raken care of in "determine_flash_it".
+!!
+!! ph           phase
+!! excl         exclude comp. n
+!! startindex   assign it(startindex) for quantities to be iterated
+!!              (further it(startindex+1) is assigned, for a ternary
+!!              mixture, etc.)
+!!
+!! sum_index    indicates the component, with the largest mole
+!!              fraction. If ph=1 and sum_index=2, we define
+!!              sum_rel(ph=1)='x12', so that this component is
+!!              calculated from the summation relation.
+!!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
 !
  SUBROUTINE select_sum_rel (ph,excl,startindex)
 !
@@ -1266,21 +1273,21 @@ END SUBROUTINE determine_flash_it2
 END SUBROUTINE poly_sta_var
 
 
-!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-! SUBROUTINE x_summation
-!
-! This subroutine solves the summation relation: xi=1-sum(xj)
-! The variable "sum_rel(i)" contains the information, which mole
-! fraction is the one to be calculated here. Consider the example
-! sum_rel(1)='x12'. The fist letter 'x' of this variable indicates,
-! that this subroutine needs to be executed and that the mole
-! fraction of a component has to be calculated. The second letter
-! of the string points to phase 1, the third letter to component 2.
-!     If the fist letter is 'e', not 'x', then the subroutine
-! NEUTR_CHARGE is called. This is the case of electrolyte solutions,
-! neutral charges have to be enforced in all phases (see below).
-!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-!
+!>WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+!! SUBROUTINE x_summation
+!!
+!! This subroutine solves the summation relation: xi=1-sum(xj)
+!! The variable "sum_rel(i)" contains the information, which mole
+!! fraction is the one to be calculated here. Consider the example
+!! sum_rel(1)='x12'. The fist letter 'x' of this variable indicates,
+!! that this subroutine needs to be executed and that the mole
+!! fraction of a component has to be calculated. The second letter
+!! of the string points to phase 1, the third letter to component 2.
+!!     If the fist letter is 'e', not 'x', then the subroutine
+!! NEUTR_CHARGE is called. This is the case of electrolyte solutions,
+!! neutral charges have to be enforced in all phases (see below).
+!!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+!!
  SUBROUTINE x_summation
 !
  USE BASIC_VARIABLES
@@ -1357,22 +1364,22 @@ END SUBROUTINE x_summation
 
 
 
-!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-! SUBROUTINE FUGACITY
-!
-! This subroutine serves as an interface to the eos-subroutines.
-! (1) case 1, when ensemble_flag = 'tp'
-!     The subroutine gives the residual chemical potential:
-!      mu_i^res(T,p,x)/kT = ln( phi_i )      
-!     and in addition, the densities that satisfy the specified p
-! (2) case 2, when ensemble_flag = 'tv'
-!     The subroutine gives the residual chemical potential:
-!     -->   mu_i^res(T,rho,x)/kT
-!     and in addition the resulting pressure for the given density.
-! The term "residual" means difference of the property and the same
-! property for an ideal gas mixture.
-!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-! 
+!>WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+!! SUBROUTINE FUGACITY
+!!
+!! This subroutine serves as an interface to the eos-subroutines.
+!! (1) case 1, when ensemble_flag = 'tp'
+!!     The subroutine gives the residual chemical potential:
+!!      mu_i^res(T,p,x)/kT = ln( phi_i )      
+!!     and in addition, the densities that satisfy the specified p
+!! (2) case 2, when ensemble_flag = 'tv'
+!!     The subroutine gives the residual chemical potential:
+!!     -->   mu_i^res(T,rho,x)/kT
+!!     and in addition the resulting pressure for the given density.
+!! The term "residual" means difference of the property and the same
+!! property for an ideal gas mixture.
+!!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+!! 
  SUBROUTINE FUGACITY (ln_phi)
 !
  USE BASIC_VARIABLES
@@ -1484,14 +1491,14 @@ ENDIF
 END SUBROUTINE enthalpy_etc
 
 
-!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-! SUBROUTINE dens_calc
-!
-! This subroutine serves as an interface to the EOS-routines. The
-! densities corresponding to given (P,T,xi) are calculated.
-! (Note: the more common interface is SUBROUTINE FUGACITY.
-!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-!
+!>WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+!! SUBROUTINE dens_calc
+!!
+!! This subroutine serves as an interface to the EOS-routines. The
+!! densities corresponding to given (P,T,xi) are calculated.
+!! (Note: the more common interface is SUBROUTINE FUGACITY.
+!!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+!!
  SUBROUTINE dens_calc(rho_phas)
 !
  USE BASIC_VARIABLES
@@ -1707,37 +1714,37 @@ END SUBROUTINE fden_calc
 
 
 
-!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-! SUBROUTINE phase_equilib
-!
-! This subroutine varies a predefined "running variable" and
-! organizes phase equilibrium calculations. For an isotherm
-! calculation e.g., the running variable is often the pressure. The
-! code is designed to deliver only converged solutions. In order to
-! enforce convergence, a step-width adjustment (reduction) is
-! implemented.
-
-!   VARIABLE LIST:
-! running     defines the running variable. For example: if you want
-!             to calculate the vapor pressure curve of a component
-!             starting from 100�C to 200�C, then running is 't'. The
-!             temperature is step-wise increased until the end-
-!             -temperature of 200�C is reached.
-!             (in this example end_x=200+273.15)
-! end_x       end point for running variable
-! steps       No. of calculation steps towards the end point of calc.
-! converg     0 if no convergence achieved, 1 if converged solution
-!
-!   PREREQUISITES:
-! prior to execution of this routine, the follwing variables have to
-! be defined: "val_init" an array containing the starting values for
-! this iteration, "it(i)" provides the information, which variable is
-! determined iteratively, "sum_rel(i)" indicates, which mole fraction
-! is determined from the summation relation sum(xi)=1. Furthermore,
-! the number of phases and the variables provided by the subroutine
-! INPUT are required.
-!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-! 
+!>WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+!! SUBROUTINE phase_equilib
+!!
+!! This subroutine varies a predefined "running variable" and
+!! organizes phase equilibrium calculations. For an isotherm
+!! calculation e.g., the running variable is often the pressure. The
+!! code is designed to deliver only converged solutions. In order to
+!! enforce convergence, a step-width adjustment (reduction) is
+!! implemented.
+!!
+!!   VARIABLE LIST:
+!! running     defines the running variable. For example: if you want
+!!             to calculate the vapor pressure curve of a component
+!!             starting from 100�C to 200�C, then running is 't'. The
+!!             temperature is step-wise increased until the end-
+!!             -temperature of 200�C is reached.
+!!             (in this example end_x=200+273.15)
+!! end_x       end point for running variable
+!! steps       No. of calculation steps towards the end point of calc.
+!! converg     0 if no convergence achieved, 1 if converged solution
+!!
+!!   PREREQUISITES:
+!! prior to execution of this routine, the follwing variables have to
+!! be defined: "val_init" an array containing the starting values for
+!! this iteration, "it(i)" provides the information, which variable is
+!! determined iteratively, "sum_rel(i)" indicates, which mole fraction
+!! is determined from the summation relation sum(xi)=1. Furthermore,
+!! the number of phases and the variables provided by the subroutine
+!! INPUT are required.
+!!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+!! 
  SUBROUTINE phase_equilib (end_x,steps,converg)
 !
  USE BASIC_VARIABLES
@@ -1885,21 +1892,21 @@ END SUBROUTINE phase_equilib
 END SUBROUTINE new_flash
 
 
-!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-! SUBROUTINE PHI_EOS
-!
-! This subroutine gives the residual chemical potential:
-! -->   mu_i^res(T,p,x)/kT = ln( phi_i )       when ensemble_flag = 'tp'
-! The required input for this case (T, p, x(nc)) and as a starting value
-! eta_start
-!
-! or it gives
-!
-! -->   mu_i^res(T,rho,x)/kT                   when ensemble_flag = 'tv'
-! The required input for this case (T, eta_start, x(nc)). Note that
-! eta_start is the specified density (packing fraction) in this case.
-!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-! 
+!>WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+!! SUBROUTINE PHI_EOS
+!!
+!! This subroutine gives the residual chemical potential:
+!! -->   mu_i^res(T,p,x)/kT = ln( phi_i )       when ensemble_flag = 'tp'
+!! The required input for this case (T, p, x(nc)) and as a starting value
+!! eta_start
+!!
+!! or it gives
+!!
+!! -->   mu_i^res(T,rho,x)/kT                   when ensemble_flag = 'tv'
+!! The required input for this case (T, eta_start, x(nc)). Note that
+!! eta_start is the specified density (packing fraction) in this case.
+!!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+!! 
  SUBROUTINE PHI_EOS
 !
  USE PARAMETERS
@@ -3210,14 +3217,14 @@ cp_res = cv_res - RGAS +RGAS*(zges+eta*t*df_drdt)**2   &
 END SUBROUTINE H_EOS_num
 
 
-!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-! SUBROUTINE DENSITY_ITERATION
-!
-! iterates the density until the calculated pressure 'pges' is equal to
-! the specified pressure 'p'. A Newton-scheme is used for determining
-! the root to the objective function  f(eta) = (pges / p ) - 1.0. 
-!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-!
+!>WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+!! SUBROUTINE DENSITY_ITERATION
+!!
+!! iterates the density until the calculated pressure 'pges' is equal to
+!! the specified pressure 'p'. A Newton-scheme is used for determining
+!! the root to the objective function  f(eta) = (pges / p ) - 1.0. 
+!!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+!!
  SUBROUTINE DENSITY_ITERATION
 !
  USE BASIC_VARIABLES, ONLY: num
@@ -3323,13 +3330,13 @@ END SUBROUTINE DENSITY_ITERATION
 
 
 
-!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-! SUBROUTINE F_EOS
-!
-! calculates the Helmholtz energy f/kT. The input to the subroutine is
-! (T,eta,x), where eta is the packing fraction.
-!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-!
+!>WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+!! SUBROUTINE F_EOS
+!!
+!! calculates the Helmholtz energy f/kT. The input to the subroutine is
+!! (T,eta,x), where eta is the packing fraction.
+!!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+!!
  SUBROUTINE F_EOS
 !
  USE PARAMETERS, ONLY: nc, nsite

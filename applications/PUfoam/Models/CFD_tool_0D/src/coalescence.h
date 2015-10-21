@@ -1,16 +1,20 @@
-/* Source term due to coalescence */
-
+/** @file coalescence.h 
+	@brief Source term due to bubble coalescence 
+	@fn void coalescenceSource(double *sc, double *we, double *vi, int &nNodes, int *mOrder, double &beta0)
+	@param  double *sc - source due to coalescence
+	@param  double *we - weights of quadrature approximation
+	@param  double *vi - nodes of quadrature approximation
+ 	@param  int &nNodes - number of nodes
+	@param  int *mOrder - order of moments
+	@param  double &beta0 - coalescence constant
+	@return void. 
+*/
+	
 void coalescenceSource(double *, double *, double *, int &, int *, double &);
 
 void coalescenceSource(double *sc, double *we, double *vi, int &nNodes, int *mOrder, double &beta0)
 {
-// coalescenceSource - returns the source terms due to coalescence
-// @param - double *sc - source due to coalescence
-// @param - double *we - weights of quadrature approximation
-// @param - double *vi - nodes of quadrature approximation
-// @param - int &nNodes - number of nodes
-// @param - int *mOrder - order of moments
-// @param - double &beta0 - coalescence constant
+
 	
 	int counter = 0;	
 	double k; 			// To hold the moment order

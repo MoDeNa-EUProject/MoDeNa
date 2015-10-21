@@ -1,50 +1,47 @@
 #!/usr/bin/python
-'''
+'''@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
-  `88.       .888'           `888'   `Y8b            `888b.     `8'
-   888b     d'888   .ooooo.   888      888  .ooooo.   8 `88b.    8   .oooo.
-   8 Y88. .P  888  d88' `88b  888      888 d88' `88b  8   `88b.  8  `P  )88b
-   8  `888'   888  888   888  888      888 888ooo888  8     `88b.8   .oP"888
-   8    Y     888  888   888  888     d88' 888    .o  8       `888  d8(  888
-  o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
+   `88.       .888'           `888'   `Y8b            `888b.     `8'
+    888b     d'888   .ooooo.   888      888  .ooooo.   8 `88b.    8   .oooo.
+    8 Y88. .P  888  d88' `88b  888      888 d88' `88b  8   `88b.  8  `P  )88b
+    8  `888'   888  888   888  888      888 888ooo888  8     `88b.8   .oP"888
+    8    Y     888  888   888  888     d88' 888    .o  8       `888  d8(  888
+   o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
-  Copyright
-      2014 MoDeNa Consortium, All rights reserved.
+Copyright
+    2014-2015 MoDeNa Consortium, All rights reserved.
 
-  License
-      This file is part of Modena.
+License
+    This file is part of Modena.
 
-      Modena is free software; you can redistribute it and/or modify it under
-      the terms of the GNU General Public License as published by the Free
-      Software Foundation, either version 3 of the License, or (at your option)
-      any later version.
+    Modena is free software; you can redistribute it and/or modify it under
+    the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version.
 
-      Modena is distributed in the hope that it will be useful, but WITHOUT ANY
-      WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-      FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
-      details.
+    Modena is distributed in the hope that it will be useful, but WITHOUT ANY
+    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+    FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+    details.
 
-      You should have received a copy of the GNU General Public License along
-      with Modena.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License along
+    with Modena.  If not, see <http://www.gnu.org/licenses/>.
+@endcond'''
 
-  Description
-      Initialisation script needed to run Bubble growth model.
+"""
+@file
+Creates input files for Bubble growth and QmomKinetics detailed models.
 
-  Authors
+@author Pavel Ferkl
+@copyright 2014-2015, MoDeNa Project. GNU Public License.
+"""
 
-  Contributors
-
-  Summary
-      Script creating input files to Bubble growth model and QmomKinetics
-
-
-'''
 from __future__ import division
 import json
 from numpy import exp,log,pi
 # read json
-f=open("example inputs/physicalBlowing/unifiedInput.json",'r')
+f=open("unifiedInput.json",'r')
 inputs=json.load(f)
 f.close()
 # prepare input for Bubble growth model

@@ -1,3 +1,12 @@
+!>This file contains the subroutines which calculate the contribution of
+!!dispersion to the Helmholtz energy functional. 
+
+
+
+
+
+
+
 Module mod_DFT_DISP_WDA
 
 

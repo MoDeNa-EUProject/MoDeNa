@@ -1,3 +1,7 @@
+!> This file contains the subroutine which starts the phase equilibrium calculation.
+!! It also prints the calculated density to the outputfile "out.txt".
+
+
 SUBROUTINE VLE_MIX(rhob,density,chemPot_total,compID)
 
  USE parameters, ONLY: PI, RGAS, KBOL
@@ -8,9 +12,9 @@ SUBROUTINE VLE_MIX(rhob,density,chemPot_total,compID)
  IMPLICIT NONE
 
 
-! ---------------------------------------------------------------------
-! Variables
-! ---------------------------------------------------------------------
+!> ---------------------------------------------------------------------
+!! Variables
+!! ---------------------------------------------------------------------
  
  
 !passed
@@ -28,9 +32,9 @@ SUBROUTINE VLE_MIX(rhob,density,chemPot_total,compID)
  CHARACTER (LEN=50)                    :: filename
  
 
- ! ---------------------------------------------------------------------
- ! prepare for phase equilibrium calculation for given T
- ! ---------------------------------------------------------------------
+ !> ---------------------------------------------------------------------
+ !! prepare for phase equilibrium calculation for given T
+ !! ---------------------------------------------------------------------
   
    dhs(1:ncomp) = parame(1:ncomp,2) * ( 1.0 - 0.12*EXP( -3.0*parame(1:ncomp,3)/t ) )  ! needed for rdf_matrix
    dhs_star(1:ncomp) = dhs(1:ncomp)/parame(1:ncomp,2)
@@ -99,7 +103,9 @@ SUBROUTINE VLE_MIX(rhob,density,chemPot_total,compID)
   write(*,*)'  '
 
   
-  !write liquid phase density in kg/m3 to out.txt 
+  
+  !>write liquid phase density in kg/m3 to out.txt 
+
   Polymer_density = max(density(1),density(2)) !* w(1,1)
   
   filename='./out.txt'

@@ -1,4 +1,5 @@
-/*
+/**
+@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -27,16 +28,14 @@ License
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Solving the two tank problem the MoDeNa way.
-
-    A prototypical macros-scopic code embeds a micro-scale model (flowRate)
-    through the MoDeNa interface library.
-
-Authors
-    Henrik Rusche
-
-Contributors
+@endcond
+@file
+Solving the two tank problem the MoDeNa way.
+A prototypical macros-scopic code embeds a micro-scale model (flowRate)
+through the MoDeNa interface library.
+@author     Henrik Rusche
+@copyright  2014-2015, MoDeNa Project. GNU Public License.
+@ingroup    twoTank
 */
 
 #include <stdio.h>
@@ -158,3 +157,4 @@ main(int argc, char *argv[])
 
     return 0;
 }
+

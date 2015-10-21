@@ -33,6 +33,7 @@ Description
 
 Authors
     Henrik Rusche
+    Pavel Ferkl
 
 Contributors
 '''
@@ -57,4 +58,3 @@ wf = Workflow([Firework(CFD_tool_0D.m)], {}, name="simulation")
 # store workflow and launch it locally
 launchpad.add_wf(wf)
 rapidfire(launchpad)
-

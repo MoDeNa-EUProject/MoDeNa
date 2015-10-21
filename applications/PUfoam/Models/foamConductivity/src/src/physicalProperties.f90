@@ -1,5 +1,8 @@
-!subroutines for calculation of physical properties of polymer and blowing agents (using Modena calls)
-!author: pavel.ferkl@vscht.cz
+!> @file
+!! subroutines for calculation of physical properties of polymer and blowing
+!! agents (using Modena calls)
+!! @author    Pavel Ferkl
+!! @ingroup   foam_cond
 module physicalProperties
     use constants
     use fmodena
@@ -8,7 +11,7 @@ module physicalProperties
     public polymerConductivity
 contains
 !********************************BEGINNING*************************************
-!calculation of thermal conductivity of polymer
+!> calculation of thermal conductivity of polymer
 subroutine polymerConductivity(ksol,temp)
     real(dp), intent(out) :: ksol
     real(dp), intent(in) :: temp

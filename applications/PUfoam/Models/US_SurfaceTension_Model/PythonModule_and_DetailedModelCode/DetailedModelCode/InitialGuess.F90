@@ -1,3 +1,12 @@
+!>This file contains the subroutines to set the initial density profile.
+
+
+
+ 
+!>The subroutine FormFunction is a wrapper function which takes care of 
+!!handling the global PETSc data structures and creates local copys for 
+!!every processor. It then calls the subroutine InitialGuessLocal which
+!!sets the initial density values.
  
 Subroutine FormInitialGuess(snes,X,ierr)
 Use PetscManagement
@@ -56,6 +65,8 @@ End Subroutine FormInitialGuess
 
 
 
+!>In this subroutine every processor sets the initial density values
+!!at its locally owned part of the grid.
 
 Subroutine InitialGuessLocal(user,rhop,ierr)
 
