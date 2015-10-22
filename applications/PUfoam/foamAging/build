@@ -5,5 +5,3 @@ cmake -H${foamAging} -B${foamAging} && make --directory=${foamAging}
 foamConductivity="../Models/foamConductivity/src"
 cmake -H${foamConductivity} -B${foamConductivity} && \
     make --directory=${foamConductivity}
-
-export PYTHONPATH="${PYTHONPATH}:../Models"

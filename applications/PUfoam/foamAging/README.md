@@ -22,6 +22,10 @@ Compile the detailed models using:
 ```
 ./build
 ```
+Append path to the models directory to "PYTHONPATH":
+```
+export PYTHONPATH="${PYTHONPATH}:../Models"
+```
 
 ### (Optional)
 Some results can be easily visualized using [VEUSZ](http://home.gna.org/veusz/)

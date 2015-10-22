@@ -178,8 +178,8 @@ fname='input.in'
 try:
     f = open(fname,'r')
 except IOError:
-    f = open(os.path.dirname(os.path.abspath(__file__))+'/example_inputs/'+fname,'r')
-
+    f = open(os.path.dirname(os.path.abspath(__file__))+'../../foamAging/'+
+        fname,'r')
 
 a=f.readline()
 a=f.readline()
@@ -247,4 +247,3 @@ m_foamConductivity = BackwardMappingModel(
         maxIterations=5  # Currently not used
     ),
 )
-
