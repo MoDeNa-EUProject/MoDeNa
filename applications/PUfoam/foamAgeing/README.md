@@ -20,9 +20,7 @@ sudo apt-get install libblas-dev
 ```
 Compile the detailed models using:
 ```
-cd src
-cmake .
-make
+./build
 ```
 
 ### (Optional)
