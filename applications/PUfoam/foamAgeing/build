@@ -1,0 +1,3 @@
+#!/bin/sh
+foamAging="../Models/foamAging/src"
+cmake -H${foamAging} -B${foamAging} && make --directory=${foamAging}
