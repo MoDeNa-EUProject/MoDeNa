@@ -41,20 +41,20 @@ from fireworks import Firework, Workflow, LaunchPad
 from fireworks.core.rocket_launcher import rapidfire
 import modena
 from modulefinder import ModuleFinder
-
+import multicomponentDiffusion
 
 # set up the LaunchPad and reset it
 launchpad = LaunchPad()
 launchpad.reset('', require_password=False)
 
 # Define 'macroscopic' code to run
-m = modena.BackwardMappingScriptTask(
+SIMULATION = modena.BackwardMappingScriptTask(
         script='../src/fullerEtAlDiffusionTest'
 )
 
 # create the individual FireWorks and Workflow
 # Source code in src/twoTanksMacroscopicProblem.C
-wf = Workflow([Firework(m)], {}, name="simulation")
+wf = Workflow([Firework(SIMULATION)], {}, name="simulation")
 
 # store workflow and launch it locally
 launchpad.add_wf(wf)

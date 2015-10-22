@@ -16,14 +16,19 @@ export PKG_CONFIG_PATH=${PKG_CONFIG_PATH:-}:${HOME}/lib/pkgconfig:/usr/local/lib
 export PYTHONPATH=${PYTHONPATH:-}:${HOME}/lib/python2.7/site-packages
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH:-}:${HOME}/lib/python2.7/site-packages:${HOME}/lib:/usr/local/lib
 
-# Compile project specific sources (only locally)
-cd src
-cmake .
-make
+# Compile project specific sources, i.e. "models":
+fuller="../models/fullerEtAlDiffusion/src"
+cmake -H${fuller} -B${fuller} && make --directory=${fuller}
+
+# Append path to the models directory to "PYTHONPATH":
+export PYTHONPATH="${PYTHONPATH}:../models"
 
 # Initialise the model in the database
 ./initModel
 
 # Start the workflow
+./workflow
+
+# Run again to see that no fitting is done on the second start
 ./workflow
 

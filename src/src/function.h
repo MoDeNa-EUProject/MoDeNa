@@ -73,7 +73,7 @@ stores a surrogate function
 */
 typedef struct modena_function_t
 {
-    PyObject_HEAD;
+    PyObject_HEAD
 
     PyObject *pFunction;
 

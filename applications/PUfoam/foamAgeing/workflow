@@ -39,7 +39,12 @@ Contributors
 
 from fireworks import Firework, Workflow, LaunchPad
 from fireworks.core.rocket_launcher import rapidfire
+
+import diffusivity
+import gasConductivity
+import foamConductivity
 import foamAging
+
 from modulefinder import ModuleFinder
 
 
