@@ -1,3 +1,7 @@
 #!/bin/sh
 foamAging="../Models/foamAging/src"
 cmake -H${foamAging} -B${foamAging} && make --directory=${foamAging}
+
+foamConductivity="../Models/foamConductivity/src"
+cmake -H${foamConductivity} -B${foamConductivity} && \
+    make --directory=${foamConductivity}
