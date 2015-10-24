@@ -39,11 +39,7 @@ Authors
 Contributors
 '''
 
-from modena import CFunction, IndexSet, Workflow2, \
-    ForwardMappingModel, BackwardMappingModel, SurrogateModel
-import modena.Strategy as Strategy
-from fireworks import Firework, Workflow, LaunchPad
-from fireworks.core.rocket_launcher import rapidfire
+from modena import CFunction, IndexSet, ForwardMappingModel
 
 species = IndexSet(
     _id= 'species',
