@@ -47,22 +47,26 @@ subroutine equcond(keq,ystate,neq,eps,fstrut,temp)
     call mixtureConductivity(kgas,kg,yg,Tc,pc,Mg,temp,1._dp)
     ! write(*,*) yg
     ! write(*,*) kg
-    write(*,*) "kgas: ", kgas
+    ! write(*,*) "kgas: ", kgas
     kgas=0
     do i=1,size(kg)
         kgas=kgas+yg(i)*kg(i)
     enddo
     ! write(*,*) yg
     ! write(*,*) kg
-    ! write(*,*) kgas
+    write(*,*) "kgas: ", kgas
     call modena_inputs_set(kfoamInputs, kfoamEpspos, eps)
     call modena_inputs_set(kfoamInputs, kfoamDcellpos, dcell)
     call modena_inputs_set(kfoamInputs, kfoamFstrutpos, fstrut)
     call modena_inputs_set(kfoamInputs, kfoamKgaspos, kgas)
     call modena_inputs_set(kfoamInputs, kfoamTemppos, temp)
     ret = modena_model_call (kfoamModena, kfoamInputs, kfoamOutputs)
-    if(ret /= 0) then
-        call exit(ret)
+    write(*,*) "modena_model_call return code: ", ret
+    ! if(ret /= 0) then
+    !     call exit(ret)
+    ! endif
+    if (modena_error_occurred()) then
+        call exit(modena_error())
     endif
     keq = modena_outputs_get(kfoamOutputs, 0_c_size_t); !fetch results
 end subroutine equcond

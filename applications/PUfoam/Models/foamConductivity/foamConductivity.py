@@ -178,7 +178,7 @@ fname='input.in'
 try:
     f = open(fname,'r')
 except IOError:
-    f = open(os.path.dirname(os.path.abspath(__file__))+'../../foamAging/'+
+    f = open(os.path.dirname(os.path.abspath(__file__))+'/../../foamAging/'+
         fname,'r')
 
 a=f.readline()
