@@ -28,7 +28,7 @@ License
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
 @endcond'''
-
+from __future__ import division
 """
 @file
 Creates input files for Bubble growth and QmomKinetics detailed models.
@@ -37,7 +37,6 @@ Creates input files for Bubble growth and QmomKinetics detailed models.
 @copyright 2014-2015, MoDeNa Project. GNU Public License.
 """
 
-from __future__ import division
 import json
 from numpy import exp,log,pi
 # read json

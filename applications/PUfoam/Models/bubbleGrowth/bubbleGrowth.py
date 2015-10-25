@@ -37,7 +37,7 @@ Contains path to the detailed model executable.
 @copyright 2014-2015, MoDeNa Project. GNU Public License.
 @ingroup   app_foaming
 """
-
+import os
 from modena.Strategy import BackwardMappingScriptTask
 
 m = BackwardMappingScriptTask(
