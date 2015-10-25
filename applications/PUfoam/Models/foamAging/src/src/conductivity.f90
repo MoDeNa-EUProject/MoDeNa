@@ -47,7 +47,7 @@ subroutine equcond(keq,ystate,neq,eps,fstrut,temp)
     call mixtureConductivity(kgas,kg,yg,Tc,pc,Mg,temp,1._dp)
     ! write(*,*) yg
     ! write(*,*) kg
-    ! write(*,*) kgas
+    write(*,*) "kgas: ", kgas
     kgas=0
     do i=1,size(kg)
         kgas=kgas+yg(i)*kg(i)
