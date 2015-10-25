@@ -54,17 +54,13 @@ subroutine equcond(keq,ystate,neq,eps,fstrut,temp)
     enddo
     ! write(*,*) yg
     ! write(*,*) kg
-    write(*,*) "kgas: ", kgas
+    ! write(*,*) "kgas: ", kgas
     call modena_inputs_set(kfoamInputs, kfoamEpspos, eps)
     call modena_inputs_set(kfoamInputs, kfoamDcellpos, dcell)
     call modena_inputs_set(kfoamInputs, kfoamFstrutpos, fstrut)
     call modena_inputs_set(kfoamInputs, kfoamKgaspos, kgas)
     call modena_inputs_set(kfoamInputs, kfoamTemppos, temp)
     ret = modena_model_call (kfoamModena, kfoamInputs, kfoamOutputs)
-    write(*,*) "modena_model_call return code: ", ret
-    ! if(ret /= 0) then
-    !     call exit(ret)
-    ! endif
     if (modena_error_occurred()) then
         call exit(modena_error())
     endif
