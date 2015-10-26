@@ -106,10 +106,17 @@ module fmodena !command line arguments not implemented yet
             type(c_ptr), value :: outputs
             integer(c_int) :: ret
         end function modena_model_call
+        function modena_error_occurred() result(output) bind(c)
+            import
+            logical(c_bool) :: output
+        end function modena_error_occurred
+        function modena_error() result(output) bind(c)
+            import
+            integer(c_int) :: output
+        end function modena_error
     end interface
 
 end module fmodena
 
 !>
 !!@}
-

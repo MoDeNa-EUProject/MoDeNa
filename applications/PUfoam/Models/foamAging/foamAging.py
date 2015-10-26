@@ -38,6 +38,7 @@ Contains path to the detailed model executable.
 @ingroup   app_aging
 """
 
+import os
 from modena.Strategy import BackwardMappingScriptTask
 
 m = BackwardMappingScriptTask(

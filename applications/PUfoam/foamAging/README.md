@@ -20,9 +20,11 @@ sudo apt-get install libblas-dev
 ```
 Compile the detailed models using:
 ```
-cd src
-cmake .
-make
+./build
+```
+Append path to the models directory to "PYTHONPATH":
+```
+export PYTHONPATH="${PYTHONPATH}:../Models"
 ```
 
 ### (Optional)
