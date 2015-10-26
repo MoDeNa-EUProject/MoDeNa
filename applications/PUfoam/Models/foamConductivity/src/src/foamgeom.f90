@@ -101,7 +101,6 @@ subroutine foam_morpholgy
     write(mfi,'(2x,A,1x,e9.3,1x,A)') 'wall thickness:', dwall*1e6, 'um'
     write(mfi,'(2x,A,1x,e9.3)') 'strut content:', fs
     write(mfi,'(2x,A,1x,e9.3,1x,A)') 'strut diameter:', dstrut*1e6, 'um'
-
 end subroutine foam_morpholgy
 !***********************************END****************************************
 
@@ -113,7 +112,6 @@ subroutine fcn_dwall(n,x,fvec,iflag)
     real (dp), intent(in) :: x(n)
     real (dp), intent(out) :: fvec(n)
     integer, intent(inout) :: iflag
-
     real(dp) :: Vcell,Vstruts,Vwalls,fs,dstrut
     fs=x(1)
     dstrut=x(2)
@@ -133,7 +131,6 @@ subroutine fcn_fs(n,x,fvec,iflag)
     real (dp), intent(in) :: x(n)
     real (dp), intent(out) :: fvec(n)
     integer, intent(inout) :: iflag
-
     real(dp) :: Vcell,Vstruts,Vwalls,dwall,dstrut
     dwall=x(1)
     dstrut=x(2)
@@ -153,7 +150,6 @@ subroutine fcn_dstrut(n,x,fvec,iflag)
     real (dp), intent(in) :: x(n)
     real (dp), intent(out) :: fvec(n)
     integer, intent(inout) :: iflag
-
     real(dp) :: Vcell,Vstruts,Vwalls,dwall,fs
     dwall=x(1)
     fs=x(2)
