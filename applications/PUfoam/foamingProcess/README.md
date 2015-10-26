@@ -7,11 +7,13 @@ kinetics, temperature, foam density, bubble size distribution, etc.
 
 ## Installation
 Several models need to be compiled. C++ and Fortran compilers are required.
-Execute following commands:
+Execute following command:
 ```
-cd src
-cmake .
-make
+./build
+```
+Append path to the models directory to "PYTHONPATH":
+```
+export PYTHONPATH="${PYTHONPATH}:../Models"
 ```
 
 ### (Optional)
