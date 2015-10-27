@@ -11,7 +11,7 @@ program hahtf
     open (newunit(mfi),file='hahtf.out')
     write(mfi,*) 'Welcome in hahtf'
     call loadParameters
-    call eqcond
+    call eqcond(1)
 !    call eqcond_por
 !    call eqcond_dcell
 !    call eqcond_strut

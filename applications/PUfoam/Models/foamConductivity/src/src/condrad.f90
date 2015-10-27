@@ -9,7 +9,7 @@ module condrad
     use ioutils
     implicit none
     private
-    public equcond
+    public equcond,cond,alpha,sigma
     !lapack variables
     character :: trans='n'
     character(len=30) :: fmt='(2x,A,1x,es9.3,1x,A)'
@@ -20,7 +20,8 @@ module condrad
     real(dp), dimension(:,:), allocatable :: tmatrix,gmatrix
     !end of lapack variables
     real(dp) :: dz
-    real(dp), dimension(:), allocatable :: tvec,qcon,qrad,qtot,gqrad
+    real(dp), dimension(:), allocatable :: tvec,qcon,qrad,qtot,gqrad,cond
+    real(dp), dimension(:,:), allocatable :: alpha,sigma
 contains
 !********************************BEGINNING*************************************
 !> determines equivalent conductivity of the foam, main algorithm
@@ -65,7 +66,6 @@ subroutine equcond
     write(fi,*) eqc
     close(fi)
     deallocate(tmatrix,gmatrix,tipiv,gipiv,trhs,grhs,tvec,qcon,qrad,qtot,gqrad)
-    deallocate(lambdabox,trextcoeffbox,albedobox,abscoeffbox,scattcoeffbox,fbepbox)
 end subroutine equcond
 !***********************************END****************************************
 
@@ -82,30 +82,30 @@ subroutine make_gmatrix
         do i=2,nz-1
             l=l+1
             j=l
-            gmatrix(kl+ku+1+l-j,j)=2/((abscoeffbox(k)+scattcoeffbox(k))*dz) + &
-                3*abscoeffbox(k)*dz
+            gmatrix(kl+ku+1+l-j,j)=2/((alpha(i,k)+sigma(i,k))*dz) + &
+                3*alpha(i,k)*dz
             j=l-1
-            gmatrix(kl+ku+1+l-j,j)=-1/((abscoeffbox(k)+scattcoeffbox(k))*dz)
+            gmatrix(kl+ku+1+l-j,j)=-1/((alpha(i,k)+sigma(i,k))*dz)
             j=l+1
-            gmatrix(kl+ku+1+l-j,j)=-1/((abscoeffbox(k)+scattcoeffbox(k))*dz)
+            gmatrix(kl+ku+1+l-j,j)=-1/((alpha(i,k)+sigma(i,k))*dz)
         enddo
         l=l+1
         i=(k-1)*nz+1
         j=i
-        gmatrix(kl+ku+1+i-j,j)=1/((abscoeffbox(k)+scattcoeffbox(k))*dz) + &
-            3*abscoeffbox(k)*dz + &
-            9*emi1/(2-emi1)*abscoeffbox(k)/4/(abscoeffbox(k)+scattcoeffbox(k))
+        gmatrix(kl+ku+1+i-j,j)=1/((alpha(1,k)+sigma(1,k))*dz) + &
+            3*alpha(1,k)*dz + &
+            9*emi1/(2-emi1)*alpha(1,k)/4/(alpha(1,k)+sigma(1,k))
         j=i+1
-        gmatrix(kl+ku+1+i-j,j)=-1/((abscoeffbox(k)+scattcoeffbox(k))*dz) - &
-            3*emi1/(2-emi1)*abscoeffbox(k)/4/(abscoeffbox(k)+scattcoeffbox(k))
+        gmatrix(kl+ku+1+i-j,j)=-1/((alpha(1,k)+sigma(1,k))*dz) - &
+            3*emi1/(2-emi1)*alpha(1,k)/4/(alpha(1,k)+sigma(1,k))
         i=nz*k
         j=i-1
-        gmatrix(kl+ku+1+i-j,j)=-1/((abscoeffbox(k)+scattcoeffbox(k))*dz) - &
-            3*emi2/(2-emi2)*abscoeffbox(k)/4/(abscoeffbox(k)+scattcoeffbox(k))
+        gmatrix(kl+ku+1+i-j,j)=-1/((alpha(nz,k)+sigma(nz,k))*dz) - &
+            3*emi2/(2-emi2)*alpha(nz,k)/4/(alpha(nz,k)+sigma(nz,k))
         j=i
-        gmatrix(kl+ku+1+i-j,j)=1/((abscoeffbox(k)+scattcoeffbox(k))*dz) + &
-            3*abscoeffbox(k)*dz + &
-            9*emi2/(2-emi2)*abscoeffbox(k)/4/(abscoeffbox(k)+scattcoeffbox(k))
+        gmatrix(kl+ku+1+i-j,j)=1/((alpha(nz,k)+sigma(nz,k))*dz) + &
+            3*alpha(nz,k)*dz + &
+            9*emi2/(2-emi2)*alpha(nz,k)/4/(alpha(nz,k)+sigma(nz,k))
     enddo
 end subroutine make_gmatrix
 !***********************************END****************************************
@@ -119,14 +119,14 @@ subroutine make_grhs
     do i=1,nbox
         do j=1,nz
             k=k+1
-            grhs(k)=12*effn**2*sigmab*abscoeffbox(i)*tvec(j)**4*dz*fbepbox(i)
+            grhs(k)=12*effn**2*sigmab*alpha(j,i)*tvec(j)**4*dz*fbepbox(i)
         enddo
         j=(i-1)*nz+1
-        grhs(j)=grhs(j) + 6*emi1/(2-emi1)*abscoeffbox(i)*effn**2*sigmab*t1**4/&
-            (abscoeffbox(i)+scattcoeffbox(i))*fbepbox(i)
+        grhs(j)=grhs(j) + 6*emi1/(2-emi1)*alpha(1,i)*effn**2*sigmab*t1**4/&
+            (alpha(1,i)+sigma(1,i))*fbepbox(i)
         j=nz*i
-        grhs(j)=grhs(j) + 6*emi2/(2-emi2)*abscoeffbox(i)*effn**2*sigmab*t2**4/&
-            (abscoeffbox(i)+scattcoeffbox(i))*fbepbox(i)
+        grhs(j)=grhs(j) + 6*emi2/(2-emi2)*alpha(nz,i)*effn**2*sigmab*t2**4/&
+            (alpha(nz,i)+sigma(nz,i))*fbepbox(i)
     enddo
 end subroutine make_grhs
 !***********************************END****************************************
@@ -138,24 +138,27 @@ subroutine make_tmatrix
     integer :: i,j
     tmatrix=0
     tipiv=0
-    do i=1,nz
+    i=1
+    j=i
+    tmatrix(kl+ku+1+i-j,j)=(cond(i) + &
+        cond(i)*cond(i+1)/(cond(i)+cond(i+1)))*2/dz
+    j=i+1
+    tmatrix(kl+ku+1+i-j,j)=-cond(i)*cond(i+1)/(cond(i)+cond(i+1))*2/dz
+    do i=2,nz-1
+        j=i-1
+        tmatrix(kl+ku+1+i-j,j)=-cond(i-1)*cond(i)/(cond(i-1)+cond(i))*2/dz
         j=i
-        tmatrix(kl+ku+1+i-j,j)=2*effc/dz
-        if (i>1) then
-            j=i-1
-            tmatrix(kl+ku+1+i-j,j)=-effc/dz
-        else
-            j=i
-            tmatrix(kl+ku+1+i-j,j)=tmatrix(kl+ku+1+i-j,j)+effc/dz
-        endif
-        if (i<nz) then
-            j=i+1
-            tmatrix(kl+ku+1+i-j,j)=-effc/dz
-        else
-            j=i
-            tmatrix(kl+ku+1+i-j,j)=tmatrix(kl+ku+1+i-j,j)+effc/dz
-        endif
+        tmatrix(kl+ku+1+i-j,j)=(cond(i-1)*cond(i)/(cond(i-1)+cond(i)) + &
+            cond(i)*cond(i+1)/(cond(i)+cond(i+1)))*2/dz
+        j=i+1
+        tmatrix(kl+ku+1+i-j,j)=-cond(i)*cond(i+1)/(cond(i)+cond(i+1))*2/dz
     enddo
+    i=nz
+    j=i-1
+    tmatrix(kl+ku+1+i-j,j)=-cond(i-1)*cond(i)/(cond(i-1)+cond(i))*2/dz
+    j=i
+    tmatrix(kl+ku+1+i-j,j)=(cond(i-1)*cond(i)/(cond(i-1)+cond(i)) + &
+        cond(i))*2/dz
 end subroutine make_tmatrix
 !***********************************END****************************************
 
@@ -165,8 +168,8 @@ end subroutine make_tmatrix
 subroutine make_trhs
     call make_gqrad
     trhs=gqrad
-    trhs(1)=trhs(1)+2*effc*t1/dz
-    trhs(nz)=trhs(nz)+2*effc*t2/dz
+    trhs(1)=trhs(1)+2*cond(1)*t1/dz
+    trhs(nz)=trhs(nz)+2*cond(nz)*t2/dz
 end subroutine make_trhs
 !***********************************END****************************************
 
@@ -182,8 +185,8 @@ subroutine make_gqrad
     do i=1,nbox
         do j=1,nz
             k=k+1
-            gqrad(j)=gqrad(j) + abscoeffbox(i)*grhs(k)*dz - &
-                4*effn**2*sigmab*abscoeffbox(i)*tvec(j)**4*dz*fbepbox(i)
+            gqrad(j)=gqrad(j) + alpha(j,i)*grhs(k)*dz - &
+                4*effn**2*sigmab*alpha(j,i)*tvec(j)**4*dz*fbepbox(i)
         enddo
     enddo
 end subroutine make_gqrad
@@ -194,27 +197,20 @@ end subroutine make_gqrad
 !> calculate heat flux
 subroutine heatflux
     integer :: i,j,k
-    qcon(1)=-effc*(-tvec(3)+4*tvec(2)-3*tvec(1))/(2*dz)
-    do i=2,nz-1
-        qcon(i)=-effc*(tvec(i+1)-tvec(i-1))/(2*dz)
+    qcon(1)=-2*cond(1)*cond(2)/(cond(1)+cond(2))*(tvec(2)-tvec(1))/dz
+    do i=2,nz
+        qcon(i)=-2*cond(i-1)*cond(i)/(cond(i-1)+cond(i))*(tvec(i)-tvec(i-1))/dz
     enddo
-    qcon(nz)=-effc*(3*tvec(nz)-4*tvec(nz-1)+tvec(nz-2))/(2*dz)
     qrad=0
     k=0
     do i=1,nbox
         j=(i-1)*nz+1
-        qrad(1)=qrad(1)-(-grhs(j+2)+4*grhs(j+1)-&
-            3*grhs(j))/(6*(abscoeffbox(i)+scattcoeffbox(i))*dz)
+        qrad(1)=qrad(1)-(grhs(j+1)-grhs(j))/(3*(alpha(1,i)+sigma(1,i))*dz)
         k=k+1
-        do j=2,nz-1
+        do j=2,nz
             k=k+1
-            qrad(j)=qrad(j)-(grhs(k+1)-&
-                grhs(k-1))/(6*(abscoeffbox(i)+scattcoeffbox(i))*dz)
+            qrad(j)=qrad(j)-(grhs(k)-grhs(k-1))/(3*(alpha(j,i)+sigma(j,i))*dz)
         enddo
-        k=k+1
-        j=nz*i
-        qrad(nz)=qrad(nz)-(3*grhs(j)-4*grhs(j-1)+&
-            grhs(j-2))/(6*(abscoeffbox(i)+scattcoeffbox(i))*dz)
     enddo
     qtot=qcon+qrad
 end subroutine heatflux
