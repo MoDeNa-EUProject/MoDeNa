@@ -203,30 +203,22 @@ end subroutine make_gqrad
 
 !********************************BEGINNING*************************************
 !> calculate heat flux
-!TODO correct differentiation formulas cond(i) /= cond(i+1)
 subroutine heatflux
     integer :: i,j,k
-    qcon(1)=-cond(1)*(-tvec(3)+4*tvec(2)-3*tvec(1))/(2*dz)
-    do i=2,nz-1
-        qcon(i)=-cond(i)*(tvec(i+1)-tvec(i-1))/(2*dz)
+    qcon(1)=-2*cond(1)*cond(2)/(cond(1)+cond(2))*(tvec(2)-tvec(1))/dz
+    do i=2,nz
+        qcon(i)=-2*cond(i-1)*cond(i)/(cond(i-1)+cond(i))*(tvec(i)-tvec(i-1))/dz
     enddo
-    qcon(nz)=-cond(nz)*(3*tvec(nz)-4*tvec(nz-1)+tvec(nz-2))/(2*dz)
     qrad=0
     k=0
     do i=1,nbox
         j=(i-1)*nz+1
-        qrad(1)=qrad(1)-(-grhs(j+2)+4*grhs(j+1)-&
-            3*grhs(j))/(6*(alpha(1,i)+sigma(1,i))*dz)
+        qrad(1)=qrad(1)-(grhs(j+1)-grhs(j))/(3*(alpha(1,i)+sigma(1,i))*dz)
         k=k+1
-        do j=2,nz-1
+        do j=2,nz
             k=k+1
-            qrad(j)=qrad(j)-(grhs(k+1)-&
-                grhs(k-1))/(6*(alpha(j,i)+sigma(j,i))*dz)
+            qrad(j)=qrad(j)-(grhs(k)-grhs(k-1))/(3*(alpha(j,i)+sigma(j,i))*dz)
         enddo
-        k=k+1
-        j=nz*i
-        qrad(nz)=qrad(nz)-(3*grhs(j)-4*grhs(j-1)+&
-            grhs(j-2))/(6*(alpha(nz,i)+sigma(nz,i))*dz)
     enddo
     qtot=qcon+qrad
 end subroutine heatflux
