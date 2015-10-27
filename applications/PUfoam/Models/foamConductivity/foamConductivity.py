@@ -224,6 +224,14 @@ initialPoints_foamConductivity_auto = {
     'T': T,
 }
 
+initialPoints_foamConductivity_test = {
+    'eps': [0.95],
+    'dcell': [300e-6],
+    'fstrut': [0.8],
+    'kgas': [0.12],
+    'T': [300],
+}
+
 ## Surrogate model for foam conductivity
 #
 # Backward mapping model is used.

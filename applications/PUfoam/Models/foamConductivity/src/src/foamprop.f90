@@ -313,7 +313,8 @@ subroutine effrad(spectra)
             than 1 for non-gray simulation'
     else
         allocate(lambdabox(nbox+1),trextcoeffbox(nbox),albedobox(nbox),&
-            abscoeffbox(nbox),scattcoeffbox(nbox),fbepbox(nbox))
+            abscoeffbox(nbox),scattcoeffbox(nbox))
+        if (.not. allocated(fbepbox)) allocate(fbepbox(nbox))
         lambdamin=2e-6_dp
         lambdamax=25e-6_dp
         lambdabox(nbox+1)=100e-6_dp
@@ -367,9 +368,10 @@ subroutine effrad(spectra)
     write(mfi,'(2x,A,1x,es9.3,1x,A)') 'radiative conductivity:',&
         krad*1e3_dp,'mW/m/K'
     deallocate(lambdaf)
-    deallocate(kappafwall,sigmafwall,betafwall,omegafwall,betatrfwall)
-    deallocate(kappafstrut,sigmafstrut,betafstrut,omegafstrut,betatrfstrut)
-    deallocate(kappaf,sigmaf,betaf,omegaf,betatrf)
+    deallocate(kappafwall,sigmafwall,betafwall,omegafwall,betatrfwall,&
+        kappafstrut,sigmafstrut,betafstrut,omegafstrut,betatrfstrut,&
+        kappaf,sigmaf,betaf,omegaf,betatrf,kappafgas,lambdabox,trextcoeffbox,&
+        albedobox)
 end subroutine effrad
 !***********************************END****************************************
 

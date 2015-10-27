@@ -6,10 +6,10 @@
 module tests
     use constants
     use ioutils
-    use foamprop
-    use foamgeom
-    use conduction
-    use condrad
+    use foamprop, only: effrad
+    use foamgeom, only: foam_morpholgy
+    use conduction, only: effcond
+    use condrad, only: equcond,cond,alpha,sigma
     implicit none
     private
     public loadParameters,eqcond,eqcond_por,eqcond_dcell,eqcond_strut
@@ -23,11 +23,36 @@ module tests
 contains
 !********************************BEGINNING*************************************
 !> calculate equivalent conductivity for one specific foam
-subroutine eqcond
-    call foam_morpholgy
-    call effrad(spectra)
-    call effcond
+subroutine eqcond(regions)
+    integer, intent(in) :: regions
+    integer :: i,j
+    real(dp), dimension(:), allocatable :: regbound,regcond
+    real(dp), dimension(:,:), allocatable :: regalpha,regsigma
+    allocate(regbound(regions+1),regcond(regions),regalpha(regions,nbox),&
+        regsigma(regions,nbox),alpha(nz,nbox),sigma(nz,nbox),cond(nz))
+    do i=1,regions+1
+        regbound(i)=(i-1)*dfoam/regions
+    enddo
+    do i=1,regions
+        call foam_morpholgy
+        call effrad(spectra)
+        call effcond
+        regcond(i)=effc
+        regalpha(i,:)=abscoeffbox
+        regsigma(i,:)=scattcoeffbox
+        deallocate(abscoeffbox,scattcoeffbox)
+    enddo
+    do i=1,nz
+        do j=1,regions+1
+            if ((i-0.5_dp)*dfoam/nz<regbound(j)) exit
+        enddo
+        j=j-1
+        cond(i)=regcond(j)
+        alpha(i,:)=regalpha(j,:)
+        sigma(i,:)=regsigma(j,:)
+    enddo
     call equcond
+    deallocate(regbound,regcond,regalpha,regsigma,alpha,sigma,cond)
 end subroutine eqcond
 !***********************************END****************************************
 
@@ -45,7 +70,7 @@ subroutine eqcond_por
     write(fi,'(1000A23)') '#porosity','eq. conductivity','Ross. eq. cond.'
     do i=1,npoints
         por=pormin+(i-1)*dpor
-        call eqcond
+        call eqcond(1)
         write(fi,'(1000es23.15)') por,eqc,eqc_ross
     enddo
     close(fi)
@@ -66,7 +91,7 @@ subroutine eqcond_dcell
     write(fi,'(1000A23)') '#porosity','eq. conductivity'
     do i=1,npoints
         dcell=dcellmin*10**((i-1)*ddcell)
-        call eqcond
+        call eqcond(1)
         write(fi,'(1000es23.15)') dcell,eqc
     enddo
     close(fi)
@@ -87,7 +112,7 @@ subroutine eqcond_strut
     write(fi,'(1000A23)') '#strut content','eq. conductivity','Ross. eq. cond.'
     do i=1,npoints
         fs=strutmin+(i-1)*dstrut
-        call eqcond
+        call eqcond(1)
         write(fi,'(1000es23.15)') fs,eqc,eqc_ross
     enddo
     close(fi)

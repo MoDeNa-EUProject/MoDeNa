@@ -9,7 +9,7 @@ module condrad
     use ioutils
     implicit none
     private
-    public equcond
+    public equcond,cond,alpha,sigma
     !lapack variables
     character :: trans='n'
     character(len=30) :: fmt='(2x,A,1x,es9.3,1x,A)'
@@ -32,16 +32,10 @@ subroutine equcond
     write(mfi,*) 'Conduction-Radiation:'
     dz=dfoam/nz
     allocate(tmatrix(ldab,nz),gmatrix(ldab,nbox*nz),tipiv(nz),gipiv(nbox*nz),&
-        trhs(nz),grhs(nbox*nz),tvec(nz),qcon(nz),qrad(nz),qtot(nz),gqrad(nz),&
-        alpha(nz,nbox),sigma(nz,nbox),cond(nz))
+        trhs(nz),grhs(nbox*nz),tvec(nz),qcon(nz),qrad(nz),qtot(nz),gqrad(nz))
     forall (i=1:nz)
         tvec(i)=t1+(i-1)*(t2-t1)/(nz-1) !initial temperature profile
     end forall
-    do i=1,nz
-        alpha(i,:)=abscoeffbox
-        sigma(i,:)=scattcoeffbox
-    enddo
-    cond=effc
     call make_tmatrix
     call dgbtrf(nz,nz,kl,ku,tmatrix,ldab,tipiv,info)
     call make_gmatrix
@@ -71,9 +65,7 @@ subroutine equcond
     open(newunit(fi),file='outputs.out')
     write(fi,*) eqc
     close(fi)
-    deallocate(tmatrix,gmatrix,tipiv,gipiv,trhs,grhs,tvec,qcon,qrad,qtot,gqrad,&
-        lambdabox,trextcoeffbox,albedobox,abscoeffbox,scattcoeffbox,fbepbox,&
-        alpha,sigma,cond)
+    deallocate(tmatrix,gmatrix,tipiv,gipiv,trhs,grhs,tvec,qcon,qrad,qtot,gqrad)
 end subroutine equcond
 !***********************************END****************************************
 
