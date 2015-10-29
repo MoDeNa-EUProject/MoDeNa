@@ -35,5 +35,7 @@ Authors
 
 Contributors
 '''
-from modSolubility import f,\
-    m_solubilityCO2#,m_solubilityAir,m_solubilityCyclopentane
+from modSolubility import f
+from modSolubility import m_solubilityCO2
+from modSolubility import m_solubilityAir
+from modSolubility import m_solubilityCyclopentane

@@ -55,7 +55,7 @@ fitted range. The parameter fitting strategy defines tolerances and maximal iter
 which are passed to the numerical solver which performs the actual fitting of the
 surrogate model parameters.
 
-@author    Jonas Mairhofer
+@author    Jonas Mairhofer, Pavel Ferkl
 @copyright 2014-2015, MoDeNa Project. GNU Public License.
 @ingroup   app_foaming
 """
@@ -109,7 +109,7 @@ class SolubilityExactSim(FireTaskBase):
         elif (self['indices']['A']=='Air'):
             ff.write('air \n')
         elif (self['indices']['A']=='CyP'):
-            ff.write('cyp \n')
+            ff.write('cyclopentane \n')
 
         ##TODO properly implement composition input
         ff.write('pu \n')  #component 2
@@ -192,7 +192,7 @@ m_solubilityCO2 = BackwardMappingModel(
     substituteModels=[],
     initialisationStrategy=Strategy.InitialPoints(
         initialPoints={
-            'T': [295.0, 296.0, 297.0, 298.0, 299.0, 340],
+            'T': [297.0, 381.0, 297.0, 340],
         },
     ),
     outOfBoundsStrategy=Strategy.ExtendSpaceStochasticSampling(
@@ -207,47 +207,47 @@ m_solubilityCO2 = BackwardMappingModel(
         maxIterations=5  # Currently not used
     ),
 )
-# m_solubilityAir = BackwardMappingModel(
-#     _id='solubilityPol[A=Air]',
-#     surrogateFunction=f,
-#     exactTask=SolubilityExactSim(),
-#     substituteModels=[],
-#     initialisationStrategy=Strategy.InitialPoints(
-#         initialPoints={
-#             'T': [295.0, 296.0, 298.0, 299.0, 340],
-#         },
-#     ),
-#     outOfBoundsStrategy=Strategy.ExtendSpaceStochasticSampling(
-#         nNewPoints=4
-#     ),
-#     parameterFittingStrategy=Strategy.NonLinFitWithErrorContol(
-#         testDataPercentage=0.2,
-#         maxError=0.05,
-#         improveErrorStrategy=Strategy.StochasticSampling(
-#             nNewPoints=2
-#         ),
-#         maxIterations=5  # Currently not used
-#     ),
-# )
-# m_solubilityCyclopentane = BackwardMappingModel(
-#     _id='solubilityPol[A=CyP]',
-#     surrogateFunction=f,
-#     exactTask=SolubilityExactSim(),
-#     substituteModels=[],
-#     initialisationStrategy=Strategy.InitialPoints(
-#         initialPoints={
-#             'T': [370, 380, 390, 400],
-#         },
-#     ),
-#     outOfBoundsStrategy=Strategy.ExtendSpaceStochasticSampling(
-#         nNewPoints=4
-#     ),
-#     parameterFittingStrategy=Strategy.NonLinFitWithErrorContol(
-#         testDataPercentage=0.2,
-#         maxError=0.05,
-#         improveErrorStrategy=Strategy.StochasticSampling(
-#             nNewPoints=2
-#         ),
-#         maxIterations=5  # Currently not used
-#     ),
-# )
+m_solubilityAir = BackwardMappingModel(
+    _id='solubilityPol[A=Air]',
+    surrogateFunction=f,
+    exactTask=SolubilityExactSim(),
+    substituteModels=[],
+    initialisationStrategy=Strategy.InitialPoints(
+        initialPoints={
+            'T': [295.0, 296.0, 298.0, 299.0, 340],
+        },
+    ),
+    outOfBoundsStrategy=Strategy.ExtendSpaceStochasticSampling(
+        nNewPoints=4
+    ),
+    parameterFittingStrategy=Strategy.NonLinFitWithErrorContol(
+        testDataPercentage=0.2,
+        maxError=0.05,
+        improveErrorStrategy=Strategy.StochasticSampling(
+            nNewPoints=2
+        ),
+        maxIterations=5  # Currently not used
+    ),
+)
+m_solubilityCyclopentane = BackwardMappingModel(
+    _id='solubilityPol[A=CyP]',
+    surrogateFunction=f,
+    exactTask=SolubilityExactSim(),
+    substituteModels=[],
+    initialisationStrategy=Strategy.InitialPoints(
+        initialPoints={
+            'T': [370, 380, 390, 400],
+        },
+    ),
+    outOfBoundsStrategy=Strategy.ExtendSpaceStochasticSampling(
+        nNewPoints=4
+    ),
+    parameterFittingStrategy=Strategy.NonLinFitWithErrorContol(
+        testDataPercentage=0.2,
+        maxError=0.05,
+        improveErrorStrategy=Strategy.StochasticSampling(
+            nNewPoints=2
+        ),
+        maxIterations=5  # Currently not used
+    ),
+)
