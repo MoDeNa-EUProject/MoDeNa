@@ -93,6 +93,11 @@ identical model implementations. Complex operations such as database
 access are referred back to the high-level python module using
 call-back mechanisms.
 
+## Documentation
+
+The Doxygen documentation can be found [here](http://henrus.github.io/MoDeNa/index.html).
+Additional information on the software design can be found [here](http://henrus.github.io/MoDeNa/design/index.html).
+
 ## Dependencies
 - mongodb - Ideally from packages
 - pymongo - Ideally from packages
