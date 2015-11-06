@@ -40,9 +40,10 @@ Contributors
 
 from modena import SurrogateModel
 from modena.Strategy import Workflow2
-import diffusivity
-import gasConductivity
-import foamConductivity
+# import diffusivity
+# import gasConductivity
+# import foamConductivity
+import US_Solubility_Model
 from fireworks import LaunchPad
 from fireworks.core.rocket_launcher import rapidfire
 from fireworks.utilities.fw_serializers import load_object
@@ -58,4 +59,3 @@ for m in SurrogateModel.get_instances():
 # store workflow and launch it locally
 launchpad.add_wf(initWfs)
 rapidfire(launchpad)
-
