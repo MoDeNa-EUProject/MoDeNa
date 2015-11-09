@@ -43,6 +43,12 @@ program foam_diffusion
 !c
 !c ---------------------------------------------------------------------
 !c
+    call createModels
+    write(*,*) cdConductivity(300._dp)
+    write(*,*) airConductivity(300._dp)
+    write(*,*) cypConductivity(300._dp)
+    write(*,*) gasConductivity(300._dp,1._dp,0._dp,0._dp)
+    stop
 	call input(rpar, ipar)
     temp=rpar(10)/8.314d0
 	nroutputs = ipar(1)

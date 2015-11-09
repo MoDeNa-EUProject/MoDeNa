@@ -172,14 +172,12 @@ void tcfoam_SM
     },
 )
 
-# use input file to Foam ageing application to initialize with reasonable data.
+# use input file to Foam aging application to initialize with reasonable data.
 fname='input.in'
-
 try:
     f = open(fname,'r')
 except IOError:
-    f = open(os.path.dirname(os.path.abspath(__file__))+'/../../foamAging/'+
-        fname,'r')
+    f = open(os.getcwd()+'/../'+fname,'r')
 
 a=f.readline()
 a=f.readline()
