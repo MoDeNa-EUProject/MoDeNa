@@ -125,17 +125,23 @@ end subroutine eqcond_strut
 subroutine loadParameters
     use physicalProperties
     integer :: fi,ios,i,j
+    logical :: file_exists
     inputs=TRIM(ADJUSTL(fileplacein_par))//TRIM(ADJUSTL(inputs))
     spectra=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(spectra))
-    open(newunit(fi),file=inputs)
+    inquire(file=inputs,exist=file_exists)
+    if (file_exists) then
+        open(newunit(fi),file=inputs)
+    else
+        open(newunit(fi),file='../'//inputs)
+    endif
         read(fi,*) T1           !higher temperature
         read(fi,*) T2           !lower temperature
-        read(fi,*) cond1        !pore conductivity
+        read(fi,*) cond1        !gas conductivity
 !        read(fi,*) cond2        !solid conductivity
         call polymerConductivity(cond2,(t1+t2)/2)
         read(fi,*) emi1         !emittance 1
         read(fi,*) emi2         !emittance 2
-        read(fi,*) rho1         !pore density
+        read(fi,*) rho1         !gas density
         read(fi,*) rho2         !solid density
         read(fi,*) por          !porosity
         read(fi,*) dcell        !cell size

@@ -40,7 +40,8 @@ Foam conductivity model.
 
 import os
 import modena
-from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, CFunction
+from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, \
+    CFunction
 import modena.Strategy as Strategy
 from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
 from fireworks import Firework, Workflow, FWAction
@@ -252,4 +253,8 @@ m_foamConductivity = BackwardMappingModel(
         ),
         maxIterations=5  # Currently not used
     ),
+)
+
+m_simulation = Strategy.BackwardMappingScriptTask(
+    script=os.path.dirname(os.path.abspath(__file__))+'/src/kfoam'
 )
