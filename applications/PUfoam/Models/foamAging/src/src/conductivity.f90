@@ -50,18 +50,20 @@ subroutine equcond(keq,ystate,neq,eps,fstrut,temp)
     cpg(3)=cypHeatCapacity(temp)
     select case(gasModel) ! determine conductivity of gas mixture
     case (1)
-        call weightedAverage(kgas,kg,yg)
+        kgas = weightedAverage(kg,yg)
     case (2)
-        call extWassiljewa(kgas,kg,yg,Tc,pc,Mg,temp,1._dp)
+        kgas = extWassiljewa(kg,yg,Tc,pc,Mg,temp,1._dp)
     case (3)
-        call lindsayBromley(kgas,kg,yg,Tb,cpg,Mg,temp)
+        kgas = lindsayBromley(kg,yg,Tb,cpg,Mg,temp)
+    case (4)
+        kgas = pandeyPrajapati(kg,yg,Tb,Mg,temp)
     case default
         stop 'unknown gas conductivity model'
     end select
-    ! write(*,*) yg
-    ! write(*,*) kg
-    ! write(*,*) "kgas: ", kgas
-    ! stop
+    write(*,*) yg
+    write(*,*) kg
+    write(*,*) "kgas: ", kgas
+    stop
     call modena_inputs_set(kfoamInputs, kfoamEpspos, eps)
     call modena_inputs_set(kfoamInputs, kfoamDcellpos, dcell)
     call modena_inputs_set(kfoamInputs, kfoamFstrutpos, fstrut)
@@ -79,8 +81,7 @@ end subroutine equcond
 !********************************BEGINNING*************************************
 !> determine thermal conductivity of a mixture
 !! simple weighted average
-subroutine weightedAverage(kmix,k,yin)
-    real(dp), intent(out) :: kmix   !thermal conductivity of the mixture
+real(dp) function weightedAverage(k,yin) result(kmix)
     real(dp), dimension(:), intent(in) :: k !thermal conductivities
     real(dp), dimension(:), intent(in) :: yin !molar fractions
     integer :: n,i,j
@@ -95,7 +96,7 @@ subroutine weightedAverage(kmix,k,yin)
     do i=1,size(k)
         kmix=kmix+yin(i)*k(i)
     enddo
-end subroutine weightedAverage
+end function weightedAverage
 !***********************************END****************************************
 
 
@@ -103,8 +104,7 @@ end subroutine weightedAverage
 !> determine thermal conductivity of a mixture
 !! extended Wassiljewa model, parameters calculated according to Mason and Saxena
 !! [link](http://dx.doi.org/10.1016/j.fluid.2007.07.059)
-subroutine extWassiljewa(kmix,k,yin,Tc,pc,M,T,eps)
-    real(dp), intent(out) :: kmix   !thermal conductivity of the mixture
+real(dp) function extWassiljewa(k,yin,Tc,pc,M,T,eps) result(kmix)
     real(dp), dimension(:), intent(in) :: k !thermal conductivities
     real(dp), dimension(:), intent(in) :: yin !molar fractions
     real(dp), dimension(:), intent(in) :: Tc !critical temperatures
@@ -139,7 +139,7 @@ subroutine extWassiljewa(kmix,k,yin,Tc,pc,M,T,eps)
         enddo
         kmix=kmix+y(i)*k(i)/x
     enddo
-end subroutine extWassiljewa
+end function extWassiljewa
 !***********************************END****************************************
 
 
@@ -147,8 +147,7 @@ end subroutine extWassiljewa
 !> determine thermal conductivity of a mixture
 !! Lindsay-Bromley model
 !! see [link](http://dx.doi.org/10.1021/ie50488a017)
-subroutine lindsayBromley(kmix,k,yin,Tb,cp,M,T)
-    real(dp), intent(out) :: kmix   !thermal conductivity of the mixture
+real(dp) function lindsayBromley(k,yin,Tb,cp,M,T) result(kmix)
     real(dp), dimension(:), intent(in) :: &
         k,& !thermal conductivities
         yin,& !molar fractions
@@ -161,7 +160,7 @@ subroutine lindsayBromley(kmix,k,yin,Tb,cp,M,T)
     real(dp) :: x
     real(dp), dimension(:), allocatable :: &
         y,& !molar fractions
-        S,& !Sutherlands
+        S,& !Sutherland constants
         gam,& !heat capacity ratio
         cv !thermal capacities at constant volume
     real(dp), dimension(:,:), allocatable :: A
@@ -191,6 +190,51 @@ subroutine lindsayBromley(kmix,k,yin,Tb,cp,M,T)
         enddo
         kmix=kmix+y(i)*k(i)/x
     enddo
-end subroutine lindsayBromley
+end function lindsayBromley
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> determine thermal conductivity of a mixture
+!! Pandey-Prajapati model
+!! see [link](http://www.new1.dli.ernet.in/data1/upload/insa/INSA_1/20005baf_372.pdf)
+real(dp) function pandeyPrajapati(k,yin,Tb,M,T) result(kmix)
+    real(dp), dimension(:), intent(in) :: &
+        k,& !thermal conductivities
+        yin,& !molar fractions
+        Tb,& !boiling point temperatures
+        M !molar masses
+    real(dp), intent(in) :: &
+        T !temperature
+    integer :: n,i,j
+    real(dp) :: x
+    real(dp), dimension(:), allocatable :: &
+        y,& !molar fractions
+        S !Sutherland constants
+    real(dp), dimension(:,:), allocatable :: A
+    n=size(k)
+    allocate(y(n),S(n),A(n,n))
+    y=yin
+    if (minval(y)<0) stop 'Input molar fractions to extWassiljewa &
+        cannot be negative.'
+    y=y/sum(y)
+    do i=1,n
+        S(i)=1.5_dp*Tb(i)
+    enddo
+    do i=1,n
+        do j=1,n
+            A(i,j)=0.25_dp*(1+sqrt(k(i)/k(j)*(M(i)/M(j))**0.25_dp*&
+                (T+S(i))/(T+S(j))))**2*(T+sqrt(S(i)*S(j)))/(T+S(j))
+        enddo
+    enddo
+    kmix=0
+    do i=1,n
+        x=0
+        do j=1,n
+            x=x+y(j)*A(i,j)
+        enddo
+        kmix=kmix+y(i)*k(i)/x
+    enddo
+end function pandeyPrajapati
 !***********************************END****************************************
 end module conductivity
