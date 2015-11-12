@@ -21,5 +21,6 @@ module constants
     real(dp), dimension(3) :: &
         Tc=(/304.17_dp,132.55_dp,511.7_dp/),&   !<critical temperature
         pc=(/7.386e6_dp,3.769e6_dp,45.1e5_dp/),&    !<critical pressure
-        Mg=(/44e-3_dp,29e-3_dp,70e-3_dp/)   !<molar mass
+        Mg=(/44e-3_dp,29e-3_dp,70e-3_dp/),&   !<molar mass
+        Tb=(/194.75_dp,80.01_dp,322.4_dp/)  !<normal boiling point
 end module constants

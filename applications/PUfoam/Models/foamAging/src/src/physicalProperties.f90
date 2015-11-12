@@ -393,4 +393,65 @@ real(dp) function airDiffusivity(temp)
         airDiffusivity+0.79_dp*modena_outputs_get(dn2Outputs, 0_c_size_t)
 end function airDiffusivity
 !***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> heat capacity of carbon dioxide at constant pressure (J/mol/K)
+!! [link](http://webbook.nist.gov/cgi/cbook.cgi?ID=C124389&Units=SI&Mask=1#Thermo-Gas)
+real(dp) function cdHeatCapacity(temp)
+    real(dp), intent(in) :: temp
+    real(dp) :: &
+        t,&
+        a=24.99735_dp,&
+        b=55.18696_dp,&
+        c=-33.69137_dp,&
+        d=7.948387_dp,&
+        e=-0.136638_dp
+    t=temp/1e3
+    cdHeatCapacity=a+b*t+c*t**2+d*t**3+e/t**2
+end function cdHeatCapacity
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> heat capacity of cyclo-pentane at constant pressure (J/mol/K)
+!! fitted to data from [link](http://webbook.nist.gov/cgi/cbook.cgi?ID=C287923&Units=SI&Mask=1#Thermo-Gas)
+real(dp) function cypHeatCapacity(temp)
+    real(dp), intent(in) :: temp
+    real(dp) :: &
+        t,&
+        a=-25.6132057_dp,&
+        b=226.4176882_dp,&
+        c=574.2688767_dp,&
+        d=-670.5517907_dp,&
+        e=0.6765321_dp
+    t=temp/1e3
+    cypHeatCapacity=a+b*t+c*t**2+d*t**3+e/t**2
+end function cypHeatCapacity
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> heat capacity of air at constant pressure (J/mol/K)
+!! oxygen data from [link](http://webbook.nist.gov/cgi/cbook.cgi?ID=C7782447&Units=SI&Mask=1#Thermo-Gas)
+!! nitrogen data from [link](http://webbook.nist.gov/cgi/cbook.cgi?ID=C7727379&Units=SI&Mask=1#Thermo-Gas)
+real(dp) function airHeatCapacity(temp)
+    real(dp), intent(in) :: temp
+    real(dp) :: &
+        t,&
+        a=31.32234_dp,&
+        b=-20.23531_dp,&
+        c=57.86644_dp,&
+        d=-36.50624_dp,&
+        e=-0.007374_dp
+    t=temp/1e3
+    airHeatCapacity=a+b*t+c*t**2+d*t**3+e/t**2
+    a=28.98641_dp
+    b=1.853978_dp
+    c=-9.647459_dp
+    d=16.63537_dp
+    e=0.000117_dp
+    airHeatCapacity=0.21_dp*airHeatCapacity+0.79_dp*(a+b*t+c*t**2+d*t**3+e/t**2)
+end function airHeatCapacity
+!***********************************END****************************************
 end module physicalProperties
