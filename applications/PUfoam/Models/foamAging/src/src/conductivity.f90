@@ -63,10 +63,10 @@ subroutine equcond(keq,ystate,neq,eps,fstrut,temp)
     case default
         stop 'unknown gas conductivity model'
     end select
-    write(*,*) yg
-    write(*,*) kg
-    write(*,*) "kgas: ", kgas
-    stop
+    ! write(*,*) yg
+    ! write(*,*) kg
+    ! write(*,*) "kgas: ", kgas
+    ! stop
     call modena_inputs_set(kfoamInputs, kfoamEpspos, eps)
     call modena_inputs_set(kfoamInputs, kfoamDcellpos, dcell)
     call modena_inputs_set(kfoamInputs, kfoamFstrutpos, fstrut)
