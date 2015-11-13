@@ -8,7 +8,7 @@ module conductivity
     use fmodena
     use physicalProperties
     implicit none
-    integer :: gasModel=1
+    integer :: gasModel=3
     private
     public equcond
 contains
@@ -20,7 +20,7 @@ subroutine equcond(keq,ystate,neq,eps,fstrut,temp)
     integer, intent(in) :: neq
     real(dp), intent(in) :: temp,eps,fstrut
     real(dp) :: dcell,ccd,cair,ccyp,xcd,xair,xcyp,kgas
-    real(dp), dimension(3) :: kg,yg,cpg
+    real(dp), dimension(4) :: kg,yg,cpg
     integer :: i,ncell,onecell,nFV
     dcell   = ystate(nEQ + 1 )
     ncell = int(ystate(nEQ + 11))
@@ -42,12 +42,15 @@ subroutine equcond(keq,ystate,neq,eps,fstrut,temp)
     xcd=ccd/(cair+ccd+ccyp)
     xcyp=ccyp/(cair+ccd+ccyp)
     kg(1)=cdConductivity(temp)
-    kg(2)=airConductivity(temp)
-    kg(3)=cypConductivity(temp)
-    yg=(/xcd,xair,xcyp/)
+    kg(2)=nitrConductivity(temp)
+    kg(3)=oxyConductivity(temp)
+    kg(4)=cypConductivity(temp)
+    yg=(/xcd,0.79_dp*xair,0.21_dp*xair,xcyp/)
+    ! yg=(/0.0_dp,0.79_dp*0.5_dp,0.21_dp*0.5_dp,0.5_dp/)
     cpg(1)=cdHeatCapacity(temp)
-    cpg(2)=airHeatCapacity(temp)
-    cpg(3)=cypHeatCapacity(temp)
+    cpg(2)=nitrHeatCapacity(temp)
+    cpg(3)=oxyHeatCapacity(temp)
+    cpg(4)=cypHeatCapacity(temp)
     select case(gasModel) ! determine conductivity of gas mixture
     case (1)
         kgas = weightedAverage(kg,yg)

@@ -305,6 +305,26 @@ end function cypConductivity
 
 
 !********************************BEGINNING*************************************
+!> thermal conductivity of nitrogen
+real(dp) function nitrConductivity(temp)
+    real(dp), intent(in) :: temp
+    nitrConductivity=(0.3918e-3_dp)+(0.9814e-4_dp)*temp+&
+        (-5.0660e-8_dp)*temp**2+(1.503479e-11_dp)*temp**3
+end function nitrConductivity
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> thermal conductivity of oxygen
+real(dp) function oxyConductivity(temp)
+    real(dp), intent(in) :: temp
+    oxyConductivity=(-0.3272e-3_dp)+(0.9965e-4_dp)*temp+&
+        (-3.7426e-8_dp)*temp**2+(0.973012e-11_dp)*temp**3
+end function oxyConductivity
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
 !> solubility of carbon dioxide
 real(dp) function cdSolubility(temp)
     real(dp), intent(in) :: temp
@@ -433,9 +453,35 @@ end function cypHeatCapacity
 
 !********************************BEGINNING*************************************
 !> heat capacity of air at constant pressure (J/mol/K)
-!! oxygen data from [link](http://webbook.nist.gov/cgi/cbook.cgi?ID=C7782447&Units=SI&Mask=1#Thermo-Gas)
-!! nitrogen data from [link](http://webbook.nist.gov/cgi/cbook.cgi?ID=C7727379&Units=SI&Mask=1#Thermo-Gas)
 real(dp) function airHeatCapacity(temp)
+    real(dp), intent(in) :: temp
+    airHeatCapacity=0.21_dp*oxyHeatCapacity(temp)+0.79_dp*nitrHeatCapacity(temp)
+end function airHeatCapacity
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> heat capacity of nitrogen at constant pressure (J/mol/K)
+!! [link](http://webbook.nist.gov/cgi/cbook.cgi?ID=C7727379&Units=SI&Mask=1#Thermo-Gas)
+real(dp) function nitrHeatCapacity(temp)
+    real(dp), intent(in) :: temp
+    real(dp) :: &
+        t,&
+        a=28.98641_dp,&
+        b=1.853978_dp,&
+        c=-9.647459_dp,&
+        d=16.63537_dp,&
+        e=0.000117_dp
+    t=temp/1e3
+    nitrHeatCapacity=a+b*t+c*t**2+d*t**3+e/t**2
+end function nitrHeatCapacity
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> heat capacity of oxygen at constant pressure (J/mol/K)
+!! [link](http://webbook.nist.gov/cgi/cbook.cgi?ID=C7782447&Units=SI&Mask=1#Thermo-Gas)
+real(dp) function oxyHeatCapacity(temp)
     real(dp), intent(in) :: temp
     real(dp) :: &
         t,&
@@ -445,13 +491,7 @@ real(dp) function airHeatCapacity(temp)
         d=-36.50624_dp,&
         e=-0.007374_dp
     t=temp/1e3
-    airHeatCapacity=a+b*t+c*t**2+d*t**3+e/t**2
-    a=28.98641_dp
-    b=1.853978_dp
-    c=-9.647459_dp
-    d=16.63537_dp
-    e=0.000117_dp
-    airHeatCapacity=0.21_dp*airHeatCapacity+0.79_dp*(a+b*t+c*t**2+d*t**3+e/t**2)
-end function airHeatCapacity
+    oxyHeatCapacity=a+b*t+c*t**2+d*t**3+e/t**2
+end function oxyHeatCapacity
 !***********************************END****************************************
 end module physicalProperties
