@@ -147,19 +147,22 @@ void rheology_SM
    },
 )
 
-
-m = ForwardMappingModel(
-    _id= 'rheology',
+m = BackwardMappingModel(
+    _id= 'rheology',    
     surrogateFunction= f,
-    substituteModels= [ ],
-    parameters= [ 11.35, 2, 0.2],
-    inputs={
-        'temp': { 'min': 0, 'max': 9e99 },
-        'shear': { 'min': 0, 'max': 9e99 },
-        'conv': { 'min': 0, 'max': 9e99 },
-    },
-    outputs={
-        'mu_ap': {'min': 0, 'max': 9e99 },
-    },
+    exactTask= rheologyExactTask(),
+    substituteModels= [ polymerViscosity.m, SurfaceTension.m],
+    initialisationStrategy= Strategy.InitialPoints(
+        initialPoints=
+        {
+            'temp': [50.0, 100.0, 140.0],
+            'shear': [0.01, 0.1, 1.0],
+            'conv': [0.1, 0.3, 0.52],
+                 },
+    ),
+    outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(
+        nNewPoints= 4
+    ),
+    parameterFittingStrategy= Strategy.NonLinFitWithSmallestError(),
 )
 

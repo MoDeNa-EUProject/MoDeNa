@@ -5,3 +5,7 @@ cmake -H${foamAging} -B${foamAging} && make --directory=${foamAging}
 foamConductivity="../Models/foamConductivity/src"
 cmake -H${foamConductivity} -B${foamConductivity} && \
     make --directory=${foamConductivity}
+
+US_solubility="../Models/US_Solubility_Model/PythonModule_and_DetailedModelCode"
+cmake -H${US_solubility} -B${US_solubility} && \
+    make --directory=${US_solubility}
