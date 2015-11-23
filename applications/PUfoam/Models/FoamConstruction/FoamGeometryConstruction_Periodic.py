@@ -150,8 +150,8 @@ for i in range(1,NumOfVolumes):
     Volumes[t]=np.absolute(c.astype(np.float))
     t=t+1
 #####################################################
-MAX0=list(range(0,100))
-for i in range(100):
+MAX0=list(range(0,NumOfCells))
+for i in range(NumOfCells):
     MAX0[i]=max(Volumes[i])
 MaxIndexOfFaces=max(MAX0)
 MAX1=list(range(0,int(MaxIndexOfFaces)))
@@ -227,7 +227,7 @@ HyperMeshInput.write('{0}\n'.format('*plot()'))
 HyperMeshInput.write('{0}\n'.format('*settopologyedgedisplay(1,0)'))
 HyperMeshInput.write('{0}\n'.format('*plot()'))
 Tol=0.001
-for i in range(100):
+for i in range(NumOfCells):
     HyperMeshInput.write('{0}\n'.format('*createmark(surfaces,1) "displayed"'))
     HyperMeshInput.write('{0}{1}{2}{3}{4}\n'.format('*selfstitchcombine(1,82,',Tol,',',Tol,')'))
     Tol=0.0001+Tol
