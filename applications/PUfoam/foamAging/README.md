@@ -37,6 +37,7 @@ sudo apt-get install veusz
 ```
 
 ## Run
+### Aging simulation
 First, prepare input file **input.in**. Example input can be found in
 "example inputs" folder. Use only constant solubility. Detailed model is not
 present. Load all surrogate models and their parameters to database:
@@ -48,8 +49,18 @@ Main simulation:
 ./workflow
 ```
 
+### Foam conductivity
+You have also option to calculate foam conductivity for just one foam at
+specified conditions using the detailed model. To do this, prepare input file
+**inputs.in**. Example input can be found in "example inputs" folder. Run the
+model using:
+```
+./foamCond
+```
+
 ## Results
 The "results" folder contains a file with time dependence of equivalent
 conductivity "keq_time.out" and files with concentration profiles.
 The evolution of equivalent conductivity can be viewed using "keq_time.vsz"
 script and VEUSZ. Concentration profiles can be viewed using "degas_plot.py".
+Results of the foam conductivity model are in the "launcher" folder.

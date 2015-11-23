@@ -39,9 +39,7 @@ Contributors
 
 from fireworks import Firework, Workflow, LaunchPad
 from fireworks.core.rocket_launcher import rapidfire
-
-import foamAging
-
+from foamAging import m as SIMULATION
 from modulefinder import ModuleFinder
 
 
@@ -50,8 +48,7 @@ launchpad = LaunchPad()
 launchpad.reset('', require_password=False)
 
 # create the individual FireWorks and Workflow
-# Source code in src/twoTanksMacroscopicProblem.C
-wf = Workflow([Firework(foamAging.m)], {}, name="simulation")
+wf = Workflow([Firework(SIMULATION)], {}, name="simulation")
 
 # store workflow and launch it locally
 launchpad.add_wf(wf)
