@@ -151,7 +151,7 @@ void surroDensity
 )
 
 m = BackwardMappingModel(
-    _id= 'Density',    
+    _id= 'PolymerDensity',    
     surrogateFunction= f,
     exactTask= DensityExactSim(),
     substituteModels= [ ],
