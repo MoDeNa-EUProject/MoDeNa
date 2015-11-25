@@ -29,35 +29,29 @@ License
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
-    Initialisation script for the flowRate model. The script calculates a few
-    data points and fits the surrogate model. Then the model is inserted into
-    the database.
+    A simple workflow
 
 Authors
     Henrik Rusche
 
 Contributors
-    Christos Mitrias
 '''
 
-from modena import SurrogateModel
-from modena.Strategy import Workflow2
-import Rheology 
-import SurfaceTension 
-import polymerViscosity
-from fireworks import LaunchPad
+from fireworks import Firework, Workflow, LaunchPad
 from fireworks.core.rocket_launcher import rapidfire
-from fireworks.utilities.fw_serializers import load_object
+import WorkflowTest
+from modulefinder import ModuleFinder
 
 
 # set up the LaunchPad and reset it
 launchpad = LaunchPad()
 launchpad.reset('', require_password=False)
 
-initWfs = Workflow2([])
-for m in SurrogateModel.get_instances():
-    initWfs.addNoLink(m.initialisationStrategy().workflow(m))
-# store workflow and launch it locally
-launchpad.add_wf(initWfs)
-rapidfire(launchpad)
+# create the individual FireWorks and Workflow
+# Source code in src/twoTanksMacroscopicProblem.C
 
+wf = Workflow([Firework(WorkflowTest.m)], {}, name="simulation")
+
+# store workflow and launch it locally
+launchpad.add_wf(wf)
+rapidfire(launchpad)

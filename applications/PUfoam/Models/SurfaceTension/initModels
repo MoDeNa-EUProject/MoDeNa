@@ -42,7 +42,7 @@ Contributors
 from modena import SurrogateModel
 from modena.Strategy import Workflow2
 #import flowRate
-import modSurfaceTension
+import SurfaceTension
 from fireworks import LaunchPad
 from fireworks.core.rocket_launcher import rapidfire
 from fireworks.utilities.fw_serializers import load_object
