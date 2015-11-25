@@ -29,7 +29,7 @@ License
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
-    Initialisation script for the Case 1.
+    Initialisation script for the Foam aging application.
 
 Authors
     Henrik Rusche
@@ -40,10 +40,10 @@ Contributors
 
 from modena import SurrogateModel
 from modena.Strategy import Workflow2
-# import diffusivity
-# import gasConductivity
-# import foamConductivity
-import US_Solubility_Model
+import diffusivity
+import gasConductivity
+import foamConductivity
+# import US_Solubility_Model
 from fireworks import LaunchPad
 from fireworks.core.rocket_launcher import rapidfire
 from fireworks.utilities.fw_serializers import load_object

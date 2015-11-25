@@ -36,6 +36,5 @@ Authors
 Contributors
 '''
 
-
-from foamConductivity import m_foamConductivity
-from foamConductivity import m_simulation
+from gasMixtureConductivity import f_gasMixtureConductivity
+from gasMixtureConductivity import m_gasMixtureConductivity

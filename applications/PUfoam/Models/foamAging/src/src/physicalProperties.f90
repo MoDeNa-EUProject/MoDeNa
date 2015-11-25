@@ -23,6 +23,13 @@ module physicalProperties
     integer(c_size_t) :: kfoamFstrutpos
     integer(c_size_t) :: kfoamKgaspos
     integer(c_size_t) :: kfoamTemppos
+    type(c_ptr) :: kgasModena = c_null_ptr
+    type(c_ptr) :: kgasInputs = c_null_ptr
+    type(c_ptr) :: kgasOutputs = c_null_ptr
+    integer(c_size_t) :: kgasTemppos
+    integer(c_size_t) :: kgasXco2pos
+    integer(c_size_t) :: kgasXairpos
+    integer(c_size_t) :: kgasXcyppos
     type(c_ptr) :: kcdModena = c_null_ptr
     type(c_ptr) :: kcdInputs = c_null_ptr
     type(c_ptr) :: kcdOutputs = c_null_ptr
@@ -86,6 +93,15 @@ subroutine createModels
     kfoamTemppos = modena_model_inputs_argPos(&
         kfoamModena, c_char_"T"//c_null_char);
     call modena_model_argPos_check(kfoamModena)
+    ! kgasModena = modena_model_new (&
+    !     c_char_"gasMixtureConductivity"//c_null_char);
+    ! kgasInputs = modena_inputs_new (kgasModena);
+    ! kgasOutputs = modena_outputs_new (kgasModena);
+    ! kgasTemppos = modena_model_inputs_argPos(kgasModena, c_char_"T"//c_null_char);
+    ! kgasXco2pos = modena_model_inputs_argPos(kgasModena, c_char_"xCO2"//c_null_char);
+    ! kgasXairpos = modena_model_inputs_argPos(kgasModena, c_char_"xAir"//c_null_char);
+    ! kgasXcyppos = modena_model_inputs_argPos(kgasModena, c_char_"xCyP"//c_null_char);
+    ! call modena_model_argPos_check(kgasModena)
     kcdModena = modena_model_new (&
         c_char_"gas_thermal_conductivity[A=CO2]"//c_null_char);
     kcdInputs = modena_inputs_new (kcdModena);
@@ -178,6 +194,9 @@ subroutine destroyModels
     call modena_inputs_destroy (kfoamInputs);
     call modena_outputs_destroy (kfoamOutputs);
     call modena_model_destroy (kfoamModena);
+    ! call modena_inputs_destroy (kgasInputs);
+    ! call modena_outputs_destroy (kgasOutputs);
+    ! call modena_model_destroy (kgasModena);
     call modena_inputs_destroy (kcdInputs);
     call modena_outputs_destroy (kcdOutputs);
     call modena_model_destroy (kcdModena);
@@ -227,6 +246,23 @@ end function polymerDensity
 
 
 !********************************BEGINNING*************************************
+!> thermal conductivity of mixture of blowing agents
+real(dp) function gasConductivity(temp,xco2,xair,xcyp)
+    real(dp), intent(in) :: temp,xco2,xair,xcyp
+    call modena_inputs_set(kgasInputs, kgasTemppos, temp)
+    call modena_inputs_set(kgasInputs, kgasXco2pos, xco2)
+    call modena_inputs_set(kgasInputs, kgasXairpos, xair)
+    call modena_inputs_set(kgasInputs, kgasXcyppos, xcyp)
+    ret = modena_model_call (kgasModena, kgasInputs, kgasOutputs)
+    if(ret /= 0) then
+        call exit(ret)
+    endif
+    gasConductivity=modena_outputs_get(kgasOutputs, 0_c_size_t)
+end function gasConductivity
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
 !> thermal conductivity of carbon dioxide
 real(dp) function cdConductivity(temp)
     real(dp), intent(in) :: temp
@@ -265,6 +301,26 @@ real(dp) function cypConductivity(temp)
     endif
     cypConductivity=modena_outputs_get(kcypOutputs, 0_c_size_t)
 end function cypConductivity
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> thermal conductivity of nitrogen
+real(dp) function nitrConductivity(temp)
+    real(dp), intent(in) :: temp
+    nitrConductivity=(0.3918e-3_dp)+(0.9814e-4_dp)*temp+&
+        (-5.0660e-8_dp)*temp**2+(1.503479e-11_dp)*temp**3
+end function nitrConductivity
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> thermal conductivity of oxygen
+real(dp) function oxyConductivity(temp)
+    real(dp), intent(in) :: temp
+    oxyConductivity=(-0.3272e-3_dp)+(0.9965e-4_dp)*temp+&
+        (-3.7426e-8_dp)*temp**2+(0.973012e-11_dp)*temp**3
+end function oxyConductivity
 !***********************************END****************************************
 
 
@@ -356,5 +412,86 @@ real(dp) function airDiffusivity(temp)
     airDiffusivity=&
         airDiffusivity+0.79_dp*modena_outputs_get(dn2Outputs, 0_c_size_t)
 end function airDiffusivity
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> heat capacity of carbon dioxide at constant pressure (J/mol/K)
+!! [link](http://webbook.nist.gov/cgi/cbook.cgi?ID=C124389&Units=SI&Mask=1#Thermo-Gas)
+real(dp) function cdHeatCapacity(temp)
+    real(dp), intent(in) :: temp
+    real(dp) :: &
+        t,&
+        a=24.99735_dp,&
+        b=55.18696_dp,&
+        c=-33.69137_dp,&
+        d=7.948387_dp,&
+        e=-0.136638_dp
+    t=temp/1e3
+    cdHeatCapacity=a+b*t+c*t**2+d*t**3+e/t**2
+end function cdHeatCapacity
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> heat capacity of cyclo-pentane at constant pressure (J/mol/K)
+!! fitted to data from [link](http://webbook.nist.gov/cgi/cbook.cgi?ID=C287923&Units=SI&Mask=1#Thermo-Gas)
+real(dp) function cypHeatCapacity(temp)
+    real(dp), intent(in) :: temp
+    real(dp) :: &
+        t,&
+        a=-25.6132057_dp,&
+        b=226.4176882_dp,&
+        c=574.2688767_dp,&
+        d=-670.5517907_dp,&
+        e=0.6765321_dp
+    t=temp/1e3
+    cypHeatCapacity=a+b*t+c*t**2+d*t**3+e/t**2
+end function cypHeatCapacity
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> heat capacity of air at constant pressure (J/mol/K)
+real(dp) function airHeatCapacity(temp)
+    real(dp), intent(in) :: temp
+    airHeatCapacity=0.21_dp*oxyHeatCapacity(temp)+0.79_dp*nitrHeatCapacity(temp)
+end function airHeatCapacity
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> heat capacity of nitrogen at constant pressure (J/mol/K)
+!! [link](http://webbook.nist.gov/cgi/cbook.cgi?ID=C7727379&Units=SI&Mask=1#Thermo-Gas)
+real(dp) function nitrHeatCapacity(temp)
+    real(dp), intent(in) :: temp
+    real(dp) :: &
+        t,&
+        a=28.98641_dp,&
+        b=1.853978_dp,&
+        c=-9.647459_dp,&
+        d=16.63537_dp,&
+        e=0.000117_dp
+    t=temp/1e3
+    nitrHeatCapacity=a+b*t+c*t**2+d*t**3+e/t**2
+end function nitrHeatCapacity
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> heat capacity of oxygen at constant pressure (J/mol/K)
+!! [link](http://webbook.nist.gov/cgi/cbook.cgi?ID=C7782447&Units=SI&Mask=1#Thermo-Gas)
+real(dp) function oxyHeatCapacity(temp)
+    real(dp), intent(in) :: temp
+    real(dp) :: &
+        t,&
+        a=31.32234_dp,&
+        b=-20.23531_dp,&
+        c=57.86644_dp,&
+        d=-36.50624_dp,&
+        e=-0.007374_dp
+    t=temp/1e3
+    oxyHeatCapacity=a+b*t+c*t**2+d*t**3+e/t**2
+end function oxyHeatCapacity
 !***********************************END****************************************
 end module physicalProperties

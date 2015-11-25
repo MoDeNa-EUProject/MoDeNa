@@ -52,15 +52,26 @@ configure_file(
 )
 
 # Installation
-install(
-  TARGETS twoTanksFullProblem modena fmodena
-  EXPORT MODENATargets
-  RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib/modena
-  ARCHIVE DESTINATION lib/static
-  PUBLIC_HEADER DESTINATION include/modena
-  INCLUDES DESTINATION include/modena
-)
+if(CMAKE_VERSION VERSION_GREATER "2.8.11")
+  install(
+    TARGETS twoTanksFullProblem modena fmodena
+    EXPORT MODENATargets
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib/modena
+    ARCHIVE DESTINATION lib/static
+    PUBLIC_HEADER DESTINATION include/modena
+    INCLUDES DESTINATION include/modena
+  )
+else()
+  install(
+    TARGETS twoTanksFullProblem modena fmodena
+    EXPORT MODENATargets
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib/modena
+    ARCHIVE DESTINATION lib/static
+    PUBLIC_HEADER DESTINATION include/modena
+  )
+endif()
 
 install(FILES libmodena.pc DESTINATION lib/pkgconfig)
 install(FILES fmodena.mod DESTINATION include/modena)

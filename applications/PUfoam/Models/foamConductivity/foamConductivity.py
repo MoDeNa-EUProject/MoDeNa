@@ -40,7 +40,8 @@ Foam conductivity model.
 
 import os
 import modena
-from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, CFunction
+from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, \
+    CFunction
 import modena.Strategy as Strategy
 from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
 from fireworks import Firework, Workflow, FWAction
@@ -172,14 +173,12 @@ void tcfoam_SM
     },
 )
 
-# use input file to Foam ageing application to initialize with reasonable data.
+# use input file to Foam aging application to initialize with reasonable data.
 fname='input.in'
-
 try:
     f = open(fname,'r')
 except IOError:
-    f = open(os.path.dirname(os.path.abspath(__file__))+'/../../foamAging/'+
-        fname,'r')
+    f = open(os.getcwd()+'/../'+fname,'r')
 
 a=f.readline()
 a=f.readline()
@@ -254,4 +253,11 @@ m_foamConductivity = BackwardMappingModel(
         ),
         maxIterations=5  # Currently not used
     ),
+)
+
+## Foam conductivity simulation
+#
+# For the case, when only foam conductivity and no aging is needed.
+m_simulation = Strategy.BackwardMappingScriptTask(
+    script=os.path.dirname(os.path.abspath(__file__))+'/src/kfoam'
 )
