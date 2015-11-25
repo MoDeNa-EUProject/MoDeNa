@@ -37,14 +37,12 @@ Authors
     Henrik Rusche
 
 Contributors
-    Christos Mitrias
 '''
 
 from modena import SurrogateModel
 from modena.Strategy import Workflow2
-import Rheology 
-import SurfaceTension 
-import polymerViscosity
+#import flowRate
+import modDensity
 from fireworks import LaunchPad
 from fireworks.core.rocket_launcher import rapidfire
 from fireworks.utilities.fw_serializers import load_object
@@ -57,6 +55,7 @@ launchpad.reset('', require_password=False)
 initWfs = Workflow2([])
 for m in SurrogateModel.get_instances():
     initWfs.addNoLink(m.initialisationStrategy().workflow(m))
+
 # store workflow and launch it locally
 launchpad.add_wf(initWfs)
 rapidfire(launchpad)

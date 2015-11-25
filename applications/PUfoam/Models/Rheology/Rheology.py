@@ -1,4 +1,4 @@
-'''@cond
+'''
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -26,20 +26,21 @@ License
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
-@endcond'''
 
-"""
-@file
-Python library of FireTasks
-@todo Document this properly
+Description
+    Python library of FireTasks
 
-@author    Christos Mitrias
-@copyright 2014-2015, MoDeNa Project. GNU Public License.
-@ingroup   app_foaming
-"""
+Authors
+    Henrik Rusche
+
+Contributors
+    Christos Mitrias
+'''
 
 import os
 import modena
+import SurfaceTension
+import polymerViscosity 
 from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, CFunction
 import modena.Strategy as Strategy
 from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
@@ -47,16 +48,22 @@ from fireworks import Firework, Workflow, FWAction
 from fireworks.utilities.fw_utilities import explicit_serialize
 from blessings import Terminal
 from jinja2 import Template
-
 # Create terminal for colour output
 term = Terminal()
 
 
+__author__ = 'Henrik Rusche'
+__copyright__ = 'Copyright 2014, MoDeNa Project'
+__version__ = '0.2'
+__maintainer__ = 'Henrik Rusche'
+__email__ = 'h.rusche@wikki.co.uk.'
+__date__ = 'Sep 4, 2014'
+
+# ********************************* Class ************************************ #
 @explicit_serialize
-class rheologyExactTask(FireTaskBase):
+class RheologyExactTask(FireTaskBase):
     """
     A FireTask that starts a microscopic code and updates the database.
-    @todo Document this properly
     """   
     def run_task(self, fw_spec):
         print(
@@ -67,28 +74,33 @@ class rheologyExactTask(FireTaskBase):
 
 
         # Write input
-        f = open('rheologyExact.in', 'w')
+        Template('''{{ s['point']['T'] }}
+                {{ s['point']['shear'] }}
+                {{ s['point']['X'] }}
+		{{ s['point']['mu'] }}
+		{{ s['point']['ST'] }}'''.strip()).stream(s=self).dump('RheologyExact.in')
 
-        f.close()
 
         # Execute the detailed model
-        os.system(os.path.dirname(os.path.abspath(__file__)) + '/src/rheologyexact')
+        ret = os.system('../src/rheologyexactdummy')
+        print "ret ", ret
 
+        print('test')
         # Analyse output
-        f=open('rheologyExact.out','r')
-        self['point']['mu'] = float(f.readline())
+        f=open('RheologyExact.out','r')
+        self['point']['mu_ap'] = float(f.readline())
         f.close()
         
-        os.remove('rheologyExact.in')
-        os.remove('rheologyExact.out')
+        os.remove('RheologyExact.in')
+        os.remove('RheologyExact.out')
 
         return FWAction(mod_spec=[{'_push': self['point']}])
-
-
+       
 f = CFunction(
     Ccode= '''
 #include "modena.h"
 #include "math.h"
+#include <stdio.h>
 
 void rheology_SM
 (
@@ -98,9 +110,9 @@ void rheology_SM
     double *outputs
 )
 {    
-    const double temp = inputs[0]; // temperature
+    const double T = inputs[0]; // temperature
     const double shear = inputs[1]; // shear rate
-    const double conv = inputs[2]; // conversion
+    const double X = inputs[2]; // conversion
     const double lambda = parameters[0];
     const double alpha = parameters[1];
     const double n_rh = parameters[2];
@@ -112,7 +124,7 @@ void rheology_SM
     const double mu_b = 1;
     const double mu_c = 0;
     const double mu_d = 0.001;
-    const double conv_gel = 0.615;
+    const double X_gel = 0.615;
     const double mu_0_const = 0.195; 
     const double mu_inf_const = 0.266;
 //    const double lambda = 11.35 ;
@@ -122,47 +134,58 @@ void rheology_SM
     double mu_0, mu_inf, f_t;
     double mu_ap;
     
-    mu_0 = (log(conv+mu_d) - log(mu_d) + pow(conv_gel / ( conv_gel - conv ), mu_a + conv*mu_b + mu_c*pow(conv,2))) * mu_0_const; 
-    mu_inf = (log(conv+mu_d) - log(mu_d) + pow(conv_gel / ( conv_gel - conv ), mu_a + conv*mu_b + mu_c*pow(conv,2)))* mu_inf_const;
-    f_t = A_mu * exp(E_mu / R_rh / temp );
+    mu_0 = (log(X+mu_d) - log(mu_d) + pow(X_gel / ( X_gel - X ), mu_a + X*mu_b + mu_c*pow(X,2))) * mu_0_const; 
+    mu_inf = (log(X+mu_d) - log(mu_d) + pow(X_gel / ( X_gel - X ), mu_a + X*mu_b + mu_c*pow(X,2)))* mu_inf_const;
+    f_t = A_mu * exp(E_mu / R_rh / T );
 
     mu_ap = (mu_inf + (mu_0 - mu_inf)*pow(1 + pow(lambda*shear,alpha), (n_rh - 1) / alpha)) * f_t;
-
+    //printf("apparent viscosity %f", mu_ap);
     outputs[0] = mu_ap;
 }
 ''',
    # These are global bounds for the function
    inputs={
-       'temp': {'min': 0, 'max': 9e99, 'argPos': 0 },
+       'T': {'min': 0, 'max': 9e99, 'argPos': 0 },
        'shear': {'min': 0, 'max': 9e99, 'argPos': 1 },
-       'conv': {'min': 0, 'max': 1, 'argPos': 2 },
+       'X': {'min': 0, 'max': 1, 'argPos': 2 },
+       'mu': {'min': 0, 'max': 1000, 'argPos': 3 },
+       'ST': {'min': 0, 'max': 100, 'argPos': 4 },
+       
    },
    outputs={
        'mu_ap': { 'min': 0, 'max': 9e99, 'argPos': 0 },
    },
    parameters={
-       'lamdba': { 'min': 11.35, 'max': 11.35, 'argPos': 0 },
-       'alpha': { 'min': 2, 'max': 2, 'argPos': 1 },
-       'n_rh': { 'min': 0.2, 'max': 0.2, 'argPos': 2 },
+       'lamdba': { 'min': 1.35, 'max': 21.35, 'argPos': 0 },
+       'alpha': { 'min': 0, 'max': 2, 'argPos': 1 },
+       'n_rh': { 'min': 0, 'max': 2, 'argPos': 2 },
    },
 )
 
 m = BackwardMappingModel(
-    _id= 'rheology',    
+    _id= 'Rheology',    
     surrogateFunction= f,
-    exactTask= rheologyExactTask(),
-    substituteModels= [ polymerViscosity.m, SurfaceTension.m],
+    exactTask= RheologyExactTask(),
+    substituteModels= [ polymerViscosity.m_polymerViscosity, SurfaceTension.m],
+#    substituteModels= [ ],
     initialisationStrategy= Strategy.InitialPoints(
         initialPoints=
         {
-            'temp': [50.0, 100.0, 140.0],
-            'shear': [0.01, 0.1, 1.0],
-            'conv': [0.1, 0.3, 0.52],
+            'T': [300.0, 400.0],
+            'shear': [0.01, 0.1],
+            'X': [0.1, 0.3],
                  },
     ),
     outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(
         nNewPoints= 4
     ),
-    parameterFittingStrategy= Strategy.NonLinFitWithSmallestError(),
+    parameterFittingStrategy= Strategy.NonLinFitWithErrorContol(
+        testDataPercentage= 0.2,
+        maxError= 0.5,
+        improveErrorStrategy= Strategy.StochasticSampling(
+            nNewPoints= 2
+        ),
+        maxIterations= 5 # Currently not used
+    ),
 )
 

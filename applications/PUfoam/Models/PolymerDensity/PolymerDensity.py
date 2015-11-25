@@ -1,4 +1,5 @@
-'''@cond
+
+'''
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -26,40 +27,15 @@ License
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
-@endcond'''
 
-"""
-@file
-Python library of FireTasks
-This is the Surface Tension python module. Basically, it contains the following:
+Description
+    Python library of FireTasks
 
-The FireTask which controls the call of the detailed model. This detailed model is called
-at the very beginning of the simulation in order to generate initial data points 
-which can be used to fit the parameters of the surrogate model and during a running simulation
-as soon as the Surface Tension model is called with input parameters which lie outside the range
-the parameters of the surrogate model was so far fitted for. This FireTask is stored in the class
-"SurfaceTensionExactSim" and a more detailed description of the detailed model can be found
-in the description of this class.
+Authors
+    Henrik Rusche
 
-Furthermore, this module contains the code of the surrogate model function as well as the 
-definitions of its input and output values and its fittable parameters. Care should be
-taken to set reasonable bounds for these variables.
-
-Also, this module contains the backward mapping model. This model consits of the 
-surrogate model function, an initialisation strategy, the out of bounds strategy and the
-parameter fitting strategy. The initialisation strategy defines the initial data points where the
-detailed model will be evaluated at simulation start for an initial fit of the surrogate model parameters.
-The out of bounds strategy determines, how many new points and where to place these new 
-points, once the Surface Tension model is called for input values outside of the 
-fitted range. The parameter fitting strategy defines tolerances and maximal iterations 
-which are passed to the numerical solver which performs the actual fitting of the
-surrogate model parameters.
-
-
-@author    Jonas Mairhofer
-@copyright 2014-2015, MoDeNa Project. GNU Public License.
-@ingroup   app_foaming
-"""
+Contributors
+'''
 
 import os
 import modena
@@ -85,17 +61,9 @@ __date__ = 'Sep 4, 2014'
 
 # ********************************* Class ********************************** #
 @explicit_serialize
-class SurfaceTensionExactSim(FireTaskBase):
+class DensityExactSim(FireTaskBase):
     """
-    This FireTask controls the execution of the detailed model of the Surface Tension model.
-    The detailed model is a density functional theory implementation based on PC-SAFT. A 
-    detailed description of this model can be found in Deliverable 1.3 on the MoDeNa website.
-    
-    In order to start the detailed model, the input values for the model are first written to the
-    file "in.txt". The detailed model code picks them up from this file and performs the according
-    calculation. Once it is done, the output value is written to the file "out.txt". This FireTask
-    then reads in the calculated surface tension from "out.txt" and inserts this value into the 
-    database.
+    A FireTask that starts a microscopic code and updates the database.
     """
 
     def run_task(self, fw_spec):
@@ -115,7 +83,7 @@ class SurfaceTensionExactSim(FireTaskBase):
 
         ff.write('2 \n')       #number of components in system
         ff.write('air \n')     #component 1
-        ff.write('thf \n')      #component 2
+        ff.write('pu \n')      #component 2
         ff.write('0. \n')     #molar feed (initial) composition component 1
         ff.write('0. \n')     #molar feed (initial) composition component 2
         ff.close()
@@ -125,25 +93,11 @@ class SurfaceTensionExactSim(FireTaskBase):
         fff.close()
 
         # Execute detailed model
-        run_command = '''../src/./PCSAFT_SurfaceTension -snes_monitor_short -ksp_monitor_short \
-                   -nx 800 -rc 9.0 -box 300 -erel 1e-08 -init_pert 0 \
-                   -snes_type newtonls  -snes_converged_reason  \
-                   -snes_atol 1e-07 -snes_rtol 1e-07 -snes_stol 1e-07 -snes_max_it 20 \
-                   -ksp_max_it 15 -ksp_gmres_restart 50 \
-                   -snes_linesearch_type l2 -snes_linesearch_damping 0.3 -snes_linesearch_monitor \
-                   -snes_max_fail 1 -snes_max_linear_solve_fail 100 \
-                   -ksp_gmres_cgs_refinement_type refine_always \
-                   -snes_ksp_ew -snes_ksp_ew_version 1 -snes_ksp_ew_rtol0 0.5 -snes_ksp_ew_rtolmax 0.9 -snes_ksp_ew_threshold 0.1 \
-                   -jac 0 -pc_type none '''
-
-
-        os.system(run_command)
-        
-        #os.system('../src/./PCSAFT_SurfaceTension')
+        os.system('../src/PCSAFT_Density')
 
         # Analyse output
         f = open('out.txt', 'r')
-        self['point']['ST'] = float(f.readline())
+        self['point']['rho'] = float(f.readline())
         f.close()
 
         return FWAction(mod_spec=[{'_push': self['point']}])
@@ -158,7 +112,7 @@ f = CFunction(
 #include "modena.h"
 #include "math.h"
 
-void surroSurfaceTension
+void surroDensity
 (
     const double* parameters,
     const double* inherited_inputs,
@@ -172,16 +126,22 @@ void surroSurfaceTension
     const double P0 = parameters[0];
     const double P1 = parameters[1];
     const double P2 = parameters[2];
+    
+   // const double expo = 1.0 + (1.0 - T/P2);
+   // const double pwr  = pow(P1,expo);
+
+   // outputs[0] = P0 / pwr;
+
 
     outputs[0] = P0 + T*P1 + P2*T*T;
 }
 ''',
     # These are global bounds for the function
     inputs={
-        'T': { 'min': 270.0, 'max': 310.0, 'argPos': 0 },        #check if boundaries reasonable, from this range, the random values for the DOE are chosen!
+        'T': { 'min': 270.0, 'max': 300.0, 'argPos': 0 },        #check if boundaries reasonable, from this range, the random values for the DOE are chosen!
     },
     outputs={
-        'ST': { 'min': 9e99, 'max': -9e99, 'argPos': 0 },
+        'rho': { 'min': 9e99, 'max': -9e99, 'argPos': 0 },
     },
     parameters={
         'param0': { 'min': -1E10, 'max': 1E10, 'argPos': 0 },    #check if boundaries are reasonable!!!
@@ -191,9 +151,9 @@ void surroSurfaceTension
 )
 
 m = BackwardMappingModel(
-    _id= 'SurfaceTension',    
+    _id= 'PolymerDensity',    
     surrogateFunction= f,
-    exactTask= SurfaceTensionExactSim(),
+    exactTask= DensityExactSim(),
     substituteModels= [ ],
     initialisationStrategy= Strategy.InitialPoints(
         initialPoints=
@@ -206,7 +166,7 @@ m = BackwardMappingModel(
     ),
     parameterFittingStrategy= Strategy.NonLinFitWithErrorContol(
         testDataPercentage= 0.2,
-        maxError= 30.0,
+        maxError= 300.0,
         improveErrorStrategy= Strategy.StochasticSampling(
             nNewPoints= 2
         ),
