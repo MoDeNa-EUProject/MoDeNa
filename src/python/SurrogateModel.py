@@ -67,10 +67,9 @@ term = Terminal()
 # @{
 
 def existsAndHasArgPos(i, name):
-    try:
-        return i[name]['argPos']
-    except:
+    if name not in i or 'argPos' not in i[name]:
         raise Exception('[%s][\'argPos\'] not found' % name)
+    return i[name]['argPos']
 
 
 def checkAndConvertType(kwargs, name, cls):
