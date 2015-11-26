@@ -3,8 +3,8 @@ import os
 import os.path
 import numpy as np
 MU=0.15
-SIGMA=0.3
-NumOfCells=100
+SIGMA=0.01
+NumOfCells=8
 #####To create input file for SpherePack
 mypath=os.getcwd()
 myfile=os.path.join(mypath,'Project01.prj')
@@ -183,6 +183,35 @@ for i in range(int(NumOfCells-1)):
     j+=1
 text_GEO.write('{0}{1}{2}{3}{4}'.format('Volume (',NumOfCells,') = {',NumOfCells,'};'))
 text_GEO.close()
+####################################################
+# Creating periodic domain
+minDomain=[4,4,4]
+maxDomain=[8,8,8]
+def inDomain(point):
+    inDomain=1
+    for i,pos in enumerate(point):
+        if (pos<minDomain[i] or pos>maxDomain[i]):
+            inDomain=0
+            return inDomain
+    return inDomain
+NodesInDomain=[]
+NodeIndex=[]
+NodeIndexNew=range(len(Nodes))
+for i,point in enumerate(Nodes):
+    if (inDomain(point)):
+        NodesInDomain.append(point)
+        NodeIndex.append(i)
+        NodeIndexNew[i]=len(NodeIndex)-1
+EdgesInDomain=[]
+for i,index in enumerate(Edges):
+    if (index[0] in NodeIndex or index[1] in NodeIndex):
+        EdgesInDomain.append([NodeIndexNew[int(index[0])],NodeIndexNew[int(index[1])]])
+geofile=open('PeriodicRVEdomain.geo','w')
+for i,pos in enumerate(NodesInDomain):
+    geofile.write('Point ({0}) = {{{1},{2},{3}}};\n'.format(i,pos[0],pos[1],pos[2]))
+for i,index in enumerate(EdgesInDomain):
+    geofile.write('Line ({0}) = {{{1},{2}}};\n'.format(i,index[0],index[1]))
+geofile.close()
 # End of Geometry construction
 #########################################################
 ########################################################
@@ -240,7 +269,7 @@ os.remove('Project01.rst')
 os.remove('Project01.sco')
 os.remove('Rads.txt')
 os.remove('Centers.txt')
-os.remove('RVE27.geo')
+#os.remove('RVE27.geo')
 os.remove('RVE27.stcell')
 os.remove('RVE27.stedge')
 os.remove('RVE27.stface')
