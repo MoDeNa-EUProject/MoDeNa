@@ -77,6 +77,8 @@ typedef struct modena_function_t
 
     PyObject *pFunction;
 
+    size_t parameters_size;
+
     lt_dlhandle handle;
 
     void (*function)

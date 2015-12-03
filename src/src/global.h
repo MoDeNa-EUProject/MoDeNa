@@ -77,8 +77,10 @@ __BEGIN_DECLS
 // Declare variable for error handling
 extern thread_local int modena_error_code;
 
-// Declare python exception
+// Declare python exceptions
 extern PyObject *modena_DoesNotExist;
+extern PyObject *modena_OutOfBounds;
+extern PyObject *modena_ParametersNotValid;
 
 enum modena_error_t
 {

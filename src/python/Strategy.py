@@ -46,6 +46,7 @@ from fireworks.core.firework import FireTaskMeta
 from fireworks import Firework, Workflow, FWAction, FireTaskBase, ScriptTask
 from fireworks.utilities.fw_serializers import FWSerializable, \
     recursive_serialize, recursive_deserialize, serialize_fw
+import fireworks.utilities.fw_serializers as fw_serializers
 from fireworks.utilities.fw_utilities import explicit_serialize
 from fireworks.utilities.fw_serializers import load_object
 from collections import defaultdict
@@ -76,6 +77,8 @@ class Workflow2(Workflow):
         Workflow.__init__(self, *args, **kwargs)
 
     def addAfterAll(self, wf):
+        updated_ids = []
+
         root_ids = wf.root_fw_ids
         leaf_ids = wf.leaf_fw_ids
 
@@ -94,11 +97,17 @@ class Workflow2(Workflow):
                 self.links[new_fw.fw_id] = []
             else:
                 self.links[new_fw.fw_id] = wf.links[new_fw.fw_id]
+            updated_ids.append(new_fw.fw_id)
 
         for fw_id in my_leaf_ids:
             self.links[fw_id].extend(root_ids)  # add the root id as my child
 
+        for new_fw in wf.fws:
+            updated_ids = self.refresh(new_fw.fw_id, set(updated_ids))
+
     def addNoLink(self, wf):
+        updated_ids = []
+
         leaf_ids = wf.leaf_fw_ids
 
         for new_fw in wf.fws:
@@ -114,8 +123,16 @@ class Workflow2(Workflow):
                 self.links[new_fw.fw_id] = []
             else:
                 self.links[new_fw.fw_id] = wf.links[new_fw.fw_id]
+            updated_ids.append(new_fw.fw_id)
 
-        print self.links
+        for new_fw in wf.fws:
+            updated_ids = self.refresh(new_fw.fw_id, set(updated_ids))
+
+    def printWf(self):
+        for k, v in self.id_fw.iteritems():
+            print k, v.spec
+        print sorted(self.root_fw_ids)
+        print sorted(self.leaf_fw_ids)
 
 
 class InitialisationStrategy(defaultdict, FWSerializable):
@@ -169,7 +186,6 @@ class OutOfBoundsStrategy(defaultdict, FWSerializable):
     def workflow(self, model, **kwargs):
         wf = model.exactTasks(self.newPoints(model, **kwargs))
         wf.addAfterAll(model.parameterFittingStrategy().workflow(model))
-
         return wf
 
 
@@ -189,6 +205,37 @@ class OutOfBoundsStrategy(defaultdict, FWSerializable):
         return '<{}>:{}'.format(self.fw_name, dict(self))
 
 
+def recursive_serialize2(func):
+    """
+    a decorator to add FW serializations keys
+    see documentation of FWSerializable for more details
+    """
+
+    def _decorator(self, *args, **kwargs):
+        m_dict = func(self, *args, **kwargs)
+        m_dict = fw_serializers.recursive_dict(m_dict)
+        return m_dict
+
+    return _decorator
+
+
+def recursive_deserialize2(func):
+    """
+    a decorator to add FW serializations keys
+    see documentation of FWSerializable for more details
+    """
+
+    def _decorator(self, *args, **kwargs):
+        new_args = [a for a in args]
+        new_args[0] = {k: fw_serializers._recursive_load(v) for k, v in args[0].items()}
+        m_dict = func(self, *new_args, **kwargs)
+        print "recursive_deserialize2"
+        print m_dict
+        return m_dict
+
+    return _decorator
+
+
 class ImproveErrorStrategy(defaultdict, FWSerializable):
 
     def __init__(self, *args, **kwargs):
@@ -198,7 +245,6 @@ class ImproveErrorStrategy(defaultdict, FWSerializable):
     def workflow(self, model, **kwargs):
         wf = model.exactTasks(self.newPoints(model))
         wf.addAfterAll(model.parameterFittingStrategy().workflow(model))
-
         return wf
 
 
@@ -266,6 +312,7 @@ class SamplingStrategy():
         points = array(lhs.randomLHS(nPoints, len(sampleRange))).tolist()
 
         sr = sampleRange
+
         return {
             key: [
                 sr[key]['min'] +
@@ -312,16 +359,13 @@ class InitialData(InitialisationStrategy):
              for k in points:
                 p[k][i] = points[k][i]
 
-             for m in model.substituteModels:
-                p.update(m.callModel(p))
-
         t = et
         t['point'] = p
+        t['indices'] = indices
+        t['modelId'] = self._id
         fw = Firework(t)
         wf = Workflow2( [fw], name='initialising to dataset')
 
-        # pf = load_object({'_fw_name': '{{modena.Strategy.NonLinFitToPointWithSmallestError}}'})
-        # NonLinFitToPointWithSmallestError
         wf.addAfterAll(model.parameterFittingStrategy().workflow(model))
 
         return wf
@@ -343,8 +387,9 @@ class ExtendSpaceStochasticSampling(OutOfBoundsStrategy, SamplingStrategy):
 
     def newPoints(self, model, **kwargs):
         # Get a sampling range around the outside point and create points
-        sampleRange = model.extendedRange(kwargs['outsidePoint'])
-        return self.samplePoints(model, sampleRange, self['nNewPoints'])
+        sampleRange, limitPoint = model.extendedRange(kwargs['outsidePoint'])
+        sp = self.samplePoints(model, sampleRange, self['nNewPoints']-1)
+        return  { k: v + [limitPoint[k]] for k, v in sp.iteritems() }
 
 
 @explicit_serialize
@@ -392,6 +437,7 @@ class NonLinFitWithErrorContol(ParameterFittingStrategy):
 
 
     def newPointsFWAction(self, model, **kwargs):
+        print "In newPointsFWAction"
         # Make sure we get new samples in deterministic manner
         seed(model.nSamples)
 
@@ -425,7 +471,8 @@ class NonLinFitWithErrorContol(ParameterFittingStrategy):
                 list(
                     model.error(
                         cModel,
-                        idxGenerator=fitData(model.nSamples, testIndices)
+                        idxGenerator=fitData(model.nSamples, testIndices),
+                        checkBounds=False
                     )
                 )
             )
@@ -448,7 +495,8 @@ class NonLinFitWithErrorContol(ParameterFittingStrategy):
             return max(
                 abs(i) for i in model.error(
                     cModel,
-                    idxGenerator=fitData(testIndices)
+                    idxGenerator=fitData(testIndices),
+                    checkBounds=False
                 )
             )
 
@@ -589,8 +637,10 @@ class NonLinFitToPointWithSmallestError(ParameterFittingStrategy):
                 return max(
                     abs(i) for i in model.error(
                         cModel,
-                        idxGenerator=fitData(testPoint)
-                    ))
+                        idxGenerator=fitData(testPoint),
+                        checkBounds=False
+                    )
+                )
             # ------------------------------------------------------------------- #
 
             # ------------------------------ Function ----------------------------#
@@ -611,8 +661,11 @@ class NonLinFitToPointWithSmallestError(ParameterFittingStrategy):
                     list(
                         model.error(
                             cModel,
-                            idxGenerator=fitData(model.nSamples, testPoint)
-                        )))
+                            idxGenerator=fitData(model.nSamples, testPoint),
+                            checkBounds=False
+                        )
+                    )
+                )
             # ------------------------------------------------------------------- #
 
             # make objects usable in R
@@ -719,62 +772,6 @@ class ParameterFitting(FireTaskBase):
         return model.parameterFittingStrategy().newPointsFWAction(model)
 
 
-class BackwardMappingTask:
-
-    def handleReturnCode(self, returnCode):
-
-        # Analyse return code
-        print('return code = %i' % returnCode)
-        if returnCode == 201:
-            print term.cyan + "Performing Initialisation" + term.normal
-            # TODO
-            # Finding the 'failing' model using the outsidePoint will fail
-            # eventually fail when running in parallel. Need to pass id of
-            # calling FireTask. However, this requires additional code in the
-            # library as well as cooperation of the recipie
-            model = modena.SurrogateModel.loadFromModule()
-
-            # Continue with exact tasks, parameter estimation and (finally) this
-            # task in order to resume normal operation
-
-            print model.initialisationStrategy()
-            wf = model.initialisationStrategy().workflow(model)
-            wf.addAfterAll(
-                Workflow2([Firework(self)], name='original task')
-            )
-
-            return FWAction(detours=wf)
-
-        elif returnCode == 200:
-            print term.cyan + "Performing Design of Experiments" + term.normal
-            # TODO
-            # Finding the 'failing' model using the outsidePoint will fail
-            # eventually fail when running in parallel. Need to pass id of
-            # calling FireTask. However, this requires additional code in the
-            # library as well as cooperation of the recipie
-            model = modena.SurrogateModel.loadFailing()
-
-            # Continue with exact tasks, parameter estimation and (finally) this
-            # task in order to resume normal operation
-            wf = model.outOfBoundsStrategy().workflow(
-                model,
-                outsidePoint= model.outsidePoint
-            )
-            wf.addAfterAll(
-                Workflow2([Firework(self)], name='original task')
-            )
-
-            return FWAction(detours=wf)
-
-        elif returnCode > 0:
-            print('An error occurred')
-            sys.exit(returnCode)
-
-        else:
-            print('Success - We are done')
-            return FWAction()
-
-
 @explicit_serialize
 class InitialDataPoints(FireTaskBase):
     """
@@ -794,27 +791,176 @@ class InitialDataPoints(FireTaskBase):
         return FWAction(mod_spec=[{'_push': self['point']}])
 
 
+class OutOfBounds(Exception):
+    pass
+
+class ParametersNotValid(Exception):
+    pass
+
 @explicit_serialize
-class BackwardMappingScriptTask(ScriptTask, BackwardMappingTask):
+class ModenaFireTask(FireTaskBase):
+
+    def outOfBounds(self):
+
+        try:
+            # TODO
+            # Finding the 'failing' model using the outsidePoint will fail
+            # eventually fail when running in parallel. Need to pass id of
+            # calling FireTask. However, this requires additional code in the
+            # library as well as cooperation of the recipie
+            model = modena.SurrogateModel.loadFailing()
+
+            # Continue with exact tasks, parameter estimation and (finally) this
+            # task in order to resume normal operation
+            wf = model.outOfBoundsStrategy().workflow(
+                model,
+                outsidePoint= model.outsidePoint
+            )
+            wf.addAfterAll(
+                Workflow2([Firework(self)], name='original task')
+            )
+            return FWAction(detours=wf)
+
+        except:
+            import traceback
+            traceback.print_exc()
+            return FWAction(defuse_children=True)
+
+
+    def parametersNotValid(self, model):
+
+        try:
+            # Continue with exact tasks, parameter estimation and (finally) this
+            # task in order to resume normal operation
+            wf = model.initialisationStrategy().workflow(model)
+            wf.addAfterAll(
+                Workflow2([Firework(self)], name='original task')
+            )
+            return FWAction(detours=wf)
+
+        except:
+            import traceback
+            traceback.print_exc()
+            return FWAction(defuse_children=True)
+
+
+    def run_task(self, fw_spec):
+        if 'point' in self:
+            print(
+                term.yellow
+              + "Performing exact simulation (microscopic code recipe)"
+              + term.normal
+            )
+            p = self['point']
+
+            print(term.yellow + "point = " + str(p) + term.normal)
+
+            self.model = modena.SurrogateModel.load(self['modelId'])
+            newP = {}
+            for m in self.model.substituteModels:
+                try:
+                    res = m.callModel(p)
+                    newP.update(res)
+                    p.update(res)
+
+                except OutOfBounds:
+                    print(
+                        term.red
+                      + 'Substituted model out-of-bounds, executing outOfBoundsStrategy.'
+                      + term.normal
+                    )
+                    return self.outOfBounds()
+
+                except ParametersNotValid:
+                    print(
+                        term.red
+                      + 'Substituted model is not initialised, executing initialisationStrategy.'
+                      + term.normal
+                    )
+                    return self.parametersNotValid(m)
+
+
+            if len(newP):
+                print(
+                    term.yellow
+                  + "values added by substitution = " + str(newP)
+                  + term.normal
+                )
+
+            try:
+                self.task(fw_spec)
+                return FWAction(mod_spec=[{'_push': self['point']}])
+
+            except OutOfBounds:
+                print(
+                    term.red
+                  + 'Model out-of-bounds, executing outOfBoundsStrategy.'
+                  + term.normal
+                )
+                return self.outOfBounds()
+
+            except ParametersNotValid:
+                print term.cyan + "Performing Initialisation" + term.normal
+                return self.parametersNotValid(model)
+
+        else:
+            try:
+                print(
+                    term.yellow
+                  + "Performing backward mapping simulation (macroscopic code recipe)"
+                  + term.normal
+                )
+                self.task(fw_spec)
+
+            except OutOfBounds:
+                print(
+                    term.red
+                  + 'Model out-of-bounds, executing outOfBoundsStrategy.'
+                  + term.normal
+                )
+                return self.outOfBounds()
+
+            except ParametersNotValid:
+                print term.cyan + "Performing Initialisation" + term.normal
+                return self.parametersNotValid()
+
+            print('Success - We are done')
+            return FWAction()
+
+        return FWAction()
+
+
+    def handleReturnCode(self, returnCode):
+
+        # Analyse return code and raise appropriate exception
+        print('return code = %i' % returnCode)
+
+        if returnCode == 200:
+            raise OutOfBounds('Exact task of model returned 200')
+
+        elif returnCode == 201:
+            raise ParametersNotValid('Exact task of model returned 201')
+
+        elif returnCode > 0:
+            print('An error occurred')
+            sys.exit(returnCode)
+
+
+@explicit_serialize
+class BackwardMappingScriptTask(ModenaFireTask, ScriptTask):
     """
     A FireTask that starts a macroscopic code and catches its return code.
     @author Henrik Rusche
     """
     required_params = ['script']
 
-    def run_task(self, fw_spec):
-        print(
-            term.yellow
-          + "Performing backward mapping simulation (macroscopic code recipe)"
-          + term.normal
-        )
+    def task(self, fw_spec):
 
         self['defuse_bad_rc'] = True
 
         # Execute the macroscopic code by calling function in base class
-        ret = super(BackwardMappingScriptTask, self).run_task(fw_spec)
-
-        return self.handleReturnCode(ret.stored_data['returncode'])
+        ret = ScriptTask.run_task(self, fw_spec)
+        self.handleReturnCode(ret.stored_data['returncode'])
 
 ##
 # @} # end of python_interface_library

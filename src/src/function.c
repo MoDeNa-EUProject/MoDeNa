@@ -35,6 +35,57 @@ License
 
 PyObject *modena_SurrogateFunction = NULL;
 
+void modena_function_load_library(modena_function_t* self)
+{
+    PyObject *pFunctionName =
+        PyObject_GetAttrString(self->pFunction, "functionName");
+    if(!pFunctionName){ Modena_PyErr_Print(); }
+
+    PyObject *pLibraryName =
+        PyObject_GetAttrString(self->pFunction, "libraryName");
+    if(!pLibraryName){ Modena_PyErr_Print(); }
+
+    self->handle = lt_dlopen(PyString_AsString(pLibraryName));
+
+    if(!self->handle)
+    {
+        fprintf
+        (
+           stderr,
+           "lt_dlopen: Could not open library %s\nlt_dlopen: %s\n",
+           PyString_AsString(pLibraryName),
+           lt_dlerror()
+        );
+        exit(1);
+    }
+
+    self->function = lt_dlsym(self->handle, PyString_AsString(pFunctionName));
+    if(!self->function)
+    {
+        fprintf
+        (
+            stderr,
+            "lt_dlsym: Could not find function %s in library %s\n"
+            "lt_dlsym: %s",
+            PyString_AsString(pFunctionName),
+            PyString_AsString(pLibraryName),
+            lt_dlerror()
+        );
+        lt_dlclose(self->handle);
+        exit(1);
+    }
+
+    Py_DECREF(pFunctionName);
+    Py_DECREF(pLibraryName);
+
+    PyObject *pParameters =
+        PyObject_GetAttrString(self->pFunction, "parameters");
+    if(!pParameters){ Modena_PyErr_Print(); }
+    self->parameters_size = PyObject_Size(pParameters);
+    Py_DECREF(pParameters);
+}
+
+
 modena_function_t *modena_function_new
 (
     const char *functionId
@@ -88,7 +139,7 @@ modena_function_t *modena_function_new
     }
 
 
-    modena_function_t *f = (modena_function_t *) pNewObj;
+    modena_function_t *self = (modena_function_t *) pNewObj;
 
     if(lt_dlinit())
     {
@@ -96,48 +147,9 @@ modena_function_t *modena_function_new
         exit(1);
     }
 
-    PyObject *pFunctionName =
-        PyObject_GetAttrString(f->pFunction, "functionName");
-    if(!pFunctionName){ Modena_PyErr_Print(); }
+    modena_function_load_library(self);
 
-    PyObject *pLibraryName =
-        PyObject_GetAttrString(f->pFunction, "libraryName");
-    if(!pLibraryName){ Modena_PyErr_Print(); }
-
-    f->handle = lt_dlopen(PyString_AsString(pLibraryName));
-
-    if(!f->handle)
-    {
-        fprintf
-        (
-           stderr,
-           "lt_dlopen: Could not open library %s\nlt_dlopen: %s\n",
-           PyString_AsString(pLibraryName),
-           lt_dlerror()
-        );
-        exit(1);
-    }
-
-    f->function = lt_dlsym(f->handle, PyString_AsString(pFunctionName));
-    if(!f->function)
-    {
-        fprintf
-        (
-            stderr,
-            "lt_dlsym: Could not find function %s in library %s\n"
-            "lt_dlsym: %s",
-            PyString_AsString(pFunctionName),
-            PyString_AsString(pLibraryName),
-            lt_dlerror()
-        );
-        lt_dlclose(f->handle);
-        exit(1);
-    }
-
-    Py_DECREF(pFunctionName);
-    Py_DECREF(pLibraryName);
-
-    return f;
+    return self;
 }
 
 modena_function_t *modena_function_new_from_model
@@ -145,7 +157,7 @@ modena_function_t *modena_function_new_from_model
     const modena_model_t *m
 )
 {
-    modena_function_t *f = malloc(sizeof(modena_function_t));
+    modena_function_t *self = malloc(sizeof(modena_function_t));
 
     if(lt_dlinit())
     {
@@ -153,53 +165,13 @@ modena_function_t *modena_function_new_from_model
         exit(1);
     }
 
-    PyObject *pSurrogateFunction =
+    self->pFunction =
         PyObject_GetAttrString(m->pModel, "surrogateFunction");
-    if(!pSurrogateFunction){ Modena_PyErr_Print(); }
+    if(!self->pFunction){ Modena_PyErr_Print(); }
 
-    PyObject *pFunctionName =
-        PyObject_GetAttrString(pSurrogateFunction, "functionName");
-    if(!pFunctionName){ Modena_PyErr_Print(); }
+    modena_function_load_library(self);
 
-    PyObject *pLibraryName =
-        PyObject_GetAttrString(pSurrogateFunction, "libraryName");
-    if(!pLibraryName){ Modena_PyErr_Print(); }
-
-    Py_DECREF(pSurrogateFunction);
-
-    f->handle = lt_dlopen(PyString_AsString(pLibraryName));
-    if(!f->handle)
-    {
-        fprintf
-        (
-           stderr,
-           "lt_dlopen: Could not open library %s\nlt_dlopen: %s\n",
-           PyString_AsString(pLibraryName),
-           lt_dlerror()
-        );
-        exit(1);
-    }
-
-    f->function = lt_dlsym(f->handle, PyString_AsString(pFunctionName));
-    if(!f->function)
-    {
-        fprintf
-        (
-            stderr,
-            "lt_dlsym: Could not find function %s in library %s\n"
-            "lt_dlsym: %s",
-            PyString_AsString(pFunctionName),
-            PyString_AsString(pLibraryName),
-            lt_dlerror()
-        );
-        lt_dlclose(f->handle);
-        exit(1);
-    }
-
-    Py_DECREF(pFunctionName);
-    Py_DECREF(pLibraryName);
-
-    return f;
+    return self;
 }
 
 modena_index_set_t *modena_function_get_index_set
@@ -241,6 +213,7 @@ void modena_function_destroy(modena_function_t *self)
 {
     lt_dlclose(self->handle);
     lt_dlexit();
+    Py_XDECREF(self->pFunction);
     free(self);
 }
 
@@ -264,6 +237,9 @@ static int modena_function_t_init
    PyObject *kwds
 )
 {
+    printf("In modena_function_t_init - not supported\n");
+    exit(1);
+
     PyObject *pFunction=NULL;
     char *functionId=NULL;
 
@@ -308,6 +284,14 @@ static int modena_function_t_init
         self->pFunction = pFunction;
     }
 
+    // Shouldn't I load the function from the library here?
+
+    PyObject *pParameters =
+        PyObject_GetAttrString(self->pFunction, "parameters");
+    if(!pParameters){ Modena_PyErr_Print(); }
+    self->parameters_size = PyObject_Size(pParameters);
+    Py_DECREF(pParameters);
+
     return 0;
 }
 
@@ -324,6 +308,7 @@ static PyObject *modena_function_t_new
     if(self)
     {
         self->pFunction = NULL;
+        self->parameters_size = 0;
     }
 
     return (PyObject *)self;

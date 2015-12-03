@@ -46,21 +46,17 @@ import modena
 from modena.Strategy import *
 import weakref
 import re
-import sys
+import random
 from mongoengine import *
 from mongoengine.document import TopLevelDocumentMetaclass
-from fireworks import Firework, FWAction, FireTaskBase
+from fireworks import Firework, FireTaskBase
 from collections import defaultdict
-from blessings import Terminal
 
 
 # Create connection to database
 MODENA_URI = os.environ.get('MODENA_URI', 'mongodb://localhost:27017/test')
 (uri, database) = MODENA_URI.rsplit('/', 1);
 connect(database, host=MODENA_URI)
-
-# Create terminal for colour output
-term = Terminal()
 
 ##
 # @addtogroup python_interface_library
@@ -83,12 +79,15 @@ def checkAndConvertType(kwargs, name, cls):
 
 
 def loadType(obj, name, cls):
+    #print "In loadType", name
     n = '___' + name
     if hasattr(obj, n):
         return getattr(obj, n)
     else:
         var = getattr(obj, 'meth_' + name)
+        #print obj._get_changed_fields()
         var = load_object(var)
+        #print obj._get_changed_fields()
         setattr(obj, n, var)
         return var
 
@@ -176,8 +175,6 @@ class MinMaxArgPosOpt(EmbeddedDocument):
     argPos = IntField()
     meta = {'allow_inheritance': False}
 
-class combinedMeta(abc.ABCMeta, TopLevelDocumentMetaclass):
-   pass
 
 class SurrogateFunction(DynamicDocument):
 
@@ -289,6 +286,8 @@ class CFunction(SurrogateFunction):
             f.write("""
 cmake_minimum_required (VERSION 2.6)
 project (%(h)s C)
+
+set(CMAKE_BUILD_TYPE Debug)
 
 find_package(MODENA REQUIRED)
 find_package(LTDL REQUIRED)
@@ -529,6 +528,7 @@ class SurrogateModel(DynamicDocument):
             except:
                 pass
 
+        #print "maps: output =", map_outputs, "input =", map_inputs
         return map_outputs, map_inputs
 
 
@@ -540,27 +540,69 @@ class SurrogateModel(DynamicDocument):
             minValues[self.inputs_argPos(k)] = v.min
             maxValues[self.inputs_argPos(k)] = v.max
 
+        #print "min =", minValues, "max =", maxValues
         return minValues, maxValues
+
+
+    def updateMinMax(self):
+        if not self.nSamples:
+            for v in self.inputs.values():
+                v.min = 9e99
+                v.max = -9e99
+
+            for v in self.outputs.values():
+                v.min = 9e99
+                v.max = -9e99
+
+        for k, v in self.inputs.iteritems():
+            v.min = min(self.fitData[k])
+            v.max = max(max(self.fitData[k]), v.min*1.000001)
+
+        for k, v in self.outputs.iteritems():
+            v.min = min(self.fitData[k])
+            v.max = max(self.fitData[k])
+
+
+    def error(self, cModel, **kwargs):
+        idxGenerator = kwargs.pop('idxGenerator', xrange(self.nSamples))
+        checkBounds = kwargs.pop('checkBounds', True)
+
+        in_i = list()
+        i = [0] * (1 + self.inputs_max_argPos())
+
+        # TODO: Deal with multivalued functions
+        output = self.fitData[six.next(six.iterkeys(self.outputs))]
+
+        for j in idxGenerator:
+            # Load inputs
+            for k, v in self.inputs.iteritems():
+                i[v.argPos] = self.fitData[k][j]
+
+            # Call the surrogate model
+            out = cModel.call(in_i, i, checkBounds= checkBounds)
+
+            #print "%i %f - %f = %f" % (j, out[0], output[j], out[0] - output[j])
+            yield out[0] - output[j]
 
 
     def __getattribute__(self, name):
         if name.startswith( '___' ):
             return object.__getattribute__(self, name)
         else:
-            return super(DynamicDocument, self).__getattribute__(name)
+            return super(SurrogateModel, self).__getattribute__(name)
 
 
     def __setattribute__(self, name, value):
         if name.startswith( '___' ):
             object.__setattribute__(self, name, value)
         else:
-            super(DynamicDocument, self).__setattribute__(name, value)
+            super(SurrogateModel, self).__setattribute__(name, value)
 
 
     @classmethod
     def exceptionLoad(self, surrogateModelId):
         """
-        @todo Finding the 'unitialised' models using this method will fail
+        @todo Finding the 'unintialised' models using this method will fail
               eventually fail when running in parallel. Need to pass id of
               calling FireTask. However, this requires additional code in the
               library as well as cooperation of the recipie
@@ -646,8 +688,8 @@ class SurrogateModel(DynamicDocument):
 class ForwardMappingModel(SurrogateModel):
 
     # Database definition
-    inputs = MapField(EmbeddedDocumentField(MinMaxOpt))
-    outputs = MapField(EmbeddedDocumentField(MinMaxOpt))
+    inputs = MapField(EmbeddedDocumentField(MinMaxArgPosOpt))
+    outputs = MapField(EmbeddedDocumentField(MinMaxArgPosOpt))
     substituteModels = ListField(ReferenceField(SurrogateModel))
     meta = {'allow_inheritance': True}
 
@@ -685,7 +727,7 @@ class ForwardMappingModel(SurrogateModel):
             kwargs['outputs'] = {}
             for k, v in kwargs['surrogateFunction'].outputs.iteritems():
                 kwargs['fitData'][k] = []
-                kwargs['outputs'][k] = MinMaxOpt(**{})
+                kwargs['outputs'][k] = MinMaxArgPosOpt(**{})
 
             subOutputs = {}
             for m in kwargs['substituteModels']:
@@ -717,7 +759,7 @@ class ForwardMappingModel(SurrogateModel):
             nInputs = 0
             for k, v in kwargs['inputs'].iteritems():
                 kwargs['fitData'][k] = []
-                kwargs['inputs'][k] = MinMaxOpt(**v)
+                kwargs['inputs'][k] = MinMaxArgPosOpt(**v)
 
             if 'initialisationStrategy' not in kwargs:
                 kwargs['initialisationStrategy'] = \
@@ -731,25 +773,6 @@ class ForwardMappingModel(SurrogateModel):
 
             DynamicDocument.__init__(self, *args, **kwargs)
             self.save()
-
-
-    def updateMinMax(self):
-        if not self.nSamples:
-            for v in self.inputs.values():
-                v.min = 9e99
-                v.max = -9e99
-
-            for v in self.outputs.values():
-                v.min = 9e99
-                v.max = -9e99
-
-        for k, v in self.inputs.iteritems():
-            v.min = min(self.fitData[k])
-            v.max = max(self.fitData[k])
-
-        for k, v in self.outputs.iteritems():
-            v.min = min(self.fitData[k])
-            v.max = max(self.fitData[k])
 
 
     def updateFitDataFromFwSpec(self, fw_spec):
@@ -772,28 +795,6 @@ class ForwardMappingModel(SurrogateModel):
         # Get first set
         firstSet = six.next(six.itervalues(self.fitData))
         self.nSamples = len(firstSet)
-
-
-    def error(self, cModel, **kwargs):
-        idxGenerator = kwargs.pop('idxGenerator', xrange(self.nSamples))
-
-        in_i = list()
-        i = [0] * (1 + self.inputs_max_argPos())
-
-        # TODO: Deal with multivalued functions
-        output = self.fitData[six.next(six.iterkeys(self.outputs))]
-
-        for j in idxGenerator:
-            # Load inputs
-            for k, v in self.inputs.iteritems():
-                i[v.argPos] = self.fitData[k][j]
-
-            # Call the surrogate model
-            # out = cModel.call(in_i, i, checkBounds=False)
-            out = cModel.call(in_i, i)
-
-            #print "%i %f - %f = %f" % (j, out[0], output[j], out[0] - output[j])
-            yield out[0] - output[j]
 
 
     def exactTasks(self, points):
@@ -926,16 +927,12 @@ class BackwardMappingModel(SurrogateModel):
         tl = []
         e = six.next(six.itervalues(points))
         for i in xrange(len(e)):
-            p = {}
-            for k in points:
-                p[k] = points[k][i]
-
-            for m in self.substituteModels:
-                p.update(m.callModel(p))
+            p = { k: points[k][i] for k in points }
 
             t = et
             t['point'] = p
             t['indices'] = indices
+            t['modelId'] = self._id
             fw = Firework(t)
 
             tl.append(fw)
@@ -952,11 +949,18 @@ class BackwardMappingModel(SurrogateModel):
 
 
     def parameterFittingStrategy(self):
-        return loadType(
+        pfs = loadType(
             self,
             'parameterFittingStrategy',
             ParameterFittingStrategy
         )
+
+        # Nasty hack to work around a bug somewhere in mongoengine or fireworks
+        self._changed_fields = filter(
+            lambda a: a != u'improveErrorStrategy._fw_name', self._changed_fields
+        )
+
+        return pfs
 
 
     def outOfBoundsStrategy(self):
@@ -989,47 +993,6 @@ class BackwardMappingModel(SurrogateModel):
         self.nSamples = len(firstSet)
 
 
-    def updateMinMax(self):
-        if not self.nSamples:
-            for v in self.inputs.values():
-                v.min = 9e99
-                v.max = -9e99
-
-            for v in self.outputs.values():
-                v.min = 9e99
-                v.max = -9e99
-
-        for k, v in self.inputs.iteritems():
-            v.min = min(self.fitData[k])
-            v.max = max(self.fitData[k])
-
-        for k, v in self.outputs.iteritems():
-            v.min = min(self.fitData[k])
-            v.max = max(self.fitData[k])
-
-
-    def error(self, cModel, **kwargs):
-        idxGenerator = kwargs.pop('idxGenerator', xrange(self.nSamples))
-
-        in_i = list()
-        i = [0] * (1 + self.inputs_max_argPos())
-
-        # TODO: Deal with multivalued functions
-        output = self.fitData[six.next(six.iterkeys(self.outputs))]
-
-        for j in idxGenerator:
-            # Load inputs
-            for k, v in self.inputs.iteritems():
-                 i[v.argPos] = self.fitData[k][j]
-
-            # Call the surrogate model
-            # out = cModel.call(in_i, i, checkBounds=False)
-            out = cModel.call(in_i, i)
-
-            #print "%i %f - %f = %f" % (j, out[0], output[j], out[0] - output[j])
-            yield out[0] - output[j]
-
-
     def extendedRange(self, outsidePoint, expansion_factor=1.2):
         """
                   Method expanding the design space. The method ONLY operates
@@ -1059,6 +1022,7 @@ class BackwardMappingModel(SurrogateModel):
         """
 
         sampleRange = {}
+        limitPoint = {}
 
         for k, v in self.inputs.iteritems():
             sampleRange[k] = {}
@@ -1068,24 +1032,31 @@ class BackwardMappingModel(SurrogateModel):
             # "localdict" max to the outside point value
 
             if outsideValue > v['max']:
+                if outsideValue > self.surrogateFunction.inputs[k].max:
+                    raise OutOfBounds('outside point is larger than function min for %s' % k)
                 sampleRange[k]['min'] = v['max']
                 sampleRange[k]['max'] = min(
                     outsideValue*expansion_factor,
                     self.surrogateFunction.inputs[k].max
                 )
+                limitPoint[k] = sampleRange[k]['max']
 
             elif outsideValue < v['min']:
+                if outsideValue < self.surrogateFunction.inputs[k].min:
+                    raise OutOfBounds('outside point is smaller than function max for %s' % k)
                 sampleRange[k]['min'] = max(
                     outsideValue/expansion_factor,
                     self.surrogateFunction.inputs[k].min
                 )
                 sampleRange[k]['max'] = v['min']
+                limitPoint[k] = sampleRange[k]['min']
 
             else:
                 sampleRange[k]['min'] = v['min']
                 sampleRange[k]['max'] = v['max']
+                limitPoint[k] = random.uniform(v['min'], v['max'])
 
-        return sampleRange
+        return sampleRange, limitPoint
 
 ##
 # @} # end of python_interface_library
