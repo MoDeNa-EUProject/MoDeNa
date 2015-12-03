@@ -14,30 +14,86 @@ reader = vtk.vtkSTLReader()
 reader.SetFileName(filename)
 # Create plane for clipping
 Origins=[[4,4,4],[4,4,4],[4,4,4],[8,8,8],[8,8,8],[8,8,8]]
-Normals=[[1,0,0],[0,1,0],[0,0,1],[-1,0,0],[0,-1,0],[0,0,-1]]
-planes=[]
-for i in xrange(6):
-    planes.append(vtk.vtkPlane())
-    planes[i].SetOrigin(Origins[i])
-    planes[i].SetNormal(Normals[i])
-# Clip it
-clipper = vtk.vtkClipPolyData()
-clipper.SetInputConnection(reader.GetOutputPort())
-clipper.SetClipFunction(planes[0])
-clipper.GenerateClipScalarsOn()
-clipper.GenerateClippedOutputOn()
-clipper.SetValue(0.5)
+Normals=[
+    [[-1,0,0],[0,-1,0],[0,0,-1],[-1,0,0],[0,-1,0],[0,0,-1]],
+    [[+1,0,0],[0,-1,0],[0,0,-1],[-1,0,0],[0,-1,0],[0,0,-1]],
+    [[+1,0,0],[0,-1,0],[0,0,-1],[+1,0,0],[0,-1,0],[0,0,-1]],
+    [[-1,0,0],[0,+1,0],[0,0,-1],[-1,0,0],[0,-1,0],[0,0,-1]],
+    [[+1,0,0],[0,+1,0],[0,0,-1],[-1,0,0],[0,-1,0],[0,0,-1]],
+    [[+1,0,0],[0,+1,0],[0,0,-1],[+1,0,0],[0,-1,0],[0,0,-1]],
+    [[-1,0,0],[0,+1,0],[0,0,-1],[-1,0,0],[0,+1,0],[0,0,-1]],
+    [[+1,0,0],[0,+1,0],[0,0,-1],[-1,0,0],[0,+1,0],[0,0,-1]],
+    [[+1,0,0],[0,+1,0],[0,0,-1],[+1,0,0],[0,+1,0],[0,0,-1]],
+
+    [[-1,0,0],[0,-1,0],[0,0,+1],[-1,0,0],[0,-1,0],[0,0,-1]],
+    [[+1,0,0],[0,-1,0],[0,0,+1],[-1,0,0],[0,-1,0],[0,0,-1]],
+    [[+1,0,0],[0,-1,0],[0,0,+1],[+1,0,0],[0,-1,0],[0,0,-1]],
+    [[-1,0,0],[0,+1,0],[0,0,+1],[-1,0,0],[0,-1,0],[0,0,-1]],
+    [[+1,0,0],[0,+1,0],[0,0,+1],[-1,0,0],[0,-1,0],[0,0,-1]],
+    [[+1,0,0],[0,+1,0],[0,0,+1],[+1,0,0],[0,-1,0],[0,0,-1]],
+    [[-1,0,0],[0,+1,0],[0,0,+1],[-1,0,0],[0,+1,0],[0,0,-1]],
+    [[+1,0,0],[0,+1,0],[0,0,+1],[-1,0,0],[0,+1,0],[0,0,-1]],
+    [[+1,0,0],[0,+1,0],[0,0,+1],[+1,0,0],[0,+1,0],[0,0,-1]],
+
+    [[-1,0,0],[0,-1,0],[0,0,+1],[-1,0,0],[0,-1,0],[0,0,+1]],
+    [[+1,0,0],[0,-1,0],[0,0,+1],[-1,0,0],[0,-1,0],[0,0,+1]],
+    [[+1,0,0],[0,-1,0],[0,0,+1],[+1,0,0],[0,-1,0],[0,0,+1]],
+    [[-1,0,0],[0,+1,0],[0,0,+1],[-1,0,0],[0,-1,0],[0,0,+1]],
+    [[+1,0,0],[0,+1,0],[0,0,+1],[-1,0,0],[0,-1,0],[0,0,+1]],
+    [[+1,0,0],[0,+1,0],[0,0,+1],[+1,0,0],[0,-1,0],[0,0,+1]],
+    [[-1,0,0],[0,+1,0],[0,0,+1],[-1,0,0],[0,+1,0],[0,0,+1]],
+    [[+1,0,0],[0,+1,0],[0,0,+1],[-1,0,0],[0,+1,0],[0,0,+1]],
+    [[+1,0,0],[0,+1,0],[0,0,+1],[+1,0,0],[0,+1,0],[0,0,+1]],
+        ]
+regions=[]
+for j in xrange(2):
+    polydata=reader
+    for i in xrange(6):
+        plane=vtk.vtkPlane()
+        plane.SetOrigin(Origins[i])
+        plane.SetNormal(Normals[j][i])
+        # Clip it
+        clipper = vtk.vtkClipPolyData()
+        clipper.SetInputConnection(polydata.GetOutputPort())
+        clipper.SetClipFunction(plane)
+        polydata=clipper
+        polydata.Update()
+    regions.append(vtk.vtkPolyData())
+    regions[j].ShallowCopy(polydata.GetOutput())
+# Move it
+transform = vtk.vtkTransform()
+transform.Translate([1,0,0])
+transformFilter = vtk.vtkTransformPolyDataFilter()
+transformFilter.SetTransform(transform)
+transformFilter.SetInputConnection(polydata.GetOutputPort())
+transformFilter.Update()
+regions[1].ShallowCopy(transformFilter.GetOutput())
+# Append the two meshes
+appendFilter = vtk.vtkAppendPolyData()
+if vtk.VTK_MAJOR_VERSION <= 5:
+    for j in xrange(2):
+        appendFilter.AddInputConnection(regions[j].GetProducerPort())
+else:
+    for j in xrange(2):
+        appendFilter.AddInputData(regions[j])
+appendFilter.Update()
+#  Remove any duplicate points.
+cleanFilter = vtk.vtkCleanPolyData()
+cleanFilter.SetInputConnection(appendFilter.GetOutputPort())
+cleanFilter.Update()
+# Final data to be saved and displayed
+finalData=cleanFilter
 # Write the stl file to disk
 stlWriter = vtk.vtkSTLWriter()
 stlWriter.SetFileName(filenameClipped)
-stlWriter.SetInputConnection(clipper.GetOutputPort())
+stlWriter.SetInputConnection(finalData.GetOutputPort())
 stlWriter.Write()
 # Create mappper and actor for rendering
 mapper = vtk.vtkPolyDataMapper()
 if vtk.VTK_MAJOR_VERSION <= 5:
-    mapper.SetInput(clipper.GetOutput())
+    mapper.SetInput(finalData.GetOutput())
 else:
-    mapper.SetInputConnection(clipper.GetOutputPort())
+    mapper.SetInputConnection(finalData.GetOutputPort())
 actor = vtk.vtkActor()
 actor.SetMapper(mapper)
 # Create a rendering window and renderer
