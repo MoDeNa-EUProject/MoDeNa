@@ -46,9 +46,6 @@ from fireworks.utilities.fw_utilities import explicit_serialize
 from blessings import Terminal
 from jinja2 import Template
 
-# Create terminal for colour output
-term = Terminal()
-
 
 __author__ = 'Henrik Rusche'
 __copyright__ = 'Copyright 2014, MoDeNa Project'

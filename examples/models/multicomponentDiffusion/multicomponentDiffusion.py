@@ -1,5 +1,4 @@
-#!/usr/bin/python
-'''
+'''@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -22,22 +21,21 @@ License
 
     Modena is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
-    details.
+    FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
+@endcond'''
 
-Description
-    Initialisation script for the flowRate model. The script calculates a few
-    data points and fits the surrogate model. Then the model is inserted into
-    the database.
+"""
+@file
+Python library of FireTasks
 
-Authors
-    Henrik Rusche
-
-Contributors
-'''
+@author    Henrik Rusche
+@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@ingroup   twoTank
+"""
 
 from modena import CFunction, IndexSet, ForwardMappingModel
 
