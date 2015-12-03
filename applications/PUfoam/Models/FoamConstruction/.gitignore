@@ -4,3 +4,11 @@
 *.ply
 *.stl
 *.vtk
+*.prj
+*.rco
+*.rst
+*.sco
+*.stcell
+*.stedge
+*.stface
+*.stver
