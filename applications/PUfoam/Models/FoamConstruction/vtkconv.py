@@ -8,9 +8,15 @@ import vtk
 def main(filenameIn,filenameOut):
     r = vtk.vtkDataSetReader()
     r.SetFileName(filenameIn)
-
+    r.Update()
+    data = vtk.vtkImageData()
+    data.ShallowCopy(r.GetOutput())
+    data.SetOrigin(4,4,4)
+    data.SetSpacing(0.015625,0.015625,0.015625)
+    data.Update()
     #w = vtk.vtkDataSetWriter()
     w = vtk.vtkStructuredPointsWriter()
-    w.SetInput( r.GetOutput() )
+    # w.SetInputConnection(data.GetProducerPort())
+    w.SetInput(data)
     w.SetFileName(filenameOut)
     w.Write()

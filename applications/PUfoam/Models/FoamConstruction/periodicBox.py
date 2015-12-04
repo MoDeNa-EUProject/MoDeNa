@@ -8,16 +8,6 @@ periodic boundary conditions
 import vtk
 def main(filenameIn,filenameOut,xmin,ymin,zmin,dx,dy,dz,render):
     # print vtk.VTK_MAJOR_VERSION # Check the version
-    # Define input and output files
-    # filenameIn = "PeriodicRVE.stl"
-    # filenameOut = "PeriodicRVEDomain.stl"
-    # # Define domain origin and size
-    # xmin=4
-    # ymin=4
-    # zmin=4
-    # dx=4
-    # dy=4
-    # dz=4
     # Read the file and create polydata
     reader = vtk.vtkSTLReader()
     reader.SetFileName(filenameIn)
@@ -131,7 +121,7 @@ def main(filenameIn,filenameOut,xmin,ymin,zmin,dx,dy,dz,render):
     cleanFilter = vtk.vtkCleanPolyData()
     cleanFilter.SetInputConnection(appendFilter.GetOutputPort())
     cleanFilter.Update()
-    # One more rotation
+    # One more rotation - not needed
     # transform = vtk.vtkTransform()
     # transform.Translate(-6,-6,-6)
     # transformFilter = vtk.vtkTransformPolyDataFilter()
