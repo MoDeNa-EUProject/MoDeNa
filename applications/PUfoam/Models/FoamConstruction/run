@@ -2,6 +2,7 @@
 """
 @author: Pavel Ferkl
 """
+from __future__ import division
 import os
 from blessings import Terminal
 import json
@@ -30,8 +31,9 @@ if moveToPeriodicBox:
         "Convert .geo to .stl" +
         term.normal
     )
-    os.system("gmsh -n -2 -format stl "+filename+".geo >gmsh_out")
-    os.remove("gmsh_out")
+    os.system("gmsh -n -2 -format stl "+filename+".geo >gmsh.out")
+    if deleteFiles:
+        os.remove("gmsh.out")
     ########## Move to periodic box
     print(
         term.yellow +
@@ -67,8 +69,19 @@ if binarizeBox:
         os.remove(filename+'.vtk')
     if not os.path.isfile(filename+'.ply'):
         raise SystemError(".ply file is missing. Nothing to binarize.")
-    os.system("binvox -e -rotz -rotx -rotz -rotz -t vtk "+filename+".ply")
+    vx=256
+    vy=vx
+    vz=vx
+    os.system("binvox -e -d {0:d} -rotz -rotx -rotz -rotz -t vtk ".format(vx)+
+        filename+".ply >binvox.out")
+    with open('binvox.out') as data_file:
+        for line in data_file:
+            if "counted" in line:
+                solidVoxel,totalVoxel=[int(s) for s in line.split() if s.isdigit()]
+                eps=1-solidVoxel/totalVoxel
+                print "porosity: {0:f}".format(eps)
     if deleteFiles:
+        os.remove("binvox.out")
         os.remove(filename+".ply")
     ########## Convert binary .vtk to ascii .vtk
     print(
@@ -79,6 +92,6 @@ if binarizeBox:
     filenameIn = filename+".vtk"
     filename = filename+"-ascii"
     filenameOut = filename+".vtk"
-    vtkconv.main(filenameIn,filenameOut)
+    vtkconv.main(filenameIn,filenameOut,dx,dy,dz,vx,vy,vz)
     if deleteFiles:
         os.remove(filenameIn)

@@ -5,14 +5,14 @@ Reads binary vtk file and creates ascii vtk file
 @author: Pavel Ferkl
 """
 import vtk
-def main(filenameIn,filenameOut):
+def main(filenameIn,filenameOut,dx,dy,dz,vx,vy,vz):
     r = vtk.vtkDataSetReader()
     r.SetFileName(filenameIn)
     r.Update()
     data = vtk.vtkImageData()
     data.ShallowCopy(r.GetOutput())
-    data.SetOrigin(4,4,4)
-    data.SetSpacing(0.015625,0.015625,0.015625)
+    data.SetOrigin(dx,dy,dz)
+    data.SetSpacing(dx/vx,dy/vy,dz/vz)
     data.Update()
     #w = vtk.vtkDataSetWriter()
     w = vtk.vtkStructuredPointsWriter()
