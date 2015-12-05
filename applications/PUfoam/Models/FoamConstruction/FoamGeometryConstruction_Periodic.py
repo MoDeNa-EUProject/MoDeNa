@@ -4,7 +4,7 @@ import os.path
 import numpy as np
 mypath=os.getcwd()
 def main(MU,SIGMA,NumOfCells,filenameOut,packing,tesselation,geometry,
-    statistics,hypermesh,deleteFiles):
+    statistics,hypermesh,deleteFiles,dx,dy,dz):
     #####To create input file for SpherePack
     if packing:
         myfile=os.path.join(mypath,'Project01.prj')
@@ -14,9 +14,9 @@ def main(MU,SIGMA,NumOfCells,filenameOut,packing,tesselation,geometry,
         f.write('{0}\n'.format('# NUMBER OF SPHERES'))
         f.write('{0:d}\n'.format(NumOfCells))
         f.write('{0}\n'.format('# LENGTH IN X-, Y- AND Z-DIRECTION'))
-        f.write('{0:f}\n'.format(4.0))
-        f.write('{0:f}\n'.format(4.0))
-        f.write('{0:f}\n'.format(4.0))
+        f.write('{0:f}\n'.format(dx))
+        f.write('{0:f}\n'.format(dy))
+        f.write('{0:f}\n'.format(dz))
         f.write('{0}\n'.format('# EPSILON'))
         f.write('{0}\n'.format('0.0001'))
         f.write('{0}\n'.format('# NTAU'))
@@ -74,7 +74,7 @@ def main(MU,SIGMA,NumOfCells,filenameOut,packing,tesselation,geometry,
             for j in range(0,NumOfCells):
                 fff.write('{0:f}\n'.format(Rads[j]))
         fff.close()
-        commandTessellation="neper -T -n {0:d} -domain 'cube(12,12,12)' -morpho @Centers.txt -weight @Rads.txt -o RVE27 -format geo -statcell vol -statedge length -statface area -statver x".format((27*NumOfCells))
+        commandTessellation="neper -T -n {0:d} -domain 'cube({1:d},{2:d},{3:d})' -morpho @Centers.txt -weight @Rads.txt -o RVE27 -format geo -statcell vol -statedge length -statface area -statver x".format((27*NumOfCells),3*dx,3*dy,3*dz)
         os.system(commandTessellation)
     ################################################################
     ######Extraction of middle Representative volume element########

@@ -1,0 +1,84 @@
+#!/usr/bin/env python
+"""
+@author: Pavel Ferkl
+"""
+import os
+from blessings import Terminal
+import json
+import FoamGeometryConstruction_Periodic
+import periodicBox
+import vtkconv
+from pprint import pprint
+########## Read input file
+with open('input.json') as data_file:
+    data = json.load(data_file)
+locals().update(data) # Creates variables from dictionary
+########## Create terminal for colour output
+term = Terminal()
+########## Create periodic RVE of foam
+print(
+    term.yellow +
+    "Create periodic RVE of foam" +
+    term.normal
+)
+FoamGeometryConstruction_Periodic.main(MU,SIGMA,NumOfCells,filename,packing,\
+    tesselation,geometry,statistics,hypermesh,deleteFiles,dx,dy,dz)
+if moveToPeriodicBox:
+    ########## Convert .geo to .stl
+    print(
+        term.yellow +
+        "Convert .geo to .stl" +
+        term.normal
+    )
+    os.system("gmsh -n -2 -format stl "+filename+".geo >gmsh_out")
+    os.remove("gmsh_out")
+    ########## Move to periodic box
+    print(
+        term.yellow +
+        "Move to periodic box" +
+        term.normal
+    )
+    filenameIn = filename+".stl"
+    filename = filename+"Box"
+    filenameOut = filename+".stl"
+    xmin=dx
+    ymin=dy
+    zmin=dz
+    periodicBox.main(filenameIn,filenameOut,xmin,ymin,zmin,dx,dy,dz,renderBox)
+    if deleteFiles:
+        os.remove(filenameIn)
+    ########## Convert .stl to .ply
+    print(
+        term.yellow +
+        "Convert .stl to .ply" +
+        term.normal
+    )
+    os.system("meshconv "+filename+".stl -c ply")
+if binarizeBox:
+    ########## Binarize and save as .vtk
+    if deleteFiles and os.path.isfile(filename+'.stl'):
+        os.remove(filename+'.stl')
+    print(
+        term.yellow +
+        "Binarize and save as .vtk" +
+        term.normal
+    )
+    if os.path.isfile(filename+'.vtk'):
+        os.remove(filename+'.vtk')
+    if not os.path.isfile(filename+'.ply'):
+        raise SystemError(".ply file is missing. Nothing to binarize.")
+    os.system("binvox -e -rotz -rotx -rotz -rotz -t vtk "+filename+".ply")
+    if deleteFiles:
+        os.remove(filename+".ply")
+    ########## Convert binary .vtk to ascii .vtk
+    print(
+        term.yellow +
+        "Convert binary .vtk to ascii .vtk" +
+        term.normal
+    )
+    filenameIn = filename+".vtk"
+    filename = filename+"-ascii"
+    filenameOut = filename+".vtk"
+    vtkconv.main(filenameIn,filenameOut)
+    if deleteFiles:
+        os.remove(filenameIn)
