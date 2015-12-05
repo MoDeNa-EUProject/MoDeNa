@@ -30,7 +30,8 @@ The folder `FoamConstruction` contains following files:
 All files must be in one directory.
 
 ## Inputs
-The code is controlled by the `input.json` file. Default input can be found
+The code is controlled by the `input.json` file, which must be located in the
+root of `FoamConstruction` folder. Default input file can be found
 in `example_inputs` directory. Following inputs can be adjusted:
 - `MU` - mean of cell size distribution
 - `SIGMA` - standard deviation of cell size distribution
