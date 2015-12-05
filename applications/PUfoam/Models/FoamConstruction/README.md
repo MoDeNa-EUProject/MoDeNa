@@ -3,7 +3,7 @@ Foam Construction
 ## Installation
 The code depends on several third-party applications:
 - `wine` to have ability of running windows executable files (i.e. file.exe).
-- `neper` for tesselation
+- `neper` for tessellation
 - `gmsh`, `vtk`, `meshconv` and `binvox` for mesh manipulation
 
 To install all of these on Ubuntu, do:
