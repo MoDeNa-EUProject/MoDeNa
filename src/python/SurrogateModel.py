@@ -55,7 +55,7 @@ from collections import defaultdict
 
 # Create connection to database
 MODENA_URI = os.environ.get('MODENA_URI', 'mongodb://localhost:27017/test')
-(uri, database) = MODENA_URI.rsplit('/', 1);
+(uri, database) = MODENA_URI.rsplit('/', 1)
 connect(database, host=MODENA_URI)
 
 ##
@@ -79,7 +79,7 @@ def checkAndConvertType(kwargs, name, cls):
 
 
 def loadType(obj, name, cls):
-    #print "In loadType", name
+    #print 'In loadType', name
     n = '___' + name
     if hasattr(obj, n):
         return getattr(obj, n)
@@ -104,13 +104,15 @@ class GrowingList(list):
 
 
 class IndexSet(Document):
+
+    # Database definition
     name = StringField(primary_key=True)
     names = ListField(StringField(required=True))
     meta = {'allow_inheritance': True}
 
     @abc.abstractmethod
     def __init__(self, *args, **kwargs):
-        self.___index___ = {j:i for i,j in enumerate(kwargs['names'])}
+        self.___index___ = {j: i for i, j in enumerate(kwargs['names'])}
         Document.__init__(self, *args, **kwargs)
         self.save()
 
@@ -204,13 +206,13 @@ class SurrogateFunction(DynamicDocument):
         DynamicDocument.__init__(self, **kwargs)
 
         for k in self.inputs.keys():
-            self.checkVariableName(k);
+            self.checkVariableName(k)
 
         for k in self.outputs.keys():
-            self.checkVariableName(k);
+            self.checkVariableName(k)
 
         for k in self.parameters.keys():
-            self.checkVariableName(k);
+            self.checkVariableName(k)
 
 
     def indexSet(self, name):
@@ -271,8 +273,8 @@ class CFunction(SurrogateFunction):
         m = hashlib.md5()
         m.update(Ccode)
         h = m.hexdigest()
-        d = "func_" + h
-        ln = "%s/%s/lib%s.so" % (os.getcwd(), d, h)
+        d = 'func_' + h
+        ln = '%s/%s/lib%s.so' % (os.getcwd(), d, h)
 
         if(True or not os.path.exists(ln)):
             if(not os.path.isdir(d)): os.mkdir(d)
@@ -296,12 +298,12 @@ add_library(%(h)s MODULE %(h)s.c)
 target_link_libraries(%(h)s MODENA::modena ${LTDL_LIBRARIES})
 
 install(TARGETS %(h)s DESTINATION ${CMAKE_INSTALL_PREFIX}/lib )
-""" % {"h": h})
+""" % {'h': h})
             f.close()
 
             from subprocess import call
-            call(["cmake", "."])
-            call(["make"])
+            call(['cmake', '.'])
+            call(['make'])
             os.chdir('..')
 
             return ln
@@ -322,12 +324,12 @@ class Function(CFunction):
                 raise Exception('Algebraic representation not found')
 
         # lambda function writing inputs, parameters
-        cDouble = lambda VAR: '\n'.join(["const double %s = %s[%s];" \
+        cDouble = lambda VAR: '\n'.join(['const double %s = %s[%s];' \
                                          %(V, VAR, kwargs[VAR][V]['argPos'] )\
                                                         for V in kwargs[VAR]])
 
         # lambda function parsing 'function' and writing outputs
-        outPut = lambda OUT: '\n'.join(["outputs[%s] = %s;" \
+        outPut = lambda OUT: '\n'.join(['outputs[%s] = %s;' \
                                  %(kwargs['outputs'][O]['argPos'],\
                                            self.Parse(kwargs['function'][O]))\
                                                      for O in kwargs[OUT] ] )
@@ -506,10 +508,6 @@ class SurrogateModel(DynamicDocument):
                 raise Exception(name + ' not found in parameters')
 
 
-    def inputs_max_argPos(self):
-        return max(self.inputs_argPos(k) for k in self.inputs)
-
-
     def calculate_maps(self, sm):
         map_outputs = []
         map_inputs = []
@@ -528,19 +526,18 @@ class SurrogateModel(DynamicDocument):
             except:
                 pass
 
-        #print "maps: output =", map_outputs, "input =", map_inputs
+        #print 'maps: output =', map_outputs, 'input =', map_inputs
         return map_outputs, map_inputs
 
 
     def minMax(self):
-        len = 1 + self.inputs_max_argPos()
-        minValues = [-9e99] * len
-        maxValues = [9e99] * len
+        minValues = [-9e99] * len(self.surrogateFunction.inputs)
+        maxValues = [9e99] * len(self.surrogateFunction.inputs)
         for k, v in self.inputs.iteritems():
             minValues[self.inputs_argPos(k)] = v.min
             maxValues[self.inputs_argPos(k)] = v.max
 
-        #print "min =", minValues, "max =", maxValues
+        #print 'min =', minValues, 'max =', maxValues
         return minValues, maxValues
 
 
@@ -568,21 +565,28 @@ class SurrogateModel(DynamicDocument):
         checkBounds = kwargs.pop('checkBounds', True)
 
         in_i = list()
-        i = [0] * (1 + self.inputs_max_argPos())
+        i = [0] * len(self.surrogateFunction.inputs)
 
         # TODO: Deal with multivalued functions
         output = self.fitData[six.next(six.iterkeys(self.outputs))]
 
-        for j in idxGenerator:
+        for idx in idxGenerator:
             # Load inputs
             for k, v in self.inputs.iteritems():
-                i[v.argPos] = self.fitData[k][j]
+                i[v.argPos] = self.fitData[k][idx]
+
+            #print 'i = {', ', '.join('%s: %g' % (
+            #    k, self.fitData[k][idx]
+            #) for k in self.inputs.keys()), '}'
+            #print 'i =', str(i)
 
             # Call the surrogate model
             out = cModel.call(in_i, i, checkBounds= checkBounds)
 
-            #print "%i %f - %f = %f" % (j, out[0], output[j], out[0] - output[j])
-            yield out[0] - output[j]
+            #print '%i %g - %g = %g' % (
+            #    idx, out[0], output[idx], out[0] - output[idx]
+            #)
+            yield out[0] - output[idx]
 
 
     def __getattribute__(self, name):
@@ -631,7 +635,7 @@ class SurrogateModel(DynamicDocument):
         cModel = modena.libmodena.modena_model_t(model=self)
 
         in_i = list()
-        i = [0] * (1 + self.inputs_max_argPos())
+        i = [0] * len(self.surrogateFunction.inputs)
 
         # Set inputs
         for k, v in self.inputs.iteritems():
@@ -643,7 +647,7 @@ class SurrogateModel(DynamicDocument):
         outputs = {
             k: out[v.argPos]
             for k, v in self.surrogateFunction.outputs.iteritems()
-        };
+        }
 
         return outputs
 
@@ -769,7 +773,7 @@ class ForwardMappingModel(SurrogateModel):
                 kwargs,
                 'initialisationStrategy',
                 InitialisationStrategy
-            );
+            )
 
             DynamicDocument.__init__(self, *args, **kwargs)
             self.save()
@@ -853,6 +857,8 @@ class BackwardMappingModel(SurrogateModel):
                 kwargs['fitData'][k] = []
                 kwargs['outputs'][k] = MinMaxArgPosOpt(**{})
 
+            #print ' '.join(kwargs['inputs'].keys())
+
             subOutputs = {}
             for m in kwargs['substituteModels']:
                 if not isinstance(m, SurrogateModel):
@@ -861,6 +867,7 @@ class BackwardMappingModel(SurrogateModel):
                         'must be derived from SurrogateModel'
                     )
                 subOutputs.update(m.outputsToModels())
+            #print subOutputs
 
             nInp = len(kwargs['inputs'])
             replaced = {}
@@ -879,31 +886,33 @@ class BackwardMappingModel(SurrogateModel):
                     if not k in kwargs['inputs']:
                         kwargs['inputs'][k] = { 'argPos': nInp }
                         nInp += 1
+            #print replaced
+            #print ' '.join(kwargs['inputs'].keys())
 
             nInputs = 0
             for k, v in kwargs['inputs'].iteritems():
                 kwargs['fitData'][k] = []
                 kwargs['inputs'][k] = MinMaxArgPosOpt(**v)
 
-            checkAndConvertType(kwargs, 'exactTask', FireTaskBase);
+            checkAndConvertType(kwargs, 'exactTask', FireTaskBase)
 
             checkAndConvertType(
                 kwargs,
                 'initialisationStrategy',
                 InitialisationStrategy
-            );
+            )
 
             checkAndConvertType(
                 kwargs,
                 'outOfBoundsStrategy',
                 OutOfBoundsStrategy
-            );
+            )
 
             checkAndConvertType(
                 kwargs,
                 'parameterFittingStrategy',
                 ParameterFittingStrategy
-            );
+            )
 
             DynamicDocument.__init__(self, *args, **kwargs)
 

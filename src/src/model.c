@@ -745,11 +745,6 @@ static int modena_model_t_init
     //PyObject_Print(self->pModel, stdout, 0);
     //printf("\n");
 
-    PyObject *pInputs = PyObject_GetAttrString(self->pModel, "inputs");
-    if(!pInputs){ Modena_PyErr_Print(); }
-    self->inputs_size = PyDict_Size(pInputs);
-    Py_DECREF(pInputs);
-
     PyObject *pOutputs = PyObject_GetAttrString(self->pModel, "outputs");
     if(!pOutputs){ Modena_PyErr_Print(); }
     self->outputs_size = PyDict_Size(pOutputs);
@@ -757,29 +752,22 @@ static int modena_model_t_init
 
     modena_model_read_substituteModels(self);
 
-    size_t i, j;
-    for(j = 0; j < self->substituteModels_size; j++)
-    {
-        modena_substitute_model_t *sm = &self->substituteModels[j];
-        for(i = 0; i < sm->map_outputs_size; i++)
-        {
-            if(self->inputs_size < sm->map_outputs[2*i+1])
-            {
-                self->inputs_size = sm->map_outputs[2*i+1];
-            }
-        }
-    }
-
     // Avoiding double indirection in modena_model_call
     // Use modena_function_new to construct, then copy function pointer
     self->mf = modena_function_new_from_model(self);
     self->function = self->mf->function;
+
+    PyObject *pInputs = PyObject_GetAttrString(self->mf->pFunction, "inputs");
+    if(!pInputs){ Modena_PyErr_Print(); }
+    self->inputs_size = PyDict_Size(pInputs);
+    Py_DECREF(pInputs);
 
     self->argPos_used = malloc
     (
         (self->inputs_size + self->inherited_inputs_size)*sizeof(bool)
     );
 
+    size_t i, j;
     for(j = 0; j < self->substituteModels_size; j++)
     {
         modena_substitute_model_t *sm = &self->substituteModels[j];

@@ -143,7 +143,7 @@ class InitialisationStrategy(defaultdict, FWSerializable):
 
     @abc.abstractmethod
     def newPoints(self):
-        raise NotImplementedError("newPoints not implemented!")
+        raise NotImplementedError('newPoints not implemented!')
 
 
     def workflow(self, model):
@@ -180,7 +180,7 @@ class OutOfBoundsStrategy(defaultdict, FWSerializable):
 
     @abc.abstractmethod
     def newPoints(self):
-        raise NotImplementedError("newPoints not implemented!")
+        raise NotImplementedError('newPoints not implemented!')
 
 
     def workflow(self, model, **kwargs):
@@ -229,7 +229,7 @@ def recursive_deserialize2(func):
         new_args = [a for a in args]
         new_args[0] = {k: fw_serializers._recursive_load(v) for k, v in args[0].items()}
         m_dict = func(self, *new_args, **kwargs)
-        print "recursive_deserialize2"
+        print 'recursive_deserialize2'
         print m_dict
         return m_dict
 
@@ -272,7 +272,7 @@ class ParameterFittingStrategy(dict, FWSerializable):
 
     @abc.abstractmethod
     def newPointsFWAction(self, model, **kwargs):
-        raise NotImplementedError("newPointsFWAction not implemented!")
+        raise NotImplementedError('newPointsFWAction not implemented!')
 
     def workflow(self, model):
         return Workflow2(
@@ -283,6 +283,59 @@ class ParameterFittingStrategy(dict, FWSerializable):
                 )
             ]
         )
+
+
+    def errorTest(model, parameters, testIndices):
+
+        def fitData(testIndices):
+            for i in testPoint:
+                yield i
+
+        # Instantiate the surrogate model
+        cModel = modena.libmodena.modena_model_t(
+             model,
+             parameters=list(parameters)
+        )
+
+        return max(
+            abs(i) for i in model.error(
+                cModel,
+                idxGenerator=fitData(testPoint),
+                checkBounds=False
+            )
+        )
+
+
+    # errorFit function can only take a single arguemnt (parameters) when it
+    # is called from R. Using wrapper class instead!
+    class errorFit:
+
+        def __init__(self, *args, **kwargs):
+            self.model = args[0]
+            self.testPoint = args[1]
+
+        def function(parameters):
+
+            def fitData(n, testPoint):
+                for i in xrange(n):
+                    if i not in testPoint:
+                         yield i
+
+            # Instantiate the surrogate model
+            cModel = modena.libmodena.modena_model_t(
+                model=model,
+                parameters=list(parameters)
+            )
+
+            return FloatVector(
+                list(
+                    model.error(
+                        cModel,
+                        idxGenerator=fitData(model.nSamples, self.testPoint),
+                        checkBounds=False
+                    )
+                )
+            )
 
 
     @serialize_fw
@@ -304,7 +357,7 @@ class ParameterFittingStrategy(dict, FWSerializable):
 class SamplingStrategy():
 
     def newPoints(self):
-        raise NotImplementedError("newPoints not implemented!")
+        raise NotImplementedError('newPoints not implemented!')
 
 
     def samplePoints(self, model, sampleRange, nPoints):
@@ -437,7 +490,6 @@ class NonLinFitWithErrorContol(ParameterFittingStrategy):
 
 
     def newPointsFWAction(self, model, **kwargs):
-        print "In newPointsFWAction"
         # Make sure we get new samples in deterministic manner
         seed(model.nSamples)
 
@@ -542,7 +594,7 @@ class NonLinFitWithErrorContol(ParameterFittingStrategy):
 
         maxError = errorTest(new_parameters)
 
-        print "Maximum Error = %s" % maxError
+        print 'Maximum Error = %s' % maxError
         if maxError > self['maxError']:
             print 'Parameters ' + term.red + 'not' + term.normal + \
                 ' valid, adding samples.'
@@ -694,7 +746,7 @@ class NonLinFitToPointWithSmallestError(ParameterFittingStrategy):
         nlfb_coeffs = coeffs[nlfb.names.index('coefficients')]
         nlfb_ssqres = coeffs[nlfb.names.index('ssquares')]
 
-        print "Maximum Error = %s" % maxError
+        print 'Maximum Error = %s' % maxError
         print('old parameters = [%s]' % ' '.join(
             '%g' % k for k in model.parameters)
         )
@@ -736,7 +788,7 @@ class Initialisation(FireTaskBase):
 
 
     def run_task(self, fw_spec):
-        print term.cyan + "Performing initialisation" + term.normal
+        print term.cyan + 'Performing initialisation' + term.normal
 
         model=modena.SurrogateModel.load(self['surrogateModelId'])
 
@@ -763,7 +815,7 @@ class ParameterFitting(FireTaskBase):
 
 
     def run_task(self, fw_spec):
-        print term.cyan + "Performing parameter fitting" + term.normal
+        print term.cyan + 'Performing parameter fitting' + term.normal
 
         model=modena.SurrogateModel.load(self['surrogateModelId'])
 
@@ -848,12 +900,16 @@ class ModenaFireTask(FireTaskBase):
         if 'point' in self:
             print(
                 term.yellow
-              + "Performing exact simulation (microscopic code recipe)"
+              + 'Performing exact simulation (microscopic code recipe)'
               + term.normal
             )
+
             p = self['point']
 
-            print(term.yellow + "point = " + str(p) + term.normal)
+            print(term.yellow + 'point = {'
+                + ', '.join('%s: %g' % (k, v) for (k, v) in p.iteritems())
+                + '}' +term.normal
+            )
 
             self.model = modena.SurrogateModel.load(self['modelId'])
             newP = {}
@@ -883,8 +939,9 @@ class ModenaFireTask(FireTaskBase):
             if len(newP):
                 print(
                     term.yellow
-                  + "values added by substitution = " + str(newP)
-                  + term.normal
+                  + 'values added by substitution = {'
+                  + ', '.join('%s: %g' % (k, v) for (k, v) in newP.iteritems())
+                  + '}' +term.normal
                 )
 
             try:
@@ -900,14 +957,14 @@ class ModenaFireTask(FireTaskBase):
                 return self.outOfBounds()
 
             except ParametersNotValid:
-                print term.cyan + "Performing Initialisation" + term.normal
+                print term.cyan + 'Performing Initialisation' + term.normal
                 return self.parametersNotValid(model)
 
         else:
             try:
                 print(
                     term.yellow
-                  + "Performing backward mapping simulation (macroscopic code recipe)"
+                  + 'Performing backward mapping simulation (macroscopic code recipe)'
                   + term.normal
                 )
                 self.task(fw_spec)
@@ -921,7 +978,7 @@ class ModenaFireTask(FireTaskBase):
                 return self.outOfBounds()
 
             except ParametersNotValid:
-                print term.cyan + "Performing Initialisation" + term.normal
+                print term.cyan + 'Performing Initialisation' + term.normal
                 return self.parametersNotValid()
 
             print('Success - We are done')
