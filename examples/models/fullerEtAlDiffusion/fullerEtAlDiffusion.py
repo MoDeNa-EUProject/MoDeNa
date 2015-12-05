@@ -1,5 +1,4 @@
-#!/usr/bin/python
-'''
+'''@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -22,27 +21,80 @@ License
 
     Modena is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
-    details.
+    FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
+@endcond'''
 
-Description
-    A simple workflow
+"""
+@file
+Python library of FireTasks
 
-Authors
-    Henrik Rusche
+@author    Henrik Rusche
+@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@ingroup   twoTank
+"""
 
-Contributors
-'''
+from modena import CFunction, IndexSet, ForwardMappingModel
+import modena.Strategy as Strategy
 
-import modena
-import os
-from modulefinder import ModuleFinder
-
-# Define 'macroscopic' code to run
-m = modena.BackwardMappingScriptTask(
-        script=os.path.dirname(os.path.abspath(__file__))+'/src/fullerEtAlDiffusionTest'
+species = IndexSet(
+    name= 'species',
+    names= [ 'H2O', 'N2', 'SO2' ]
 )
+
+
+f = CFunction(
+    inputs={
+        'T': { 'min': 0, 'max': 9e99, 'argPos': 0 },
+        'p': { 'min': 0, 'max': 9e99, 'argPos': 1 },
+    },
+    outputs={
+        'D[A]': { 'min': 0, 'max': 9e99, 'argPos': 0 },
+    },
+    parameters={
+        'W[A]': { 'min': 0, 'max': 9e99, 'argPos': 0 },
+        'V[A]': { 'min': 0, 'max': 9e99, 'argPos': 1 },
+        'W[B]': { 'min': 0, 'max': 9e99, 'argPos': 2 },
+        'V[B]': { 'min': 0, 'max': 9e99, 'argPos': 3 },
+    },
+    indices={
+        'A': species,
+        'B': species,
+    },
+    Ccode= '''
+#include "modena.h"
+#include "math.h"
+
+void fullerEtAlDiffusion
+(
+    const double* parameters,
+    const double* inherited_inputs,
+    const double* inputs,
+    double *outputs
+)
+{
+    const double T = inputs[0];
+    const double p = inputs[1];
+
+    const double WA = parameters[0];
+    const double VA = parameters[1];
+    const double WB = parameters[2];
+    const double VB = parameters[3];
+
+    outputs[0] = 1.011e-4*pow(T, 1.75)*pow(1.0/WA + 1.0/WB, 1.0/2.0);
+    outputs[0] /= p*(pow(pow(VA, 1.0/3.0) + pow(VB, 1.0/3.0), 2.0));
+}
+''',
+)
+
+m = ForwardMappingModel(
+    _id= 'fullerEtAlDiffusion[A=H2O,B=N2]',
+    surrogateFunction= f,
+    substituteModels= [ ],
+    parameters= [ 16, 9.44, 14, 11.38 ],
+)
+
 

@@ -237,9 +237,6 @@ static int modena_function_t_init
    PyObject *kwds
 )
 {
-    printf("In modena_function_t_init - not supported\n");
-    exit(1);
-
     PyObject *pFunction=NULL;
     char *functionId=NULL;
 

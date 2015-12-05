@@ -162,9 +162,8 @@ class MinMaxOpt(EmbeddedDocument):
 class MinMaxArgPos(EmbeddedDocument):
     min = FloatField(required=True, default=None)
     max = FloatField(required=True, default=None)
-    #index = IndexSet()
-    #index = ReferenceField(IndexSet)
     argPos = IntField(required=True)
+    index = ReferenceField(IndexSet)
     meta = {'allow_inheritance': False}
 
     def __init__(self, *args, **kwargs):
@@ -175,6 +174,7 @@ class MinMaxArgPosOpt(EmbeddedDocument):
     min = FloatField()
     max = FloatField()
     argPos = IntField()
+    index = ReferenceField(IndexSet)
     meta = {'allow_inheritance': False}
 
 
@@ -220,7 +220,7 @@ class SurrogateFunction(DynamicDocument):
 
 
     def checkVariableName(self, name):
-        m = re.search('\[(.*)\]', name)
+        m = re.search(r'[(.*)]', name)
         if m and not m.group(1) in self.indices:
             raise Exception('Index %s not defined' % m.group(1))
 
@@ -674,8 +674,8 @@ class SurrogateModel(DynamicDocument):
     def loadFromModule(self):
         collection = self._get_collection()
         doc = collection.find_one({ '_cls': { '$exists': False}})
-        modelId = doc['_id']
-        mod = __import__(modelId)
+        modName = re.search('(.*)\[.*\]', doc['_id']).group(1)
+        mod = __import__(modName)
         # TODO:
         # Give a better name to the variable a model is imported from
         return mod.m

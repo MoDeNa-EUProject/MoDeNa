@@ -879,9 +879,11 @@ class ModenaFireTask(FireTaskBase):
             return FWAction(defuse_children=True)
 
 
-    def parametersNotValid(self, model):
+    def parametersNotValid(self):
 
         try:
+            model = modena.SurrogateModel.loadFromModule()
+
             # Continue with exact tasks, parameter estimation and (finally) this
             # task in order to resume normal operation
             wf = model.initialisationStrategy().workflow(model)
@@ -911,9 +913,9 @@ class ModenaFireTask(FireTaskBase):
                 + '}' +term.normal
             )
 
-            self.model = modena.SurrogateModel.load(self['modelId'])
+            model = modena.SurrogateModel.load(self['modelId'])
             newP = {}
-            for m in self.model.substituteModels:
+            for m in model.substituteModels:
                 try:
                     res = m.callModel(p)
                     newP.update(res)
@@ -933,7 +935,7 @@ class ModenaFireTask(FireTaskBase):
                       + 'Substituted model is not initialised, executing initialisationStrategy.'
                       + term.normal
                     )
-                    return self.parametersNotValid(m)
+                    return self.parametersNotValid()
 
 
             if len(newP):
@@ -958,7 +960,7 @@ class ModenaFireTask(FireTaskBase):
 
             except ParametersNotValid:
                 print term.cyan + 'Performing Initialisation' + term.normal
-                return self.parametersNotValid(model)
+                return self.parametersNotValid()
 
         else:
             try:
@@ -978,7 +980,11 @@ class ModenaFireTask(FireTaskBase):
                 return self.outOfBounds()
 
             except ParametersNotValid:
-                print term.cyan + 'Performing Initialisation' + term.normal
+                print(
+                    term.cyan
+                  + 'Model not initialised, executing initialisationStrategy'
+                  + term.normal
+                )
                 return self.parametersNotValid()
 
             print('Success - We are done')
@@ -990,7 +996,7 @@ class ModenaFireTask(FireTaskBase):
     def handleReturnCode(self, returnCode):
 
         # Analyse return code and raise appropriate exception
-        print('return code = %i' % returnCode)
+        print(term.red + 'return code = %i' % returnCode + term.normal)
 
         if returnCode == 200:
             raise OutOfBounds('Exact task of model returned 200')
