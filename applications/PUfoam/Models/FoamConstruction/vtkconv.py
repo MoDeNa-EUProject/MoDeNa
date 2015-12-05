@@ -4,6 +4,7 @@ Created on Tue Nov 24 11:32:34 2015
 Reads binary vtk file and creates ascii vtk file
 @author: Pavel Ferkl
 """
+from __future__ import division
 import vtk
 def main(filenameIn,filenameOut,dx,dy,dz,vx,vy,vz):
     r = vtk.vtkDataSetReader()

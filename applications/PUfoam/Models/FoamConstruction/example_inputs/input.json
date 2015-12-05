@@ -2,6 +2,7 @@
     "MU": 0.15,
     "SIGMA": 0.01,
     "NumOfCells": 27,
+    "porosity": 0.94,
     "filename": "PeriodicRVE",
     "dx": 4,
     "dy": 4,
