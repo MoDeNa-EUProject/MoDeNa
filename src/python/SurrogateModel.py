@@ -286,7 +286,7 @@ class CFunction(SurrogateFunction):
 
             f = open('CMakeLists.txt', 'w')
             f.write("""
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8)
 project (%(h)s C)
 
 set(CMAKE_BUILD_TYPE Debug)
