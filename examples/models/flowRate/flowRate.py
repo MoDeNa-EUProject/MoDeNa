@@ -94,15 +94,13 @@ f = CFunction(
 
 void two_tank_flowRate
 (
-    const double* parameters,
-    const double* inherited_inputs,
+    const modena_model_t* model,
     const double* inputs,
     double *outputs
 )
 {
-    const double D = inputs[0];
-    const double rho0 = inputs[1];
-    const double p0 = inputs[2];
+    {% block variables %}{% endblock %}
+
     const double p1 = p0*inputs[3];
 
     const double P0 = parameters[0];
@@ -113,10 +111,10 @@ void two_tank_flowRate
 ''',
     # These are global bounds for the function
     inputs={
-        'D': { 'min': 0, 'max': 9e99, 'argPos': 0 },
-        'rho0': { 'min': 0, 'max': 9e99, 'argPos': 1 },
-        'p0': { 'min': 0, 'max': 9e99, 'argPos': 2 },
-        'p1Byp0': { 'min': 0, 'max': 1.0, 'argPos': 3},
+        'D': { 'min': 0, 'max': 9e99 },
+        'rho0': { 'min': 0, 'max': 9e99 },
+        'p0': { 'min': 0, 'max': 9e99 },
+        'p1Byp0': { 'min': 0, 'max': 1.0 },
     },
     outputs={
         'flowRate': { 'min': 9e99, 'max': -9e99, 'argPos': 0 },
