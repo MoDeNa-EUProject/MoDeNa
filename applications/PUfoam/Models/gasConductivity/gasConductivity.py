@@ -54,7 +54,7 @@ term = Terminal()
 
 ## List of components, for which surrogate model is provided
 species = IndexSet(
-    _id= 'gas_thermal_conductivity_species',
+    name= 'gas_thermal_conductivity_species',
     names= [ 'CO2', 'CyP', 'Air' ]
 )
 
@@ -68,13 +68,12 @@ f_gas_thermal_conductivity = CFunction(
 
 void gas_thermal_conductivity
 (
-    const double* parameters,
-    const double* inherited_inputs,
+    const modena_model_t* model,
     const double* inputs,
     double *outputs
 )
 {
-    const double T = inputs[0];
+    {% block variables %}{% endblock %}
 
     const double a = parameters[0];
     const double b = parameters[1];
@@ -84,10 +83,10 @@ void gas_thermal_conductivity
 ''',
     # These are global bounds for the function
     inputs={
-        'T': {'min': 273, 'max': 450, 'argPos': 0},
+        'T': {'min': 273, 'max': 450},
     },
     outputs={
-        'gas_thermal_conductivity': {'min': 0, 'max': +9e99, 'argPos': 0},
+        'gas_thermal_conductivity[A]': {'min': 0, 'max': +9e99, 'argPos': 0},
     },
     parameters={
         'param0[A]': {'min': -9e99, 'max': +9e99, 'argPos': 0},

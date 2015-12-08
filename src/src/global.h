@@ -116,10 +116,12 @@ INLINE_FUN int modena_error()
 // Returns error message for error code
 const char* modena_error_message(int error_code);
 
+void modena_print_backtrace();
+
 #define Modena_PyErr_Print() \
-    fprintf(stderr, "Error in python catched in %i of %s\n", __LINE__, __FILE__); \
     PyErr_Print(); \
-    exit(1);
+    fprintf(stderr, "Error in python catched in %i of %s\n", __LINE__, __FILE__); \
+    modena_print_backtrace(); \
 
 __END_DECLS
 

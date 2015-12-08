@@ -54,7 +54,7 @@ from jinja2 import Template
 term = Terminal()
 ## List of components, for which surrogate model is provided
 species = IndexSet(
-    _id= 'diffusivity_pol_species',
+    name= 'diffusivity_pol_species',
     names= [ 'CO2', 'CyP', 'N2', 'O2' ]
 )
 ## Surrogate function for diffusivity of blowing agents in polymer.
@@ -67,13 +67,12 @@ f_diffusivity = CFunction(
 
 void diffusivityPol
 (
-    const double* parameters,
-    const double* inherited_inputs,
+    const modena_model_t* model,
     const double* inputs,
     double *outputs
 )
 {
-    const double T = inputs[0];
+    {% block variables %}{% endblock %}
 
     const double a = parameters[0];
     const double b = parameters[1];
@@ -83,7 +82,7 @@ void diffusivityPol
 ''',
     # These are global bounds for the function
     inputs={
-        'T': {'min': 273, 'max': 450, 'argPos': 0},
+        'T': {'min': 273, 'max': 450},
     },
     outputs={
         'diffusivity': {'min': 0, 'max': +9e99, 'argPos': 0},

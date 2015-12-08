@@ -65,10 +65,6 @@ modena_inputs_t *modena_inputs_new(const modena_model_t *self)
 {
     modena_inputs_t *i = malloc(sizeof(modena_inputs_t));
     i->inputs = malloc(self->inputs_size*sizeof(double));
-    i->inherited_inputs = malloc
-    (
-        self->inherited_inputs_size*sizeof(double)
-    );
     return i;
 }
 
@@ -82,7 +78,6 @@ modena_outputs_t *modena_outputs_new(const modena_model_t *self)
 void modena_inputs_destroy(modena_inputs_t *self)
 {
     free(self->inputs);
-    free(self->inherited_inputs);
     free(self);
 }
 

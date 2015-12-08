@@ -93,15 +93,19 @@ subroutine createModels
     kfoamTemppos = modena_model_inputs_argPos(&
         kfoamModena, c_char_"T"//c_null_char);
     call modena_model_argPos_check(kfoamModena)
-    ! kgasModena = modena_model_new (&
-    !     c_char_"gasMixtureConductivity"//c_null_char);
-    ! kgasInputs = modena_inputs_new (kgasModena);
-    ! kgasOutputs = modena_outputs_new (kgasModena);
-    ! kgasTemppos = modena_model_inputs_argPos(kgasModena, c_char_"T"//c_null_char);
-    ! kgasXco2pos = modena_model_inputs_argPos(kgasModena, c_char_"xCO2"//c_null_char);
-    ! kgasXairpos = modena_model_inputs_argPos(kgasModena, c_char_"xAir"//c_null_char);
-    ! kgasXcyppos = modena_model_inputs_argPos(kgasModena, c_char_"xCyP"//c_null_char);
-    ! call modena_model_argPos_check(kgasModena)
+    write(*,*) 'loading gasMixtureConductivity model'
+    kgasModena = modena_model_new (&
+        c_char_"gasMixtureConductivity"//c_null_char);
+    write(*,*) 'loading gasMixtureConductivity model OK'
+    kgasInputs = modena_inputs_new (kgasModena);
+    kgasOutputs = modena_outputs_new (kgasModena);
+    write(*,*) 'setting inputs'
+    kgasTemppos = modena_model_inputs_argPos(kgasModena, c_char_"T"//c_null_char);
+    kgasXco2pos = modena_model_inputs_argPos(kgasModena, c_char_"x[A=CO2]"//c_null_char);
+    write(*,*) 'setting inputs OK'
+    kgasXairpos = modena_model_inputs_argPos(kgasModena, c_char_"x[A=Air]"//c_null_char);
+    kgasXcyppos = modena_model_inputs_argPos(kgasModena, c_char_"x[A=CyP]"//c_null_char);
+    call modena_model_argPos_check(kgasModena)
     kcdModena = modena_model_new (&
         c_char_"gas_thermal_conductivity[A=CO2]"//c_null_char);
     kcdInputs = modena_inputs_new (kcdModena);
@@ -194,9 +198,9 @@ subroutine destroyModels
     call modena_inputs_destroy (kfoamInputs);
     call modena_outputs_destroy (kfoamOutputs);
     call modena_model_destroy (kfoamModena);
-    ! call modena_inputs_destroy (kgasInputs);
-    ! call modena_outputs_destroy (kgasOutputs);
-    ! call modena_model_destroy (kgasModena);
+    call modena_inputs_destroy (kgasInputs);
+    call modena_outputs_destroy (kgasOutputs);
+    call modena_model_destroy (kgasModena);
     call modena_inputs_destroy (kcdInputs);
     call modena_outputs_destroy (kcdOutputs);
     call modena_model_destroy (kcdModena);

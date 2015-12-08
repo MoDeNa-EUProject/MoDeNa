@@ -996,7 +996,8 @@ class ModenaFireTask(FireTaskBase):
     def handleReturnCode(self, returnCode):
 
         # Analyse return code and raise appropriate exception
-        print(term.red + 'return code = %i' % returnCode + term.normal)
+        if returnCode > 0:
+            print(term.red + 'return code = %i' % returnCode + term.normal)
 
         if returnCode == 200:
             raise OutOfBounds('Exact task of model returned 200')
@@ -1005,7 +1006,7 @@ class ModenaFireTask(FireTaskBase):
             raise ParametersNotValid('Exact task of model returned 201')
 
         elif returnCode > 0:
-            print('An error occurred')
+            print('An unknow error occurred')
             sys.exit(returnCode)
 
 

@@ -39,31 +39,19 @@ Foam conductivity model.
 """
 
 import os
-import modena
-from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, \
-    CFunction
+from modena import *
 import modena.Strategy as Strategy
-from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
-from fireworks import Firework, Workflow, FWAction
 from fireworks.utilities.fw_utilities import explicit_serialize
-from blessings import Terminal
 from jinja2 import Template
 import polymerConductivity
 
-## Create terminal for colour output
-term = Terminal()
 
 @explicit_serialize
-class FoamConductivityExactTask(FireTaskBase):
+class FoamConductivityExactTask(ModenaFireTask):
     """
     A FireTask that starts a microscopic code and updates the database.
     """
-    def run_task(self, fw_spec):
-        print(
-            term.yellow +
-            "Performing exact simulation (microscopic code recipe)" +
-            term.normal
-        )
+    def task(self, fw_spec):
 
         eps = self['point']['eps']
         dcell = self['point']['dcell']
@@ -111,8 +99,6 @@ class FoamConductivityExactTask(FireTaskBase):
         os.remove('inputs.in')
         os.remove('outputs.out')
 
-        return FWAction(mod_spec=[{'_push': self['point']}])
-
 ## Surrogate function for thermal conductivity of the foam.
 #
 # Foam conductivity is a function of porosity, cell size, strut content,
@@ -124,18 +110,13 @@ f_foamConductivity = CFunction(
 
 void tcfoam_SM
 (
-    const double* parameters,
-    const double* inherited_inputs,
+    const modena_model_t* model,
     const double* inputs,
     double *outputs
 )
 {
-    const double eps = inputs[0]; // porosity
-    const double dcell = inputs[1]; // cell size
-    const double fstrut = inputs[2]; // strut size
-    const double kgas = inputs[3]; // gas conductivity
-    const double ksol = inputs[4]; // solid conductivity
-    const double temp = inputs[5]; // temperature
+    {% block variables %}{% endblock %}
+
     const double alpha = parameters[1];
     const double beta = parameters[0];
 
@@ -145,24 +126,24 @@ void tcfoam_SM
     double kfoam;
 
     fs=alpha*fstrut;
-    Xs=(1+4*kgas/(kgas+ksol))/3.0;
-    Xw=2*(1+kgas/(2*ksol))/3.0;
+    Xs=(1+4*kgas/(kgas+polymer_thermal_conductivity))/3.0;
+    Xw=2*(1+kgas/(2*polymer_thermal_conductivity))/3.0;
     X=(1-fs)*Xw+fs*Xs;
     kappa=4.09*sqrt(1-eps)/dcell;
-    kr=16*sigma*pow(temp,3)/(3*kappa);
-    kfoam = (kgas*eps+ksol*X*(1-eps))/(eps+(1-eps)*X)+beta*kr;
+    kr=16*sigma*pow(T,3)/(3*kappa);
+    kfoam = (kgas*eps+polymer_thermal_conductivity*X*(1-eps))/(eps+(1-eps)*X)+beta*kr;
 
     outputs[0] = kfoam;
 }
 ''',
     # These are global bounds for the function
     inputs={
-        'eps': {'min': 0, 'max': 1, 'argPos': 0},
-        'dcell': {'min': 0, 'max': 1e-1, 'argPos': 1},
-        'fstrut': {'min': 0, 'max': 1, 'argPos': 2},
-        'kgas': {'min': 0, 'max': 1e-1, 'argPos': 3},
-        'polymer_thermal_conductivity': {'min': 0, 'max': 1e0, 'argPos': 4},
-        'T': {'min': 273, 'max': 450, 'argPos': 5},
+        'eps': {'min': 0, 'max': 1},
+        'dcell': {'min': 0, 'max': 1e-1},
+        'fstrut': {'min': 0, 'max': 1},
+        'kgas': {'min': 0, 'max': 1e-1},
+        'polymer_thermal_conductivity': {'min': 0, 'max': 1e0},
+        'T': {'min': 273, 'max': 450},
     },
     outputs={
         'kfoam': {'min': 0, 'max': 1e0, 'argPos': 0},
