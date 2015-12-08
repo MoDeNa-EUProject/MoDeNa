@@ -44,6 +44,7 @@ import modena.Strategy as Strategy
 from fireworks.utilities.fw_utilities import explicit_serialize
 from jinja2 import Template
 import polymerConductivity
+import gasConductivity
 import gasMixtureConductivity
 
 
@@ -54,19 +55,24 @@ class FoamConductivityExactTask(ModenaFireTask):
     """
     def task(self, fw_spec):
 
+        # print self['point']
         eps = self['point']['eps']
         dcell = self['point']['dcell']
         fstrut = self['point']['fstrut']
         temp = self['point']['T']
-        xCO2 = self['point']['x']['CO2']
-        print xCO2
+        xCO2 = self['point']['x[A=CO2]']
+        xAir = self['point']['x[A=Air]']
+        xCyP = self['point']['x[A=CyP]']
+        # print xCO2,xAir,xCyP
 
-        kgas=0.12
+        # xCO2=0.3
+        # xAir=0.3
+        # xCyP=0.4
         # Write input
         f = open('inputs.in', 'w')
         f.write('{0:.6e}\n'.format(temp+1))
         f.write('{0:.6e}\n'.format(temp-1))
-        f.write('{0:.6e}\n'.format(kgas))
+        f.write('{0:.6e}\t{1:.6e}\t{2:.6e}\n'.format(xCO2,xAir,xCyP))
         f.write('0.9\n')
         f.write('0.9\n')
         f.write('1.2\n')
@@ -191,30 +197,24 @@ kgas0=0.012
 eps=[]
 dcell=[]
 fstrut=[]
-kgas=[]
 T=[]
 
 for i in xrange(4):
     eps.append(eps0)
     dcell.append(dcell0)
     fstrut.append(fstrut0)
-    kgas.append(kgas0*(1+0.01*i))
     T.append(T0)
-
+xCO2=[0.0, 0.1, 0.2, 0.3]
+xAir=[0.0, 0.1, 0.2, 0.3]
+xCyP=[1.0, 0.8, 0.6, 0.4]
 initialPoints_foamConductivity_auto = {
     'eps': eps,
     'dcell': dcell,
     'fstrut': fstrut,
-    'kgas': kgas,
     'T': T,
-}
-
-initialPoints_foamConductivity_test = {
-    'eps': [0.95],
-    'dcell': [300e-6],
-    'fstrut': [0.8],
-    'kgas': [0.12],
-    'T': [300],
+    'x[A=CO2]': xCO2,
+    'x[A=Air]': xAir,
+    'x[A=CyP]': xCyP,
 }
 
 ## Surrogate model for foam conductivity

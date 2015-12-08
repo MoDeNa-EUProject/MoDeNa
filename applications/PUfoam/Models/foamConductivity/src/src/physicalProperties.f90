@@ -8,7 +8,7 @@ module physicalProperties
     use fmodena
     implicit none
     private
-    public polymerConductivity
+    public polymerConductivity,gasConductivity
 contains
 !********************************BEGINNING*************************************
 !> calculation of thermal conductivity of polymer
