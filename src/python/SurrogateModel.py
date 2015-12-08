@@ -935,7 +935,7 @@ class BackwardMappingModel(SurrogateModel):
                 p.update(m.callModel(p))
 
             t = et
-            t['point'] = p
+     l       t['point'] = p
             t['indices'] = indices
             fw = Firework(t)
 
