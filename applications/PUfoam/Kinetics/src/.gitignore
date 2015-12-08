@@ -16,5 +16,6 @@ install_manifest.txt
 # locate results (executables and libraries)
 *.l[ao]
 *.mod
+*.out
 
 simpleKinetics
