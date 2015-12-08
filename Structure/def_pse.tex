@@ -1,0 +1,27 @@
+\begin{minipage}[t]{5cm}
+	{\large\bf\Tcolour{Authors:}}\\[6pt]
+	{\large\it \authorstring}\\ 
+		\vskip 6cm
+	{\large\bf\Tcolour{Print date:}}\\[6pt]
+	{\large\it \printdatestring}\\[6pt]
+	\ifundefined{versionstring}   \else 
+	{\large\bf\Tcolour{Version: }}\\[6pt] 
+	\versionstring\par \fi
+	
+\end{minipage}\vrule
+\hbox {\vbox{\hrule width12cm\vskip 1cm%
+\begin{minipage}[t]{12cm}
+\begin{flushright} 
+{\ReportString{\Huge\bf\Tcolour{PSE}}}
+\vskip1cm
+\ifundefined{printdatestring} \else \vskip 12pt {\huge\bf \Tcolour{\PSEreportstring}}\medskip\\[6pt]\fi 
+{\huge{\titlestring}}%
+\vskip2cm
+{\large\bf\Tcolour{Address:}}\\[6pt]
+{\addressstring}\\[6pt]
+{e-mail: \eadstring\\}
+\vskip 1cm
+\end{flushright} %
+\hrule
+\end{minipage} %
+}} %
