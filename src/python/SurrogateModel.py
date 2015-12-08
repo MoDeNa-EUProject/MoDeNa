@@ -63,6 +63,9 @@ connect(database, host=MODENA_URI)
 # @addtogroup python_interface_library
 # @{
 
+class ArgPosNotFound(Exception):
+    pass
+
 def existsAndHasArgPos(i, name):
     if name not in i or 'argPos' not in i[name]:
         raise Exception('[%s][\'argPos\'] not found' % name)
@@ -258,7 +261,7 @@ class SurrogateFunction(DynamicDocument):
         size = 0
         for k, v in self.inputs.iteritems():
             if 'index' in v:
-                size += len(v['index'])
+                size += v.index.iterator_size()
             else:
                 size += 1
 
@@ -504,6 +507,7 @@ class SurrogateModel(DynamicDocument):
 
         if kwargs.has_key('_cls'):
             DynamicDocument.__init__(self, *args, **kwargs)
+            self.___indices___ = self.parseIndices(self._id)
 
         else:
             if not kwargs.has_key('_id'):
@@ -513,7 +517,7 @@ class SurrogateModel(DynamicDocument):
             if not isinstance(kwargs['surrogateFunction'], SurrogateFunction):
                 raise TypeError('Need surrogateFunction')
 
-            indices = self.parseIndices(kwargs['_id'])
+            self.___indices___ = self.parseIndices(kwargs['_id'])
 
             kwargs['fitData'] = {}
             kwargs['inputs'] = {}
@@ -522,10 +526,7 @@ class SurrogateModel(DynamicDocument):
 
             kwargs['outputs'] = {}
             for k, v in kwargs['surrogateFunction'].outputs.iteritems():
-                m = re.search('\[(.*)\]', k)
-                if m:
-                    s = ','.join('%s=%s' % (exp, indices[exp]) for exp in m.group(1).split(','))
-                    k = re.sub('\[(.*)\]', '[' + s + ']', k)
+                k = self.expandIndices(k)
                 kwargs['fitData'][k] = []
                 kwargs['outputs'][k] = MinMaxArgPosOpt(**{})
 
@@ -572,10 +573,6 @@ class SurrogateModel(DynamicDocument):
                 except:
                     pass
 
-            indices = self.parseIndices(self._id)
-            for k, v in indices.iteritems():
-                kwargs['surrogateFunction'].indices[k].get_index(v)
-
             self.save()
 
 
@@ -598,6 +595,24 @@ class SurrogateModel(DynamicDocument):
         return indices
 
 
+    def expandIndices(self, name):
+        m = re.search('\[(.*)\]', name)
+        if m:
+            try:
+                return re.sub(
+                    '\[(.*)\]',
+                    '[%s]' % ','.join(
+                        '%s=%s' % (exp, self.___indices___[exp])
+                            for exp in m.group(1).split(',')
+                    ),
+                    name
+                )
+            except ArgPosNotFound:
+                raise Exception('Unable to expand indices in %s' % name)
+
+        return name
+
+
     def outputsToModels(self):
         o = { k: self for k in self.outputs }
         for m in self.substituteModels:
@@ -606,15 +621,14 @@ class SurrogateModel(DynamicDocument):
 
 
     def inputs_argPos(self, name):
-        m = re.search('(.*)\[(.*)\]', name)
+        m = re.search('(.*)\[.*=(.*)]', name)
         if m:
             try:
                 base = m.group(1)
-                m = re.search('(.*)=(.*)', m.group(2))
                 return existsAndHasArgPos(self.surrogateFunction.inputs, base) \
                     + self.surrogateFunction.inputs[base].index.get_index(m.group(2))
             except:
-                raise Exception('argPos for ' + name + ' not found in inputs')
+                raise ArgPosNotFound('argPos for ' + name + ' not found in inputs')
         else:
             try:
                 return existsAndHasArgPos(self.inputs, name)
@@ -622,7 +636,7 @@ class SurrogateModel(DynamicDocument):
                 try:
                     return existsAndHasArgPos(self.surrogateFunction.inputs, name)
                 except:
-                    raise Exception('argPos for ' + name + ' not found in inputs')
+                    raise ArgPosNotFound('argPos for ' + name + ' not found in inputs')
 
 
     def outputs_argPos(self, name):
@@ -635,7 +649,7 @@ class SurrogateModel(DynamicDocument):
                     name
                 )
             except:
-                raise Exception('argPos for ' + name + ' not found in outputs')
+                raise ArgPosNotFound('argPos for ' + name + ' not found in outputs')
 
 
     def parameters_argPos(self, name):
@@ -648,7 +662,7 @@ class SurrogateModel(DynamicDocument):
                     name
                 )
             except:
-                raise Exception('argPos for ' + name + ' not found in parameters')
+                raise ArgPosNotFound('argPos for ' + name + ' not found in parameters')
 
 
     def calculate_maps(self, sm):
@@ -657,16 +671,16 @@ class SurrogateModel(DynamicDocument):
 
         for k in self.inputs:
             try:
-                map_inputs.extend(
-                    [self.inputs_argPos(k), sm.inputs_argPos(k)]
-                )
-            except:
+                map_inputs.extend([self.inputs_argPos(k), sm.inputs_argPos(k)])
+            except ArgPosNotFound:
                 pass
 
-        for k, v in self.surrogateFunction.inputs.iteritems():
+        for k, v in sm.surrogateFunction.outputs.iteritems():
             try:
-                map_outputs.extend([sm.outputs_argPos(k), v.argPos])
-            except:
+                map_outputs.extend(
+                    [v.argPos, self.inputs_argPos(sm.expandIndices(k))]
+                )
+            except ArgPosNotFound:
                 pass
 
         #print 'maps: output =', map_outputs, 'input =', map_inputs
@@ -680,9 +694,9 @@ class SurrogateModel(DynamicDocument):
         for k, v in self.inputs.iteritems():
             if 'index' in v:
                 start = self.inputs_argPos(k)
-                end = self.inputs_argPos(k) + len(v['index'])
-                minValues[start:end] = v.min
-                maxValues[start:end] = v.max
+                end = self.inputs_argPos(k) + v.index.iterator_size()
+                minValues[start:end] = [v.min] * ( end - start )
+                maxValues[start:end] = [v.max] * ( end - start )
             else:
                 minValues[self.inputs_argPos(k)] = v.min
                 maxValues[self.inputs_argPos(k)] = v.max
@@ -931,8 +945,6 @@ class BackwardMappingModel(SurrogateModel):
         Build a workflow to excute an exactTask for each point
         """
 
-        indices = self.parseIndices(self._id)
-
         # De-serialise the exact task from dict
         et = load_object(self.meth_exactTask)
 
@@ -943,7 +955,7 @@ class BackwardMappingModel(SurrogateModel):
 
             t = et
             t['point'] = p
-            t['indices'] = indices
+            t['indices'] = self.___indices___
             t['modelId'] = self._id
             fw = Firework(t)
 

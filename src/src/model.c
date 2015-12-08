@@ -263,15 +263,17 @@ size_t modena_model_outputs_argPos(const modena_model_t *self, const char *name)
 void modena_model_argPos_check(const modena_model_t *self)
 {
     bool allUsed = true;
-    size_t j, i = 0;
+    size_t j = 0;
 
     for(j = 0; j < self->inputs_size; j++)
     {
-        if(!self->argPos_used[i++])
+        if(!self->argPos_used[j])
         {
             //TODO: Replace by call into python
             //printf("argPos for %s not used\n", self->inputs_names[j]);
+            //printf("argPos %zu not used\n", j);
             allUsed = false;
+            break;
         }
     }
 
