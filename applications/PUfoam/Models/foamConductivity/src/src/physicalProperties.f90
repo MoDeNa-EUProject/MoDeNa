@@ -41,4 +41,49 @@ subroutine polymerConductivity(ksol,temp)
     call modena_model_destroy (ksolModena)
 end subroutine polymerConductivity
 !***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> calculation of thermal conductivity of gas
+subroutine gasConductivity(kgas,temp,xCO2,xAir,xCyP)
+    real(dp), intent(out) :: kgas
+    real(dp), intent(in) :: temp,xCO2,xAir,xCyP
+    !modena variables
+    integer(c_size_t) :: kgasTemppos
+    integer(c_size_t) :: kgasXCO2pos
+    integer(c_size_t) :: kgasXAirpos
+    integer(c_size_t) :: kgasXCyPpos
+
+    integer(c_int) :: ret
+
+    type(c_ptr) :: kgasModena = c_null_ptr
+    type(c_ptr) :: kgasInputs = c_null_ptr
+    type(c_ptr) :: kgasOutputs = c_null_ptr
+    kgasModena = modena_model_new (&
+        c_char_"gasMixtureConductivity"//c_null_char)
+    kgasInputs = modena_inputs_new (kgasModena)
+    kgasOutputs = modena_outputs_new (kgasModena)
+    kgasTemppos = modena_model_inputs_argPos(&
+        kgasModena, c_char_"T"//c_null_char)
+    kgasXCO2pos = modena_model_inputs_argPos(&
+        kgasModena, c_char_"x[A=CO2]"//c_null_char)
+    kgasXAirpos = modena_model_inputs_argPos(&
+        kgasModena, c_char_"x[A=Air]"//c_null_char)
+    kgasXCyPpos = modena_model_inputs_argPos(&
+        kgasModena, c_char_"x[A=CyP]"//c_null_char)
+    call modena_model_argPos_check(kgasModena)
+    call modena_inputs_set(kgasInputs, kgasTemppos, temp)
+    call modena_inputs_set(kgasInputs, kgasXCO2pos, xCO2)
+    call modena_inputs_set(kgasInputs, kgasXAirpos, xAir)
+    call modena_inputs_set(kgasInputs, kgasXCyPpos, xCyP)
+    ret = modena_model_call (kgasModena, kgasInputs, kgasOutputs)
+    if(ret /= 0) then
+        call exit(ret)
+    endif
+    kgas=modena_outputs_get(kgasOutputs, 0_c_size_t)
+    call modena_inputs_destroy (kgasInputs)
+    call modena_outputs_destroy (kgasOutputs)
+    call modena_model_destroy (kgasModena)
+end subroutine gasConductivity
+!***********************************END****************************************
 end module physicalProperties

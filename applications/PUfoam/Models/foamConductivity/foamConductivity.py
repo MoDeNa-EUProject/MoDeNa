@@ -44,6 +44,7 @@ import modena.Strategy as Strategy
 from fireworks.utilities.fw_utilities import explicit_serialize
 from jinja2 import Template
 import polymerConductivity
+import gasMixtureConductivity
 
 
 @explicit_serialize
@@ -56,9 +57,11 @@ class FoamConductivityExactTask(ModenaFireTask):
         eps = self['point']['eps']
         dcell = self['point']['dcell']
         fstrut = self['point']['fstrut']
-        kgas = self['point']['kgas']
         temp = self['point']['T']
+        xCO2 = self['point']['x']['CO2']
+        print xCO2
 
+        kgas=0.12
         # Write input
         f = open('inputs.in', 'w')
         f.write('{0:.6e}\n'.format(temp+1))
@@ -124,6 +127,7 @@ void tcfoam_SM
 
     double fs,Xs,Xw,X,kappa,kr;
     double kfoam;
+    double kgas=gasMixtureConductivity;
 
     fs=alpha*fstrut;
     Xs=(1+4*kgas/(kgas+polymer_thermal_conductivity))/3.0;
@@ -141,9 +145,10 @@ void tcfoam_SM
         'eps': {'min': 0, 'max': 1},
         'dcell': {'min': 0, 'max': 1e-1},
         'fstrut': {'min': 0, 'max': 1},
-        'kgas': {'min': 0, 'max': 1e-1},
+        'gasMixtureConductivity': {'min': 0, 'max': 1e-1},
         'polymer_thermal_conductivity': {'min': 0, 'max': 1e0},
         'T': {'min': 273, 'max': 450},
+        'x': {'index': gasConductivity.species, 'min': 0, 'max': 1},
     },
     outputs={
         'kfoam': {'min': 0, 'max': 1e0, 'argPos': 0},
@@ -219,7 +224,10 @@ m_foamConductivity = BackwardMappingModel(
     _id='foamConductivity',
     surrogateFunction=f_foamConductivity,
     exactTask=FoamConductivityExactTask(),
-    substituteModels=[polymerConductivity.m_polymer_thermal_conductivity],
+    substituteModels=[
+        gasMixtureConductivity.m_gasMixtureConductivity,\
+        polymerConductivity.m_polymer_thermal_conductivity\
+    ],
     initialisationStrategy=Strategy.InitialPoints(
         initialPoints=initialPoints_foamConductivity_auto,
     ),
