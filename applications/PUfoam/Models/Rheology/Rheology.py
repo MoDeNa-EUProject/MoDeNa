@@ -41,15 +41,12 @@ import os
 import modena
 import SurfaceTension
 import polymerViscosity 
-from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, CFunction
+from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, CFunction, ModenaFireTask
 import modena.Strategy as Strategy
 from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
 from fireworks import Firework, Workflow, FWAction
 from fireworks.utilities.fw_utilities import explicit_serialize
-from blessings import Terminal
 from jinja2 import Template
-# Create terminal for colour output
-term = Terminal()
 
 
 __author__ = 'Henrik Rusche'
@@ -61,17 +58,11 @@ __date__ = 'Sep 4, 2014'
 
 # ********************************* Class ************************************ #
 @explicit_serialize
-class RheologyExactTask(FireTaskBase):
+class RheologyExactTask(ModenaFireTask):
     """
     A FireTask that starts a microscopic code and updates the database.
     """   
-    def run_task(self, fw_spec):
-        print(
-            term.yellow +
-            "Performing exact simulation (microscopic code recipe)" +
-            term.normal
-        )
-
+    def task(self, fw_spec):
 
         # Write input
         Template('''{{ s['point']['T'] }}
@@ -83,9 +74,9 @@ class RheologyExactTask(FireTaskBase):
 
         # Execute the detailed model
         ret = os.system('../src/rheologyexactdummy')
-        print "ret ", ret
+        # This enables backward mapping capabilities (not needed in this example)
+        self.handleReturnCode(ret)
 
-        print('test')
         # Analyse output
         f=open('RheologyExact.out','r')
         self['point']['mu_ap'] = float(f.readline())
@@ -94,8 +85,7 @@ class RheologyExactTask(FireTaskBase):
         os.remove('RheologyExact.in')
         os.remove('RheologyExact.out')
 
-        return FWAction(mod_spec=[{'_push': self['point']}])
-       
+
 f = CFunction(
     Ccode= '''
 #include "modena.h"
@@ -171,10 +161,10 @@ m = BackwardMappingModel(
     initialisationStrategy= Strategy.InitialPoints(
         initialPoints=
         {
-            'T': [300.0, 400.0],
+            'T': [300.0, 310.0], # 310 is the maximum that is supported by Surface Tension Model
             'shear': [0.01, 0.1],
             'X': [0.1, 0.3],
-                 },
+        },
     ),
     outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(
         nNewPoints= 4

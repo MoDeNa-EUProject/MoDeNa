@@ -63,16 +63,11 @@ surrogate model parameters.
 
 import os
 import modena
-from modena import ForwardMappingModel,BackwardMappingModel,SurrogateModel,CFunction,IndexSet
+from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, CFunction, IndexSet, ModenaFireTask
 import modena.Strategy as Strategy
-from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
 from fireworks import Firework, Workflow, FWAction
 from fireworks.utilities.fw_utilities import explicit_serialize
-from blessings import Terminal
 from jinja2 import Template
-
-# Create terminal for colour output
-term = Terminal()
 
 
 __author__ = 'Henrik Rusche'
@@ -85,7 +80,7 @@ __date__ = 'Sep 4, 2014'
 
 # ********************************* Class ********************************** #
 @explicit_serialize
-class SurfaceTensionExactSim(FireTaskBase):
+class SurfaceTensionExactSim(ModenaFireTask):
     """
     This FireTask controls the execution of the detailed model of the Surface Tension model.
     The detailed model is a density functional theory implementation based on PC-SAFT. A 
@@ -98,13 +93,7 @@ class SurfaceTensionExactSim(FireTaskBase):
     database.
     """
 
-    def run_task(self, fw_spec):
-        print(
-            term.yellow
-          + "Performing exact simulation (microscopic code recipe)"
-          + term.normal
-        )
-
+    def task(self, fw_spec):
         # Write input for detailed model
         ff = open('in.txt', 'w')
         Tstr = str(self['point']['T'])
@@ -134,27 +123,21 @@ class SurfaceTensionExactSim(FireTaskBase):
                    -snes_max_fail 1 -snes_max_linear_solve_fail 100 \
                    -ksp_gmres_cgs_refinement_type refine_always \
                    -snes_ksp_ew -snes_ksp_ew_version 1 -snes_ksp_ew_rtol0 0.5 -snes_ksp_ew_rtolmax 0.9 -snes_ksp_ew_threshold 0.1 \
-                   -jac 0 -pc_type none '
+                   -jac 0 -pc_type none > log'
 
 
-        os.system(run_command)
-        
-        #os.system('../src/./PCSAFT_SurfaceTension')
+        ret = os.system(run_command)
+        # This call enables backward mapping capabilities (not needed in this example)
+        self.handleReturnCode(ret)
 
         # Analyse output
         f = open('out.txt', 'r')
         self['point']['ST'] = float(f.readline())
         f.close()
 
-        return FWAction(mod_spec=[{'_push': self['point']}])
-
-
-
-
-
 
 f = CFunction(
-    Ccode= '''
+    Ccode= r'''
 #include "modena.h"
 #include "math.h"
 
@@ -166,7 +149,6 @@ void surroSurfaceTension
     double *outputs
 )
 {
-
     const double T = inputs[0];
 
     const double P0 = parameters[0];
@@ -199,7 +181,7 @@ m = BackwardMappingModel(
         initialPoints=
         {
             'T': [270.0, 290.0, 300.0],
-                 },
+        },
     ),
     outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(
         nNewPoints= 4

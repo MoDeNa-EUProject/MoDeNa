@@ -102,7 +102,7 @@ main(int argc, char *argv[])
     // Instantiate model
     modena_model_t *model = modena_model_new
     (
-        "fullerEtAlDiffusion[A=H20,B=N2]"
+        "fullerEtAlDiffusion[A=H2O,B=N2]"
     );
 
     if(modena_error_occurred())

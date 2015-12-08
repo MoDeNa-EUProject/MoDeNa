@@ -39,16 +39,12 @@ Python library of FireTasks
 
 import os
 import modena
-from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, CFunction
+from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, CFunction, ModenaFireTask
 import modena.Strategy as Strategy
-from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
 from fireworks import Firework, Workflow, FWAction
 from fireworks.utilities.fw_utilities import explicit_serialize
 from blessings import Terminal
 from jinja2 import Template
-
-# Create terminal for colour output
-term = Terminal()
 
 
 __author__ = 'Henrik Rusche'
@@ -60,18 +56,12 @@ __date__ = 'Sep 4, 2014'
 
 # ********************************* Class ********************************** #
 @explicit_serialize
-class FlowRateExactSim(FireTaskBase):
+class FlowRateExactSim(ModenaFireTask):
     """
     A FireTask that starts a microscopic code and updates the database.
     """
 
-    def run_task(self, fw_spec):
-        print(
-            term.yellow
-          + "Performing exact simulation (microscopic code recipe)"
-          + term.normal
-        )
-
+    def task(self, fw_spec):
         # Write input
 
         # See http://jinja.pocoo.org/docs/dev/templates/
@@ -86,14 +76,15 @@ class FlowRateExactSim(FireTaskBase):
         # In this simple example, this call stands for a complex microscopic
         # code - such as full 3D CFD simulation.
         # Source code in src/flowRateExact.C
-        os.system(os.path.dirname(os.path.abspath(__file__))+'/src/flowRateExact')
+        ret = os.system(os.path.dirname(os.path.abspath(__file__))+'/src/flowRateExact')
+
+        # This enables backward mapping capabilities (not needed in this example)
+        self.handleReturnCode(ret)
 
         # Analyse output
         f = open('out.txt', 'r')
         self['point']['flowRate'] = float(f.readline())
         f.close()
-
-        return FWAction(mod_spec=[{'_push': self['point']}])
 
 
 f = CFunction(

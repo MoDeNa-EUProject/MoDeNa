@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 '''
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
@@ -10,7 +10,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -39,63 +39,43 @@ Authors
 Contributors
 '''
 
-from modena import CFunction, IndexSet, ForwardMappingModel
+from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, CFunction
+from modena.SurrogateModel import PrediciKinetics, Workflow2
+import modena.Strategy as Strategy
+from fireworks import Firework, LaunchPad
+from fireworks.core.rocket_launcher import rapidfire
 
-species = IndexSet(
-    _id= 'species',
-    names= [ 'H2O', 'N2', 'SO2' ]
+
+class PrediciKinetics(CFunction):
+
+    def __init__(self, *args, **kwargs):
+
+        from predici_2_modena import create_args
+
+        kwargs.update(create_args(kwargs['fileName']))
+
+        CFunction.__init__(self, *args, **kwargs)
+
+
+k0 = PrediciKinetics(
+    name= 'RF-1-public',
+    fileName= 'RF-1-public.c',
 )
 
-
-f = CFunction(
-    inputs={
-        'T': { 'min': 0, 'max': 9e99, 'argPos': 0 },
-        'p': { 'min': 0, 'max': 9e99, 'argPos': 1 },
-    },
-    outputs={
-        'D[A]': { 'min': 0, 'max': 9e99, 'argPos': 0 },
-    },
-    parameters={
-        'W[A]': { 'min': 0, 'max': 9e99, 'argPos': 0 },
-        'V[A]': { 'min': 0, 'max': 9e99, 'argPos': 1 },
-        'W[B]': { 'min': 0, 'max': 9e99, 'argPos': 2 },
-        'V[B]': { 'min': 0, 'max': 9e99, 'argPos': 3 },
-    },
-    indices={
-        'A': species,
-        'B': species,
-    },
-    Ccode= '''
-#include "modena.h"
-#include "math.h"
-
-void fullerEtAlDiffusion
-(
-    const double* parameters,
-    const double* inherited_inputs,
-    const double* inputs,
-    double *outputs
-)
-{
-    const double T = inputs[0];
-    const double p = inputs[1];
-
-    const double WA = parameters[0];
-    const double VA = parameters[1];
-    const double WB = parameters[2];
-    const double VB = parameters[3];
-
-    outputs[0] = 1.011e-4*pow(T, 1.75)*pow(1.0/WA + 1.0/WB, 1.0/2.0);
-    outputs[0] /= p*(pow(pow(VA, 1.0/3.0) + pow(VB, 1.0/3.0), 2.0));
-}
-''',
-)
-
-m = ForwardMappingModel(
-    _id= 'fullerEtAlDiffusion[A=H2O,B=N2]',
-    surrogateFunction= f,
+m0 = ForwardMappingModel(
+    _id= 'RF-1-public',
+    surrogateFunction= k0,
     substituteModels= [ ],
-    parameters= [ 16, 9.44, 14, 11.38 ],
 )
 
+# set up the LaunchPad and reset it
+launchpad = LaunchPad()
+launchpad.reset('', require_password=False)
 
+initWfs = Workflow2([])
+for m in SurrogateModel.get_instances():
+    initWfs.addNoLink(m.initialisationStrategy().workflow(m))
+
+# store workflow and launch it locally
+launchpad.add_wf(initWfs)
+rapidfire(launchpad)

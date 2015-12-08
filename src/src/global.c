@@ -75,6 +75,8 @@ License
 thread_local int modena_error_code = 0;
 
 PyObject *modena_DoesNotExist = NULL;
+PyObject *modena_OutOfBounds = NULL;
+PyObject *modena_ParametersNotValid = NULL;
 
 struct modena_errordesc
 {
@@ -196,6 +198,21 @@ PyMODINIT_FUNC initlibmodena(void)
         modena_DoesNotExist = PyObject_GetItem(pDict, pName);
         Py_DECREF(pName);
         if(!modena_DoesNotExist){ Modena_PyErr_Print(); }
+
+        pName = PyString_FromString("ParametersNotValid");
+        if(!pName){ Modena_PyErr_Print(); }
+
+        modena_ParametersNotValid = PyObject_GetItem(pDict, pName);
+        Py_DECREF(pName);
+        if(!modena_ParametersNotValid){ Modena_PyErr_Print(); }
+
+        pName = PyString_FromString("OutOfBounds");
+        if(!pName){ Modena_PyErr_Print(); }
+
+        modena_OutOfBounds = PyObject_GetItem(pDict, pName);
+        Py_DECREF(pName);
+        if(!modena_OutOfBounds){ Modena_PyErr_Print(); }
+
 
         Py_DECREF(pModule);
     }

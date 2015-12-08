@@ -36,5 +36,5 @@ Authors
 Contributors
 '''
 
-from fullerEtAlDiffusion import m
+from fullerEtAlDiffusion import f, m, species
 

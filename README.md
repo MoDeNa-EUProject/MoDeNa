@@ -122,7 +122,7 @@ user@machine> sudo apt-get install swig
 
 ### Install pip packages
 ```
-user@machine> sudo pip install FireWorks pymongo==2.8 mongoengine==0.8.7
+user@machine> sudo pip install FireWorks pymongo mongoengine
 ```
 
 ### Install R-libraries (this is done from within the R environment)

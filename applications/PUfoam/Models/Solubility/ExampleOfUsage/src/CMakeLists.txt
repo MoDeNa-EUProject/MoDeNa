@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8)
 project (tutorialModels C CXX)
 
 if( CMAKE_VERSION VERSION_GREATER "3.0" )

@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8)
 
 # I am specifying two projects in the same Cmake file (not sure if good idea)
 project (PCSAFT_Density C CXX Fortran)
