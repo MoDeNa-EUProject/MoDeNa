@@ -65,10 +65,11 @@ def find_module(target, startsearch=MODENA_WORKING_DIR):
 def import_helper():
     from os.path import dirname
     import imp
-    modena_models = find_module("models")         # Look for a models directory
+
+    modena_models = find_module("MoDeNaModels")   # Look for a models directory
     if modena_models is not None:
         sys.path.insert(0, modena_models)
-    print sys.path
+
     fp = None
     try:
         fp, pathname, description = imp.find_module(
