@@ -306,7 +306,7 @@ class SurrogateFunction(DynamicDocument):
 
 
     def inputs_iterAll(self):
-        for k in self.inputs.iteritems():
+        for k, v in self.inputs.iteritems():
             if 'index' in v:
                 for idx in v.index.names:
                     yield '%s[%s]' % (k, idx), v
@@ -578,8 +578,12 @@ class SurrogateModel(DynamicDocument):
 
             kwargs['fitData'] = {}
             kwargs['inputs'] = {}
-            for k, v in kwargs['surrogateFunction'].inputs.iteritems():
+            for k, v in kwargs['surrogateFunction'].inputs_iterAll():
                 kwargs['inputs'][k] = v.to_mongo()
+                if 'index' in kwargs['inputs'][k]:
+                    del kwargs['inputs'][k]['index']
+                if 'argPos' in kwargs['inputs'][k]:
+                    del kwargs['inputs'][k]['argPos']
 
             kwargs['outputs'] = {}
             for k, v in kwargs['surrogateFunction'].outputs.iteritems():
@@ -614,20 +618,26 @@ class SurrogateModel(DynamicDocument):
                     )
                 subOutputs.update(m.outputsToModels())
 
-            nInp = self.surrogateFunction.inputs_size()
-            for o in subOutputs:
+            #print 'inputs for', self._id
+            #print 'subOutputs=', subOutputs.keys()
+            #print 'inputs =', self.inputs.keys()
+
+            for o in subOutputs.keys():
                 try:
                     self.inputs_argPos(o)
+                    del self.inputs[o]
+                    del self.fitData[o]
 
-                    for k, v in subOutputs[found].inputs.iteritems():
+                    for k, v in subOutputs[o].inputs.iteritems():
                         try:
                             self.inputs_argPos(k)
-                        except:
-                            self.inputs[k].argPos = nInp
-                            nInp += 1
+                        except ArgPosNotFound:
+                            pass
 
-                except:
+                except ArgPosNotFound:
                     pass
+
+            #print 'inputs =', self.inputs.keys()
 
             self.save()
 
@@ -658,6 +668,24 @@ class SurrogateModel(DynamicDocument):
                 return re.sub(
                     '\[(.*)\]',
                     '[%s]' % ','.join(
+                        '%s' % self.___indices___[exp]
+                            for exp in m.group(1).split(',')
+                    ),
+                    name
+                )
+            except ArgPosNotFound:
+                raise Exception('Unable to expand indices in %s' % name)
+
+        return name
+
+
+    def expandIndicesWithName(self, name):
+        m = re.search('\[(.*)\]', name)
+        if m:
+            try:
+                return re.sub(
+                    '\[(.*)\]',
+                    '[%s]' % ','.join(
                         '%s=%s' % (exp, self.___indices___[exp])
                             for exp in m.group(1).split(',')
                     ),
@@ -677,12 +705,12 @@ class SurrogateModel(DynamicDocument):
 
 
     def inputs_argPos(self, name):
-        m = re.search('(.*)\[.*=(.*)]', name)
+        m = re.search('(.*)\[(.*=)?(.*)]', name)
         if m:
             try:
                 base = m.group(1)
                 return existsAndHasArgPos(self.surrogateFunction.inputs, base) \
-                    + self.surrogateFunction.inputs[base].index.get_index(m.group(2))
+                    + self.surrogateFunction.inputs[base].index.get_index(m.group(3))
             except:
                 raise ArgPosNotFound('argPos for ' + name + ' not found in inputs')
         else:
@@ -748,37 +776,11 @@ class SurrogateModel(DynamicDocument):
         minValues = [-9e99] * l
         maxValues = [9e99] * l
         for k, v in self.inputs.iteritems():
-            if 'index' in v:
-                start = self.inputs_argPos(k)
-                end = self.inputs_argPos(k) + v.index.iterator_size()
-                minValues[start:end] = [v.min] * ( end - start )
-                maxValues[start:end] = [v.max] * ( end - start )
-            else:
-                minValues[self.inputs_argPos(k)] = v.min
-                maxValues[self.inputs_argPos(k)] = v.max
+            minValues[self.inputs_argPos(k)] = v.min
+            maxValues[self.inputs_argPos(k)] = v.max
 
         #print 'min =', minValues, 'max =', maxValues
         return minValues, maxValues
-
-
-    def inputs_iterAll(self):
-        for k, v in self.inputs.iteritems():
-            if 'index' in v:
-                for idx in v.index.names:
-                    yield '%s[%s]' % (k, idx), v
-            else:
-                yield k, v
-
-
-    def inputs_size(self):
-        size = 0
-        for k, v in self.inputs.iteritems():
-            if 'index' in v:
-                size += v.index.iterator_size()
-            else:
-                size += 1
-
-        return size
 
 
     def updateMinMax(self):
@@ -791,7 +793,7 @@ class SurrogateModel(DynamicDocument):
                 v.min = 9e99
                 v.max = -9e99
 
-        for k, v in self.inputs_iterAll():
+        for k, v in self.inputs.iteritems():
             v.min = min(self.fitData[k])
             v.max = max(max(self.fitData[k]), v.min*1.000001)
 
@@ -811,8 +813,8 @@ class SurrogateModel(DynamicDocument):
 
         for idx in idxGenerator:
             # Load inputs
-            for k, v in self.inputs.items():
-                i[v.argPos] = self.fitData[k][idx]
+            for k, v in self.inputs.iteritems():
+                i[self.inputs_argPos(k)] = self.fitData[k][idx]
 
             #print 'i = {', ', '.join('%s: %g' % (
             #    k, self.fitData[k][idx]
@@ -862,7 +864,7 @@ class SurrogateModel(DynamicDocument):
     def exceptionOutOfBounds(self, oPoint):
         oPointDict = {
             k: oPoint[v.argPos]
-            for k, v in self.inputs_iterAll()
+            for k, v in self.inputs.iteritems()
         }
         self.outsidePoint = EmbDoc(**oPointDict)
         self.save()
@@ -870,24 +872,54 @@ class SurrogateModel(DynamicDocument):
 
 
     def callModel(self, inputs):
+        #print 'In callModel', self._id
         # Instantiate the surrogate model
         cModel = modena.libmodena.modena_model_t(model=self)
 
         i = [0] * self.surrogateFunction.inputs_size()
 
+        for m in self.substituteModels:
+            inputs.update(m.callModel(inputs))
+
+        #print 'inputs', inputs.keys()
+
         # Set inputs
-        for k, v in self.inputs_iterAll():
+        for k, v in self.inputs.iteritems():
             i[self.inputs_argPos(k)] = inputs[k]
 
         # Call the surrogate model
         out = cModel.call(i)
 
         outputs = {
-            k: out[v.argPos]
+            self.expandIndices(k): out[v.argPos]
             for k, v in self.surrogateFunction.outputs.iteritems()
         }
 
+        #print 'outputs', outputs.keys()
+
         return outputs
+
+
+    def updateFitDataFromFwSpec(self, fw_spec):
+        # Load the fitting data
+        # Removed temporarily, probably bug in mongo engine
+        #self.reload('fitData')
+
+        for k, v in self.inputs.iteritems():
+            if fw_spec[k][0].__class__ == list:
+                self.fitData[k].extend(fw_spec[k][0])
+            else:
+                self.fitData[k].extend(fw_spec[k])
+
+        for k in self.outputs:
+            if fw_spec[k][0].__class__ == list:
+                self.fitData[k].extend(fw_spec[k][0])
+            else:
+                self.fitData[k].extend(fw_spec[k])
+
+        # Get first set
+        firstSet = six.next(six.itervalues(self.fitData))
+        self.nSamples = len(firstSet)
 
 
     @classmethod
@@ -943,28 +975,6 @@ class ForwardMappingModel(SurrogateModel):
         if 'initialisationStrategy' not in kwargs:
             kwargs['initialisationStrategy'] = \
                 EmptyInitialisationStrategy()
-
-
-    def updateFitDataFromFwSpec(self, fw_spec):
-        # Load the fitting data
-        # Removed temporarily, probably bug in mongo engine
-        #self.reload('fitData')
-
-        for k in self.inputs:
-            if fw_spec[k][0].__class__ == list:
-                self.fitData[k].extend(fw_spec[k][0])
-            else:
-                self.fitData[k].extend(fw_spec[k])
-
-        for k in self.outputs:
-            if fw_spec[k][0].__class__ == list:
-                self.fitData[k].extend(fw_spec[k][0])
-            else:
-                self.fitData[k].extend(fw_spec[k])
-
-        # Get first set
-        firstSet = six.next(six.itervalues(self.fitData))
-        self.nSamples = len(firstSet)
 
 
     def exactTasks(self, points):
@@ -1071,28 +1081,6 @@ class BackwardMappingModel(SurrogateModel):
         )
 
 
-    def updateFitDataFromFwSpec(self, fw_spec):
-        # Load the fitting data
-        # Removed temporarily, probably bug in mongo engine
-        #self.reload('fitData')
-
-        for k in self.inputs:
-            if fw_spec[k][0].__class__ == list:
-                self.fitData[k].extend(fw_spec[k][0])
-            else:
-                self.fitData[k].extend(fw_spec[k])
-
-        for k in self.outputs:
-            if fw_spec[k][0].__class__ == list:
-                self.fitData[k].extend(fw_spec[k][0])
-            else:
-                self.fitData[k].extend(fw_spec[k])
-
-        # Get first set
-        firstSet = six.next(six.itervalues(self.fitData))
-        self.nSamples = len(firstSet)
-
-
     def extendedRange(self, outsidePoint, expansion_factor=1.2):
         """
                   Method expanding the design space. The method ONLY operates
@@ -1124,7 +1112,7 @@ class BackwardMappingModel(SurrogateModel):
         sampleRange = {}
         limitPoint = {}
 
-        for k, v in self.inputs_iterAll():
+        for k, v in self.inputs.iteritems():
             sampleRange[k] = {}
             outsideValue = outsidePoint[k]
 

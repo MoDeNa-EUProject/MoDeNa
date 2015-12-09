@@ -73,7 +73,7 @@ void gasMixtureConductivity
     double kgasmix=0; // gas mixture conductivity
     int i;
 
-    printf("temp = %g\\n", T);
+    printf("temp = %g\n", T);
     printf("x = ");
     for (i=0;i<x_size;i++) {
         printf("%g ", x[i]);
