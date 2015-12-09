@@ -35,26 +35,46 @@ Module providing the MoDeNa python interface
 @copyright  2014-2015, MoDeNa Project. GNU Public License.
 """
 
-import os
+import os, sys
 from pkg_resources import get_distribution
 
 __version__ = get_distribution('modena').version
 
 MODENA_INSTALL_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MODENA_WORKING_DIR = os.path.realpath(os.getcwd())
 
 from Strategy import BackwardMappingScriptTask, ModenaFireTask
 from SurrogateModel import CFunction, IndexSet, Workflow2, \
     SurrogateModel, ForwardMappingModel, BackwardMappingModel, \
     ModenaFireTask
 
+def find_module(target, startsearch=MODENA_WORKING_DIR):
+    """Function recursively searching through the file tree for "target"
+
+    @arg target: 'str' name of directory e.g. "Desktop"
+    """
+
+    pdir = os.path.abspath(startsearch) 
+    while target not in os.listdir(pdir):
+        pdir = os.path.abspath(os.path.join(pdir,'..')) # step back a directory
+        if os.path.ismount(pdir):                      # break if we hit "root"
+            break
+
+    return os.path.join(pdir,target) if not os.path.ismount(pdir) else None
+
 def import_helper():
     from os.path import dirname
     import imp
+
+    modena_models = find_module("MoDeNaModels")   # Look for a models directory
+    if modena_models is not None:
+        sys.path.insert(0, modena_models)
+
     fp = None
     try:
         fp, pathname, description = imp.find_module(
             'libmodena',
-            [ dirname(__file__)+"/../../../modena" ]
+            [ find_module("modena", os.path.join(MODENA_INSTALL_DIR, "..","..")) ]
         )
     except ImportError:
         import libmodena
@@ -65,8 +85,11 @@ def import_helper():
         finally:
             fp.close()
         return _mod
+
+
 libmodena = import_helper()
 del import_helper
+del find_module
 
 ##
 # @defgroup python_interface_library

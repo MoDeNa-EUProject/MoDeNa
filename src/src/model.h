@@ -100,15 +100,11 @@ typedef struct modena_model_t
 
     size_t inputs_size;
 
-    size_t inputs_minMax_size;
-
     double *inputs_min;
 
     double *inputs_max;
 
     bool *argPos_used;
-
-    size_t inherited_inputs_size;
 
     size_t parameters_size;
 
@@ -118,8 +114,7 @@ typedef struct modena_model_t
 
     void (*function)
     (
-        const double* p,
-        const double* in_i,
+        const struct modena_model_t* model,
         const double* i,
         double *o
     );
@@ -143,12 +138,6 @@ size_t modena_model_inputs_argPos
 
 void modena_model_argPos_check(const modena_model_t *self);
 
-size_t modena_model_inherited_inputs_argPos
-(
-    const modena_model_t *self,
-    const char *name
-);
-
 size_t modena_model_outputs_argPos
 (
     const modena_model_t *self,
@@ -157,18 +146,9 @@ size_t modena_model_outputs_argPos
 
 size_t modena_model_inputs_size(const modena_model_t *self);
 
-size_t modena_model_inherited_inputs_size(const modena_model_t *self);
-
 size_t modena_model_outputs_size(const modena_model_t *self);
 
 void modena_model_inputs_siunits
-(
-    const modena_model_t *self,
-    const size_t i,
-    modena_siunits_t *units
-);
-
-void modena_model_inherited_inputs_siunits
 (
     const modena_model_t *self,
     const size_t i,
