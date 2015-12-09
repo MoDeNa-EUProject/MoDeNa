@@ -49,6 +49,7 @@ import re
 import random
 from mongoengine import *
 from mongoengine.document import TopLevelDocumentMetaclass
+from mongoengine.base import BaseField
 from fireworks import Firework, FireTaskBase
 from collections import defaultdict
 import jinja2
@@ -158,13 +159,11 @@ class IndexSet(Document):
 class MinMax(EmbeddedDocument):
     min = FloatField(required=True)
     max = FloatField(required=True)
-    meta = {'allow_inheritance': False}
 
 
 class MinMaxOpt(EmbeddedDocument):
     min = FloatField()
     max = FloatField()
-    meta = {'allow_inheritance': False}
 
 
 class MinMaxArgPos(EmbeddedDocument):
@@ -172,10 +171,12 @@ class MinMaxArgPos(EmbeddedDocument):
     max = FloatField(required=True, default=None)
     argPos = IntField(required=True)
     index = ReferenceField(IndexSet)
-    meta = {'allow_inheritance': False}
 
     def __init__(self, *args, **kwargs):
-        EmbeddedDocument.__init__(self, **kwargs)
+        super(MinMaxArgPos, self).__init__(*args, **kwargs)
+
+    def printIndex(self):
+        print str(self.index)
 
 
 class MinMaxArgPosOpt(EmbeddedDocument):
@@ -183,13 +184,58 @@ class MinMaxArgPosOpt(EmbeddedDocument):
     max = FloatField()
     argPos = IntField()
     index = ReferenceField(IndexSet)
-    meta = {'allow_inheritance': False}
+
+    def __init__(self, *args, **kwargs):
+        super(MinMaxArgPosOpt, self).__init__(*args, **kwargs)
+
+    def printIndex(self):
+        print str(self.index)
+
+'''
+Currently not working
+'''
+class IOP(DictField):
+
+    def __init__(self, field=None, *args, **kwargs):
+        #if not isinstance(field, BaseField):
+        #    self.error('Argument to MapField constructor must be a valid '
+        #               'field')
+        super(IOP, self).__init__(field=field, *args, **kwargs)
+
+
+    def size(self):
+        size = 0
+        for k in self._fields.keys():
+            if 'index' in v:
+                size += v.index.iterator_size()
+            else:
+                size += 1
+
+        return size
+
+    def iteritems(self):
+        for k in self._fields.keys():
+            if 'index' in v:
+                for idx in v.index.names:
+                    yield '%s[%s]' % (k, idx), v
+            else:
+                yield k, v
+
+    def keys(self):
+        for k, v in self._fields.iteritems():
+            if 'index' in v:
+                for idx in v.index.names:
+                    yield '%s[%s]' % (k, idx)
+            else:
+                yield k
 
 
 class SurrogateFunction(DynamicDocument):
 
     # Database definition
     name = StringField(primary_key=True)
+    inputs = MapField(EmbeddedDocumentField(MinMaxArgPosOpt))
+    outputs = MapField(EmbeddedDocumentField(MinMaxArgPos))
     parameters = MapField(EmbeddedDocumentField(MinMaxArgPos))
     functionName = StringField(required=True)
     libraryName = StringField(required=True)
@@ -199,8 +245,10 @@ class SurrogateFunction(DynamicDocument):
     @abc.abstractmethod
     def __init__(self, *args, **kwargs):
         if kwargs.has_key('_cls'):
-            DynamicDocument.__init__(self, *args, **kwargs)
+            super(SurrogateFunction, self).__init__(*args, **kwargs)
         else:
+            super(SurrogateFunction, self).__init__()
+
             nInp = 0;
             for k, v in kwargs['inputs'].iteritems():
                 if 'argPos' in v:
@@ -216,19 +264,18 @@ class SurrogateFunction(DynamicDocument):
 
             for k, v in kwargs['inputs'].iteritems():
                 if not isinstance(v, MinMaxArgPosOpt):
-                    kwargs['inputs'][k] = MinMaxArgPosOpt(**v)
+                    self.inputs[k] = MinMaxArgPosOpt(**v)
 
             for k, v in kwargs['outputs'].iteritems():
                 if not isinstance(v, MinMaxArgPos):
-                    kwargs['outputs'][k] = MinMaxArgPos(**v)
+                    self.outputs[k] = MinMaxArgPos(**v)
+                    print self.outputs[k]
 
             for k, v in kwargs['parameters'].iteritems():
                 if not isinstance(v, MinMaxArgPos):
-                    kwargs['parameters'][k] = MinMaxArgPos(**v)
+                    self.parameters[k] = MinMaxArgPos(**v)
 
             self.initKwargs(kwargs)
-
-            DynamicDocument.__init__(self, **kwargs)
 
             for k in self.inputs.keys():
                 self.checkVariableName(k)
@@ -248,6 +295,7 @@ class SurrogateFunction(DynamicDocument):
 
 
     def indexSet(self, name):
+        print self.indices.to_mongo()
         return self.indices[name]
 
 
@@ -255,6 +303,15 @@ class SurrogateFunction(DynamicDocument):
         m = re.search(r'[(.*)]', name)
         if m and not m.group(1) in self.indices:
             raise Exception('Index %s not defined' % m.group(1))
+
+
+    def inputs_iterAll(self):
+        for k in self.inputs.iteritems():
+            if 'index' in v:
+                for idx in v.index.names:
+                    yield '%s[%s]' % (k, idx), v
+            else:
+                yield k, v
 
 
     def inputs_size(self):
@@ -281,7 +338,7 @@ class SurrogateFunction(DynamicDocument):
 class CFunction(SurrogateFunction):
 
     def __init__(self, *args, **kwargs):
-        SurrogateFunction.__init__(self, *args, **kwargs)
+        super(CFunction, self).__init__(*args, **kwargs)
 
     def initKwargs(self, kwargs):
         if not kwargs.has_key('Ccode'):
@@ -297,9 +354,9 @@ class CFunction(SurrogateFunction):
         ).group(1)
         fn = fn.strip(' \t\n\r')
 
-        kwargs['name'] = fn
-        kwargs['libraryName'] = ln
-        kwargs['functionName'] = fn
+        self.name = fn
+        self.libraryName = ln
+        self.functionName = fn
 
 
     def compileCcode(self, kwargs):
@@ -373,9 +430,9 @@ class Function(CFunction):
     """
     def __init__(self, *args, **kwargs):
         if kwargs.has_key('_cls'):
-            SurrogateFunction.__init__(self, *args, **kwargs)
+            super(Function, self).__init__(*args, **kwargs)
         if kwargs.has_key('libraryName'):
-            SurrogateFunction.__init__(self, *args, **kwargs)
+            super(Function, self).__init__(*args, **kwargs)
         else:
             # This is a bad check, make a better one...
             if not kwargs.has_key('function'):
@@ -557,8 +614,7 @@ class SurrogateModel(DynamicDocument):
                     )
                 subOutputs.update(m.outputsToModels())
 
-            # Not correct in presence the presence of indexes
-            nInp = len(self.surrogateFunction.inputs)
+            nInp = self.surrogateFunction.inputs_size()
             for o in subOutputs:
                 try:
                     self.inputs_argPos(o)
@@ -688,9 +744,9 @@ class SurrogateModel(DynamicDocument):
 
 
     def minMax(self):
-        len = self.surrogateFunction.inputs_size()
-        minValues = [-9e99] * len
-        maxValues = [9e99] * len
+        l = self.surrogateFunction.inputs_size()
+        minValues = [-9e99] * l
+        maxValues = [9e99] * l
         for k, v in self.inputs.iteritems():
             if 'index' in v:
                 start = self.inputs_argPos(k)
@@ -705,6 +761,26 @@ class SurrogateModel(DynamicDocument):
         return minValues, maxValues
 
 
+    def inputs_iterAll(self):
+        for k, v in self.inputs.iteritems():
+            if 'index' in v:
+                for idx in v.index.names:
+                    yield '%s[%s]' % (k, idx), v
+            else:
+                yield k, v
+
+
+    def inputs_size(self):
+        size = 0
+        for k, v in self.inputs.iteritems():
+            if 'index' in v:
+                size += v.index.iterator_size()
+            else:
+                size += 1
+
+        return size
+
+
     def updateMinMax(self):
         if not self.nSamples:
             for v in self.inputs.values():
@@ -715,7 +791,7 @@ class SurrogateModel(DynamicDocument):
                 v.min = 9e99
                 v.max = -9e99
 
-        for k, v in self.inputs.iteritems():
+        for k, v in self.inputs_iterAll():
             v.min = min(self.fitData[k])
             v.max = max(max(self.fitData[k]), v.min*1.000001)
 
@@ -735,7 +811,7 @@ class SurrogateModel(DynamicDocument):
 
         for idx in idxGenerator:
             # Load inputs
-            for k, v in self.inputs.iteritems():
+            for k, v in self.inputs.items():
                 i[v.argPos] = self.fitData[k][idx]
 
             #print 'i = {', ', '.join('%s: %g' % (
@@ -786,7 +862,7 @@ class SurrogateModel(DynamicDocument):
     def exceptionOutOfBounds(self, oPoint):
         oPointDict = {
             k: oPoint[v.argPos]
-            for k, v in self.inputs.iteritems()
+            for k, v in self.inputs_iterAll()
         }
         self.outsidePoint = EmbDoc(**oPointDict)
         self.save()
@@ -800,7 +876,7 @@ class SurrogateModel(DynamicDocument):
         i = [0] * self.surrogateFunction.inputs_size()
 
         # Set inputs
-        for k, v in self.inputs.iteritems():
+        for k, v in self.inputs_iterAll():
             i[self.inputs_argPos(k)] = inputs[k]
 
         # Call the surrogate model
@@ -909,7 +985,7 @@ class ForwardMappingModel(SurrogateModel):
 class BackwardMappingModel(SurrogateModel):
 
     # Database definition
-    inputs = MapField(EmbeddedDocumentField(MinMaxArgPosOpt))
+    inputs = IOP(EmbeddedDocumentField(MinMaxArgPosOpt))
     outputs = MapField(EmbeddedDocumentField(MinMaxArgPosOpt))
     fitData = MapField(ListField(FloatField(required=True)))
     substituteModels = ListField(ReferenceField(SurrogateModel))
@@ -1048,7 +1124,7 @@ class BackwardMappingModel(SurrogateModel):
         sampleRange = {}
         limitPoint = {}
 
-        for k, v in self.inputs.iteritems():
+        for k, v in self.inputs_iterAll():
             sampleRange[k] = {}
             outsideValue = outsidePoint[k]
 

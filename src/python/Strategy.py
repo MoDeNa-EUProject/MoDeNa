@@ -463,7 +463,7 @@ class StochasticSampling(ImproveErrorStrategy, SamplingStrategy):
             k: {
                 'min': min(model.fitData[k]),
                 'max': max(model.fitData[k])
-            } for k in model.inputs
+            } for k, v in model.inputs_iterAll()
         }
 
         return self.samplePoints(model, sampleRange, self['nNewPoints'])
