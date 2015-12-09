@@ -44,6 +44,8 @@ import modena.Strategy as Strategy
 from fireworks.utilities.fw_utilities import explicit_serialize
 from jinja2 import Template
 import polymerConductivity
+import gasConductivity
+import gasMixtureConductivity
 
 
 @explicit_serialize
@@ -53,17 +55,24 @@ class FoamConductivityExactTask(ModenaFireTask):
     """
     def task(self, fw_spec):
 
+        # print self['point']
         eps = self['point']['eps']
         dcell = self['point']['dcell']
         fstrut = self['point']['fstrut']
-        kgas = self['point']['kgas']
         temp = self['point']['T']
+        xCO2 = self['point']['x[A=CO2]']
+        xAir = self['point']['x[A=Air]']
+        xCyP = self['point']['x[A=CyP]']
+        # print xCO2,xAir,xCyP
 
+        # xCO2=0.3
+        # xAir=0.3
+        # xCyP=0.4
         # Write input
         f = open('inputs.in', 'w')
         f.write('{0:.6e}\n'.format(temp+1))
         f.write('{0:.6e}\n'.format(temp-1))
-        f.write('{0:.6e}\n'.format(kgas))
+        f.write('{0:.6e}\t{1:.6e}\t{2:.6e}\n'.format(xCO2,xAir,xCyP))
         f.write('0.9\n')
         f.write('0.9\n')
         f.write('1.2\n')
@@ -124,6 +133,7 @@ void tcfoam_SM
 
     double fs,Xs,Xw,X,kappa,kr;
     double kfoam;
+    double kgas=gasMixtureConductivity;
 
     fs=alpha*fstrut;
     Xs=(1+4*kgas/(kgas+polymer_thermal_conductivity))/3.0;
@@ -141,9 +151,10 @@ void tcfoam_SM
         'eps': {'min': 0, 'max': 1},
         'dcell': {'min': 0, 'max': 1e-1},
         'fstrut': {'min': 0, 'max': 1},
-        'kgas': {'min': 0, 'max': 1e-1},
+        'gasMixtureConductivity': {'min': 0, 'max': 1e-1},
         'polymer_thermal_conductivity': {'min': 0, 'max': 1e0},
         'T': {'min': 273, 'max': 450},
+        'x': {'index': gasConductivity.species, 'min': 0, 'max': 1},
     },
     outputs={
         'kfoam': {'min': 0, 'max': 1e0, 'argPos': 0},
@@ -186,30 +197,24 @@ kgas0=0.012
 eps=[]
 dcell=[]
 fstrut=[]
-kgas=[]
 T=[]
 
 for i in xrange(4):
     eps.append(eps0)
     dcell.append(dcell0)
     fstrut.append(fstrut0)
-    kgas.append(kgas0*(1+0.01*i))
     T.append(T0)
-
+xCO2=[0.0, 0.1, 0.2, 0.3]
+xAir=[0.0, 0.1, 0.2, 0.3]
+xCyP=[1.0, 0.8, 0.6, 0.4]
 initialPoints_foamConductivity_auto = {
     'eps': eps,
     'dcell': dcell,
     'fstrut': fstrut,
-    'kgas': kgas,
     'T': T,
-}
-
-initialPoints_foamConductivity_test = {
-    'eps': [0.95],
-    'dcell': [300e-6],
-    'fstrut': [0.8],
-    'kgas': [0.12],
-    'T': [300],
+    'x[A=CO2]': xCO2,
+    'x[A=Air]': xAir,
+    'x[A=CyP]': xCyP,
 }
 
 ## Surrogate model for foam conductivity
@@ -219,7 +224,10 @@ m_foamConductivity = BackwardMappingModel(
     _id='foamConductivity',
     surrogateFunction=f_foamConductivity,
     exactTask=FoamConductivityExactTask(),
-    substituteModels=[polymerConductivity.m_polymer_thermal_conductivity],
+    substituteModels=[
+        gasMixtureConductivity.m_gasMixtureConductivity,\
+        polymerConductivity.m_polymer_thermal_conductivity\
+    ],
     initialisationStrategy=Strategy.InitialPoints(
         initialPoints=initialPoints_foamConductivity_auto,
     ),
