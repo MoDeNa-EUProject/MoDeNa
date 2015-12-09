@@ -1036,10 +1036,10 @@ class BackwardMappingModel(SurrogateModel):
                               +------------+....+ <- new global max
                               ^            ^
                         global min      new min (temporary, only for sampling)
- 
+
         @param    outsidePoint     The point that where found to be outside (X)
         @retval   expansion_factor The ratio that is used to expand the space beyond X
-    
+
         @author   Sigve Karolius
         @author   Mandar Thombre
         @todo     Document...
@@ -1082,6 +1082,18 @@ class BackwardMappingModel(SurrogateModel):
 
         return sampleRange, limitPoint
 
+class PrediciKinetics(CFunction):
+
+    def __init__(self, *args, **kwargs):
+
+        if kwargs.has_key('_cls'):
+            CFunction.__init__(self, *args, **kwargs)
+
+        else:
+            from predici_2_modena import create_args
+
+            kwargs.update(create_args(kwargs['fileName']))
+
+            CFunction.__init__(self, *args, **kwargs)
 ##
 # @} # end of python_interface_library
-
