@@ -72,11 +72,23 @@ term = Terminal()
 # @{
 
 class Workflow2(Workflow):
+    """Workflow2, expanding on "Workflow" from "FireWorks"
 
+    @brief The class specifically allows the user to add dependencies
+    """
     def __init__(self, *args, **kwargs):
         Workflow.__init__(self, *args, **kwargs)
 
     def addAfterAll(self, wf):
+        """Method which adds a the workflow "wf" as a dependency to the
+        fireworks.
+
+        @param wf "Workflow2" object.
+
+        @var root_ids: Root "FireWorks" of this workflow
+        @var leaf_ids: Leaf FireWorks, i.e. those with no children
+        @var my_leaf_ids
+        """
         updated_ids = []
 
         root_ids = wf.root_fw_ids
@@ -106,6 +118,7 @@ class Workflow2(Workflow):
             updated_ids = self.refresh(new_fw.fw_id, set(updated_ids))
 
     def addNoLink(self, wf):
+        """Method adding "Workflow" without dependency."""
         updated_ids = []
 
         leaf_ids = wf.leaf_fw_ids
@@ -136,17 +149,34 @@ class Workflow2(Workflow):
 
 
 class InitialisationStrategy(defaultdict, FWSerializable):
+    """Parent class for the initialisation strategies.
 
+    defaultdict: subclass of type(dict), overrides method __missing__ in dict
+                 and uses a method "defaultfactory" in order to automatically
+                 return a dictionary "key" instead of "KeyError".
+    FWSerializable: Creates a serializable object within "FireWorks"
+    """
     def __init__(self, *args, **kwargs):
+        """Constructor"""
         dict.__init__(self, *args, **kwargs)
 
 
     @abc.abstractmethod
     def newPoints(self):
+        """Method which adds new points to the database."""
         raise NotImplementedError('newPoints not implemented!')
 
 
     def workflow(self, model):
+        """Method creating a Workflow2 object for the initialisation.
+
+        @param model surrogate model object.
+
+        @var p list of dicts each representing inputs for a computation.
+        @var wf Workflow2 object containing FireTasks for every point in "p".
+
+        @return Workflow2 object
+        """
         p = self.newPoints()
         if len(p):
             wf = model.exactTasks(p)
@@ -159,12 +189,14 @@ class InitialisationStrategy(defaultdict, FWSerializable):
     @serialize_fw
     @recursive_serialize
     def to_dict(self):
+        """Method used by FireWorks to deserialise the object instance."""
         return dict(self)
 
 
     @classmethod
     @recursive_deserialize
     def from_dict(cls, m_dict):
+        """Method used by FireWorks to deserialise all insatnces."""
         return cls(m_dict)
 
 
@@ -173,8 +205,15 @@ class InitialisationStrategy(defaultdict, FWSerializable):
 
 
 class OutOfBoundsStrategy(defaultdict, FWSerializable):
+    """Parent class for the out of bounds strategies.
 
+    defaultdict: subclass of type(dict), overrides method __missing__ in dict
+                 and uses a method "defaultfactory" in order to automatically
+                 return a dictionary "key" instead of "KeyError".
+    FWSerializable: Creates a serializable object within "FireWorks"
+    """
     def __init__(self, *args, **kwargs):
+        """Constructor"""
         dict.__init__(self, *args, **kwargs)
 
 
