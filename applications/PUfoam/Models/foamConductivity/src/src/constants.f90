@@ -72,4 +72,5 @@ module constants
         abscoeffbox,&       !<absorption coefficients of gray boxes
         scattcoeffbox,&     !<scatering coefficients of gray boxes
         fbepbox             !<fraction of blackbody radiation in the box
+    logical :: testing=.true.
 end module constants
