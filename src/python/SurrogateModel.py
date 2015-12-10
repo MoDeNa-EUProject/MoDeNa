@@ -118,7 +118,7 @@ class IndexSet(Document):
     @abc.abstractmethod
     def __init__(self, *args, **kwargs):
         self.___index___ = {j: i for i, j in enumerate(kwargs['names'])}
-        Document.__init__(self, *args, **kwargs)
+        super(IndexSet, self).__init__(*args, **kwargs)
         self.save()
 
 
@@ -269,7 +269,6 @@ class SurrogateFunction(DynamicDocument):
             for k, v in kwargs['outputs'].iteritems():
                 if not isinstance(v, MinMaxArgPos):
                     self.outputs[k] = MinMaxArgPos(**v)
-                    print self.outputs[k]
 
             for k, v in kwargs['parameters'].iteritems():
                 if not isinstance(v, MinMaxArgPos):
@@ -473,7 +472,7 @@ void {name}
                               outputs=outPut('outputs')\
                           )
 
-        CFunction.__init__(self, *args, **kwargs)
+        super(Function, self).__init__(*args, **kwargs)
 
 
     def Parse(self, formula, debug=False, model='', stack={}, delim=0, \
@@ -563,12 +562,16 @@ class SurrogateModel(DynamicDocument):
         self.___refs___.append(weakref.ref(self))
 
         if kwargs.has_key('_cls'):
-            DynamicDocument.__init__(self, *args, **kwargs)
+            super(SurrogateModel, self).__init__(*args, **kwargs)
             self.___indices___ = self.parseIndices(self._id)
+            #print '--- Loaded model', self._id
 
         else:
             if not kwargs.has_key('_id'):
                 raise Exception('Need _id')
+
+            #print '--- Initialising model', kwargs['_id']
+
             if not kwargs.has_key('surrogateFunction'):
                 raise Exception('Need surrogateFunction')
             if not isinstance(kwargs['surrogateFunction'], SurrogateFunction):
@@ -607,7 +610,7 @@ class SurrogateModel(DynamicDocument):
                 InitialisationStrategy
             )
 
-            DynamicDocument.__init__(self, *args, **kwargs)
+            super(SurrogateModel, self).__init__(*args, **kwargs)
 
             subOutputs = {}
             for m in self.substituteModels:
@@ -642,9 +645,9 @@ class SurrogateModel(DynamicDocument):
 
             self.save()
 
-        #print 'ID=', self._id, '---'
         #for k, v in self.inputs.iteritems():
         #    print k, self.inputs_argPos(k)
+        #print('parameters = [%s]' % ', '.join('%g' % v for v in self.parameters))
 
 
     @abc.abstractmethod
@@ -949,7 +952,7 @@ class SurrogateModel(DynamicDocument):
     def loadFromModule(self):
         collection = self._get_collection()
         doc = collection.find_one({ '_cls': { '$exists': False}})
-        modName = re.search('(.*)\[.*\]', doc['_id']).group(1)
+        modName = re.search('(.*)(\[.*\])?', doc['_id']).group(1)
         mod = __import__(modName)
         # TODO:
         # Give a better name to the variable a model is imported from
@@ -973,7 +976,7 @@ class ForwardMappingModel(SurrogateModel):
     meta = {'allow_inheritance': True}
 
     def __init__(self, *args, **kwargs):
-        SurrogateModel.__init__(self, *args, **kwargs)
+        super(ForwardMappingModel, self).__init__(*args, **kwargs)
 
 
     def initKwargs(self, kwargs):
@@ -1008,12 +1011,8 @@ class BackwardMappingModel(SurrogateModel):
     meta = {'allow_inheritance': True}
 
 
-    # TODO: Should be able to have
-    # __init__(self, _id, surrogateFunction, *args, **kwargs):
-    # But this is not working with the mongoengine 0.8.7
-    # Try again when > 0.9.0 comes out
     def __init__(self, *args, **kwargs):
-        SurrogateModel.__init__(self, *args, **kwargs)
+        super(BackwardMappingModel, self).__init__(*args, **kwargs)
 
     def initKwargs(self, kwargs):
         checkAndConvertType(kwargs, 'exactTask', FireTaskBase)
@@ -1166,7 +1165,7 @@ class PrediciKinetics(CFunction):
     def __init__(self, *args, **kwargs):
 
         if kwargs.has_key('_cls'):
-            CFunction.__init__(self, *args, **kwargs)
+            super(PrediciKinetics, self).__init__(*args, **kwargs)
 
         else:
             from predici_2_modena import create_args

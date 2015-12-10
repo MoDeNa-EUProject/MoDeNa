@@ -516,7 +516,7 @@ void modena_model_destroy(modena_model_t *self)
         modena_function_destroy(self->mf);
     }
 
-    Py_XDECREF(self->pModel);
+    Py_DECREF(self->pModel);
 
     self->ob_type->tp_free((PyObject*)self);
 }
@@ -540,12 +540,7 @@ static PyObject *modena_model_t_call
     PyObject *pI=NULL, *pCheckBounds=NULL;
     bool checkBounds = true;
 
-    static char *kwlist[] =
-    {
-        "inputs",
-        "checkBounds",
-        NULL
-    };
+    static char *kwlist[] = { "inputs", "checkBounds", NULL };
 
     if
     (
@@ -638,7 +633,7 @@ static PyObject *modena_model_t_call
 
 static PyMethodDef modena_model_t_methods[] = {
     {"call", (PyCFunction) modena_model_t_call, METH_KEYWORDS,
-     "Call surrogate model and return outputs"
+        "Call surrogate model and return outputs"
     },
     {NULL}  /* Sentinel */
 };
@@ -650,6 +645,8 @@ static int modena_model_t_init
     PyObject *kwds
 )
 {
+    //printf("In modena_model_t_init\n");
+
     PyObject *pParameters=NULL, *pModel=NULL;
     char *modelId=NULL;
     size_t i, j;
@@ -717,10 +714,7 @@ static int modena_model_t_init
     self->mf = modena_function_new_from_model(self);
     self->function = self->mf->function;
 
-    self->argPos_used = malloc
-    (
-        self->inputs_size*sizeof(bool)
-    );
+    self->argPos_used = malloc(self->inputs_size*sizeof(bool));
 
     for(j = 0; j < self->inputs_size; j++)
     {
@@ -761,8 +755,12 @@ static int modena_model_t_init
             modena_ParametersNotValid,
             "Surrogate model does not have valid parameters"
         );
+        PyErr_SetObject
+        (
+            modena_ParametersNotValid,
+            self->pModel
+        );
 
-        modena_model_destroy(self);
         Py_DECREF(pSeq);
         Py_DECREF(pParameters);
         return -1;
