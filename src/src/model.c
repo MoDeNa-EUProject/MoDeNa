@@ -238,6 +238,7 @@ size_t modena_model_inputs_argPos(const modena_model_t *self, const char *name)
 
     if(self->argPos_used)
     {
+        //printf("Mark argPos %zu as used from inputs_argPos\n", argPos);
         self->argPos_used[argPos] = true;
     }
 
@@ -271,7 +272,7 @@ void modena_model_argPos_check(const modena_model_t *self)
         {
             //TODO: Replace by call into python
             //printf("argPos for %s not used\n", self->inputs_names[j]);
-            //printf("argPos %zu not used\n", j);
+            printf("argPos %zu not used\n", j);
             allUsed = false;
             break;
         }
@@ -651,6 +652,7 @@ static int modena_model_t_init
 {
     PyObject *pParameters=NULL, *pModel=NULL;
     char *modelId=NULL;
+    size_t i, j;
 
     static char *kwlist[] = {"model", "modelId", "parameters", NULL};
 
@@ -720,12 +722,17 @@ static int modena_model_t_init
         self->inputs_size*sizeof(bool)
     );
 
-    size_t i, j;
+    for(j = 0; j < self->inputs_size; j++)
+    {
+        self->argPos_used[j] = false;
+    }
+
     for(j = 0; j < self->substituteModels_size; j++)
     {
         modena_substitute_model_t *sm = &self->substituteModels[j];
         for(i = 0; i < sm->map_outputs_size; i++)
         {
+            //printf("Mark argPos %zu as used\n", sm->map_outputs[2*i+1]);
             self->argPos_used[sm->map_outputs[2*i+1]] = true;
         }
     }

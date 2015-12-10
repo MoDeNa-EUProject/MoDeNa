@@ -88,10 +88,13 @@ subroutine createModels
         kfoamModena, c_char_"dcell"//c_null_char);
     kfoamFstrutpos = modena_model_inputs_argPos(&
         kfoamModena, c_char_"fstrut"//c_null_char);
-    kfoamKgaspos = modena_model_inputs_argPos(&
-        kfoamModena, c_char_"kgas"//c_null_char);
+!    kfoamKgaspos = modena_model_inputs_argPos(&
+!        kfoamModena, c_char_"kgas"//c_null_char);
     kfoamTemppos = modena_model_inputs_argPos(&
         kfoamModena, c_char_"T"//c_null_char);
+    kgasXco2pos = modena_model_inputs_argPos(kfoamModena, c_char_"x[CO2]"//c_null_char);
+    kgasXairpos = modena_model_inputs_argPos(kfoamModena, c_char_"x[Air]"//c_null_char);
+    kgasXcyppos = modena_model_inputs_argPos(kfoamModena, c_char_"x[CyP]"//c_null_char);
     call modena_model_argPos_check(kfoamModena)
     write(*,*) 'loading gasMixtureConductivity model'
     kgasModena = modena_model_new (&
@@ -101,10 +104,10 @@ subroutine createModels
     kgasOutputs = modena_outputs_new (kgasModena);
     write(*,*) 'setting inputs'
     kgasTemppos = modena_model_inputs_argPos(kgasModena, c_char_"T"//c_null_char);
-    kgasXco2pos = modena_model_inputs_argPos(kgasModena, c_char_"x[A=CO2]"//c_null_char);
+    kgasXco2pos = modena_model_inputs_argPos(kgasModena, c_char_"x[CO2]"//c_null_char);
     write(*,*) 'setting inputs OK'
-    kgasXairpos = modena_model_inputs_argPos(kgasModena, c_char_"x[A=Air]"//c_null_char);
-    kgasXcyppos = modena_model_inputs_argPos(kgasModena, c_char_"x[A=CyP]"//c_null_char);
+    kgasXairpos = modena_model_inputs_argPos(kgasModena, c_char_"x[Air]"//c_null_char);
+    kgasXcyppos = modena_model_inputs_argPos(kgasModena, c_char_"x[CyP]"//c_null_char);
     call modena_model_argPos_check(kgasModena)
     kcdModena = modena_model_new (&
         c_char_"gas_thermal_conductivity[A=CO2]"//c_null_char);

@@ -622,6 +622,7 @@ class SurrogateModel(DynamicDocument):
             #print 'subOutputs=', subOutputs.keys()
             #print 'inputs =', self.inputs.keys()
 
+            nInp = len(self.inputs)
             for o in subOutputs.keys():
                 try:
                     self.inputs_argPos(o)
@@ -632,14 +633,19 @@ class SurrogateModel(DynamicDocument):
                         try:
                             self.inputs_argPos(k)
                         except ArgPosNotFound:
-                            pass
+                            self.inputs[k] = subOutputs[o].surrogateFunction.inputs[k]
+                            self.inputs[k].argPos = nInp
+                            nInp += 1
+
 
                 except ArgPosNotFound:
                     pass
 
-            #print 'inputs =', self.inputs.keys()
-
             self.save()
+
+        #print 'ID=', self._id, '---'
+        #for k, v in self.inputs.iteritems():
+        #    print k, self.inputs_argPos(k)
 
 
     @abc.abstractmethod
@@ -779,7 +785,7 @@ class SurrogateModel(DynamicDocument):
             minValues[self.inputs_argPos(k)] = v.min
             maxValues[self.inputs_argPos(k)] = v.max
 
-        #print 'min =', minValues, 'max =', maxValues
+        #print 'min =', minValues, 'max =', maxValues, self.inputs.keys()
         return minValues, maxValues
 
 
