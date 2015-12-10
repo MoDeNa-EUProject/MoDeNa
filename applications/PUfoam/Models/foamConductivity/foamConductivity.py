@@ -207,6 +207,9 @@ for i in xrange(4):
 xCO2=[0.0, 0.1, 0.2, 0.3]
 xAir=[0.0, 0.1, 0.2, 0.3]
 xCyP=[1.0, 0.8, 0.6, 0.4]
+# xCO2=[0.0, 0.0, 1.0, 0.3]
+# xAir=[0.0, 1.0, 0.0, 0.3]
+# xCyP=[1.0, 0.0, 0.0, 0.4]
 initialPoints_foamConductivity_auto = {
     'eps': eps,
     'dcell': dcell,
