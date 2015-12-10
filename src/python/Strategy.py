@@ -57,6 +57,7 @@ from rpy2.robjects.vectors import FloatVector
 from numpy import array
 from numpy.random import choice, seed
 from blessings import Terminal
+import copy
 
 
 # Import R libraries
@@ -463,7 +464,7 @@ class StochasticSampling(ImproveErrorStrategy, SamplingStrategy):
             k: {
                 'min': min(model.fitData[k]),
                 'max': max(model.fitData[k])
-            } for k in model.inputs
+            } for k in model.inputs.keys()
         }
 
         return self.samplePoints(model, sampleRange, self['nNewPoints'])
@@ -914,12 +915,10 @@ class ModenaFireTask(FireTaskBase):
             )
 
             model = modena.SurrogateModel.load(self['modelId'])
-            newP = {}
+            oldP = copy.copy(p)
             for m in model.substituteModels:
                 try:
-                    res = m.callModel(p)
-                    newP.update(res)
-                    p.update(res)
+                    p.update(m.callModel(p))
 
                 except OutOfBounds:
                     print(
@@ -937,12 +936,11 @@ class ModenaFireTask(FireTaskBase):
                     )
                     return self.parametersNotValid()
 
-
-            if len(newP):
+            if not len(p) == len(oldP):
                 print(
                     term.yellow
                   + 'values added by substitution = {'
-                  + ', '.join('%s: %g' % (k, v) for (k, v) in newP.iteritems())
+                  + ', '.join('%s: %g' % (k, v) for (k, v) in p.iteritems() if k not in oldP)
                   + '}' +term.normal
                 )
 
@@ -996,7 +994,8 @@ class ModenaFireTask(FireTaskBase):
     def handleReturnCode(self, returnCode):
 
         # Analyse return code and raise appropriate exception
-        print(term.red + 'return code = %i' % returnCode + term.normal)
+        if returnCode > 0:
+            print(term.red + 'return code = %i' % returnCode + term.normal)
 
         if returnCode == 200:
             raise OutOfBounds('Exact task of model returned 200')
@@ -1005,7 +1004,7 @@ class ModenaFireTask(FireTaskBase):
             raise ParametersNotValid('Exact task of model returned 201')
 
         elif returnCode > 0:
-            print('An error occurred')
+            print('An unknow error occurred')
             sys.exit(returnCode)
 
 

@@ -145,10 +145,10 @@ void modena_model_get_minMax
 
     PyObject *pMin = PyTuple_GET_ITEM(pObj, 0); // Borrowed ref
     PyObject *pSeq = PySequence_Fast(pMin, "expected a sequence");
-    self->inputs_minMax_size = PySequence_Size(pMin);
-    self->inputs_min = malloc(self->inputs_minMax_size*sizeof(double));
+    self->inputs_size = PySequence_Size(pMin);
+    self->inputs_min = malloc(self->inputs_size*sizeof(double));
     size_t i;
-    for(i = 0; i < self->inputs_minMax_size; i++)
+    for(i = 0; i < self->inputs_size; i++)
     {
         self->inputs_min[i] = PyFloat_AsDouble(PyList_GET_ITEM(pSeq, i));
     }
@@ -157,8 +157,8 @@ void modena_model_get_minMax
 
     PyObject *pMax = PyTuple_GET_ITEM(pObj, 1); // Borrowed ref
     pSeq = PySequence_Fast(pMax, "expected a sequence");
-    self->inputs_max = malloc(self->inputs_minMax_size*sizeof(double));
-    for(i = 0; i < self->inputs_minMax_size; i++)
+    self->inputs_max = malloc(self->inputs_size*sizeof(double));
+    for(i = 0; i < self->inputs_size; i++)
     {
         self->inputs_max[i] = PyFloat_AsDouble(PyList_GET_ITEM(pSeq, i));
     }
@@ -238,20 +238,11 @@ size_t modena_model_inputs_argPos(const modena_model_t *self, const char *name)
 
     if(self->argPos_used)
     {
+        //printf("Mark argPos %zu as used from inputs_argPos\n", argPos);
         self->argPos_used[argPos] = true;
     }
 
     return argPos;
-}
-
-size_t modena_model_inherited_inputs_argPos
-(
-    const modena_model_t *self,
-    const char *name
-)
-{
-    fprintf(stderr, "Not implemented\n");
-    exit(1);
 }
 
 size_t modena_model_outputs_argPos(const modena_model_t *self, const char *name)
@@ -273,15 +264,17 @@ size_t modena_model_outputs_argPos(const modena_model_t *self, const char *name)
 void modena_model_argPos_check(const modena_model_t *self)
 {
     bool allUsed = true;
-    size_t j, i = 0;
+    size_t j = 0;
 
     for(j = 0; j < self->inputs_size; j++)
     {
-        if(!self->argPos_used[i++])
+        if(!self->argPos_used[j])
         {
             //TODO: Replace by call into python
             //printf("argPos for %s not used\n", self->inputs_names[j]);
+            printf("argPos %zu not used\n", j);
             allUsed = false;
+            break;
         }
     }
 
@@ -290,30 +283,11 @@ void modena_model_argPos_check(const modena_model_t *self)
         fprintf(stderr, "Not all input arguments used - Exiting\n");
         exit(1);
     }
-
-    for(j = 0; j < self->inherited_inputs_size; j++)
-    {
-        if(!self->argPos_used[i++])
-        {
-            allUsed = false;
-        }
-    }
-
-    if(!allUsed)
-    {
-        fprintf(stderr, "Not all inherited input arguments used\n");
-        exit(1);
-    }
 }
 
 size_t modena_model_inputs_size(const modena_model_t *self)
 {
     return self->inputs_size;
-}
-
-size_t modena_model_inherited_inputs_size(const modena_model_t *self)
-{
-    return self->inherited_inputs_size;
 }
 
 size_t modena_model_outputs_size(const modena_model_t *self)
@@ -369,10 +343,10 @@ int write_outside_point
     modena_inputs_t *inputs
 )
 {
-    PyObject* pOutside = PyList_New(self->inputs_minMax_size);
+    PyObject* pOutside = PyList_New(self->inputs_size);
 
     size_t j;
-    for(j = 0; j < self->inputs_minMax_size; j++)
+    for(j = 0; j < self->inputs_size; j++)
     {
         PyList_SET_ITEM
         (
@@ -437,7 +411,7 @@ int modena_model_call
         if(ret){ return ret; }
     }
 
-    for(j = 0; j < self->inputs_minMax_size; j++)
+    for(j = 0; j < self->inputs_size; j++)
     {
         /*
         printf
@@ -463,8 +437,7 @@ int modena_model_call
 
     self->function
     (
-        self->parameters,
-        inputs->inherited_inputs,
+        self,
         inputs->inputs,
         outputs->outputs
     );
@@ -499,22 +472,21 @@ void modena_model_call_no_check
         );
     }
 
-    /*
-    for(j = 0; j < self->inherited_inputs_size; j++)
+    for(j = 0; j < self->inputs_size; j++)
     {
+        /*
         printf
         (
             "j = %zu %g\n",
             j,
             inputs->inputs[j]
         );
+        */
     }
-    */
 
     self->function
     (
-        self->parameters,
-        inputs->inherited_inputs,
+        self,
         inputs->inputs,
         outputs->outputs
     );
@@ -565,13 +537,12 @@ static PyObject *modena_model_t_call
     PyObject *kwds
 )
 {
-    PyObject *pIn_i=NULL, *pI=NULL, *pCheckBounds=NULL;
+    PyObject *pI=NULL, *pCheckBounds=NULL;
     bool checkBounds = true;
 
     static char *kwlist[] =
     {
         "inputs",
-        "inherited_inputs",
         "checkBounds",
         NULL
     };
@@ -582,27 +553,19 @@ static PyObject *modena_model_t_call
         (
             args,
             kwds,
-            "OO|O",
+            "O|O",
             kwlist,
-            &pIn_i,
             &pI,
             &pCheckBounds
         )
     )
     {
-        printf("Expected two arguments\n");
-        return NULL;
+        Modena_PyErr_Print();
     }
 
     if(pCheckBounds)
     {
         checkBounds = PyObject_IsTrue(pCheckBounds);
-    }
-
-    if(!PyList_Check(pIn_i))
-    {
-        printf("First argument is not a list\n");
-        return NULL;
     }
 
     if(!PyList_Check(pI))
@@ -611,23 +574,19 @@ static PyObject *modena_model_t_call
         return NULL;
     }
 
+    PyObject *pSeq = PySequence_Fast(pI, "expected a sequence");
+    size_t len = PySequence_Size(pI);
+
+    if(len != self->inputs_size)
+    {
+        Py_DECREF(pSeq);
+        printf("input array has incorrect size %zu %zu\n", len, self->inputs_size);
+        return NULL;
+    }
+
     modena_inputs_t *inputs = modena_inputs_new(self);
 
-    PyObject *pSeq = PySequence_Fast(pIn_i, "expected a sequence");
-    size_t len = PySequence_Size(pIn_i);
     size_t j;
-    for(j = 0; j < len; j++)
-    {
-        modena_inherited_inputs_set
-        (
-            inputs, j, PyFloat_AsDouble(PyList_GET_ITEM(pSeq, j))
-        );
-    }
-    Py_DECREF(pSeq);
-    if(PyErr_Occurred()){ Modena_PyErr_Print(); }
-
-    pSeq = PySequence_Fast(pI, "expected a sequence");
-    len = PySequence_Size(pI);
     for(j = 0; j < len; j++)
     {
         modena_inputs_set
@@ -693,6 +652,7 @@ static int modena_model_t_init
 {
     PyObject *pParameters=NULL, *pModel=NULL;
     char *modelId=NULL;
+    size_t i, j;
 
     static char *kwlist[] = {"model", "modelId", "parameters", NULL};
 
@@ -757,22 +717,22 @@ static int modena_model_t_init
     self->mf = modena_function_new_from_model(self);
     self->function = self->mf->function;
 
-    PyObject *pInputs = PyObject_GetAttrString(self->mf->pFunction, "inputs");
-    if(!pInputs){ Modena_PyErr_Print(); }
-    self->inputs_size = PyDict_Size(pInputs);
-    Py_DECREF(pInputs);
-
     self->argPos_used = malloc
     (
-        (self->inputs_size + self->inherited_inputs_size)*sizeof(bool)
+        self->inputs_size*sizeof(bool)
     );
 
-    size_t i, j;
+    for(j = 0; j < self->inputs_size; j++)
+    {
+        self->argPos_used[j] = false;
+    }
+
     for(j = 0; j < self->substituteModels_size; j++)
     {
         modena_substitute_model_t *sm = &self->substituteModels[j];
         for(i = 0; i < sm->map_outputs_size; i++)
         {
+            //printf("Mark argPos %zu as used\n", sm->map_outputs[2*i+1]);
             self->argPos_used[sm->map_outputs[2*i+1]] = true;
         }
     }
@@ -836,11 +796,9 @@ static PyObject * modena_model_t_new
         self->pModel = NULL;
         self->outputs_size = 0;
         self->inputs_size = 0;
-        self->inputs_minMax_size = 0;
         self->inputs_min = NULL;
         self->inputs_max = NULL;
         self->argPos_used = NULL;
-        self->inherited_inputs_size = 0;
         self->parameters_size = 0;
         self->parameters = NULL;
         self->mf = NULL;

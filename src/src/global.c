@@ -50,6 +50,7 @@ License
 #include "indexset.h"
 #include "function.h"
 #include "model.h"
+#include <execinfo.h>
 
 #ifndef thread_local
 # if __STDC_VERSION__ >= 201112 && !defined __STDC_NO_THREADS__
@@ -216,5 +217,23 @@ PyMODINIT_FUNC initlibmodena(void)
 
         Py_DECREF(pModule);
     }
+}
+
+
+void modena_print_backtrace()
+{
+    void* tracePtrs[100];
+    int count = backtrace( tracePtrs, 100 );
+
+    char** funcNames = backtrace_symbols( tracePtrs, count );
+    // Print the stack trace
+    int ii;
+    for( ii = 0; ii < count; ii++ )
+        printf( "%s\n", funcNames[ii] );
+
+    // Free the string pointers
+    free( funcNames );
+
+    exit(1);
 }
 
