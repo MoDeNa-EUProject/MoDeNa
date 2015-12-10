@@ -41,6 +41,7 @@ Module providing strategies
 import six
 import abc
 import sys
+import copy
 import modena
 from fireworks.core.firework import FireTaskMeta
 from fireworks import Firework, Workflow, FWAction, FireTaskBase, ScriptTask
@@ -57,7 +58,6 @@ from rpy2.robjects.vectors import FloatVector
 from numpy import array
 from numpy.random import choice, seed
 from blessings import Terminal
-import copy
 
 
 # Import R libraries

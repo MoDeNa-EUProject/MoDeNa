@@ -42,6 +42,7 @@ import os
 import six
 import abc
 import hashlib
+import copy
 import modena
 from modena.Strategy import *
 import weakref
@@ -636,7 +637,7 @@ class SurrogateModel(DynamicDocument):
                         try:
                             self.inputs_argPos(k)
                         except ArgPosNotFound:
-                            self.inputs[k] = subOutputs[o].surrogateFunction.inputs[k]
+                            self.inputs[k] = subOutputs[o].inputs[k]
                             self.inputs[k].argPos = nInp
                             nInp += 1
 
@@ -706,10 +707,31 @@ class SurrogateModel(DynamicDocument):
 
 
     def outputsToModels(self):
-        o = { k: self for k in self.outputs }
+        o = { k: self for k in self.outputs.keys() }
         for m in self.substituteModels:
             o.update(m.outputsToModels())
         return o
+
+
+    def inputsMinMax(self):
+
+        def new(Min, Max):
+            obj = type('MinMax', (object,), {})
+            obj.min = Min
+            obj.max = Max
+            return obj
+
+        i = { k: new(v.min, v.max) for k, v in self.surrogateFunction.inputs_iterAll() }
+
+        for m in self.substituteModels:
+            for k, v in m.inputsMinMax().iteritems():
+                if k in i:
+                    v.min = max(v.min, i[k].min)
+                    v.max = min(v.max, i[k].max)
+                else:
+                    i[k] = new(v.min, v.max)
+                
+        return i
 
 
     def inputs_argPos(self, name):
@@ -1119,35 +1141,32 @@ class BackwardMappingModel(SurrogateModel):
         for k, v in self.inputs.iteritems():
             sampleRange[k] = {}
             outsideValue = outsidePoint[k]
+            inputsMinMax = self.inputsMinMax()
 
             # If the value outside point is outside the range, set the
             # "localdict" max to the outside point value
 
             if outsideValue > v['max']:
-                value = outsideValue*expansion_factor
+                if outsideValue > inputsMinMax[k].max:
+                    raise OutOfBounds('new value is larger than function min for %s' % k)
 
-                if k in self.surrogateFunction.inputs:
-                    if outsideValue > self.surrogateFunction.inputs[k].max:
-                        raise OutOfBounds('new value is larger than function min for %s' % k)
-                    value = min(
-                        value,
-                        self.surrogateFunction.inputs[k].max
-                    )
+                value = min(
+                    outsideValue*expansion_factor,
+                    inputsMinMax[k].max
+                )
 
                 sampleRange[k]['min'] = v['max']
                 sampleRange[k]['max'] = value
                 limitPoint[k] = value
 
             elif outsideValue < v['min']:
-                value = outsideValue/expansion_factor
+                if outsideValue < inputsMinMax[k].min:
+                    raise OutOfBounds('new value is smaller than function max for %s' % k)
 
-                if k in self.surrogateFunction.inputs:
-                    if outsideValue < self.surrogateFunction.inputs[k].min:
-                        raise OutOfBounds('new value is smaller than function max for %s' % k)
-                    value = max(
-                        value,
-                        self.surrogateFunction.inputs[k].min
-                    )
+                value = max(
+                    outsideValue/expansion_factor,
+                    inputsMinMax[k].min
+                )
 
                 sampleRange[k]['min'] = value
                 sampleRange[k]['max'] = v['min']
