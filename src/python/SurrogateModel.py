@@ -868,8 +868,8 @@ class SurrogateModel(DynamicDocument):
 
     def exceptionOutOfBounds(self, oPoint):
         oPointDict = {
-            k: oPoint[v.argPos]
-            for k, v in self.inputs.iteritems()
+            k: oPoint[self.inputs_argPos(k)]
+            for k in self.inputs.keys()
         }
         self.outsidePoint = EmbDoc(**oPointDict)
         self.save()
@@ -1125,24 +1125,34 @@ class BackwardMappingModel(SurrogateModel):
             # "localdict" max to the outside point value
 
             if outsideValue > v['max']:
-                if outsideValue > self.surrogateFunction.inputs[k].max:
-                    raise OutOfBounds('outside point is larger than function min for %s' % k)
+                value = outsideValue*expansion_factor
+
+                if k in self.surrogateFunction.inputs:
+                    if outsideValue > self.surrogateFunction.inputs[k].max:
+                        raise OutOfBounds('new value is larger than function min for %s' % k)
+                    value = min(
+                        value,
+                        self.surrogateFunction.inputs[k].max
+                    )
+
                 sampleRange[k]['min'] = v['max']
-                sampleRange[k]['max'] = min(
-                    outsideValue*expansion_factor,
-                    self.surrogateFunction.inputs[k].max
-                )
-                limitPoint[k] = sampleRange[k]['max']
+                sampleRange[k]['max'] = value
+                limitPoint[k] = value
 
             elif outsideValue < v['min']:
-                if outsideValue < self.surrogateFunction.inputs[k].min:
-                    raise OutOfBounds('outside point is smaller than function max for %s' % k)
-                sampleRange[k]['min'] = max(
-                    outsideValue/expansion_factor,
-                    self.surrogateFunction.inputs[k].min
-                )
+                value = outsideValue/expansion_factor
+
+                if k in self.surrogateFunction.inputs:
+                    if outsideValue < self.surrogateFunction.inputs[k].min:
+                        raise OutOfBounds('new value is smaller than function max for %s' % k)
+                    value = max(
+                        value,
+                        self.surrogateFunction.inputs[k].min
+                    )
+
+                sampleRange[k]['min'] = value
                 sampleRange[k]['max'] = v['min']
-                limitPoint[k] = sampleRange[k]['min']
+                limitPoint[k] = value
 
             else:
                 sampleRange[k]['min'] = v['min']

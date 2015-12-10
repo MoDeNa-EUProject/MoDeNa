@@ -40,7 +40,7 @@ Contributors
 
 from modena import SurrogateModel
 from modena.Strategy import Workflow2
-# import diffusivity
+import diffusivity
 # import gasConductivity
 import foamConductivity
 # import US_Solubility_Model
