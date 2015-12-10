@@ -637,7 +637,6 @@ class SurrogateModel(DynamicDocument):
                             self.inputs[k].argPos = nInp
                             nInp += 1
 
-
                 except ArgPosNotFound:
                     pass
 
