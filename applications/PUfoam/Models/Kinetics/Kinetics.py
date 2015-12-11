@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-'''
+'''@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -10,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014 MoDeNa Consortium, All rights reserved.
+    2014-2015 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -22,39 +21,47 @@ License
 
     Modena is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
-    details.
+    FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
+@endcond'''
 
-Description
-    Initialisation script for the flowRate model. The script calculates a few
-    data points and fits the surrogate model. Then the model is inserted into
-    the database.
+"""
+@file
+@todo Document
 
-Authors
-    Henrik Rusche
+@author    Andreas Daiss
+@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@ingroup   app_foaming
+"""
 
-Contributors
-'''
-
-from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, CFunction
-from modena.SurrogateModel import Workflow2
+import os
+import modena
+from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, CFunction, IndexSet, ModenaFireTask
 import modena.Strategy as Strategy
-import Kinetics
-from fireworks import Firework, LaunchPad
-from fireworks.core.rocket_launcher import rapidfire
+from fireworks import Firework, Workflow, FWAction
+from fireworks.utilities.fw_utilities import explicit_serialize
+from jinja2 import Template
 
 
-# set up the LaunchPad and reset it
-launchpad = LaunchPad()
-launchpad.reset('', require_password=False)
+__author__ = 'Henrik Rusche'
+__copyright__ = 'Copyright 2014, MoDeNa Project'
+__version__ = '0.2'
+__maintainer__ = 'Henrik Rusche'
+__email__ = 'h.rusche@wikki.co.uk.'
+__date__ = 'Sep 4, 2014'
 
-initWfs = Workflow2([])
-for m in SurrogateModel.get_instances():
-    initWfs.addNoLink(m.initialisationStrategy().workflow(m))
 
-# store workflow and launch it locally
-launchpad.add_wf(initWfs)
-rapidfire(launchpad)
+k = PrediciKinetics(
+    name= 'RF-1-public',
+    fileName= 'RF-1-public.c',
+)
+
+m = ForwardMappingModel(
+    _id= 'RF-1-public',
+    surrogateFunction= k,
+    substituteModels= [ ],
+)
+

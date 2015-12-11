@@ -613,9 +613,8 @@ void FandA(double* x, double t, double* fall);
 
 void predici_kinetics
 (
-    const double* parameters,
-    const double* inherited_inputs,
-    const double *inputs,
+    const modena_model_t* model,
+    const double* inputs,
     double *outputs
 )
 {
@@ -671,13 +670,4 @@ void predici_kinetics
         index_out += 1
 
     return returnDict
-
-
-
-
-
-
-
-
-
 

@@ -250,13 +250,15 @@ class SurrogateFunction(DynamicDocument):
         else:
             super(SurrogateFunction, self).__init__()
 
-            nInp = 0;
-            for k, v in kwargs['inputs'].iteritems():
-                if 'argPos' in v:
-                    raise Exception('argPos in function for inputs %s (old format) -- delete argPos from function' % k)
-                if not 'index' in v:
-                    v['argPos'] = nInp
-                    nInp += 1
+            argPos = kwargs.pop('argPos', False)
+            if not argPos:
+                nInp = 0;
+                for k, v in kwargs['inputs'].iteritems():
+                    if 'argPos' in v:
+                        raise Exception('argPos in function for inputs %s (old format) -- delete argPos from function' % k)
+                    if not 'index' in v:
+                        v['argPos'] = nInp
+                        nInp += 1
 
             for k, v in kwargs['inputs'].iteritems():
                 if 'index' in v:
@@ -1197,6 +1199,9 @@ class PrediciKinetics(CFunction):
 
             kwargs.update(create_args(kwargs['fileName']))
 
+            kwargs['argPos'] = True
             CFunction.__init__(self, *args, **kwargs)
+
+
 ##
 # @} # end of python_interface_library

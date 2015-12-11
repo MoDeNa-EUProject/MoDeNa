@@ -190,7 +190,7 @@ if (kin_model==2) then
         c_char_"source_R_1_temp"//c_null_char);
     call modena_model_argPos_check(kinModena)
 elseif (kin_model==4) then
-    kinModena = modena_model_new (c_char_"RF-1-private"//c_null_char);
+    kinModena = modena_model_new (c_char_"RF-1-public"//c_null_char);
     kinInputs = modena_inputs_new (kinModena);
     kinOutputs = modena_outputs_new (kinModena);
     kinInputsPos(1) = modena_model_inputs_argPos(kinModena, &
