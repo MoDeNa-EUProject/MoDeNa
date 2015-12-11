@@ -56,49 +56,46 @@ term = Terminal()
 #
 # Thermal conductivity of blowing agents is a function of temperature.
 f_gasMixtureConductivity = CFunction(
-    Ccode='''
+    Ccode=r'''
 #include "modena.h"
 #include "math.h"
 #include "stdio.h"
 
 void gasMixtureConductivity
 (
-    const double* parameters,
-    const double* inherited_inputs,
+    const modena_model_t* model,
     const double* inputs,
     double *outputs
 )
 {
-    const N = 3; // number of blowing agents
-    const double temp = inputs[0]; // temperature
-    double k[N]; // gas component conductivity
-    double x[N]; // molar fraction
-    double a[N]; // parameters
+    {% block variables %}{% endblock %}
+
     double kgasmix=0; // gas mixture conductivity
     int i;
-    for (i=0;i<N;i++) {
-        x[i] = inputs[i+1];
-        k[i] = inputs[i+N+1];
-        a[i] = parameters[i];
-    }
-    printf("temp = %g\\n",temp);
-    printf("x = %g, %g, %g\\n",x[0],x[1],x[2]);
-    printf("k = %g, %g, %g\\n",k[0],k[1],k[2]);
-    for (i=0;i<N;i++) {
-        kgasmix = kgasmix + a[i]*k[i]*x[i];
+
+    //printf("temp = %g\n", T);
+    //printf("x = ");
+    //for (i=0;i<x_size;i++) {
+    //    printf("%g ", x[i]);
+    //}
+    //printf("\n");
+    //printf("k = ");
+    //for (i=0;i<x_size;i++) {
+    //    printf("%g ", gas_thermal_conductivity[i]);
+    //}
+    //printf("\n");
+
+    for (i=0;i<x_size;i++) {
+        kgasmix = kgasmix + parameters[i]*gas_thermal_conductivity[i]*x[i];
     }
     outputs[0] = kgasmix;
 }
 ''',
     # These are global bounds for the function
     inputs={
-        'T': {'min': 273, 'max': 450, 'argPos': 0},
-        'xCO2': {'min': 0, 'max': 1, 'argPos': 1},
-        'xAir': {'min': 0, 'max': 1, 'argPos': 2},
-        'xCyP': {'min': 0, 'max': 1, 'argPos': 3},
-        'gas_thermal_conductivity': {'min': 0, 'max': 1, 'argPos': 4},
-        'gas_thermal_conductivity': {'min': 0, 'max': 1, 'argPos': 5},
-        'gas_thermal_conductivity': {'min': 0, 'max': 1, 'argPos': 6},
+        'T': {'min': 273, 'max': 450},
+        'x': {'index': gasConductivity.species, 'min': 0, 'max': 1},
+        'gas_thermal_conductivity': {'index': gasConductivity.species, 'min': 0, 'max': 1},
     },
     outputs={
         'gasMixtureConductivity': {'min': 0, 'max': +9e99, 'argPos': 0},

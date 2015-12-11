@@ -61,14 +61,12 @@ f_polymerViscosity = CFunction(
 
 void viscosity_SM
 (
-    const double* parameters,
-    const double* inherited_inputs,
+    const modena_model_t* model,
     const double* inputs,
     double *outputs
 )
 {
-    const double T = inputs[0];
-    const double X = inputs[1];
+    {% block variables %}{% endblock %}
 
     const double Aeta = parameters[0];
     const double Eeta = parameters[1];
@@ -83,8 +81,8 @@ void viscosity_SM
 ''',
     # These are global bounds for the function
     inputs={
-        'T': {'min': 200, 'max': 450, 'argPos': 0},
-        'X': {'min': 0, 'max': 1, 'argPos': 1},
+        'T': {'min': 200, 'max': 450 },
+        'X': {'min': 0, 'max': 1 },
     },
     outputs={
         'mu': {'min': 0, 'max': +9e99, 'argPos': 0},

@@ -37,62 +37,11 @@ Python library of FireTasks
 @ingroup   twoTank
 """
 
-from modena import CFunction, IndexSet, ForwardMappingModel
-import modena.Strategy as Strategy
+from modena.Strategy import BackwardMappingScriptTask
+import os
 
-species = IndexSet(
-    name= 'species',
-    names= [ 'H2O', 'N2', 'SO2' ]
+# Source code in src/twoTanksMacroscopicProblem.C
+m = BackwardMappingScriptTask(
+    script=os.path.dirname(os.path.abspath(__file__))+'/src/twoTanksMacroscopicProblem'
 )
-
-
-f = CFunction(
-    inputs={
-        'T': { 'min': 0, 'max': 9e99 },
-        'p': { 'min': 0, 'max': 9e99 },
-    },
-    outputs={
-        'D[A]': { 'min': 0, 'max': 9e99, 'argPos': 0 },
-    },
-    parameters={
-        'W[A]': { 'min': 0, 'max': 9e99, 'argPos': 0 },
-        'V[A]': { 'min': 0, 'max': 9e99, 'argPos': 1 },
-        'W[B]': { 'min': 0, 'max': 9e99, 'argPos': 2 },
-        'V[B]': { 'min': 0, 'max': 9e99, 'argPos': 3 },
-    },
-    indices={
-        'A': species,
-        'B': species,
-    },
-    Ccode= '''
-#include "modena.h"
-#include "math.h"
-
-void fullerEtAlDiffusion
-(
-    const modena_model_t* model,
-    const double* inputs,
-    double *outputs
-)
-{
-    {% block variables %}{% endblock %}
-
-    const double WA = parameters[0];
-    const double VA = parameters[1];
-    const double WB = parameters[2];
-    const double VB = parameters[3];
-
-    outputs[0] = 1.011e-4*pow(T, 1.75)*pow(1.0/WA + 1.0/WB, 1.0/2.0);
-    outputs[0] /= p*(pow(pow(VA, 1.0/3.0) + pow(VB, 1.0/3.0), 2.0));
-}
-''',
-)
-
-m = ForwardMappingModel(
-    _id= 'fullerEtAlDiffusion[A=H2O,B=N2]',
-    surrogateFunction= f,
-    substituteModels= [ ],
-    parameters= [ 16, 9.44, 14, 11.38 ],
-)
-
 

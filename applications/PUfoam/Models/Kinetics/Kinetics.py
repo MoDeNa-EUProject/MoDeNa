@@ -30,69 +30,38 @@ License
 
 """
 @file
-Python library of FireTasks
+@todo Document
 
-@author    Henrik Rusche
+@author    Andreas Daiss
 @copyright 2014-2015, MoDeNa Project. GNU Public License.
-@ingroup   twoTank
+@ingroup   app_foaming
 """
 
-from modena import CFunction, IndexSet, ForwardMappingModel
+import os
+import modena
+from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, CFunction, IndexSet, ModenaFireTask
 import modena.Strategy as Strategy
-
-species = IndexSet(
-    name= 'species',
-    names= [ 'H2O', 'N2', 'SO2' ]
-)
+from fireworks import Firework, Workflow, FWAction
+from fireworks.utilities.fw_utilities import explicit_serialize
+from jinja2 import Template
 
 
-f = CFunction(
-    inputs={
-        'T': { 'min': 0, 'max': 9e99 },
-        'p': { 'min': 0, 'max': 9e99 },
-    },
-    outputs={
-        'D[A]': { 'min': 0, 'max': 9e99, 'argPos': 0 },
-    },
-    parameters={
-        'W[A]': { 'min': 0, 'max': 9e99, 'argPos': 0 },
-        'V[A]': { 'min': 0, 'max': 9e99, 'argPos': 1 },
-        'W[B]': { 'min': 0, 'max': 9e99, 'argPos': 2 },
-        'V[B]': { 'min': 0, 'max': 9e99, 'argPos': 3 },
-    },
-    indices={
-        'A': species,
-        'B': species,
-    },
-    Ccode= '''
-#include "modena.h"
-#include "math.h"
+__author__ = 'Henrik Rusche'
+__copyright__ = 'Copyright 2014, MoDeNa Project'
+__version__ = '0.2'
+__maintainer__ = 'Henrik Rusche'
+__email__ = 'h.rusche@wikki.co.uk.'
+__date__ = 'Sep 4, 2014'
 
-void fullerEtAlDiffusion
-(
-    const modena_model_t* model,
-    const double* inputs,
-    double *outputs
-)
-{
-    {% block variables %}{% endblock %}
 
-    const double WA = parameters[0];
-    const double VA = parameters[1];
-    const double WB = parameters[2];
-    const double VB = parameters[3];
-
-    outputs[0] = 1.011e-4*pow(T, 1.75)*pow(1.0/WA + 1.0/WB, 1.0/2.0);
-    outputs[0] /= p*(pow(pow(VA, 1.0/3.0) + pow(VB, 1.0/3.0), 2.0));
-}
-''',
+k = PrediciKinetics(
+    name= 'RF-1-public',
+    fileName= 'RF-1-public.c',
 )
 
 m = ForwardMappingModel(
-    _id= 'fullerEtAlDiffusion[A=H2O,B=N2]',
-    surrogateFunction= f,
+    _id= 'RF-1-public',
+    surrogateFunction= k,
     substituteModels= [ ],
-    parameters= [ 16, 9.44, 14, 11.38 ],
 )
-
 

@@ -40,33 +40,12 @@ Contributors
 '''
 
 from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, CFunction
-from modena.SurrogateModel import PrediciKinetics, Workflow2
+from modena.SurrogateModel import Workflow2
 import modena.Strategy as Strategy
+import Kinetics
 from fireworks import Firework, LaunchPad
 from fireworks.core.rocket_launcher import rapidfire
 
-
-class PrediciKinetics(CFunction):
-
-    def __init__(self, *args, **kwargs):
-
-        from predici_2_modena import create_args
-
-        kwargs.update(create_args(kwargs['fileName']))
-
-        CFunction.__init__(self, *args, **kwargs)
-
-
-k0 = PrediciKinetics(
-    name= 'RF-1-public',
-    fileName= 'RF-1-public.c',
-)
-
-m0 = ForwardMappingModel(
-    _id= 'RF-1-public',
-    surrogateFunction= k0,
-    substituteModels= [ ],
-)
 
 # set up the LaunchPad and reset it
 launchpad = LaunchPad()

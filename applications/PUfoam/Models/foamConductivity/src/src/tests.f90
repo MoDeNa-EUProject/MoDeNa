@@ -126,6 +126,7 @@ subroutine loadParameters
     use physicalProperties
     integer :: fi,ios,i,j
     logical :: file_exists
+    real(dp) :: xCO2,xAir,xCyP
     inputs=TRIM(ADJUSTL(fileplacein_par))//TRIM(ADJUSTL(inputs))
     spectra=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(spectra))
     inquire(file=inputs,exist=file_exists)
@@ -136,7 +137,9 @@ subroutine loadParameters
     endif
         read(fi,*) T1           !higher temperature
         read(fi,*) T2           !lower temperature
-        read(fi,*) cond1        !gas conductivity
+        read(fi,*) xCO2,xAir,xCyP
+        call gasConductivity(cond1,(t1+t2)/2,xCO2,xAir,xCyP)
+        ! read(fi,*) cond1        !gas conductivity
 !        read(fi,*) cond2        !solid conductivity
         call polymerConductivity(cond2,(t1+t2)/2)
         read(fi,*) emi1         !emittance 1

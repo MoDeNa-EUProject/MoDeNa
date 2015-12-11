@@ -61,13 +61,12 @@ f_polymer_thermal_conductivity = CFunction(
 
 void thermal_conductivity
 (
-    const double* parameters,
-    const double* inherited_inputs,
+    const modena_model_t* model,
     const double* inputs,
     double *outputs
 )
 {
-    const double T = inputs[0];
+    {% block variables %}{% endblock %}
 
     const double a = parameters[0];
     const double b = parameters[1];
@@ -77,7 +76,7 @@ void thermal_conductivity
 ''',
     # These are global bounds for the function
     inputs={
-        'T': {'min': 273, 'max': 450, 'argPos': 0},
+        'T': {'min': 273, 'max': 450},
     },
     outputs={
         'polymer_thermal_conductivity': {
