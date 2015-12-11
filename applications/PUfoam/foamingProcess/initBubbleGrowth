@@ -138,11 +138,11 @@ void bblgr_SM
 ''',
     # These are global bounds for the function
     inputs={
-        'T': {'min': -9e99, 'max': 9e99, 'argPos': 0},
-        'R': {'min': -9e99, 'max': 9e99, 'argPos': 1},
-        'kH': {'min': -9e99, 'max': 9e99, 'argPos': 2},
-        'c': {'min': -9e99, 'max': 9e99, 'argPos': 3},
-        'p': {'min': -9e99, 'max': 9e99, 'argPos': 4},
+        'T': {'min': -9e99, 'max': 9e99 },
+        'R': {'min': -9e99, 'max': 9e99 },
+        'kH': {'min': -9e99, 'max': 9e99 },
+        'c': {'min': -9e99, 'max': 9e99 },
+        'p': {'min': -9e99, 'max': 9e99 },
     },
     outputs={
         'G': {'min': -9e99, 'max': 9e99, 'argPos': 0},
@@ -176,16 +176,6 @@ m = ForwardMappingModel(
     surrogateFunction=f,
     substituteModels=[],
     parameters=[1.0, 1.0, 1.0],
-    inputs={
-        'T': {'min': -9e99, 'max': 9e99},
-        'R': {'min': -9e99, 'max': 9e99},
-        'kH': {'min': -9e99, 'max': 9e99},
-        'c': {'min': -9e99, 'max': 9e99},
-        'p': {'min': -9e99, 'max': 9e99},
-    },
-    outputs={
-        'G': {'min': -9e99, 'max': 9e99},
-    },
 )
 
 # Instantiate surrogate model
