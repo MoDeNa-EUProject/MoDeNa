@@ -196,6 +196,13 @@ modena_model_t *modena_model_new
     Py_DECREF(kw);
     if(!pNewObj)
     {
+        fprintf
+        (
+            stderr,
+            "Loading model %s failed - Attempting automatic initialisation\n",
+            modelId
+        );
+
         if(PyErr_ExceptionMatches(modena_DoesNotExist))
         {
             PyErr_Clear();
