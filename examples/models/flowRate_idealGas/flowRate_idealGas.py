@@ -1,4 +1,4 @@
-'''
+'''@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -26,29 +26,26 @@ License
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
+@endcond'''
 
-Description
-    Python library of FireTasks
+"""
+@file
+Python library of FireTasks
 
-Authors
-    Henrik Rusche
-
-Contributors
-'''
+@author    Henrik Rusche
+@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@ingroup   twoTank
+"""
 
 import os
 import modena
-from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, CFunction
+from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, CFunction, ModenaFireTask
 import modena.Strategy as Strategy
-from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
 from fireworks import Firework, Workflow, FWAction
 from fireworks.utilities.fw_utilities import explicit_serialize
 from blessings import Terminal
 from jinja2 import Template
 import idealGas
-
-# Create terminal for colour output
-term = Terminal()
 
 
 __author__ = 'Henrik Rusche'
@@ -58,21 +55,14 @@ __maintainer__ = 'Henrik Rusche'
 __email__ = 'h.rusche@wikki.co.uk.'
 __date__ = 'Sep 4, 2014'
 
-
 # ********************************* Class ********************************** #
 @explicit_serialize
-class FlowRateExactSim(FireTaskBase):
+class FlowRateExactSim(ModenaFireTask):
     """
     A FireTask that starts a microscopic code and updates the database.
     """
 
-    def run_task(self, fw_spec):
-        print(
-            term.yellow
-          + "Performing exact simulation (microscopic code recipe)"
-          + term.normal
-        )
-
+    def task(self, fw_spec):
         # Write input
 
         # See http://jinja.pocoo.org/docs/dev/templates/
@@ -87,14 +77,15 @@ class FlowRateExactSim(FireTaskBase):
         # In this simple example, this call stands for a complex microscopic
         # code - such as full 3D CFD simulation.
         # Source code in src/flowRateExact.C
-        os.system('../src/flowRateExact')
+        ret = os.system(os.path.dirname(os.path.abspath(__file__))+'/src/flowRateExact')
+
+        # This enables backward mapping capabilities (not needed in this example)
+        self.handleReturnCode(ret)
 
         # Analyse output
         f = open('out.txt', 'r')
         self['point']['flowRate'] = float(f.readline())
         f.close()
-
-        return FWAction(mod_spec=[{'_push': self['point']}])
 
 
 f = CFunction(
@@ -104,12 +95,13 @@ f = CFunction(
 
 void two_tank_flowRate
 (
-    const double* parameters,
-    const double* inherited_inputs,
+    const modena_model_t* model,
     const double* inputs,
     double *outputs
 )
 {
+    {% block variables %}{% endblock %}
+
     const double D = inputs[0];
     const double rho0 = inputs[1];
     const double p0 = inputs[2];
@@ -123,10 +115,10 @@ void two_tank_flowRate
 ''',
     # These are global bounds for the function
     inputs={
-        'D': { 'min': 0, 'max': 9e99, 'argPos': 0 },
-        'T0': { 'min': 0, 'max': 9e99, 'argPos': 1 },
-        'p0': { 'min': 0, 'max': 9e99, 'argPos': 2 },
-        'p1Byp0': { 'min': 0, 'max': 1.0, 'argPos': 3},
+        'D': { 'min': 0, 'max': 9e99 },
+        'T0': { 'min': 0, 'max': 9e99 },
+        'p0': { 'min': 0, 'max': 9e99 },
+        'p1Byp0': { 'min': 0, 'max': 1.0 },
     },
     outputs={
         'flowRate': { 'min': 9e99, 'max': -9e99, 'argPos': 0 },

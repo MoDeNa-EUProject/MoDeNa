@@ -597,10 +597,14 @@ class NonLinFitWithErrorContol(ParameterFittingStrategy):
 
         print 'Maximum Error = %s' % maxError
         if maxError > self['maxError']:
-            print 'Parameters ' + term.red + 'not' + term.normal + \
-                ' valid, adding samples.'
-            print 'current parameters = [%s]' % ' '.join(
-                '%g, ' % k for k in new_parameters
+            print(
+                'Parameters ' + term.red + 'not' + term.normal
+              + ' valid, adding samples.'
+            )
+            print(
+                'current parameters = [%s]' % ', '.join(
+                    '%g' % k for k in new_parameters
+                )
             )
 
             # Update database
@@ -611,11 +615,15 @@ class NonLinFitWithErrorContol(ParameterFittingStrategy):
             )
 
         else:
-            print('old parameters = [%s]' % ' '.join(
-                '%g, ' % k for k in model.parameters)
+            print(
+                'old parameters = [%s]' % ', '.join(
+                    '%g' % k for k in model.parameters
+                )
             )
-            print('new parameters = [%s]' % ' '.join(
-                '%g, ' % k for k in new_parameters)
+            print(
+                'new parameters = [%s]' % ', '.join(
+                    '%g' % k for k in new_parameters
+                )
             )
 
             # Update database
@@ -748,11 +756,15 @@ class NonLinFitToPointWithSmallestError(ParameterFittingStrategy):
         nlfb_ssqres = coeffs[nlfb.names.index('ssquares')]
 
         print 'Maximum Error = %s' % maxError
-        print('old parameters = [%s]' % ' '.join(
-            '%g' % k for k in model.parameters)
+        print(
+            'old parameters = [%s]' % ', '.join(
+                '%g' % k for k in model.parameters
+            )
         )
-        print('new parameters = [%s]' % ' '.join(
-            '%g' % k for k in new_parameters)
+        print(
+            'new parameters = [%s]' % ', '.join(
+                '%g' % k for k in new_parameters
+            )
         )
 
         # Update database
@@ -915,9 +927,11 @@ class ModenaFireTask(FireTaskBase):
 
             p = self['point']
 
-            print(term.yellow + 'point = {%s}' %
-                ', '.join('%s: %g' % (k, v) for (k, v) in p.iteritems())
-                + term.normal
+            print(
+                term.yellow + 'point = {%s}' % ', '.join(
+                    '%s: %g' % (k, v) for (k, v) in p.iteritems()
+                )
+              + term.normal
             )
 
             model = modena.SurrogateModel.load(self['modelId'])
@@ -940,14 +954,15 @@ class ModenaFireTask(FireTaskBase):
                       + 'Substituted model is not initialised, executing initialisationStrategy.'
                       + term.normal
                     )
-                    return self.parametersNotValid(e.args[0])
+                    return self.parametersNotValid(e.args[1])
 
             if not len(p) == len(oldP):
                 print(
                     term.yellow
-                  + 'values added by substitution = {%s}' %
-                    ', '.join('%s: %g' % (k, v)
-                    for (k, v) in p.iteritems() if k not in oldP)
+                  + 'values added by substitution = {%s}' % ', '.join(
+                        '%s: %g' % (k, v) for (k, v) in p.iteritems()
+                        if k not in oldP
+                    )
                   + term.normal
                 )
 
@@ -965,7 +980,7 @@ class ModenaFireTask(FireTaskBase):
 
             except ParametersNotValid, e:
                 print term.cyan + 'Performing Initialisation' + term.normal
-                return self.parametersNotValid(e.args[0])
+                return self.parametersNotValid(e.args[1])
 
         else:
             try:
@@ -984,13 +999,13 @@ class ModenaFireTask(FireTaskBase):
                 )
                 return self.outOfBounds()
 
-            except ParametersNotValid:
+            except ParametersNotValid, e:
                 print(
                     term.cyan
                   + 'Model not initialised, executing initialisationStrategy'
                   + term.normal
                 )
-                return self.parametersNotValid()
+                return self.parametersNotValid(e.args[1])
 
             print('Success - We are done')
             return FWAction()

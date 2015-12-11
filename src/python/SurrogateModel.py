@@ -253,7 +253,7 @@ class SurrogateFunction(DynamicDocument):
             nInp = 0;
             for k, v in kwargs['inputs'].iteritems():
                 if 'argPos' in v:
-                    raise Exception('argPos in function (old format) -- delete argPos from function')
+                    raise Exception('argPos in function for inputs %s (old format) -- delete argPos from function' % k)
                 if not 'index' in v:
                     v['argPos'] = nInp
                     nInp += 1
@@ -275,6 +275,10 @@ class SurrogateFunction(DynamicDocument):
                 if not isinstance(v, MinMaxArgPos):
                     self.parameters[k] = MinMaxArgPos(**v)
 
+            if 'indices' in kwargs:
+                for k, v in kwargs['indices'].iteritems():
+                    self.indices[k] = kwargs['indices'][k]
+
             self.initKwargs(kwargs)
 
             for k in self.inputs.keys():
@@ -295,7 +299,6 @@ class SurrogateFunction(DynamicDocument):
 
 
     def indexSet(self, name):
-        print self.indices.to_mongo()
         return self.indices[name]
 
 
@@ -439,15 +442,25 @@ class Function(CFunction):
                 raise Exception('Algebraic representation not found')
 
         # lambda function writing inputs, parameters
-        cDouble = lambda VAR: '\n'.join(['const double %s = %s[%s];' \
-                                         %(V, VAR, kwargs[VAR][V]['argPos'] )\
-                                                        for V in kwargs[VAR]])
+        cDouble = lambda VAR: '\n'.join(
+            [
+                'const double %s = %s[%s];' % (
+                    V, VAR, kwargs[VAR][V]['argPos']
+                )
+                for V in kwargs[VAR]
+            ]
+        )
 
         # lambda function parsing 'function' and writing outputs
-        outPut = lambda OUT: '\n'.join(['outputs[%s] = %s;' \
-                                 %(kwargs['outputs'][O]['argPos'],\
-                                           self.Parse(kwargs['function'][O]))\
-                                                     for O in kwargs[OUT] ] )
+        outPut = lambda OUT: '\n'.join(
+            [
+                'outputs[%s] = %s;' % (
+                    kwargs['outputs'][O]['argPos'],
+                    self.Parse(kwargs['function'][O])
+                )
+                for O in kwargs[OUT]
+            ]
+        )
 
         # Main body of the Ccode
         Ccode='''
@@ -466,12 +479,12 @@ void {name}
 {outputs}
 }}
 '''
-        kwargs['Ccode'] = Ccode.format(\
-                              name=kwargs['function']['name'],\
-                              inputs=cDouble('inputs'),\
-                              parameters=cDouble('parameters'),\
-                              outputs=outPut('outputs')\
-                          )
+        kwargs['Ccode'] = Ccode.format(
+            name=kwargs['function']['name'],
+            inputs=cDouble('inputs'),
+            parameters=cDouble('parameters'),
+            outputs=outPut('outputs')
+        )
 
         super(Function, self).__init__(*args, **kwargs)
 
@@ -805,6 +818,7 @@ class SurrogateModel(DynamicDocument):
         l = self.surrogateFunction.inputs_size()
         minValues = [-9e99] * l
         maxValues = [9e99] * l
+
         for k, v in self.inputs.iteritems():
             minValues[self.inputs_argPos(k)] = v.min
             maxValues[self.inputs_argPos(k)] = v.max
@@ -893,8 +907,7 @@ class SurrogateModel(DynamicDocument):
 
     def exceptionOutOfBounds(self, oPoint):
         oPointDict = {
-            k: oPoint[self.inputs_argPos(k)]
-            for k in self.inputs.keys()
+            k: oPoint[self.inputs_argPos(k)] for k in self.inputs.keys()
         }
         self.outsidePoint = EmbDoc(**oPointDict)
         self.save()
@@ -950,6 +963,14 @@ class SurrogateModel(DynamicDocument):
         # Get first set
         firstSet = six.next(six.itervalues(self.fitData))
         self.nSamples = len(firstSet)
+
+
+    def initialisationStrategy(self):
+        return loadType(
+            self,
+            'initialisationStrategy',
+            InitialisationStrategy
+        )
 
 
     @classmethod
@@ -1014,14 +1035,6 @@ class ForwardMappingModel(SurrogateModel):
         return Workflow2([])
 
 
-    def initialisationStrategy(self):
-        return loadType(
-            self,
-            'initialisationStrategy',
-            InitialisationStrategy
-        )
-
-
 class BackwardMappingModel(SurrogateModel):
 
     # Database definition
@@ -1074,14 +1087,6 @@ class BackwardMappingModel(SurrogateModel):
             tl.append(fw)
 
         return Workflow2(tl, name='exact tasks for new points')
-
-
-    def initialisationStrategy(self):
-        return loadType(
-            self,
-            'initialisationStrategy',
-            InitialisationStrategy
-        )
 
 
     def parameterFittingStrategy(self):
@@ -1178,6 +1183,7 @@ class BackwardMappingModel(SurrogateModel):
                 limitPoint[k] = random.uniform(v['min'], v['max'])
 
         return sampleRange, limitPoint
+
 
 class PrediciKinetics(CFunction):
 

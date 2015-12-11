@@ -516,7 +516,7 @@ void modena_model_destroy(modena_model_t *self)
         modena_function_destroy(self->mf);
     }
 
-    Py_DECREF(self->pModel);
+    Py_XDECREF(self->pModel);
 
     self->ob_type->tp_free((PyObject*)self);
 }
@@ -750,15 +750,18 @@ static int modena_model_t_init
        && self->parameters_size != self->mf->parameters_size
     )
     {
-        PyErr_SetString
+        PyObject *args = PyTuple_New(2);
+        PyObject* str = PyString_FromString
         (
-            modena_ParametersNotValid,
             "Surrogate model does not have valid parameters"
         );
+        PyTuple_SET_ITEM(args, 0, str);
+        PyTuple_SET_ITEM(args, 1, self->pModel);
+
         PyErr_SetObject
         (
             modena_ParametersNotValid,
-            self->pModel
+            args
         );
 
         Py_DECREF(pSeq);
