@@ -109,17 +109,13 @@ f = CFunction(
 
 void bblgr_SM
 (
-    const double* parameters,
-    const double* inherited_inputs,
+    const modena_model_t* model,
     const double* inputs,
     double *outputs
 )
 {
-    const double T = inputs[0];
-    const double R = inputs[1];
-    const double kH = inputs[2];
-    const double c = inputs[3];
-    const double p = inputs[4];
+    {% block variables %}{% endblock %}
+
     const double alpha = parameters[0];
     const double beta = parameters[1];
     const double gamma = parameters[2];

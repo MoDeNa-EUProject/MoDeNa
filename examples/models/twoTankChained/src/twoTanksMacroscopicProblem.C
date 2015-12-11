@@ -68,7 +68,6 @@ main(int argc, char *argv[])
 
     // Instantiate a model
     modena_model_t *model = modena_model_new("flowRate");
-
     if(modena_error_occurred())
     {
         return modena_error();
@@ -79,7 +78,7 @@ main(int argc, char *argv[])
     modena_outputs_t *outputs = modena_outputs_new(model);
 
     size_t Dpos = modena_model_inputs_argPos(model, "D");
-    size_t rho0Pos = modena_model_inputs_argPos(model, "rho0");
+    size_t T0Pos = modena_model_inputs_argPos(model, "T0");
     size_t p0Pos = modena_model_inputs_argPos(model, "p0");
     size_t p1Byp0Pos = modena_model_inputs_argPos(model, "p1Byp0");
 
@@ -93,7 +92,7 @@ main(int argc, char *argv[])
         {
             // Set input vector
             modena_inputs_set(inputs, Dpos, D);
-            modena_inputs_set(inputs, rho0Pos, rho0);
+            modena_inputs_set(inputs, T0Pos, T);
             modena_inputs_set(inputs, p0Pos, p0);
             modena_inputs_set(inputs, p1Byp0Pos, p1/p0);
 
@@ -120,7 +119,7 @@ main(int argc, char *argv[])
         {
             // Set input vector
             modena_inputs_set(inputs, Dpos, D);
-            modena_inputs_set(inputs, rho0Pos, rho1);
+            modena_inputs_set(inputs, T0Pos, T);
             modena_inputs_set(inputs, p0Pos, p1);
             modena_inputs_set(inputs, p1Byp0Pos, p0/p1);
 

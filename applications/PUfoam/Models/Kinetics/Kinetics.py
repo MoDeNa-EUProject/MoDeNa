@@ -1,5 +1,4 @@
-#!/usr/bin/python
-'''
+'''@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -22,36 +21,47 @@ License
 
     Modena is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
-    details.
+    FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
+@endcond'''
 
-Description
-    A simple workflow
+"""
+@file
+@todo Document
 
-Authors
-    Henrik Rusche
+@author    Andreas Daiss
+@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@ingroup   app_foaming
+"""
 
-Contributors
-'''
+import os
+import modena
+from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, CFunction, IndexSet, ModenaFireTask
+import modena.Strategy as Strategy
+from fireworks import Firework, Workflow, FWAction
+from fireworks.utilities.fw_utilities import explicit_serialize
+from jinja2 import Template
 
-from fireworks import Firework, Workflow, LaunchPad
-from fireworks.core.rocket_launcher import rapidfire
-from twoTank import m as SIMULATION
-from modulefinder import ModuleFinder
+
+__author__ = 'Henrik Rusche'
+__copyright__ = 'Copyright 2014, MoDeNa Project'
+__version__ = '0.2'
+__maintainer__ = 'Henrik Rusche'
+__email__ = 'h.rusche@wikki.co.uk.'
+__date__ = 'Sep 4, 2014'
 
 
-# set up the LaunchPad and reset it
-launchpad = LaunchPad()
-launchpad.reset('', require_password=False)
+k = PrediciKinetics(
+    name= 'RF-1-public',
+    fileName= 'RF-1-public.c',
+)
 
-# create the individual FireWorks and Workflow
-# Source code in src/twoTanksMacroscopicProblem.C
-wf = Workflow([Firework(SIMULATION)], {}, name="simulation")
-
-# store workflow and launch it locally
-launchpad.add_wf(wf)
-rapidfire(launchpad)
+m = ForwardMappingModel(
+    _id= 'RF-1-public',
+    surrogateFunction= k,
+    substituteModels= [ ],
+)
 

@@ -42,6 +42,7 @@ import os
 import six
 import abc
 import hashlib
+import copy
 import modena
 from modena.Strategy import *
 import weakref
@@ -118,7 +119,7 @@ class IndexSet(Document):
     @abc.abstractmethod
     def __init__(self, *args, **kwargs):
         self.___index___ = {j: i for i, j in enumerate(kwargs['names'])}
-        Document.__init__(self, *args, **kwargs)
+        super(IndexSet, self).__init__(*args, **kwargs)
         self.save()
 
 
@@ -249,13 +250,15 @@ class SurrogateFunction(DynamicDocument):
         else:
             super(SurrogateFunction, self).__init__()
 
-            nInp = 0;
-            for k, v in kwargs['inputs'].iteritems():
-                if 'argPos' in v:
-                    raise Exception('argPos in function (old format) -- delete argPos from function')
-                if not 'index' in v:
-                    v['argPos'] = nInp
-                    nInp += 1
+            argPos = kwargs.pop('argPos', False)
+            if not argPos:
+                nInp = 0;
+                for k, v in kwargs['inputs'].iteritems():
+                    if 'argPos' in v:
+                        raise Exception('argPos in function for inputs %s (old format) -- delete argPos from function' % k)
+                    if not 'index' in v:
+                        v['argPos'] = nInp
+                        nInp += 1
 
             for k, v in kwargs['inputs'].iteritems():
                 if 'index' in v:
@@ -269,11 +272,14 @@ class SurrogateFunction(DynamicDocument):
             for k, v in kwargs['outputs'].iteritems():
                 if not isinstance(v, MinMaxArgPos):
                     self.outputs[k] = MinMaxArgPos(**v)
-                    print self.outputs[k]
 
             for k, v in kwargs['parameters'].iteritems():
                 if not isinstance(v, MinMaxArgPos):
                     self.parameters[k] = MinMaxArgPos(**v)
+
+            if 'indices' in kwargs:
+                for k, v in kwargs['indices'].iteritems():
+                    self.indices[k] = kwargs['indices'][k]
 
             self.initKwargs(kwargs)
 
@@ -295,7 +301,6 @@ class SurrogateFunction(DynamicDocument):
 
 
     def indexSet(self, name):
-        print self.indices.to_mongo()
         return self.indices[name]
 
 
@@ -439,15 +444,25 @@ class Function(CFunction):
                 raise Exception('Algebraic representation not found')
 
         # lambda function writing inputs, parameters
-        cDouble = lambda VAR: '\n'.join(['const double %s = %s[%s];' \
-                                         %(V, VAR, kwargs[VAR][V]['argPos'] )\
-                                                        for V in kwargs[VAR]])
+        cDouble = lambda VAR: '\n'.join(
+            [
+                'const double %s = %s[%s];' % (
+                    V, VAR, kwargs[VAR][V]['argPos']
+                )
+                for V in kwargs[VAR]
+            ]
+        )
 
         # lambda function parsing 'function' and writing outputs
-        outPut = lambda OUT: '\n'.join(['outputs[%s] = %s;' \
-                                 %(kwargs['outputs'][O]['argPos'],\
-                                           self.Parse(kwargs['function'][O]))\
-                                                     for O in kwargs[OUT] ] )
+        outPut = lambda OUT: '\n'.join(
+            [
+                'outputs[%s] = %s;' % (
+                    kwargs['outputs'][O]['argPos'],
+                    self.Parse(kwargs['function'][O])
+                )
+                for O in kwargs[OUT]
+            ]
+        )
 
         # Main body of the Ccode
         Ccode='''
@@ -466,14 +481,14 @@ void {name}
 {outputs}
 }}
 '''
-        kwargs['Ccode'] = Ccode.format(\
-                              name=kwargs['function']['name'],\
-                              inputs=cDouble('inputs'),\
-                              parameters=cDouble('parameters'),\
-                              outputs=outPut('outputs')\
-                          )
+        kwargs['Ccode'] = Ccode.format(
+            name=kwargs['function']['name'],
+            inputs=cDouble('inputs'),
+            parameters=cDouble('parameters'),
+            outputs=outPut('outputs')
+        )
 
-        CFunction.__init__(self, *args, **kwargs)
+        super(Function, self).__init__(*args, **kwargs)
 
 
     def Parse(self, formula, debug=False, model='', stack={}, delim=0, \
@@ -563,12 +578,16 @@ class SurrogateModel(DynamicDocument):
         self.___refs___.append(weakref.ref(self))
 
         if kwargs.has_key('_cls'):
-            DynamicDocument.__init__(self, *args, **kwargs)
+            super(SurrogateModel, self).__init__(*args, **kwargs)
             self.___indices___ = self.parseIndices(self._id)
+            #print '--- Loaded model', self._id
 
         else:
             if not kwargs.has_key('_id'):
                 raise Exception('Need _id')
+
+            #print '--- Initialising model', kwargs['_id']
+
             if not kwargs.has_key('surrogateFunction'):
                 raise Exception('Need surrogateFunction')
             if not isinstance(kwargs['surrogateFunction'], SurrogateFunction):
@@ -607,7 +626,7 @@ class SurrogateModel(DynamicDocument):
                 InitialisationStrategy
             )
 
-            DynamicDocument.__init__(self, *args, **kwargs)
+            super(SurrogateModel, self).__init__(*args, **kwargs)
 
             subOutputs = {}
             for m in self.substituteModels:
@@ -633,7 +652,7 @@ class SurrogateModel(DynamicDocument):
                         try:
                             self.inputs_argPos(k)
                         except ArgPosNotFound:
-                            self.inputs[k] = subOutputs[o].surrogateFunction.inputs[k]
+                            self.inputs[k] = subOutputs[o].inputs[k]
                             self.inputs[k].argPos = nInp
                             nInp += 1
 
@@ -642,9 +661,9 @@ class SurrogateModel(DynamicDocument):
 
             self.save()
 
-        #print 'ID=', self._id, '---'
         #for k, v in self.inputs.iteritems():
         #    print k, self.inputs_argPos(k)
+        #print('parameters = [%s]' % ', '.join('%g' % v for v in self.parameters))
 
 
     @abc.abstractmethod
@@ -703,10 +722,31 @@ class SurrogateModel(DynamicDocument):
 
 
     def outputsToModels(self):
-        o = { k: self for k in self.outputs }
+        o = { k: self for k in self.outputs.keys() }
         for m in self.substituteModels:
             o.update(m.outputsToModels())
         return o
+
+
+    def inputsMinMax(self):
+
+        def new(Min, Max):
+            obj = type('MinMax', (object,), {})
+            obj.min = Min
+            obj.max = Max
+            return obj
+
+        i = { k: new(v.min, v.max) for k, v in self.surrogateFunction.inputs_iterAll() }
+
+        for m in self.substituteModels:
+            for k, v in m.inputsMinMax().iteritems():
+                if k in i:
+                    v.min = max(v.min, i[k].min)
+                    v.max = min(v.max, i[k].max)
+                else:
+                    i[k] = new(v.min, v.max)
+                
+        return i
 
 
     def inputs_argPos(self, name):
@@ -780,6 +820,7 @@ class SurrogateModel(DynamicDocument):
         l = self.surrogateFunction.inputs_size()
         minValues = [-9e99] * l
         maxValues = [9e99] * l
+
         for k, v in self.inputs.iteritems():
             minValues[self.inputs_argPos(k)] = v.min
             maxValues[self.inputs_argPos(k)] = v.max
@@ -868,8 +909,7 @@ class SurrogateModel(DynamicDocument):
 
     def exceptionOutOfBounds(self, oPoint):
         oPointDict = {
-            k: oPoint[self.inputs_argPos(k)]
-            for k in self.inputs.keys()
+            k: oPoint[self.inputs_argPos(k)] for k in self.inputs.keys()
         }
         self.outsidePoint = EmbDoc(**oPointDict)
         self.save()
@@ -927,6 +967,14 @@ class SurrogateModel(DynamicDocument):
         self.nSamples = len(firstSet)
 
 
+    def initialisationStrategy(self):
+        return loadType(
+            self,
+            'initialisationStrategy',
+            InitialisationStrategy
+        )
+
+
     @classmethod
     def load(self, surrogateModelId):
         # Removed temporarily, probably bug in mongo engine
@@ -949,7 +997,7 @@ class SurrogateModel(DynamicDocument):
     def loadFromModule(self):
         collection = self._get_collection()
         doc = collection.find_one({ '_cls': { '$exists': False}})
-        modName = re.search('(.*)\[.*\]', doc['_id']).group(1)
+        modName = re.search('(.*)(\[.*\])?', doc['_id']).group(1)
         mod = __import__(modName)
         # TODO:
         # Give a better name to the variable a model is imported from
@@ -973,7 +1021,7 @@ class ForwardMappingModel(SurrogateModel):
     meta = {'allow_inheritance': True}
 
     def __init__(self, *args, **kwargs):
-        SurrogateModel.__init__(self, *args, **kwargs)
+        super(ForwardMappingModel, self).__init__(*args, **kwargs)
 
 
     def initKwargs(self, kwargs):
@@ -989,14 +1037,6 @@ class ForwardMappingModel(SurrogateModel):
         return Workflow2([])
 
 
-    def initialisationStrategy(self):
-        return loadType(
-            self,
-            'initialisationStrategy',
-            InitialisationStrategy
-        )
-
-
 class BackwardMappingModel(SurrogateModel):
 
     # Database definition
@@ -1008,12 +1048,8 @@ class BackwardMappingModel(SurrogateModel):
     meta = {'allow_inheritance': True}
 
 
-    # TODO: Should be able to have
-    # __init__(self, _id, surrogateFunction, *args, **kwargs):
-    # But this is not working with the mongoengine 0.8.7
-    # Try again when > 0.9.0 comes out
     def __init__(self, *args, **kwargs):
-        SurrogateModel.__init__(self, *args, **kwargs)
+        super(BackwardMappingModel, self).__init__(*args, **kwargs)
 
     def initKwargs(self, kwargs):
         checkAndConvertType(kwargs, 'exactTask', FireTaskBase)
@@ -1053,14 +1089,6 @@ class BackwardMappingModel(SurrogateModel):
             tl.append(fw)
 
         return Workflow2(tl, name='exact tasks for new points')
-
-
-    def initialisationStrategy(self):
-        return loadType(
-            self,
-            'initialisationStrategy',
-            InitialisationStrategy
-        )
 
 
     def parameterFittingStrategy(self):
@@ -1105,10 +1133,10 @@ class BackwardMappingModel(SurrogateModel):
                               +------------+....+ <- new global max
                               ^            ^
                         global min      new min (temporary, only for sampling)
- 
+
         @param    outsidePoint     The point that where found to be outside (X)
         @retval   expansion_factor The ratio that is used to expand the space beyond X
-    
+
         @author   Sigve Karolius
         @author   Mandar Thombre
         @todo     Document...
@@ -1120,35 +1148,32 @@ class BackwardMappingModel(SurrogateModel):
         for k, v in self.inputs.iteritems():
             sampleRange[k] = {}
             outsideValue = outsidePoint[k]
+            inputsMinMax = self.inputsMinMax()
 
             # If the value outside point is outside the range, set the
             # "localdict" max to the outside point value
 
             if outsideValue > v['max']:
-                value = outsideValue*expansion_factor
+                if outsideValue > inputsMinMax[k].max:
+                    raise OutOfBounds('new value is larger than function min for %s' % k)
 
-                if k in self.surrogateFunction.inputs:
-                    if outsideValue > self.surrogateFunction.inputs[k].max:
-                        raise OutOfBounds('new value is larger than function min for %s' % k)
-                    value = min(
-                        value,
-                        self.surrogateFunction.inputs[k].max
-                    )
+                value = min(
+                    outsideValue*expansion_factor,
+                    inputsMinMax[k].max
+                )
 
                 sampleRange[k]['min'] = v['max']
                 sampleRange[k]['max'] = value
                 limitPoint[k] = value
 
             elif outsideValue < v['min']:
-                value = outsideValue/expansion_factor
+                if outsideValue < inputsMinMax[k].min:
+                    raise OutOfBounds('new value is smaller than function max for %s' % k)
 
-                if k in self.surrogateFunction.inputs:
-                    if outsideValue < self.surrogateFunction.inputs[k].min:
-                        raise OutOfBounds('new value is smaller than function max for %s' % k)
-                    value = max(
-                        value,
-                        self.surrogateFunction.inputs[k].min
-                    )
+                value = max(
+                    outsideValue/expansion_factor,
+                    inputsMinMax[k].min
+                )
 
                 sampleRange[k]['min'] = value
                 sampleRange[k]['max'] = v['min']
@@ -1161,6 +1186,22 @@ class BackwardMappingModel(SurrogateModel):
 
         return sampleRange, limitPoint
 
+
+class PrediciKinetics(CFunction):
+
+    def __init__(self, *args, **kwargs):
+
+        if kwargs.has_key('_cls'):
+            super(PrediciKinetics, self).__init__(*args, **kwargs)
+
+        else:
+            from predici_2_modena import create_args
+
+            kwargs.update(create_args(kwargs['fileName']))
+
+            kwargs['argPos'] = True
+            CFunction.__init__(self, *args, **kwargs)
+
+
 ##
 # @} # end of python_interface_library
-

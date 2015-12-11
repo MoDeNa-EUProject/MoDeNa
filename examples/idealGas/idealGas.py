@@ -44,10 +44,6 @@ import modena.Strategy as Strategy
 from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
 from fireworks import Firework, Workflow, FWAction
 from fireworks.utilities.fw_utilities import explicit_serialize
-from blessings import Terminal
-
-# Create terminal for colour output
-term = Terminal()
 
 
 __author__ = 'Henrik Rusche'
@@ -65,8 +61,8 @@ f1 = Function(
     },
     # These are global bounds for the function
     inputs={
-        'p0': { 'min': 0, 'max': 9e99, 'argPos': 0 },
-        'T0': { 'min': 0, 'max': 9e99, 'argPos': 1 },
+        'p0': { 'min': 0, 'max': 9e99 },
+        'T0': { 'min': 0, 'max': 9e99 },
     },
     outputs={
         'rho0': { 'min': 9e99, 'max': -9e99, 'argPos': 0 },
@@ -83,14 +79,12 @@ f2 = CFunction(
 
 void idealGas
 (
-    const double* parameters,
-    const double* inherited_inputs,
+    const modena_model_t* model,
     const double* inputs,
     double *outputs
 )
 {
-    const double p0 = inputs[0];
-    const double T0 = inputs[1];
+    {% block variables %}{% endblock %}
 
     const double R = parameters[0];
 
@@ -99,8 +93,8 @@ void idealGas
 ''',
     # These are global bounds for the function
     inputs={
-        'p0': { 'min': 0, 'max': 9e99, 'argPos': 0 },
-        'T0': { 'min': 0, 'max': 9e99, 'argPos': 1 },
+        'p0': { 'min': 0, 'max': 9e99 },
+        'T0': { 'min': 0, 'max': 9e99 },
     },
     outputs={
         'rho0': { 'min': 9e99, 'max': -9e99, 'argPos': 0 },

@@ -1,3 +1,16 @@
 *.geo
 *.txt
-*.cmf 
+*.cmf
+*.ply
+*.stl
+*.vtk
+*.prj
+*.rco
+*.rst
+*.sco
+*.stcell
+*.stedge
+*.stface
+*.stver
+*.json
+*.out
