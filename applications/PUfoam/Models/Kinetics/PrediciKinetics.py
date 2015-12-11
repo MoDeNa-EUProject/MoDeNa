@@ -1,4 +1,4 @@
-'''@cond
+'''
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -26,44 +26,29 @@ License
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
-@endcond'''
 
-"""
-@file
-@todo Document
+Description
+    Python library of FireTasks
 
-@author    Andreas Daiss
-@copyright 2014-2015, MoDeNa Project. GNU Public License.
-@ingroup   app_foaming
-"""
+Authors
+    Henrik Rusche
 
-import os
-import modena
-from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, CFunction, IndexSet, ModenaFireTask
-import modena.Strategy as Strategy
-from fireworks import Firework, Workflow, FWAction
-from fireworks.utilities.fw_utilities import explicit_serialize
-from jinja2 import Template
-from PrediciKinetics import PrediciKinetics
+Contributors
+'''
 
+from modena import CFunction
 
-__author__ = 'Henrik Rusche'
-__copyright__ = 'Copyright 2014, MoDeNa Project'
-__version__ = '0.2'
-__maintainer__ = 'Henrik Rusche'
-__email__ = 'h.rusche@wikki.co.uk.'
-__date__ = 'Sep 4, 2014'
+class PrediciKinetics(CFunction):
 
+    def __init__(self, *args, **kwargs):
+        if kwargs.has_key('_cls'):
+            super(PrediciKinetics, self).__init__(*args, **kwargs)
 
-k = PrediciKinetics(
-    _id= 'RF-1-public',
-    fileName= os.path.dirname(os.path.abspath(__file__)) + '/RF-1-public.c',
-)
+        else:
+            from predici_2_modena import create_args
 
-m = ForwardMappingModel(
-    _id= 'RF-1-public',
-    surrogateFunction= k,
-    substituteModels= [ ],
-    importFrom= 'Kinetics.PrediciKinetics'
-)
+            kwargs.update(create_args(kwargs['fileName']))
+
+            kwargs['argPos'] = True
+            super(PrediciKinetics, self).__init__(*args, **kwargs)
 

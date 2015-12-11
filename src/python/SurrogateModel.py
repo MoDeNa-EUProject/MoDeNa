@@ -582,6 +582,9 @@ class SurrogateModel(DynamicDocument):
             self.___indices___ = self.parseIndices(self._id)
             #print '--- Loaded model', self._id
 
+            if hasattr(self, 'importFrom'):
+                __import__(self.importFrom)
+
         else:
             if not kwargs.has_key('_id'):
                 raise Exception('Need _id')
@@ -1185,22 +1188,6 @@ class BackwardMappingModel(SurrogateModel):
                 limitPoint[k] = random.uniform(v['min'], v['max'])
 
         return sampleRange, limitPoint
-
-
-class PrediciKinetics(CFunction):
-
-    def __init__(self, *args, **kwargs):
-
-        if kwargs.has_key('_cls'):
-            super(PrediciKinetics, self).__init__(*args, **kwargs)
-
-        else:
-            from predici_2_modena import create_args
-
-            kwargs.update(create_args(kwargs['fileName']))
-
-            kwargs['argPos'] = True
-            CFunction.__init__(self, *args, **kwargs)
 
 
 ##
