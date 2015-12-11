@@ -54,11 +54,10 @@ def surrModel(params, T, R, kH, c, p):
         model=model,
         parameters=list(params)
     )
-    in_i = list()
-    i = [0] * (1 + model.inputs_max_argPos())
+    i = [0] * model.surrogateFunction.inputs_size()
     for k, v in inputs.iteritems():
         i[model.inputs_argPos(k)] = inputs[k]
-    return cModel.call(in_i, i, checkBounds=False)[0]
+    return cModel.call(i, checkBounds=False)[0]
 
 # def surrModel(params, T, R, kH, c, p):
 #     alpha=params[0]
