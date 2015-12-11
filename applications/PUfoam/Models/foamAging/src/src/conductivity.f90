@@ -75,7 +75,6 @@ subroutine equcond(keq,ystate,neq,eps,fstrut,temp)
     call modena_inputs_set(kfoamInputs, kfoamXCO2pos, xcd)
     call modena_inputs_set(kfoamInputs, kfoamXAirpos, xair)
     call modena_inputs_set(kfoamInputs, kfoamXCyPpos, xcyp)
-    write(*,*) 'x[Air] = ', xair
     ret = modena_model_call (kfoamModena, kfoamInputs, kfoamOutputs)
     if (modena_error_occurred()) then
         call exit(modena_error())

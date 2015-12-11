@@ -21,7 +21,9 @@ module constants
                                         !<foam has no struts if fs<struttol
                                         !<foam has no walls if fs>1-struttol
     complex(dp), parameter :: iu=(0.0e0_dp,1.0e0_dp)       !<imaginary constant
-    logical  :: wdist         !<use wall thickness distribution
+    logical  :: &
+        wdist,&                         !<use wall thickness distribution
+        testing=.false.                 !<true disables calculation of radiation
     integer  :: &
         mfi,&                 !<main file index
         nrays,&               !<number of testing rays
@@ -72,5 +74,4 @@ module constants
         abscoeffbox,&       !<absorption coefficients of gray boxes
         scattcoeffbox,&     !<scatering coefficients of gray boxes
         fbepbox             !<fraction of blackbody radiation in the box
-    logical :: testing=.true.
 end module constants

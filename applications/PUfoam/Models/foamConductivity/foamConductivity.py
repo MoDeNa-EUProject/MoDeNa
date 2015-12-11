@@ -183,6 +183,9 @@ rhop=float(a.split()[0])
 a=f.readline()
 a=f.readline()
 a=f.readline()
+xAir0=float(a.split()[0])
+xCO20=float(a.split()[1])
+xCyP0=float(a.split()[2])
 a=f.readline()
 a=f.readline()
 a=f.readline()
@@ -193,31 +196,28 @@ a=f.readline()
 rho0=float(a.split()[0])
 f.close()
 eps0=1-rho0/rhop
-kgas0=0.012
-eps=[]
-dcell=[]
-fstrut=[]
-T=[]
 
-for i in xrange(4):
-    eps.append(eps0)
-    dcell.append(dcell0)
-    fstrut.append(fstrut0)
-    T.append(T0)
-xCO2=[0.0, 0.1, 0.2, 0.3]
-xAir=[0.0, 0.1, 0.2, 0.3]
-xCyP=[1.0, 0.8, 0.6, 0.4]
-# xCO2=[0.0, 0.0, 1.0, 0.3]
-# xAir=[0.0, 1.0, 0.0, 0.3]
-# xCyP=[1.0, 0.0, 0.0, 0.4]
+def setIP(a0):
+    a=[]
+    for i in xrange(4):
+        a.append(a0)
+    upar=1-1e-4
+    opar=1+1e-4
+    a[0]=a[0]*upar
+    if a0==0:
+        a[1]=1e-4
+    else:
+        a[1]=a[1]*opar
+    return a
+
 initialPoints_foamConductivity_auto = {
-    'eps': eps,
-    'dcell': dcell,
-    'fstrut': fstrut,
-    'T': T,
-    'x[CO2]': xCO2,
-    'x[Air]': xAir,
-    'x[CyP]': xCyP,
+    'eps': setIP(eps0),
+    'dcell': setIP(dcell0),
+    'fstrut': setIP(fstrut0),
+    'T': setIP(T0),
+    'x[CO2]': setIP(xCO20),
+    'x[Air]': setIP(xAir0),
+    'x[CyP]': setIP(xCyP0),
 }
 
 ## Surrogate model for foam conductivity
