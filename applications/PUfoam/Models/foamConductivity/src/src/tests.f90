@@ -25,7 +25,7 @@ contains
 !> calculate equivalent conductivity for one specific foam
 subroutine eqcond(regions)
     integer, intent(in) :: regions
-    integer :: i,j
+    integer :: i,j,fi
     real(dp), dimension(:), allocatable :: regbound,regcond
     real(dp), dimension(:,:), allocatable :: regalpha,regsigma
     allocate(regbound(regions+1),regcond(regions),regalpha(regions,nbox),&
@@ -35,6 +35,16 @@ subroutine eqcond(regions)
     enddo
     do i=1,regions
         call foam_morpholgy
+        if (testing) then
+            write(*,*) 'TESTING: radiative properties not calculated.'
+            write(*,*) 'Ask Pavel if you want more reasonable results.'
+            krad=2e-3_dp
+            call effcond
+            open(newunit(fi),file='outputs.out')
+            write(fi,*) effc
+            close(fi)
+            stop
+        endif
         call effrad(spectra)
         call effcond
         regcond(i)=effc
