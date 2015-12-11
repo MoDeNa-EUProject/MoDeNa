@@ -1,3 +1,9 @@
+/**
+@file McGrawCorrection.h
+@brief McGraw correction algorithm 
+@fn double cos_quad_alpha(double **bk, double **differenceTable, int k, int nNodes);
+@brief 
+*/
 double cos_quad_alpha(double **bk, double **differenceTable, int k, int nNodes);
 void McGrawCorrection(double *moments, int nNodes);
 

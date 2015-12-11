@@ -14,6 +14,11 @@ instantiate the surrogate models:
 
 modena_model_t *bblgr1 = modena_model_new("bubbleGrowth1");
 modena_model_t *bblgr2 = modena_model_new("bubbleGrowth2");
+
+// modena_model_t *rheologymodel = modena_model_new("viscosity_Arrhenius");
+
+modena_model_t *kinetics = modena_model_new("RF-1-public");
+
 // modena_model_t *density_reaction_mixturemodel = modena_model_new("density_reaction_mixtureSM");
 // modena_model_t *rheologymodel = modena_model_new("rheology");
 // modena_model_t *kinetics = modena_model_new("simpleKinetics");
@@ -28,6 +33,12 @@ modena_outputs_t *outputs_bblgr1   = modena_outputs_new (bblgr1);
 
 modena_inputs_t *inputs_bblgr2     = modena_inputs_new (bblgr2);
 modena_outputs_t *outputs_bblgr2   = modena_outputs_new (bblgr2);
+
+// modena_inputs_t *inputs_rheo       = modena_inputs_new (rheologymodel);
+// modena_outputs_t *outputs_rheo     = modena_outputs_new (rheologymodel);
+
+modena_inputs_t *inputs_kinetics   = modena_inputs_new (kinetics);
+modena_outputs_t *outputs_kinetics = modena_outputs_new (kinetics);
 
 // modena_inputs_t *inputs_den        = modena_inputs_new (density_reaction_mixturemodel);
 // modena_outputs_t *outputs_den      = modena_outputs_new (density_reaction_mixturemodel);
