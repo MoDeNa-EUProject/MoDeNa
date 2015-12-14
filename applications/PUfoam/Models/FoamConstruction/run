@@ -108,6 +108,8 @@ if binarizeBox:
     filenameIn = filename+".vtk"
     filename = filename+"-ascii"
     filenameOut = filename+".vtk"
-    vtkconv.main(filenameIn,filenameOut,dx,dy,dz,vx,vy,vz)
+    origin=[dx,dy,dz]
+    spacing=[dx/vx,dy/vy,dz/vz]
+    vtkconv.main(filenameIn,filenameOut,origin,spacing)
     if deleteFiles:
         os.remove(filenameIn)
