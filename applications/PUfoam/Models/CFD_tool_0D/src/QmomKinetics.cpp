@@ -234,27 +234,6 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
         size_t source_R_1_temp_Pos     = modena_model_outputs_argPos(kinetics, "source_R_1_temp");
         size_t source_R_1_vol_Pos      = modena_model_outputs_argPos(kinetics, "source_R_1_vol");
 
-        // Second 20 outputs (ddtSource)
-        size_t dsource_CE_Ireac2_Pos      = modena_model_outputs_argPos(kinetics, "dsource_CE_Ireac2");
-        size_t dsource_CE_Ireac0_Pos      = modena_model_outputs_argPos(kinetics, "dsource_CE_Ireac0");
-        size_t dsource_CE_Ireac1_Pos      = modena_model_outputs_argPos(kinetics, "dsource_CE_Ireac1");
-        size_t dsource_CE_I2_Pos          = modena_model_outputs_argPos(kinetics, "dsource_CE_I2");
-        size_t dsource_CE_I1_Pos          = modena_model_outputs_argPos(kinetics, "dsource_CE_I1");
-        size_t dsource_R_1_mass_Pos       = modena_model_outputs_argPos(kinetics, "dsource_R_1_mass");
-        size_t dsource_Catalyst_1_Pos     = modena_model_outputs_argPos(kinetics, "dsource_Catalyst_1");
-        size_t dsource_CE_B_Pos           = modena_model_outputs_argPos(kinetics, "dsource_CE_B");
-        size_t dsource_CE_A1_Pos          = modena_model_outputs_argPos(kinetics, "dsource_CE_A1");
-        size_t dsource_CE_A0_Pos          = modena_model_outputs_argPos(kinetics, "dsource_CE_A0");
-        size_t dsource_CE_Breac_Pos       = modena_model_outputs_argPos(kinetics, "dsource_CE_Breac");
-        size_t dsource_R_1_Pos            = modena_model_outputs_argPos(kinetics, "dsource_R_1");
-        size_t dsource_CE_I0_Pos          = modena_model_outputs_argPos(kinetics, "dsource_CE_I0");
-        size_t dsource_R_1_temp_Pos       = modena_model_outputs_argPos(kinetics, "dsource_R_1_temp");
-        size_t dsource_CE_Areac0_Pos      = modena_model_outputs_argPos(kinetics, "dsource_CE_Areac0");
-        size_t dsource_CE_Areac1_Pos      = modena_model_outputs_argPos(kinetics, "dsource_CE_Areac1");
-        size_t dsource_Bulk_Pos           = modena_model_outputs_argPos(kinetics, "dsource_Bulk");
-        size_t dsource_CE_B2_Pos          = modena_model_outputs_argPos(kinetics, "dsource_CE_B2");
-        size_t dsource_CE_PBA_Pos         = modena_model_outputs_argPos(kinetics, "dsource_CE_PBA");
-        size_t dsource_R_1_vol_Pos        = modena_model_outputs_argPos(kinetics, "dsource_R_1_vol");
 
         modena_model_argPos_check(kinetics);
 
@@ -266,7 +245,6 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
         modena_inputs_set(inputs_kinetics, CE_B2_Pos, CE_B2);
         modena_inputs_set(inputs_kinetics, CE_I0_Pos, CE_I0);
         modena_inputs_set(inputs_kinetics, CE_I1_Pos, CE_I1);
-        modena_inputs_set(inputs_kinetics, CE_I2_Pos, CE_I2);
         modena_inputs_set(inputs_kinetics, CE_I2_Pos, CE_I2);
         modena_inputs_set(inputs_kinetics, CE_PBA_Pos, CE_PBA);
         modena_inputs_set(inputs_kinetics, CE_Breac_Pos, CE_Breac);
@@ -309,11 +287,11 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
         dydt[23] = 1000*modena_outputs_get(outputs_kinetics, source_CE_Ireac0_Pos);
         dydt[24] = 1000*modena_outputs_get(outputs_kinetics, source_CE_Ireac1_Pos);
         dydt[25] = 1000*modena_outputs_get(outputs_kinetics, source_CE_Ireac2_Pos);
-        dydt[26] = modena_outputs_get(outputs_kinetics, dsource_Bulk_Pos);
-        dydt[27] = modena_outputs_get(outputs_kinetics, dsource_R_1_Pos);
-        dydt[28] = modena_outputs_get(outputs_kinetics, dsource_R_1_mass_Pos);
-        dydt[29] = modena_outputs_get(outputs_kinetics, dsource_R_1_temp_Pos);
-        dydt[30] = modena_outputs_get(outputs_kinetics, dsource_R_1_vol_Pos);
+        dydt[26] = modena_outputs_get(outputs_kinetics, source_Bulk_Pos);
+        dydt[27] = modena_outputs_get(outputs_kinetics, source_R_1_Pos);
+        dydt[28] = modena_outputs_get(outputs_kinetics, source_R_1_mass_Pos);
+        dydt[29] = modena_outputs_get(outputs_kinetics, source_R_1_temp_Pos);
+        dydt[30] = modena_outputs_get(outputs_kinetics, source_R_1_vol_Pos);
         
         // for (int i = 11; i<31; i++)
         // {
@@ -663,10 +641,11 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
 */
 int main(int argc, char **argv)
 {
-    cout << " * * HERE * * " << endl;
+    
+    
 	readParams();
 	// initial conditions
-    state_type y(30);
+    state_type y(31);
     y[0]			= 0.0;
     y[1]			= 0.0;
     y[2]			= Temp0;
