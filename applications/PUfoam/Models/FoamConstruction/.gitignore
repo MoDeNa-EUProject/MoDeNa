@@ -1,5 +1,6 @@
 *.geo
 *.txt
+!CMakeLists.txt
 *.cmf
 *.ply
 *.stl
@@ -15,3 +16,4 @@
 *.json
 *.out
 *.gnu
+*.in
