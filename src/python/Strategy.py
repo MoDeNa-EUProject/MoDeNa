@@ -85,6 +85,7 @@ class Workflow2(Workflow):
 
         @param wf "Workflow2" object.
 
+        @var updated_ids 
         @var root_ids: Root "FireWorks" of this workflow
         @var leaf_ids: Leaf FireWorks, i.e. those with no children
         @var my_leaf_ids
