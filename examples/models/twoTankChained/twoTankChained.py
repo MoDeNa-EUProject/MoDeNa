@@ -1,5 +1,4 @@
-#!/usr/bin/python
-'''
+'''@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -22,36 +21,27 @@ License
 
     Modena is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
-    details.
+    FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
+@endcond'''
 
-Description
-    A simple workflow
+"""
+@file
+Python library of FireTasks
 
-Authors
-    Henrik Rusche
+@author    Henrik Rusche
+@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@ingroup   twoTank
+"""
 
-Contributors
-'''
+from modena.Strategy import BackwardMappingScriptTask
+import os
 
-from fireworks import Firework, Workflow, LaunchPad
-from fireworks.core.rocket_launcher import rapidfire
-from twoTank import m as SIMULATION
-from modulefinder import ModuleFinder
-
-
-# set up the LaunchPad and reset it
-launchpad = LaunchPad()
-launchpad.reset('', require_password=False)
-
-# create the individual FireWorks and Workflow
 # Source code in src/twoTanksMacroscopicProblem.C
-wf = Workflow([Firework(SIMULATION)], {}, name="simulation")
-
-# store workflow and launch it locally
-launchpad.add_wf(wf)
-rapidfire(launchpad)
+m = BackwardMappingScriptTask(
+    script=os.path.dirname(os.path.abspath(__file__))+'/src/twoTanksMacroscopicProblem'
+)
 

@@ -196,6 +196,13 @@ modena_model_t *modena_model_new
     Py_DECREF(kw);
     if(!pNewObj)
     {
+        fprintf
+        (
+            stderr,
+            "Loading model %s failed - Attempting automatic initialisation\n",
+            modelId
+        );
+
         if(PyErr_ExceptionMatches(modena_DoesNotExist))
         {
             PyErr_Clear();
@@ -238,6 +245,7 @@ size_t modena_model_inputs_argPos(const modena_model_t *self, const char *name)
 
     if(self->argPos_used)
     {
+        //printf("Mark argPos %zu as used from inputs_argPos\n", argPos);
         self->argPos_used[argPos] = true;
     }
 
@@ -271,7 +279,7 @@ void modena_model_argPos_check(const modena_model_t *self)
         {
             //TODO: Replace by call into python
             //printf("argPos for %s not used\n", self->inputs_names[j]);
-            //printf("argPos %zu not used\n", j);
+            printf("argPos %zu not used\n", j);
             allUsed = false;
             break;
         }
@@ -539,12 +547,7 @@ static PyObject *modena_model_t_call
     PyObject *pI=NULL, *pCheckBounds=NULL;
     bool checkBounds = true;
 
-    static char *kwlist[] =
-    {
-        "inputs",
-        "checkBounds",
-        NULL
-    };
+    static char *kwlist[] = { "inputs", "checkBounds", NULL };
 
     if
     (
@@ -637,7 +640,7 @@ static PyObject *modena_model_t_call
 
 static PyMethodDef modena_model_t_methods[] = {
     {"call", (PyCFunction) modena_model_t_call, METH_KEYWORDS,
-     "Call surrogate model and return outputs"
+        "Call surrogate model and return outputs"
     },
     {NULL}  /* Sentinel */
 };
@@ -649,8 +652,11 @@ static int modena_model_t_init
     PyObject *kwds
 )
 {
+    //printf("In modena_model_t_init\n");
+
     PyObject *pParameters=NULL, *pModel=NULL;
     char *modelId=NULL;
+    size_t i, j;
 
     static char *kwlist[] = {"model", "modelId", "parameters", NULL};
 
@@ -715,17 +721,19 @@ static int modena_model_t_init
     self->mf = modena_function_new_from_model(self);
     self->function = self->mf->function;
 
-    self->argPos_used = malloc
-    (
-        self->inputs_size*sizeof(bool)
-    );
+    self->argPos_used = malloc(self->inputs_size*sizeof(bool));
 
-    size_t i, j;
+    for(j = 0; j < self->inputs_size; j++)
+    {
+        self->argPos_used[j] = false;
+    }
+
     for(j = 0; j < self->substituteModels_size; j++)
     {
         modena_substitute_model_t *sm = &self->substituteModels[j];
         for(i = 0; i < sm->map_outputs_size; i++)
         {
+            //printf("Mark argPos %zu as used\n", sm->map_outputs[2*i+1]);
             self->argPos_used[sm->map_outputs[2*i+1]] = true;
         }
     }
@@ -749,13 +757,20 @@ static int modena_model_t_init
        && self->parameters_size != self->mf->parameters_size
     )
     {
-        PyErr_SetString
+        PyObject *args = PyTuple_New(2);
+        PyObject* str = PyString_FromString
         (
-            modena_ParametersNotValid,
             "Surrogate model does not have valid parameters"
         );
+        PyTuple_SET_ITEM(args, 0, str);
+        PyTuple_SET_ITEM(args, 1, self->pModel);
 
-        modena_model_destroy(self);
+        PyErr_SetObject
+        (
+            modena_ParametersNotValid,
+            args
+        );
+
         Py_DECREF(pSeq);
         Py_DECREF(pParameters);
         return -1;

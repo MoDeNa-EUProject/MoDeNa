@@ -94,15 +94,13 @@ f = CFunction(
 
 void rheology_SM
 (
-    const double* parameters,
-    const double* inherited_inputs,
+    const modena_model_t* model,
     const double* inputs,
     double *outputs
 )
 {    
-    const double T = inputs[0]; // temperature
-    const double shear = inputs[1]; // shear rate
-    const double X = inputs[2]; // conversion
+    {% block variables %}{% endblock %}
+
     const double lambda = parameters[0];
     const double alpha = parameters[1];
     const double n_rh = parameters[2];
@@ -135,11 +133,11 @@ void rheology_SM
 ''',
    # These are global bounds for the function
    inputs={
-       'T': {'min': 0, 'max': 9e99, 'argPos': 0 },
-       'shear': {'min': 0, 'max': 9e99, 'argPos': 1 },
-       'X': {'min': 0, 'max': 1, 'argPos': 2 },
-       'mu': {'min': 0, 'max': 1000, 'argPos': 3 },
-       'ST': {'min': 0, 'max': 100, 'argPos': 4 },
+       'T': {'min': 0, 'max': 9e99 },
+       'shear': {'min': 0, 'max': 9e99 },
+       'X': {'min': 0, 'max': 1 },
+       'mu': {'min': 0, 'max': 1000 },
+       'ST': {'min': 0, 'max': 100 },
        
    },
    outputs={

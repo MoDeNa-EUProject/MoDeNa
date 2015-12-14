@@ -54,11 +54,10 @@ def surrModel(params, T, R, kH, c, p):
         model=model,
         parameters=list(params)
     )
-    in_i = list()
-    i = [0] * (1 + model.inputs_max_argPos())
+    i = [0] * model.surrogateFunction.inputs_size()
     for k, v in inputs.iteritems():
         i[model.inputs_argPos(k)] = inputs[k]
-    return cModel.call(in_i, i, checkBounds=False)[0]
+    return cModel.call(i, checkBounds=False)[0]
 
 # def surrModel(params, T, R, kH, c, p):
 #     alpha=params[0]
@@ -109,17 +108,13 @@ f = CFunction(
 
 void bblgr_SM
 (
-    const double* parameters,
-    const double* inherited_inputs,
+    const modena_model_t* model,
     const double* inputs,
     double *outputs
 )
 {
-    const double T = inputs[0];
-    const double R = inputs[1];
-    const double kH = inputs[2];
-    const double c = inputs[3];
-    const double p = inputs[4];
+    {% block variables %}{% endblock %}
+
     const double alpha = parameters[0];
     const double beta = parameters[1];
     const double gamma = parameters[2];
@@ -142,11 +137,11 @@ void bblgr_SM
 ''',
     # These are global bounds for the function
     inputs={
-        'T': {'min': -9e99, 'max': 9e99, 'argPos': 0},
-        'R': {'min': -9e99, 'max': 9e99, 'argPos': 1},
-        'kH': {'min': -9e99, 'max': 9e99, 'argPos': 2},
-        'c': {'min': -9e99, 'max': 9e99, 'argPos': 3},
-        'p': {'min': -9e99, 'max': 9e99, 'argPos': 4},
+        'T': {'min': -9e99, 'max': 9e99 },
+        'R': {'min': -9e99, 'max': 9e99 },
+        'kH': {'min': -9e99, 'max': 9e99 },
+        'c': {'min': -9e99, 'max': 9e99 },
+        'p': {'min': -9e99, 'max': 9e99 },
     },
     outputs={
         'G': {'min': -9e99, 'max': 9e99, 'argPos': 0},
@@ -180,16 +175,6 @@ m = ForwardMappingModel(
     surrogateFunction=f,
     substituteModels=[],
     parameters=[1.0, 1.0, 1.0],
-    inputs={
-        'T': {'min': -9e99, 'max': 9e99},
-        'R': {'min': -9e99, 'max': 9e99},
-        'kH': {'min': -9e99, 'max': 9e99},
-        'c': {'min': -9e99, 'max': 9e99},
-        'p': {'min': -9e99, 'max': 9e99},
-    },
-    outputs={
-        'G': {'min': -9e99, 'max': 9e99},
-    },
 )
 
 # Instantiate surrogate model
