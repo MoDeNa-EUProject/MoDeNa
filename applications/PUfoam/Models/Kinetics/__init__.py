@@ -1,4 +1,3 @@
-#!/usr/bin/python
 '''
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
@@ -10,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014 MoDeNa Consortium, All rights reserved.
+    2014-2015 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -22,37 +21,19 @@ License
 
     Modena is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
-    details.
+    FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
-    Initialisation script for the Foam aging application.
+    Python library of FireTasks
 
 Authors
     Henrik Rusche
-    Pavel Ferkl
 
 Contributors
 '''
 
-from modena import SurrogateModel
-from modena.Strategy import Workflow2
-import gasMixtureConductivity
-from fireworks import LaunchPad
-from fireworks.core.rocket_launcher import rapidfire
-from fireworks.utilities.fw_serializers import load_object
-
-# set up the LaunchPad and reset it
-launchpad = LaunchPad()
-launchpad.reset('', require_password=False)
-
-initWfs = Workflow2([])
-for m in SurrogateModel.get_instances():
-    initWfs.addNoLink(m.initialisationStrategy().workflow(m))
-
-# store workflow and launch it locally
-launchpad.add_wf(initWfs)
-rapidfire(launchpad)
+from Kinetics import m

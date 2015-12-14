@@ -41,7 +41,7 @@ Contributors
 from modena import SurrogateModel
 from modena.Strategy import Workflow2
 import diffusivity
-import gasConductivity
+# import gasConductivity
 import foamConductivity
 # import US_Solubility_Model
 from fireworks import LaunchPad

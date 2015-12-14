@@ -1,9 +1,10 @@
-cmake_minimum_required (VERSION 2.6)
-project (tutorialModels C Fortran)
+cmake_minimum_required (VERSION 2.8)
+project (twoTankMacroscopic C CXX)
 
 if( CMAKE_VERSION VERSION_GREATER "3.0" )
   cmake_policy(SET CMP0042 OLD)
   cmake_policy(SET CMP0026 OLD)
+  cmake_policy(SET CMP0028 OLD)
 endif()
 
 set(CMAKE_BUILD_TYPE Release)
@@ -22,9 +23,9 @@ add_custom_target(release
 
 find_package(MODENA REQUIRED)
 
-#simple kinetics
-set (CMAKE_Fortran_FLAGS "-ffree-line-length-none -O3")
-set (CMAKE_Fortran_MODULE_DIRECTORY simpleKinetics_mod)
-file (GLOB _simpleKinetics_sources RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} simpleKinetics_src/*.f*)
-add_executable(simpleKinetics ${_simpleKinetics_sources})
-target_link_libraries(simpleKinetics MODENA::modena)
+include(CheckCInline)
+check_c_inline(C_INLINE)
+
+add_executable(twoTanksMacroscopicProblem twoTanksMacroscopicProblem.C)
+target_link_libraries(twoTanksMacroscopicProblem MODENA::modena)
+

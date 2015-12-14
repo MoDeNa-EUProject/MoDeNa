@@ -143,13 +143,12 @@ f = CFunction(
 
 void surroSurfaceTension
 (
-    const double* parameters,
-    const double* inherited_inputs,
+    const modena_model_t* model,
     const double* inputs,
     double *outputs
 )
 {
-    const double T = inputs[0];
+    {% block variables %}{% endblock %}
 
     const double P0 = parameters[0];
     const double P1 = parameters[1];
@@ -160,7 +159,7 @@ void surroSurfaceTension
 ''',
     # These are global bounds for the function
     inputs={
-        'T': { 'min': 270.0, 'max': 310.0, 'argPos': 0 },        #check if boundaries reasonable, from this range, the random values for the DOE are chosen!
+        'T': { 'min': 270.0, 'max': 310.0 },        #check if boundaries reasonable, from this range, the random values for the DOE are chosen!
     },
     outputs={
         'ST': { 'min': 9e99, 'max': -9e99, 'argPos': 0 },
