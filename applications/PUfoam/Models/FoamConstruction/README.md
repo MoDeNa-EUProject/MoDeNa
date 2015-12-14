@@ -3,8 +3,10 @@ Foam Construction
 ## Installation
 The code depends on several third-party applications:
 - `wine` to have ability of running windows executable files (i.e. file.exe).
-- `neper` for tessellation
-- `gmsh`, `vtk`, `meshconv` and `binvox` for mesh manipulation
+- `neper` and `voro++` for tessellation
+- `gmsh`, `vtk` and `meshconv` for mesh manipulation
+- `binvox` for voxelization
+- `foamreconstr` for creation of foams with struts
 
 To install all of these on Ubuntu, do:
 ```
@@ -16,8 +18,17 @@ sudo apt-get install wine1.7 libmatheval-dev gmsh gsl-bin libgsl0-dev \
 Then download and install `neper` from http://neper.sourceforge.net/downloads.html
 (follow its README for instructions),
 download `meshconv` from http://www.cs.princeton.edu/~min/meshconv/, download
-`binvox` from http://www.cs.princeton.edu/~min/binvox/ and copy `meshconv` and
- `binvox` to `$PATH`
+`binvox` from http://www.cs.princeton.edu/~min/binvox/ and copy `meshconv` and `binvox` to `$PATH`.
+To install `voro++`:
+```
+cd foamreconstr
+sudo ./install_voro
+```
+To compile `foamreconstr` go to `foamreconstr/` folder and:
+```
+cmake .
+make
+```
 
 ## Files
 The folder `FoamConstruction` contains following files:
