@@ -87,7 +87,7 @@ controlled_stepper_type controlled_stepper;
 double dpdt[2] = {};
 double pOld[2] = {};
 
-#include "modenaCalls.h"
+#include "modenaData.h"
 #include "momentsConverter.h"
 #include "write_kinetics.h"
 #include "determinant.h"
@@ -641,6 +641,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
 */
 int main(int argc, char **argv)
 {
+    #include "modenaCalls.h"
     
     
 	readParams();
