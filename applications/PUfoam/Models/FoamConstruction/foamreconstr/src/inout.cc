@@ -53,7 +53,6 @@ int ***allocateFromVTK(string filename, int ***amat) {
     int vtkx,vtky,vtkz;
     for (i=0;i<9;i++) {
         getline(fin, line);
-        cout << line << endl;
         if (i==4) {
             char word[20];
             sscanf(line.c_str(),"%s %d %d %d",word,&vtkx,&vtky,&vtkz);
@@ -83,7 +82,6 @@ void importFromVTK(string filename, int ***amat) {
     int vtkx,vtky,vtkz;
     for (i=0;i<9;i++) {
         getline(fin, line);
-        cout << line << endl;
         if (i==4) {
             char word[20];
             sscanf(line.c_str(),"%s %d %d %d",word,&vtkx,&vtky,&vtkz);
@@ -108,7 +106,7 @@ void importFromVTK(string filename, int ***amat) {
         l=l+2;
     }
     //check that we read the right amount of values
-    cout << vtkx*vtky*vtkz << " " << l << endl;
+    // cout << vtkx*vtky*vtkz << " " << l << endl;
     // 1 value on last line
     getline(fin, line);
     sscanf(line.c_str(),"%e",&a);

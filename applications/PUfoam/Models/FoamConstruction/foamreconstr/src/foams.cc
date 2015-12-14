@@ -85,7 +85,7 @@ int main(int argc,char *argv[])
 		vert=alloc_fmatrix(vmax,3);
 		vinc=alloc_matrix(vmax,incmax);
 		importFoamSkeleton(GnuplotSkeletonFilename,vert,vinc,vmax,incmax,sv);
-        if (!save_voro_diag1) {
+        if (!import_vtk && !save_voro_diag1) {
             remove(GnuplotSkeletonFilename.c_str());
         }
         // save alternative gnuplot image of voronoi tesselation
