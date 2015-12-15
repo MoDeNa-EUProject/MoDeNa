@@ -225,6 +225,10 @@ class OutOfBoundsStrategy(defaultdict, FWSerializable):
 
 
     def workflow(self, model, **kwargs):
+        """Method generating the workflow for the 'out of bounds strategy'.
+
+        @returns wf Workflow2 object.
+        """
         wf = model.exactTasks(self.newPoints(model, **kwargs))
         wf.addAfterAll(model.parameterFittingStrategy().workflow(model))
         return wf
@@ -250,6 +254,7 @@ def recursive_serialize2(func):
     """
     a decorator to add FW serializations keys
     see documentation of FWSerializable for more details
+    <https://pythonhosted.org/FireWorks/fireworks.utilities.html#fireworks.utilities.fw_serializers.FWSerializable>
     """
 
     def _decorator(self, *args, **kwargs):
@@ -263,7 +268,8 @@ def recursive_serialize2(func):
 def recursive_deserialize2(func):
     """
     a decorator to add FW serializations keys
-    see documentation of FWSerializable for more details
+    see documentation of FWSerializable for more details:
+    <https://pythonhosted.org/FireWorks/fireworks.utilities.html#fireworks.utilities.fw_serializers.FWSerializable>
     """
 
     def _decorator(self, *args, **kwargs):
@@ -278,7 +284,7 @@ def recursive_deserialize2(func):
 
 
 class ImproveErrorStrategy(defaultdict, FWSerializable):
-
+    """Base class for strategies 'fixing' the error of a surrogate model."""
     def __init__(self, *args, **kwargs):
         dict.__init__(self, *args, **kwargs)
 
@@ -306,7 +312,7 @@ class ImproveErrorStrategy(defaultdict, FWSerializable):
 
 
 class ParameterFittingStrategy(dict, FWSerializable):
-
+    """Base Class for creating parameter fitting strategies."""
     def __init__(self, *args, **kwargs):
         dict.__init__(self, *args, **kwargs)
 
@@ -396,6 +402,7 @@ class ParameterFittingStrategy(dict, FWSerializable):
 
 
 class SamplingStrategy():
+    """Base class for Sampling strategies (DoE)."""
 
     def newPoints(self):
         raise NotImplementedError('newPoints not implemented!')
@@ -418,7 +425,9 @@ class SamplingStrategy():
 
 @explicit_serialize
 class InitialPoints(InitialisationStrategy):
-
+    """Class for initialisation of a surrogate model by fitting it to
+    user-specified points.
+    """
     def __init__(self, *args, **kwargs):
         InitialisationStrategy.__init__(self, *args, **kwargs)
 
@@ -429,8 +438,7 @@ class InitialPoints(InitialisationStrategy):
 
 @explicit_serialize
 class InitialData(InitialisationStrategy):
-    """
-    Class initialising a SurrogateModel given a dataset of input-output
+    """Class initialising a SurrogateModel given a dataset of input-output
     relations.
     """
     def __init__(self, *args, **kwargs):
@@ -467,14 +475,14 @@ class InitialData(InitialisationStrategy):
 
 @explicit_serialize
 class EmptyInitialisationStrategy(InitialisationStrategy):
-
+    """Empty initialisation strategy, used by Forward Mapping Models."""
     def newPoints(self):
         return []
 
 
 @explicit_serialize
 class ExtendSpaceStochasticSampling(OutOfBoundsStrategy, SamplingStrategy):
-
+    """Class for extending the design space using stochastic sampling."""
     def __init__(self, *args, **kwargs):
         OutOfBoundsStrategy.__init__(self, *args, **kwargs)
 
@@ -488,7 +496,7 @@ class ExtendSpaceStochasticSampling(OutOfBoundsStrategy, SamplingStrategy):
 
 @explicit_serialize
 class StochasticSampling(ImproveErrorStrategy, SamplingStrategy):
-
+    """Design of experiments class, Monte Carlo sampling."""
     def __init__(self, *args, **kwargs):
         ImproveErrorStrategy.__init__(self, *args, **kwargs)
 
@@ -512,7 +520,7 @@ class StochasticSampling(ImproveErrorStrategy, SamplingStrategy):
 
 @explicit_serialize
 class NonLinFitWithErrorContol(ParameterFittingStrategy):
-
+    """Parameter fitting class, non-linear least squares regression."""
     def __init__(self, *args, **kwargs):
         """
         @todo access tuple correctly
