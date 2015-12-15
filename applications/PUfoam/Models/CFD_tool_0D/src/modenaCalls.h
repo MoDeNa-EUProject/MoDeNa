@@ -13,11 +13,24 @@ instantiate the surrogate models:
 */
 
 bblgr1 = modena_model_new("bubbleGrowth1");
+if(modena_error_occurred())
+{
+    return modena_error();
+}
+
 bblgr2 = modena_model_new("bubbleGrowth2");
+if(modena_error_occurred())
+{
+    return modena_error();
+}
 
 // modena_model_t *rheologymodel = modena_model_new("viscosity_Arrhenius");
 
 kinetics = modena_model_new("RF-1-public");
+if(modena_error_occurred())
+{
+    return modena_error();
+}
 
 // modena_model_t *density_reaction_mixturemodel = modena_model_new("density_reaction_mixtureSM");
 // modena_model_t *rheologymodel = modena_model_new("rheology");
