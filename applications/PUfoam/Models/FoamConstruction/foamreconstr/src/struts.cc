@@ -37,7 +37,7 @@ int optim (void * params, float &m) {
 	int iter = 0, max_iter = 100;
 	const gsl_min_fminimizer_type *T;
 	gsl_min_fminimizer *s;
-	double a = 0.0, b = 6.0;
+	double a = 0.0, b = 12.0;
 	gsl_function F;
 
 	F.function = &fn1;
