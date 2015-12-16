@@ -6,20 +6,20 @@
 #include "allocation.hh"
 using namespace std;
 using namespace globals;
-void makeNodeStruts(int ***amat, int sv, int incmax, int vmax, float **vert, \
+void makeNodeStruts(int ***amat, int sv, int incmax, int vmax, double **vert, \
                     int **vinc) {
     // Creates strut parts - solid material around cell vertices. Created
     // strut has a shape of tetrahedron. Updates `amat`.
     int i,j,k,l,m,n;
     int svd; //final number of vertices in the domain
-    float xx;
-    float mini[3],maxi[3];
+    double xx;
+    double mini[3],maxi[3];
     double xmin=0,xmax=nx;
     double ymin=0,ymax=ny;
     double zmin=0,zmax=nz;
-    float dist[4];
-    float ***tetra; //four points defining each tetrahedron
-	tetra=alloc_3Dfmatrix(vmax,4,3);
+    double dist[4];
+    double ***tetra; //four points defining each tetrahedron
+	tetra=alloc_3Ddmatrix(vmax,4,3);
     // calculate tetrahedra
     cout << "creating struts at cell vertices..." << endl;
     svd=0;
@@ -117,7 +117,7 @@ void makeNodeStruts(int ***amat, int sv, int incmax, int vmax, float **vert, \
                     }
                 }
     }
-    tetra=free_3Dfmatrix(tetra);
+    tetra=free_3Ddmatrix(tetra);
     for (i=0; i<4; ++i) delete [] A0[i]; //deallocate
     delete [] A0;
     for (i=0; i<4; ++i) delete [] A1[i]; //deallocate

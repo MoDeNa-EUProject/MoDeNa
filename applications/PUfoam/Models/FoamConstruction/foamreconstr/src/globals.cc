@@ -4,10 +4,10 @@ namespace globals {
     bool openCell; //make open cell foam
     bool save_dat; //save file in old dx style
     bool save_vtk; //save file in new paraview style
-    float dstrut; //parameter influencing size of struts in cell vertices
-    float dedge; //parameter influencing size of struts in cell edges
+    double dstrut; //parameter influencing size of struts in cell vertices
+    double dedge; //parameter influencing size of struts in cell edges
     double strutPorosity; //desired porosity of only struts
-    float RANDOM; //number between 0.0 and 1.0
+    double RANDOM; //number between 0.0 and 1.0
     //how much are positions of cell centers perturbated from even position
     int grid; //grid type for cell centers, 1=cubic grid,
     //2=hexagonal lattice, ABAB...,3=hexagonal lattice, ABCABC...

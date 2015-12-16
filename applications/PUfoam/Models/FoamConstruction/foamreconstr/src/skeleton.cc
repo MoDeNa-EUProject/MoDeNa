@@ -30,7 +30,7 @@ void makeFoamSkeleton(string filename, int ncell, int *center_x, \
     con.draw_cells_gnuplot(filename.c_str());
 }
 
-void importFoamSkeleton(string filename, float **vert, int **vinc, int vmax, \
+void importFoamSkeleton(string filename, double **vert, int **vinc, int vmax, \
                         int incmax, int &sv) {
     // Imports foam skeleton from gnuplot file. Creates `vert` and `vinc` and
     // calculates `sv`.
@@ -38,12 +38,12 @@ void importFoamSkeleton(string filename, float **vert, int **vinc, int vmax, \
     double xmin=0,xmax=nx;
     double ymin=0,ymax=ny;
     double zmin=0,zmax=nz;
-    float x[6],y[6],z[6]; //vertex coordinates
+    double x[6],y[6],z[6]; //vertex coordinates
     int vind[4]; //indices of incident vertices
     ifstream fin;
     string line;
     bool found;
-    float eps=1e-2; //tolerance for close voronoi vertices
+    double eps=1e-2; //tolerance for close voronoi vertices
     cout << "loading cell vertices and edges..." << endl;
     fin.open(filename);
     if (!fin.is_open()) {

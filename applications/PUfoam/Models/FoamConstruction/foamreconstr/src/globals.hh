@@ -19,7 +19,7 @@
 template <typename T> int sgn(T val) {
     return (T(0) < val) - (val < T(0));
 }
-struct fn1_params {int sv; int incmax; int vmax; float **vert; int **vinc; \
+struct fn1_params {int sv; int incmax; int vmax; double **vert; int **vinc; \
     int ***smat;};
 namespace globals {
     extern bool createNodes; //create struts at cell vertices
@@ -27,10 +27,10 @@ namespace globals {
     extern bool openCell; //make open cell foam
     extern bool save_dat; //save file in old dx style
     extern bool save_vtk; //save file in new paraview style
-    extern float dstrut; //parameter influencing size of struts in cell vertices
-    extern float dedge; //parameter influencing size of struts in cell edges
+    extern double dstrut; //parameter influencing size of struts in cell vertices
+    extern double dedge; //parameter influencing size of struts in cell edges
     extern double strutPorosity; //desired porosity of only struts
-    extern float RANDOM; //number between 0.0 and 1.0
+    extern double RANDOM; //number between 0.0 and 1.0
     //how much are positions of cell centers perturbated from even position
     extern int grid; //grid type for cell centers, 1=cubic grid,
     //2=hexagonal lattice, ABAB...,3=hexagonal lattice, ABCABC...

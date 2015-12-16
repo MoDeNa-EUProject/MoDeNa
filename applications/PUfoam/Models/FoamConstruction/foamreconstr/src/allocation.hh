@@ -1,6 +1,8 @@
 #ifndef ALLOCATION_H
 #define ALLOCATION_H
 
+double ***alloc_3Ddmatrix (int, int, int);
+double ***free_3Ddmatrix  (double ***);
 float ***alloc_3Dfmatrix (int, int, int);
 float ***free_3Dfmatrix  (float ***);
 int ***alloc_3Dmatrix (int, int, int);

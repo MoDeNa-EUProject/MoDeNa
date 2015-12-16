@@ -13,7 +13,7 @@ double fn1 (double x, void * p)
 	int sv = (params->sv);
     int incmax = (params->incmax);
     int vmax = (params->vmax);
-	float **vert = (params->vert);
+	double **vert = (params->vert);
 	int **vinc = (params->vinc);
 	int ***smat = (params->smat);
 	int i,j,k;
@@ -32,12 +32,12 @@ double fn1 (double x, void * p)
 	return pow(por-strutPorosity,2);
 }
 
-int optim (void * params, float &m) {
+int optim (void * params, double &m) {
 	int status;
 	int iter = 0, max_iter = 100;
 	const gsl_min_fminimizer_type *T;
 	gsl_min_fminimizer *s;
-	double a = 0.0, b = 12.0;
+	double a = 0.5*m, b = 2*m;
 	gsl_function F;
 
 	F.function = &fn1;
@@ -67,7 +67,7 @@ int optim (void * params, float &m) {
 	  b = gsl_min_fminimizer_x_upper (s);
 
 	  status
-	    = gsl_min_test_interval (a, b, 0.001, 0.0);
+	    = gsl_min_test_interval (a, b, 0.01, 0.0);
 
 	  if (status == GSL_SUCCESS)
 	    printf ("Converged:\n");

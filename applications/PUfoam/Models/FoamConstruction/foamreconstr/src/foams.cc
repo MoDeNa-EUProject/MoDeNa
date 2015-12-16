@@ -24,7 +24,7 @@ int main(int argc,char *argv[])
     int *center_x, *center_y, *center_z; //position of seeds
 	int vmax=10000; //maximum number of vertices
 	int incmax=8; //maximum number of incident vertices to a vertex
-	float **vert; //vertex coordinates
+	double **vert; //vertex coordinates
 	int **vinc; //incident vertices for each vertex
 	int sv=0; //final number of vertices
 	double por=0; //porosity
@@ -37,10 +37,12 @@ int main(int argc,char *argv[])
 	string GnuplotSkeletonFilename;
 	string GnuplotAltSkeletonFilename;
 	string descriptorsFilename;
+	string parametersFilename;
 
     // read inputs and save them to global variables
 	readParameters(inputsFilename,outputFilename,VTKInputFilename,\
-		GnuplotSkeletonFilename,GnuplotAltSkeletonFilename,descriptorsFilename);
+		GnuplotSkeletonFilename,GnuplotAltSkeletonFilename,descriptorsFilename,\
+		parametersFilename);
 	string VTKOutputFilename=outputFilename+".vtk";
 	string DXOutputFilename=outputFilename+".dat";
 	if (import_vtk) {
@@ -82,7 +84,7 @@ int main(int argc,char *argv[])
 			makeFoamSkeleton(GnuplotSkeletonFilename,ncell,center_x,center_y,\
 				center_z);
 		}
-		vert=alloc_fmatrix(vmax,3);
+		vert=alloc_dmatrix(vmax,3);
 		vinc=alloc_matrix(vmax,incmax);
 		importFoamSkeleton(GnuplotSkeletonFilename,vert,vinc,vmax,incmax,sv);
         if (!save_voro_diag1) {
@@ -101,10 +103,11 @@ int main(int argc,char *argv[])
 		struct fn1_params params = {sv,incmax,vmax,vert,vinc,smat};
 		// por=fn1(por,&params);
 		gsl_status = optim(&params,dedge);
+		saveParameters(parametersFilename,dedge);
     }
     por_s=porosity(smat);
     cout << "porosity of struts only " << por_s << endl;
-	vert=free_fmatrix(vert);
+	vert=free_dmatrix(vert);
 	vinc=free_matrix(vinc);
 	if (!openCell) {
 		if (import_vtk) {

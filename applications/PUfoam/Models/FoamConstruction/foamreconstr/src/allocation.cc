@@ -1,4 +1,38 @@
 #include <stdlib.h>
+double ***alloc_3Ddmatrix (int nx, int ny, int nz)
+{
+	int i, j;
+	double ***amat = NULL;
+
+	amat = (double ***)calloc((size_t)nx, sizeof(double **));
+	if (amat == NULL)
+		return NULL;
+
+	*amat = (double **)calloc((size_t)(nx*ny), sizeof(double *));
+	if (*amat == NULL)
+		return NULL;
+	for (i = 1; i < nx; i++)
+		amat[i] = &amat[0][i*ny];
+
+	**amat = (double *)calloc((size_t)(nx*ny*nz), sizeof(double));
+	if (**amat == NULL)
+		return NULL;
+	for (i = 0; i < nx; i++)
+		for (j = 0; j < ny; j++)
+			amat[i][j] = &amat[0][0][i*ny*nz+j*nz];
+
+	return amat;
+}
+
+double ***free_3Ddmatrix (double ***amat)
+{
+	free ((void *)**amat);
+	free ((void *) *amat);
+	free ((void *)  amat);
+	amat = NULL;
+	return amat;
+}
+
 float ***alloc_3Dfmatrix (int nx, int ny, int nz)
 {
 	int i, j;

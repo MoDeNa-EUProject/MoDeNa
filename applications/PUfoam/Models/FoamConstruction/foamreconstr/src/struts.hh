@@ -2,6 +2,6 @@
 #define STRUTS_H
 
 double fn1 (double, void *);
-int optim (void *,float &);
+int optim (void *,double &);
 
 #endif

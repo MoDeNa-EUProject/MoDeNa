@@ -1,6 +1,6 @@
 #ifndef EDGES_H
 #define EDGES_H
 
-void makeEdgeStruts(int ***, int, float **, int **);
+void makeEdgeStruts(int ***, int, double **, int **);
 
 #endif

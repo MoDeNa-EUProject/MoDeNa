@@ -6,6 +6,7 @@ from __future__ import division
 import os
 from blessings import Terminal
 import json
+import datetime
 from scipy.optimize import newton as newton
 from scipy.optimize import minimize_scalar as minimize_scalar
 from scipy.optimize import minimize as minimize
@@ -13,6 +14,7 @@ import FoamGeometryConstruction_Periodic
 import periodicBox
 import vtkconv
 dx=dy=dz=4 # size of RVE
+dedge=6
 ########## Read input file
 with open('input.json') as data_file:
     data = json.load(data_file)
@@ -46,7 +48,7 @@ def porfsOpt(x):
     vx=int(x[0])
     vy=vx
     vz=vx
-    dstrut=x[1]
+    dedge=x[1]
     if os.path.isfile(filename+'.vtk'):
         os.remove(filename+'.vtk')
     if not os.path.isfile(filename+'.ply'):
@@ -66,7 +68,7 @@ def porfsOpt(x):
     f.write("0\n")
     f.write("0\n")
     f.write("0\n")
-    f.write("{0:f}\n".format(dstrut))
+    f.write("{0:f}\n".format(dedge))
     f.write("0\n")
     f.write("1\n")
     f.write("0\n")
@@ -83,6 +85,7 @@ def porfsOpt(x):
     f.write("PeriodicRVE.gnu\n")
     f.write("name\n")
     f.write("decriptors.out\n")
+    f.write("parameters.out\n")
     f.close()
     os.system("./foamreconstr/foamreconstr")
     f=open("decriptors.out","r")
@@ -97,6 +100,7 @@ def porfsOpt(x):
 ########## Function for finding size of box and strut size parameter, which
 # would give desired porosity and strut content
 def porfsOpt2(x):
+    global dedge
     filename="PeriodicRVEBox"
     vx=int(x)
     vy=vx
@@ -120,7 +124,8 @@ def porfsOpt2(x):
     f.write("0\n")
     f.write("0\n")
     f.write("0\n")
-    f.write("3\n")
+    print "dedge: ",dedge
+    f.write("{0:f}\n".format(dedge))
     f.write("{0:f}\n".format(1-strutContent*(1-porosity)))
     f.write("0\n")
     f.write("1\n")
@@ -138,17 +143,20 @@ def porfsOpt2(x):
     f.write("PeriodicRVE.gnu\n")
     f.write("name\n")
     f.write("decriptors.out\n")
+    f.write("parameters.out\n")
     f.close()
     os.system("./foamreconstr/foamreconstr")
     f=open("decriptors.out","r")
-    eps=f.readline()
-    fs=f.readline()
+    eps=float(f.readline())
+    fs=float(f.readline())
     f.close()
-    eps=float(eps)
-    fs=float(fs)
+    f=open("parameters.out","r")
+    dedge=float(f.readline())
+    f.close()
     resid=((eps-porosity)/porosity)**2
     print resid
     return resid
+ts = datetime.datetime.now()
 ########## Create periodic RVE of foam
 print(
     term.yellow +
@@ -231,9 +239,12 @@ if binarizeBox:
         # res=minimize(porfsOpt,x0,method='Nelder-Mead',tol=5e-2)
         # print res
 
-        res=minimize_scalar(porfsOpt2,bracket=[200,250],method='Brent',tol=1e-2)
+        res=minimize_scalar(porfsOpt2,bracket=[150,200],method='Brent',tol=1e-2)
         vx=res.x
         vx=int(vx)
         vy=vx
         vz=vx
         print 'box size: {0:d}'.format(vx)
+tf = datetime.datetime.now()
+te = tf - ts
+print te

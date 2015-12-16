@@ -8,7 +8,8 @@ using namespace std;
 using namespace globals;
 void readParameters(string filename, string &outputFilename, \
     string &VTKInputFilename, string &GnuplotSkeletonFilename, \
-    string &GnuplotAltSkeletonFilename, string &descriptorsFilename) {
+    string &GnuplotAltSkeletonFilename, string &descriptorsFilename, \
+    string &parametersFilename) {
     // Reads inputs from text file. Returns filenames. Rest is put into global
     // variables.
     ifstream fin;
@@ -41,6 +42,7 @@ void readParameters(string filename, string &outputFilename, \
         fin >> GnuplotSkeletonFilename; fin.ignore(256,'\n');
         fin >> GnuplotAltSkeletonFilename; fin.ignore(256,'\n');
         fin >> descriptorsFilename; fin.ignore(256,'\n');
+        fin >> parametersFilename; fin.ignore(256,'\n');
     fin.close();
 }
 int ***allocateFromVTK(string filename, int ***amat) {
@@ -194,7 +196,7 @@ void saveToDX(const char* filename, int ***amat) {
 
     fclose (strmo);
 }
-void saveToGnuplot(string filename, int sv, int incmax, float **vert, \
+void saveToGnuplot(string filename, int sv, int incmax, double **vert, \
                    int **vinc) {
     // Stores cell edges incident to voronoi vertices in the domain
     ofstream fout;
@@ -233,5 +235,15 @@ void saveDescriptors(string filename, double por, double fs) {
     }
     fout << por << endl;
     fout << fs << endl;
+    fout.close();
+}
+void saveParameters(string filename, double dedge) {
+    ofstream fout;
+    fout.open(filename);
+    if (!fout.is_open()) {
+        cout << "can't open file " << filename << endl;
+        exit(1);
+    }
+    fout << dedge << endl;
     fout.close();
 }
