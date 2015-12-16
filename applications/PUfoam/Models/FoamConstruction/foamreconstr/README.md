@@ -13,6 +13,10 @@ sudo ./install_voro++.sh
 ```
 By default it is installed in `/usr/local`. You must change `CMakeLists.txt`
 in `src/` if you installed it somewhere else.
+The program depends on `GSL` library. Make sure it is installed by running:
+```
+sudo apt-get install gsl-bin libgsl0-dev
+```
 The program is compiled by:
 ```
 cmake .
@@ -28,6 +32,7 @@ Edit `foamreconstr.in`:
 1. Save for Paraview? `bool`
 1. How large the nodes should be. `float`
 1. How large the edges should be. `float`
+1. Desired porosity of only struts. `double`
 1. Perturbation of seed positions. `float` in range 0..1
 1. General seed positions. 1=cubic grid, 2=hexagonal lattice, ABAB...,3=hexagonal lattice, ABCABC...
 1. Size of the domain in `x` in voxels. `int`
@@ -36,7 +41,7 @@ Edit `foamreconstr.in`:
 1. Size of the cells in `x` in voxels. `int`
 1. Size of the cells in `y` in voxels. `int`
 1. Size of the cells in `z` in voxels. `int`
-1. Keep copy of `voro++` tessellation - gnuplot diagram? `bool`
+1. Keep copy of tessellation - gnuplot diagram? `bool`
 1. Keep copy of tessellation - alternative gnuplot diagram? `bool`
 1. Import morphology from file? In this case domain size is set from input file. `bool`
 1. Name of output file with morphology without extension. `string`

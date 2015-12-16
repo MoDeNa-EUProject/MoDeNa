@@ -20,7 +20,7 @@ void makeEdgeStruts(int ***amat, int sv, float **vert, int **vinc) {
     float pa[3],pb[3],pc[3]; //vertices of triangle base of the prism
     float pap[3],pbp[3],pcp[3]; //vertices of triangle in plane of point P
 	float pp[3]; //coordinates of point P
-    cout << "creating struts at cell edges..." << endl;
+    cout << "creating struts at cell edges..." << dedge << endl;
     for (i=1; i<sv; i++) { // for all vertices
         if (in_domain(vert[i][0],vert[i][1],vert[i][2])) {
             for (j=0; j<4; j++) { // for every edge

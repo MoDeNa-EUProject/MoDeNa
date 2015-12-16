@@ -75,7 +75,7 @@ def porfsOpt(x):
     f.write("0\n")
     f.write("0\n")
     f.write("0\n")
-    f.write("0\n")
+    f.write("1\n")
     f.write("0\n")
     f.write("1\n")
     f.write("morphology\n")

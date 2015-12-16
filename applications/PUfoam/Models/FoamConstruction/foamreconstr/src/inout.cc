@@ -24,6 +24,7 @@ void readParameters(string filename, string &outputFilename, \
         fin >> save_vtk; fin.ignore(256,'\n');
         fin >> dstrut; fin.ignore(256,'\n');
         fin >> dedge; fin.ignore(256,'\n');
+        fin >> strutPorosity; fin.ignore(256,'\n');
         fin >> RANDOM; fin.ignore(256,'\n');
         fin >> grid; fin.ignore(256,'\n');
         fin >> nx; fin.ignore(256,'\n');

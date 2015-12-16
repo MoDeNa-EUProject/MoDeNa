@@ -5,15 +5,14 @@
 // TODO documentation
 #include "globals.hh"
 #include <iostream>
+#include <string.h>
 #include "inout.hh"
 #include "allocation.hh"
 #include "geometry.hh"
-#include "edges.hh"
-#include "nodes.hh"
 #include "skeleton.hh"
 #include "walls.hh"
 #include "seeds.hh"
-#include <string.h>
+#include "struts.hh"
 using namespace std;
 using namespace globals;
 
@@ -21,7 +20,7 @@ int main(int argc,char *argv[])
 {
 	int ncell; //number of seeds for tessellation
 	int i, j, k;
-	int ***amat; //3D matrix of voxels
+	int ***amat,***smat; //3D matrix of voxels
     int *center_x, *center_y, *center_z; //position of seeds
 	int vmax=10000; //maximum number of vertices
 	int incmax=8; //maximum number of incident vertices to a vertex
@@ -31,6 +30,7 @@ int main(int argc,char *argv[])
 	double por=0; //porosity
 	double por_s=0; //porosity of struts only
 	double fs=0; //strut content
+	int gsl_status;
 	string inputsFilename="foamreconstr.in";
 	string outputFilename;
 	string VTKInputFilename;
@@ -85,24 +85,27 @@ int main(int argc,char *argv[])
 		vert=alloc_fmatrix(vmax,3);
 		vinc=alloc_matrix(vmax,incmax);
 		importFoamSkeleton(GnuplotSkeletonFilename,vert,vinc,vmax,incmax,sv);
-        if (!import_vtk && !save_voro_diag1) {
+        if (!save_voro_diag1) {
             remove(GnuplotSkeletonFilename.c_str());
         }
         // save alternative gnuplot image of voronoi tesselation
         if (save_voro_diag2) {
 			saveToGnuplot(GnuplotAltSkeletonFilename,sv,incmax,vert,vinc);
         }
+		// allocate matrix for struts
+	    smat = alloc_3Dmatrix (nx, ny, nz);
+	    if (smat == NULL) {
+			fprintf (stderr, "Insufficient memory.\n");
+			return 9;
+	    }
+		struct fn1_params params = {sv,incmax,vmax,vert,vinc,smat};
+		// por=fn1(por,&params);
+		gsl_status = optim(&params,dedge);
     }
-    if (createNodes) {
-		makeNodeStruts(amat,sv,incmax,vmax,vert,vinc);
-    }
-    if (createEdges) {
-		makeEdgeStruts(amat,sv,vert,vinc);
-    }
+    por_s=porosity(smat);
+    cout << "porosity of struts only " << por_s << endl;
 	vert=free_fmatrix(vert);
 	vinc=free_matrix(vinc);
-    por_s=porosity(amat);
-    cout << "porosity of struts only " << por_s << endl;
 	if (!openCell) {
 		if (import_vtk) {
 			importFromVTK(VTKInputFilename,amat);
@@ -113,17 +116,22 @@ int main(int argc,char *argv[])
 			free(center_z);
 		}
 	}
-	por=porosity(amat);
+	for (i = 0; i < nx; i++)
+	for (j = 0; j < ny; j++)
+	for (k = 0; k < nz; k++)
+		smat[i][j][k] = smat[i][j][k] + amat[i][j][k];
+	por=porosity(smat);
     cout << "porosity " << por << endl;
 	fs=(1-por_s)/(1-por);
     cout << "polymer in struts " << fs << endl;
 	saveDescriptors(descriptorsFilename,por,fs);
     if (save_dat) {
-        saveToDX(DXOutputFilename.c_str(),amat);
+        saveToDX(DXOutputFilename.c_str(),smat);
     }
     if (save_vtk) {
-		saveToVTK(VTKOutputFilename.c_str(),amat);
+		saveToVTK(VTKOutputFilename.c_str(),smat);
     }
 	amat=free_3Dmatrix(amat);
+	amat=free_3Dmatrix(smat);
 	exit(0);
 }
