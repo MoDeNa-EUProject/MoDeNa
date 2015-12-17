@@ -11,6 +11,7 @@ find_package(MODENA REQUIRED)
 include_directories(${MODENA_INCLUDE_DIRS})
 link_directories(${MODENA_LIBRARY_DIRS})
 
+set (CMAKE_NO_SYSTEM_FROM_IMPORTED yes)
 
 set (CMAKE_Fortran_FLAGS "-ffree-line-length-none -O3")
 
