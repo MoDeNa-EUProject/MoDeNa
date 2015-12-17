@@ -1842,9 +1842,9 @@ END SUBROUTINE fden_calc
 !!   VARIABLE LIST:
 !! running     defines the running variable. For example: if you want
 !!             to calculate the vapor pressure curve of a component
-!!             starting from 100�C to 200�C, then running is 't'. The
+!!             starting from 100C to 200C, then running is 't'. The
 !!             temperature is step-wise increased until the end-
-!!             -temperature of 200�C is reached.
+!!             -temperature of 200C is reached.
 !!             (in this example end_x=200+273.15)
 !! end_x       end point for running variable
 !! steps       No. of calculation steps towards the end point of calc.
