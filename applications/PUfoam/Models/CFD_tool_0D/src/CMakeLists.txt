@@ -8,8 +8,9 @@ endif()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
-set(CMAKE_BUILD_TYPE Release)
-
+set(CMAKE_CXX_FLAGS "-Wall -g")
+set(CMAKE_BUILD_TYPE Debug)
+message("CMAKE_BUILD_TYPE is ${CMAKE_BUILD_TYPE}")
 add_subdirectory(eigen)
 
 #set(Boost_DEBUG 1)
