@@ -47,11 +47,11 @@ void importFoamSkeleton(string filename, double **vert, int **vinc, int vmax, \
     bool found;
     double eps=1e-2; //tolerance for close voronoi vertices
     if (report) {
-        cout << "loading cell vertices and edges..." << endl;
+        cout << "loading cell vertices and edges" << endl;
     }
     fin.open(filename);
     if (!fin.is_open()) {
-        cout << "can't open gnuplot file with foam skeleton";
+        cout << "can't open gnuplot file with foam skeleton" << endl;
         exit(1);
     }
     for (i=0; i<vmax; i++) { //initialize vert

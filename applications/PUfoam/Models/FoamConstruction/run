@@ -7,10 +7,7 @@ import os
 from blessings import Terminal
 import json
 import datetime
-from scipy.optimize import newton as newton
 from scipy.optimize import minimize_scalar as minimize_scalar
-from scipy.optimize import minimize as minimize
-from scipy.optimize import fminbound as fminbound
 import FoamGeometryConstruction_Periodic
 import periodicBox
 import vtkconv
@@ -20,6 +17,8 @@ dedge=6
 with open('input.json') as data_file:
     data = json.load(data_file)
 locals().update(data) # Creates variables from dictionary
+filenameBox=filename+"Box"
+filenameBoxAscii = filenameBox+"-ascii"
 ########## Create terminal for colour output
 term = Terminal()
 ########## Function for finding size of box, which would give desired porosity
@@ -27,12 +26,12 @@ def porOpt(vx):
     vx=int(vx)
     vy=vx
     vz=vx
-    if os.path.isfile(filename+'.vtk'):
-        os.remove(filename+'.vtk')
-    if not os.path.isfile(filename+'.ply'):
+    if os.path.isfile(filenameBox+'.vtk'):
+        os.remove(filenameBox+'.vtk')
+    if not os.path.isfile(filenameBox+'.ply'):
         raise SystemError(".ply file is missing. Nothing to binarize.")
     os.system("binvox -e -d {0:d} -rotz -rotx -rotz -rotz -t vtk ".format(vx)+
-        filename+".ply >binvox.out")
+        filenameBox+".ply >binvox.out")
     with open('binvox.out') as data_file:
         for line in data_file:
             if "counted" in line:
@@ -41,23 +40,21 @@ def porOpt(vx):
                 eps=1-solidVoxel/totalVoxel
                 print "dimension: {0:f}, porosity: {1:f}".format(vx,eps)
                 return (eps-porosity)**2
-########## Function for finding size of box and strut size parameter, which
+########## Function for finding size of box, which
 # would give desired porosity and strut content
 def porfsOpt(x):
     global dedge
-    filename="PeriodicRVEBox"
     vx=int(x)
     vy=vx
     vz=vx
-    if os.path.isfile(filename+'.vtk'):
-        os.remove(filename+'.vtk')
-    if not os.path.isfile(filename+'.ply'):
+    if os.path.isfile(filenameBox+'.vtk'):
+        os.remove(filenameBox+'.vtk')
+    if not os.path.isfile(filenameBox+'.ply'):
         raise SystemError(".ply file is missing. Nothing to binarize.")
     os.system("binvox -e -d {0:d} -rotz -rotx -rotz -rotz -t vtk ".format(vx)+
-        filename+".ply >binvox.out")
-    filenameIn = filename+".vtk"
-    filename = filename+"-ascii"
-    filenameOut = filename+".vtk"
+        filenameBox+".ply >binvox.out")
+    filenameIn = filenameBox+".vtk"
+    filenameOut = filenameBoxAscii+".vtk"
     origin=[dx,dy,dz]
     spacing=[dx/vx,dy/vy,dz/vz]
     vtkconv.main(filenameIn,filenameOut,origin,spacing)
@@ -82,9 +79,9 @@ def porfsOpt(x):
     f.write("0\n")
     f.write("1\n")
     f.write("0\n")
-    f.write("morphology\n")
-    f.write("PeriodicRVEBox-ascii.vtk\n")
-    f.write("PeriodicRVE.gnu\n")
+    f.write(filenameBox+"Struts.vtk\n")
+    f.write(filenameBoxAscii+".vtk\n")
+    f.write(filename+".gnu\n")
     f.write("name\n")
     f.write("decriptors.out\n")
     f.write("parameters.out\n")
@@ -127,8 +124,7 @@ if moveToPeriodicBox:
         term.normal
     )
     filenameIn = filename+".stl"
-    filename = filename+"Box"
-    filenameOut = filename+".stl"
+    filenameOut = filenameBox+".stl"
     xmin=dx
     ymin=dy
     zmin=dz
@@ -176,9 +172,8 @@ if binarizeBox:
             "Convert binary .vtk to ascii .vtk" +
             term.normal
         )
-        filenameIn = filename+".vtk"
-        filename = filename+"-ascii"
-        filenameOut = filename+".vtk"
+        filenameIn = filenameBox+".vtk"
+        filenameOut = filenameBoxAscii+".vtk"
         origin=[dx,dy,dz]
         spacing=[dx/vx,dy/vy,dz/vz]
         vtkconv.main(filenameIn,filenameOut,origin,spacing)
@@ -202,16 +197,14 @@ if binarizeBox:
             "Creating and saving optimal foam" +
             term.normal
         )
-        filename="PeriodicRVEBox"
-        if os.path.isfile(filename+'.vtk'):
-            os.remove(filename+'.vtk')
-        if not os.path.isfile(filename+'.ply'):
+        if os.path.isfile(filenameBox+'.vtk'):
+            os.remove(filenameBox+'.vtk')
+        if not os.path.isfile(filenameBox+'.ply'):
             raise SystemError(".ply file is missing. Nothing to binarize.")
         os.system("binvox -e -d {0:d}".format(vx)+" -rotz -rotx -rotz -rotz "+
-            "-t vtk "+filename+".ply >binvox.out")
-        filenameIn = filename+".vtk"
-        filename = filename+"-ascii"
-        filenameOut = filename+".vtk"
+            "-t vtk "+filenameBox+".ply >binvox.out")
+        filenameIn = filenameBox+".vtk"
+        filenameOut = filenameBoxAscii+".vtk"
         origin=[dx,dy,dz]
         spacing=[dx/vx,dy/vy,dz/vz]
         vtkconv.main(filenameIn,filenameOut,origin,spacing)
@@ -236,9 +229,9 @@ if binarizeBox:
         f.write("0\n")
         f.write("1\n")
         f.write("0\n")
-        f.write("morphology\n")
-        f.write("PeriodicRVEBox-ascii.vtk\n")
-        f.write("PeriodicRVE.gnu\n")
+        f.write(filenameBox+"Struts.vtk\n")
+        f.write(filenameBoxAscii+".vtk\n")
+        f.write(filename+".gnu\n")
         f.write("name\n")
         f.write("decriptors.out\n")
         f.write("parameters.out\n")
