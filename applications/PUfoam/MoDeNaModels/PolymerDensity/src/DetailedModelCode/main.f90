@@ -34,7 +34,7 @@
 !!
 !!Gross, Joachim, and Gabriele Sadowski. "Perturbed-chain SAFT: An equation of state based on a perturbation theory for chain molecules." Industrial & engineering chemistry research 40.4 (2001): 1244-1260.
 !!Gross, Joachim, and Gabriele Sadowski. "Application of the perturbed-chain SAFT equation of state to associating systems." Industrial & engineering chemistry research 41.22 (2002): 5510-5515.
-!!Gross, Joachim, and Jadran Vrabec. "An equation‐of‐state contribution for polar components: Dipolar molecules." AIChE journal 52.3 (2006): 1194-1204.
+!!Gross, Joachim, and Jadran Vrabec. "An equation-of-state contribution for polar components: Dipolar molecules." AIChE journal 52.3 (2006): 1194-1204.
 !!
 !!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
  
