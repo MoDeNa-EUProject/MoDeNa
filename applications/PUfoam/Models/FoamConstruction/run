@@ -10,6 +10,7 @@ import datetime
 from scipy.optimize import newton as newton
 from scipy.optimize import minimize_scalar as minimize_scalar
 from scipy.optimize import minimize as minimize
+from scipy.optimize import fminbound as fminbound
 import FoamGeometryConstruction_Periodic
 import periodicBox
 import vtkconv
@@ -124,7 +125,6 @@ def porfsOpt2(x):
     f.write("0\n")
     f.write("0\n")
     f.write("0\n")
-    print "dedge: ",dedge
     f.write("{0:f}\n".format(dedge))
     f.write("{0:f}\n".format(1-strutContent*(1-porosity)))
     f.write("0\n")
@@ -240,11 +240,40 @@ if binarizeBox:
         # print res
 
         res=minimize_scalar(porfsOpt2,bracket=[150,200],method='Brent',tol=1e-2)
+        # res=minimize_scalar(porfsOpt2,bounds=[200,250],method='bounded',tol=2e0)
         vx=res.x
         vx=int(vx)
         vy=vx
         vz=vx
         print 'box size: {0:d}'.format(vx)
+        # f=open("foamreconstr.in","w")
+        # f.write("0\n")
+        # f.write("1\n")
+        # f.write("0\n")
+        # f.write("0\n")
+        # f.write("1\n")
+        # f.write("0\n")
+        # f.write("{0:f}\n".format(dedge))
+        # f.write("{0:f}\n".format(1-strutContent*(1-porosity)))
+        # f.write("0\n")
+        # f.write("1\n")
+        # f.write("0\n")
+        # f.write("0\n")
+        # f.write("0\n")
+        # f.write("0\n")
+        # f.write("0\n")
+        # f.write("0\n")
+        # f.write("1\n")
+        # f.write("0\n")
+        # f.write("1\n")
+        # f.write("morphology\n")
+        # f.write("PeriodicRVEBox-ascii.vtk\n")
+        # f.write("PeriodicRVE.gnu\n")
+        # f.write("name\n")
+        # f.write("decriptors.out\n")
+        # f.write("parameters.out\n")
+        # f.close()
+        # os.system("./foamreconstr/foamreconstr")
 tf = datetime.datetime.now()
 te = tf - ts
 print te

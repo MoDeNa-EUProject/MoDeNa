@@ -31,6 +31,8 @@ int main(int argc,char *argv[])
 	double por_s=0; //porosity of struts only
 	double fs=0; //strut content
 	int gsl_status;
+	double mini,maxi;
+	int maxit=3;
 	string inputsFilename="foamreconstr.in";
 	string outputFilename;
 	string VTKInputFilename;
@@ -102,7 +104,21 @@ int main(int argc,char *argv[])
 	    }
 		struct fn1_params params = {sv,incmax,vmax,vert,vinc,smat};
 		// por=fn1(por,&params);
-		gsl_status = optim(&params,dedge);
+		mini=0.5*dedge;
+		maxi=1.5*dedge;
+		for (i=0;i<maxit;i++) {
+			gsl_status = optim(&params,dedge,mini,maxi);
+			if (gsl_status==0) {
+				break;
+			} else {
+				mini=0.5*mini;
+				maxi=1.5*maxi;
+				if (i==maxit-1) {
+					cout << "Didn't find initial interval" << endl;
+					exit(1);
+				}
+			}
+		}
 		saveParameters(parametersFilename,dedge);
     }
     por_s=porosity(smat);

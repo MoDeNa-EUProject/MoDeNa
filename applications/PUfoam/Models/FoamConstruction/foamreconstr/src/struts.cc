@@ -5,6 +5,8 @@
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_min.h>
+#include <iostream>
+using namespace std;
 using namespace globals;
 double fn1 (double x, void * p)
 {
@@ -32,20 +34,26 @@ double fn1 (double x, void * p)
 	return pow(por-strutPorosity,2);
 }
 
-int optim (void * params, double &m) {
+int optim (void * params, double &m, double &a, double &b) {
 	int status;
 	int iter = 0, max_iter = 100;
 	const gsl_min_fminimizer_type *T;
 	gsl_min_fminimizer *s;
-	double a = 0.5*m, b = 2*m;
 	gsl_function F;
+    gsl_set_error_handler_off ();
 
 	F.function = &fn1;
 	F.params = params;
 
 	T = gsl_min_fminimizer_brent;
 	s = gsl_min_fminimizer_alloc (T);
-	gsl_min_fminimizer_set (s, &F, m, a, b);
+	status = gsl_min_fminimizer_set (s, &F, m, a, b);
+    if (status == GSL_EINVAL) {
+        cout << "endpoints do not enclose a minimum" << endl;
+        return(1);
+    } else if (status != GSL_SUCCESS) {
+        cout << "something is wrong in optim function" << endl;
+    }
 
 	printf ("using %s method\n",
 	      gsl_min_fminimizer_name (s));
