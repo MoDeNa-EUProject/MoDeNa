@@ -2,23 +2,26 @@
 #include <stdlib.h>
 #include <stdio.h>
 using namespace globals;
-void createSeeds(int &ncell, int *center_x, int *center_y, int *center_z) {
+void createSeeds(int &ncell, int *center_x, int *center_y, int *center_z, \
+    bool report) {
     // Creates seeds for Voronoi tessellation at centers of cells at cubic or
     // hexagonal grids. Seed positions are store in `center_x`, `center_y` and
     // `center_z`. Updates `ncell`.
     const int GRID_CUBIC=1,GRID_HEXAG_AB=2,GRID_HEXAG_ABC=3;
     int i,j,k,m;
     int ttt;
-    if        (grid == GRID_CUBIC     ) {
-        printf("Cubic grid.\n");
-    } else if (grid == GRID_HEXAG_AB  ) {
-        printf("Hexagonal grid ABABAB...\n");
-    } else if (grid == GRID_HEXAG_ABC ) {
-        printf("Hexagonal grid ABCABCABC...\n");
+    if (report) {
+        if        (grid == GRID_CUBIC     ) {
+            printf("Cubic grid.\n");
+        } else if (grid == GRID_HEXAG_AB  ) {
+            printf("Hexagonal grid ABABAB...\n");
+        } else if (grid == GRID_HEXAG_ABC ) {
+            printf("Hexagonal grid ABCABCABC...\n");
+        }
+        printf("Matrix of %d x %d x %d voxels.\n", nx, ny, nz);
+        printf("Spacing of the grid is %d, %d, %d\n", sx, sy, sz);
+        printf("Maximum number of cells, ncell = %d\n", ncell);
     }
-    printf("Matrix of %d x %d x %d voxels.\n", nx, ny, nz);
-    printf("Spacing of the grid is %d, %d, %d\n", sx, sy, sz);
-    printf("Maximum number of cells, ncell = %d\n", ncell);
     if        (grid == GRID_CUBIC     ) {
         m = 0;
         for (i = 0; i < nx; i++)
@@ -114,7 +117,9 @@ void createSeeds(int &ncell, int *center_x, int *center_y, int *center_z) {
                 m++;
             }
     }
-    printf("Number of initialized centers of cells = %d\n", m);
+    if (report) {
+        printf("Number of initialized centers of cells = %d\n", m);
+    }
     ncell = m;
 
     /*

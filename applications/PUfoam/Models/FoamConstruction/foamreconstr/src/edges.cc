@@ -4,7 +4,8 @@
 #include "geometry.hh"
 using namespace std;
 using namespace globals;
-void makeEdgeStruts(int ***amat, int sv, double **vert, int **vinc) {
+void makeEdgeStruts(int ***amat, int sv, double **vert, int **vinc, \
+    bool report) {
     // Creates struts - solid material along cell edge. Created strut has
     // a shape of triangular prism. Updates `amat`.
     int i,j,k,l,m,n;
@@ -20,7 +21,9 @@ void makeEdgeStruts(int ***amat, int sv, double **vert, int **vinc) {
     double pa[3],pb[3],pc[3]; //vertices of triangle base of the prism
     double pap[3],pbp[3],pcp[3]; //vertices of triangle in plane of point P
 	double pp[3]; //coordinates of point P
-    cout << "creating struts at cell edges..." << dedge << endl;
+    if (report) {
+        cout << "creating struts at cell edges..." << dedge << endl;
+    }
     for (i=1; i<sv; i++) { // for all vertices
         if (in_domain(vert[i][0],vert[i][1],vert[i][2])) {
             for (j=0; j<4; j++) { // for every edge

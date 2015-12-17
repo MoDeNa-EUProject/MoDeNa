@@ -7,7 +7,7 @@
 using namespace std;
 using namespace globals;
 void makeNodeStruts(int ***amat, int sv, int incmax, int vmax, double **vert, \
-                    int **vinc) {
+                    int **vinc, bool report) {
     // Creates strut parts - solid material around cell vertices. Created
     // strut has a shape of tetrahedron. Updates `amat`.
     int i,j,k,l,m,n;
@@ -21,7 +21,9 @@ void makeNodeStruts(int ***amat, int sv, int incmax, int vmax, double **vert, \
     double ***tetra; //four points defining each tetrahedron
 	tetra=alloc_3Ddmatrix(vmax,4,3);
     // calculate tetrahedra
-    cout << "creating struts at cell vertices..." << endl;
+    if (report) {
+        cout << "creating struts at cell vertices..." << endl;
+    }
     svd=0;
     for (i=0; i<sv; i++) {
         if (in_domain(vert[i][0],vert[i][1],vert[i][2])) {

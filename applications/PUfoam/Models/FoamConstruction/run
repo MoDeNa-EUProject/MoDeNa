@@ -39,7 +39,7 @@ def porOpt(vx):
                 solidVoxel,totalVoxel=\
                     [int(s) for s in line.split() if s.isdigit()]
                 eps=1-solidVoxel/totalVoxel
-                print "porosity: {0:f}".format(eps)
+                print "dimension: {0:f}, porosity: {1:f}".format(vx,eps)
                 return (eps-porosity)**2
 ########## Function for finding size of box and strut size parameter, which
 # would give desired porosity and strut content
@@ -81,6 +81,7 @@ def porfsOpt(x):
     f.write("1\n")
     f.write("0\n")
     f.write("1\n")
+    f.write("0\n")
     f.write("morphology\n")
     f.write("PeriodicRVEBox-ascii.vtk\n")
     f.write("PeriodicRVE.gnu\n")
@@ -97,7 +98,8 @@ def porfsOpt(x):
     dedge=float(f.readline())
     f.close()
     resid=((eps-porosity)/porosity)**2
-    print resid
+    print "dimension: {0:f}, porosity: {1:f}".format(vx,eps)+\
+        ", strut content: {0:f}".format(fs)
     return resid
 ts = datetime.datetime.now()
 ########## Create periodic RVE of foam
@@ -144,21 +146,26 @@ if binarizeBox:
     ########## Binarize and save as .vtk
     if deleteFiles and os.path.isfile(filename+'.stl'):
         os.remove(filename+'.stl')
-    print(
-        term.yellow +
-        "Binarize and save as .vtk" +
-        term.normal
-    )
     if strutContent==0:
         # Find the size of box, which would give desired porosity
         # This method is not optimal, since the solver doesn't know that the
         # function takes only integer arguments
+        print(
+            term.yellow +
+            "Optimizing porosity" +
+            term.normal
+        )
         res=minimize_scalar(porOpt,bracket=[100,120],method='Brent',tol=1e-2)
         vx=res.x
         vx=int(vx)
+        print 'box size: {0:d}'.format(vx)
         vy=vx
         vz=vx
-        print 'box size: {0:d}'.format(vx)
+        print(
+            term.yellow +
+            "Creating and saving optimal foam" +
+            term.normal
+        )
         porOpt(vx) # Call it with the optimized box size
         if deleteFiles:
             os.remove("binvox.out")
@@ -178,26 +185,36 @@ if binarizeBox:
         if deleteFiles:
             os.remove(filenameIn)
     else:
+        print(
+            term.yellow +
+            "Optimizing porosity and strut content" +
+            term.normal
+        )
         res=minimize_scalar(porfsOpt,bracket=[150,200],method='Brent',tol=1e-2)
         # res=minimize_scalar(porfsOpt,bounds=[200,250],method='bounded',tol=2e0)
         vx=res.x
         vx=int(vx)
+        print 'optimal box size: {0:d}'.format(vx)
         vy=vx
         vz=vx
+        print(
+            term.yellow +
+            "Creating and saving optimal foam" +
+            term.normal
+        )
         filename="PeriodicRVEBox"
         if os.path.isfile(filename+'.vtk'):
             os.remove(filename+'.vtk')
         if not os.path.isfile(filename+'.ply'):
             raise SystemError(".ply file is missing. Nothing to binarize.")
-        os.system("binvox -e -d {0:d} -rotz -rotx -rotz -rotz -t vtk ".format(vx)+
-            filename+".ply >binvox.out")
+        os.system("binvox -e -d {0:d}".format(vx)+" -rotz -rotx -rotz -rotz "+
+            "-t vtk "+filename+".ply >binvox.out")
         filenameIn = filename+".vtk"
         filename = filename+"-ascii"
         filenameOut = filename+".vtk"
         origin=[dx,dy,dz]
         spacing=[dx/vx,dy/vy,dz/vz]
         vtkconv.main(filenameIn,filenameOut,origin,spacing)
-        print 'box size: {0:d}'.format(vx)
         f=open("foamreconstr.in","w")
         f.write("0\n")
         f.write("1\n")
@@ -218,6 +235,7 @@ if binarizeBox:
         f.write("1\n")
         f.write("0\n")
         f.write("1\n")
+        f.write("0\n")
         f.write("morphology\n")
         f.write("PeriodicRVEBox-ascii.vtk\n")
         f.write("PeriodicRVE.gnu\n")
@@ -228,4 +246,4 @@ if binarizeBox:
         os.system("./foamreconstr/foamreconstr")
 tf = datetime.datetime.now()
 te = tf - ts
-print te
+print "Foam created in: ",te

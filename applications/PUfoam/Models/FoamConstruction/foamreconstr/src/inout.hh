@@ -4,12 +4,12 @@ using namespace std;
 
 void readParameters(string, string &, string &, string &, string &, string &, \
     string &);
-int ***allocateFromVTK(string, int ***);
-void importFromVTK(string, int ***);
-void saveToVTK(const char*, int ***);
-void saveToDX(const char*, int ***);
-void saveToGnuplot(string, int, int, double **, int **);
-void saveDescriptors(string, double, double);
-void saveParameters(string, double);
+int ***allocateFromVTK(string, int ***, bool);
+void importFromVTK(string, int ***, bool);
+void saveToVTK(const char*, int ***, bool);
+void saveToDX(const char*, int ***, bool);
+void saveToGnuplot(string, int, int, double **, int **, bool);
+void saveDescriptors(string, double, double, bool);
+void saveParameters(string, double, bool);
 
 #endif

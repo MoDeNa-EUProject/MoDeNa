@@ -48,7 +48,7 @@ int main(int argc,char *argv[])
 	string VTKOutputFilename=outputFilename+".vtk";
 	string DXOutputFilename=outputFilename+".dat";
 	if (import_vtk) {
-		amat=allocateFromVTK(VTKInputFilename,amat);
+		amat=allocateFromVTK(VTKInputFilename,amat,progress_report);
 	} else {
 	    ncell =          1 + (nx - 1) / sx ;
 	    ncell = ncell * (1 + (ny - 1) / sy);
@@ -78,23 +78,25 @@ int main(int argc,char *argv[])
 	    for (j = 0; j < ny; j++)
 	    for (k = 0; k < nz; k++)
 	        amat[i][j][k] = 0;
-		createSeeds(ncell,center_x,center_y,center_z);
+		createSeeds(ncell,center_x,center_y,center_z,progress_report);
 	}
     if (createNodes || createEdges) {
 		if (!import_vtk) {
 		    // geometrical voronoi tesselation by voro++
 			makeFoamSkeleton(GnuplotSkeletonFilename,ncell,center_x,center_y,\
-				center_z);
+				center_z,progress_report);
 		}
 		vert=alloc_dmatrix(vmax,3);
 		vinc=alloc_matrix(vmax,incmax);
-		importFoamSkeleton(GnuplotSkeletonFilename,vert,vinc,vmax,incmax,sv);
+		importFoamSkeleton(GnuplotSkeletonFilename,vert,vinc,vmax,incmax,sv,\
+			progress_report);
         if (!save_voro_diag1) {
             remove(GnuplotSkeletonFilename.c_str());
         }
         // save alternative gnuplot image of voronoi tesselation
         if (save_voro_diag2) {
-			saveToGnuplot(GnuplotAltSkeletonFilename,sv,incmax,vert,vinc);
+			saveToGnuplot(GnuplotAltSkeletonFilename,sv,incmax,vert,vinc,\
+				progress_report);
         }
 		// allocate matrix for struts
 	    smat = alloc_3Dmatrix (nx, ny, nz);
@@ -102,12 +104,12 @@ int main(int argc,char *argv[])
 			fprintf (stderr, "Insufficient memory.\n");
 			return 9;
 	    }
-		struct fn1_params params = {sv,incmax,vmax,vert,vinc,smat};
-		// por=fn1(por,&params);
+		struct fn1_params params = {sv,incmax,vmax,vert,vinc,smat,\
+			progress_report};
 		mini=0.5*dedge;
 		maxi=1.5*dedge;
 		for (i=0;i<maxit;i++) {
-			gsl_status = optim(&params,dedge,mini,maxi);
+			gsl_status = optim(&params,dedge,mini,maxi,progress_report);
 			if (gsl_status==0) {
 				break;
 			} else {
@@ -119,17 +121,19 @@ int main(int argc,char *argv[])
 				}
 			}
 		}
-		saveParameters(parametersFilename,dedge);
+		saveParameters(parametersFilename,dedge,progress_report);
     }
     por_s=porosity(smat);
-    cout << "porosity of struts only " << por_s << endl;
+	if (progress_report) {
+    	cout << "porosity of struts only " << por_s << endl;
+	}
 	vert=free_dmatrix(vert);
 	vinc=free_matrix(vinc);
 	if (!openCell) {
 		if (import_vtk) {
-			importFromVTK(VTKInputFilename,amat);
+			importFromVTK(VTKInputFilename,amat,progress_report);
 		} else {
-			makeWalls(amat,ncell,center_x,center_y,center_z);
+			makeWalls(amat,ncell,center_x,center_y,center_z,progress_report);
 			free(center_x);
 			free(center_y);
 			free(center_z);
@@ -140,15 +144,17 @@ int main(int argc,char *argv[])
 	for (k = 0; k < nz; k++)
 		smat[i][j][k] = smat[i][j][k] + amat[i][j][k];
 	por=porosity(smat);
-    cout << "porosity " << por << endl;
 	fs=(1-por_s)/(1-por);
-    cout << "polymer in struts " << fs << endl;
-	saveDescriptors(descriptorsFilename,por,fs);
+	if (progress_report) {
+	    cout << "porosity " << por << endl;
+	    cout << "polymer in struts " << fs << endl;
+	}
+	saveDescriptors(descriptorsFilename,por,fs,progress_report);
     if (save_dat) {
-        saveToDX(DXOutputFilename.c_str(),smat);
+        saveToDX(DXOutputFilename.c_str(),smat,progress_report);
     }
     if (save_vtk) {
-		saveToVTK(VTKOutputFilename.c_str(),smat);
+		saveToVTK(VTKOutputFilename.c_str(),smat,progress_report);
     }
 	amat=free_3Dmatrix(amat);
 	amat=free_3Dmatrix(smat);

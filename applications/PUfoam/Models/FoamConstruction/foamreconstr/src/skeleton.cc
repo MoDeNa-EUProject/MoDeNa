@@ -8,7 +8,7 @@ using namespace std;
 using namespace voro;
 using namespace globals;
 void makeFoamSkeleton(string filename, int ncell, int *center_x, \
-                      int *center_y, int *center_z) {
+                      int *center_y, int *center_z, bool report) {
     // Uses Voro++ to create foam skeleton - tessellation on provided seeds.
     // Skeleton is saved to gnuplot file.
     int i;
@@ -17,7 +17,9 @@ void makeFoamSkeleton(string filename, int ncell, int *center_x, \
     double zmin=0,zmax=nz;
     const int n_x=6,n_y=6,n_z=6; // Set up the number of blocks that
     // the container is divided into (voro++)
-    cout << "voro++ is creating Voronoi tesselation..." << endl;
+    if (report) {
+        cout << "voro++ is creating Voronoi tesselation..." << endl;
+    }
     // Create a container with the geometry given above, and make it
     // non-periodic in each of the three coordinates. Allocate space for
     // eight particles within each computational block
@@ -31,7 +33,7 @@ void makeFoamSkeleton(string filename, int ncell, int *center_x, \
 }
 
 void importFoamSkeleton(string filename, double **vert, int **vinc, int vmax, \
-                        int incmax, int &sv) {
+                        int incmax, int &sv, bool report) {
     // Imports foam skeleton from gnuplot file. Creates `vert` and `vinc` and
     // calculates `sv`.
     int i,j;
@@ -44,7 +46,9 @@ void importFoamSkeleton(string filename, double **vert, int **vinc, int vmax, \
     string line;
     bool found;
     double eps=1e-2; //tolerance for close voronoi vertices
-    cout << "loading cell vertices and edges..." << endl;
+    if (report) {
+        cout << "loading cell vertices and edges..." << endl;
+    }
     fin.open(filename);
     if (!fin.is_open()) {
         cout << "can't open gnuplot file with foam skeleton";

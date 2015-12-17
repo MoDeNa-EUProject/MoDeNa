@@ -20,7 +20,7 @@ template <typename T> int sgn(T val) {
     return (T(0) < val) - (val < T(0));
 }
 struct fn1_params {int sv; int incmax; int vmax; double **vert; int **vinc; \
-    int ***smat;};
+    int ***smat; bool report;};
 namespace globals {
     extern bool createNodes; //create struts at cell vertices
     extern bool createEdges; //create struts at cell edges
@@ -43,5 +43,6 @@ namespace globals {
     extern bool save_voro_diag1; //gnuplot Voronoi diagram
     extern bool save_voro_diag2; //alternative gnuplot Voronoi diagram
     extern bool import_vtk; //import morphology from vtk
+    extern bool progress_report; //show detailed progress report
 }
 #endif

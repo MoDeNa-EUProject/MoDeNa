@@ -37,6 +37,7 @@ void readParameters(string filename, string &outputFilename, \
         fin >> save_voro_diag1; fin.ignore(256,'\n');
         fin >> save_voro_diag2; fin.ignore(256,'\n');
 		fin >> import_vtk; fin.ignore(256,'\n');
+        fin >> progress_report; fin.ignore(256,'\n');
         fin >> outputFilename; fin.ignore(256,'\n');
         fin >> VTKInputFilename; fin.ignore(256,'\n');
         fin >> GnuplotSkeletonFilename; fin.ignore(256,'\n');
@@ -45,12 +46,14 @@ void readParameters(string filename, string &outputFilename, \
         fin >> parametersFilename; fin.ignore(256,'\n');
     fin.close();
 }
-int ***allocateFromVTK(string filename, int ***amat) {
+int ***allocateFromVTK(string filename, int ***amat, bool report) {
     int i,j,k;
     ifstream fin;
     string line;
     // read vtk file
-    cout << "reading vtk file" << endl;
+    if (report) {
+        cout << "reading vtk file" << endl;
+    }
     fin.open(filename);
     // read header
     int vtkx,vtky,vtkz;
@@ -61,7 +64,10 @@ int ***allocateFromVTK(string filename, int ***amat) {
             sscanf(line.c_str(),"%s %d %d %d",word,&vtkx,&vtky,&vtkz);
         }
     }
-    cout << "dimensions: " << vtkx << ", " << vtky << ", " << vtkz << endl;
+    if (report) {
+        cout << "dimensions: " << vtkx << ", " << vtky << ", " << vtkz << endl;
+        cout << "allocating" << endl;
+    }
     amat = alloc_3Dmatrix (vtkx, vtky, vtkz);
     for (i = 0; i < nx; i++)
     for (j = 0; j < ny; j++)
@@ -72,14 +78,16 @@ int ***allocateFromVTK(string filename, int ***amat) {
     nz=vtkz;
     return amat;
 }
-void importFromVTK(string filename, int ***amat) {
+void importFromVTK(string filename, int ***amat, bool report) {
     int i,j,k,l;
     ifstream fin;
     string line;
     int *bmat;
     float a,b,c;
     // read vtk file
-    cout << "reading vtk file" << endl;
+    if (report) {
+        cout << "reading vtk file" << endl;
+    }
     fin.open(filename);
     // read header
     int vtkx,vtky,vtkz;
@@ -90,7 +98,10 @@ void importFromVTK(string filename, int ***amat) {
             sscanf(line.c_str(),"%s %d %d %d",word,&vtkx,&vtky,&vtkz);
         }
     }
-    cout << "dimensions: " << vtkx << ", " << vtky << ", " << vtkz << endl;
+    if (report) {
+        cout << "dimensions: " << vtkx << ", " << vtky << ", " << vtkz << endl;
+        cout << "loading data file" << endl;
+    }
     bmat = (int *)calloc((size_t)vtkx*vtky*vtkz, sizeof(int));
     // read data
     getline(fin, line);
@@ -132,11 +143,13 @@ void importFromVTK(string filename, int ***amat) {
     ny=vtky;
     nz=vtkz;
 }
-void saveToVTK(const char* filename, int ***amat) {
+void saveToVTK(const char* filename, int ***amat, bool report) {
     int i,j,k;
     FILE *strmo;
     // Output to file in Paraview style.
-    cout << "saving in Paraview style..." << endl;
+    if (report) {
+        cout << "saving in Paraview style..." << endl;
+    }
     strmo = fopen(filename, "w");
     if (strmo == NULL) {
         fprintf (stderr, "Can't open file %s\n",filename);
@@ -167,11 +180,13 @@ void saveToVTK(const char* filename, int ***amat) {
 
     fclose (strmo);
 }
-void saveToDX(const char* filename, int ***amat) {
+void saveToDX(const char* filename, int ***amat, bool report) {
     int i,j,k;
     FILE *strmo;
     // Output to file in DX style.
-    cout << "saving in DX style..." << endl;
+    if (report) {
+        cout << "saving in DX style..." << endl;
+    }
     strmo = fopen(filename, "w");
     if (strmo == NULL) {
         fprintf (stderr, "Can't open file %s\n",filename);
@@ -197,11 +212,13 @@ void saveToDX(const char* filename, int ***amat) {
     fclose (strmo);
 }
 void saveToGnuplot(string filename, int sv, int incmax, double **vert, \
-                   int **vinc) {
+                   int **vinc, bool report) {
     // Stores cell edges incident to voronoi vertices in the domain
     ofstream fout;
     int i,j;
-    cout << "saving shifted Voronoi diagram..." << endl;
+    if (report) {
+        cout << "saving shifted Voronoi diagram" << endl;
+    }
     fout.open(filename);
     if (!fout.is_open()) {
         cout << "can't open file " << filename << endl;
@@ -226,8 +243,11 @@ void saveToGnuplot(string filename, int sv, int incmax, double **vert, \
     }
     fout.close();
 }
-void saveDescriptors(string filename, double por, double fs) {
+void saveDescriptors(string filename, double por, double fs, bool report) {
     ofstream fout;
+    if (report) {
+        cout << "saving descriptors" << endl;
+    }
     fout.open(filename);
     if (!fout.is_open()) {
         cout << "can't open file " << filename << endl;
@@ -237,8 +257,11 @@ void saveDescriptors(string filename, double por, double fs) {
     fout << fs << endl;
     fout.close();
 }
-void saveParameters(string filename, double dedge) {
+void saveParameters(string filename, double dedge, bool report) {
     ofstream fout;
+    if (report) {
+        cout << "saving parameters" << endl;
+    }
     fout.open(filename);
     if (!fout.is_open()) {
         cout << "can't open file " << filename << endl;

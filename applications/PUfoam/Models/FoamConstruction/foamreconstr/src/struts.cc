@@ -18,6 +18,7 @@ double fn1 (double x, void * p)
 	double **vert = (params->vert);
 	int **vinc = (params->vinc);
 	int ***smat = (params->smat);
+    bool report = (params->report);
 	int i,j,k;
 	dedge=x;
 	for (i = 0; i < nx; i++)
@@ -25,16 +26,16 @@ double fn1 (double x, void * p)
 	for (k = 0; k < nz; k++)
 		smat[i][j][k] = 0;
 	if (createEdges) {
-		makeEdgeStruts(smat,sv,vert,vinc);
+		makeEdgeStruts(smat,sv,vert,vinc,report);
 	}
 	if (createNodes) {
-		makeNodeStruts(smat,sv,incmax,vmax,vert,vinc);
+		makeNodeStruts(smat,sv,incmax,vmax,vert,vinc,report);
 	}
 	double por = porosity(smat);
 	return pow(por-strutPorosity,2);
 }
 
-int optim (void * params, double &m, double &a, double &b) {
+int optim (void * params, double &m, double &a, double &b, bool report) {
 	int status;
 	int iter = 0, max_iter = 100;
 	const gsl_min_fminimizer_type *T;
@@ -49,41 +50,37 @@ int optim (void * params, double &m, double &a, double &b) {
 	s = gsl_min_fminimizer_alloc (T);
 	status = gsl_min_fminimizer_set (s, &F, m, a, b);
     if (status == GSL_EINVAL) {
-        cout << "endpoints do not enclose a minimum" << endl;
+        if (report) {
+            cout << "endpoints do not enclose a minimum" << endl;
+        }
         return(1);
     } else if (status != GSL_SUCCESS) {
         cout << "something is wrong in optim function" << endl;
     }
 
-	printf ("using %s method\n",
-	      gsl_min_fminimizer_name (s));
+    if (report) {
+    	printf ("using %s method\n", gsl_min_fminimizer_name (s));
+    	printf ("%5s [%9s, %9s] %9s %9s\n",
+            "iter", "lower", "upper", "min", "err(est)");
+    	printf ("%5d [%.7f, %.7f] %.7f %.7f\n",iter, a, b, m, b - a);
+    }
 
-	printf ("%5s [%9s, %9s] %9s %9s\n",
-	      "iter", "lower", "upper", "min", "err(est)");
+	do {
+        iter++;
+        status = gsl_min_fminimizer_iterate (s);
 
-	printf ("%5d [%.7f, %.7f] %.7f %.7f\n",
-	      iter, a, b,
-	      m, b - a);
+        m = gsl_min_fminimizer_x_minimum (s);
+        a = gsl_min_fminimizer_x_lower (s);
+        b = gsl_min_fminimizer_x_upper (s);
 
-	do
-	{
-	  iter++;
-	  status = gsl_min_fminimizer_iterate (s);
+        status
+        = gsl_min_test_interval (a, b, 0.01, 0.0);
 
-	  m = gsl_min_fminimizer_x_minimum (s);
-	  a = gsl_min_fminimizer_x_lower (s);
-	  b = gsl_min_fminimizer_x_upper (s);
-
-	  status
-	    = gsl_min_test_interval (a, b, 0.01, 0.0);
-
-	  if (status == GSL_SUCCESS)
-	    printf ("Converged:\n");
-
-	  printf ("%5d [%.7f, %.7f] "
-	          "%.7f %.7f\n",
-	          iter, a, b,
-	          m, b - a);
+        if (status == GSL_SUCCESS)
+        if (report) {
+            printf ("Converged:\n");
+            printf ("%5d [%.7f, %.7f] %.7f %.7f\n", iter, a, b, m, b - a);
+        }
 	}
 	while (status == GSL_CONTINUE && iter < max_iter);
 

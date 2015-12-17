@@ -20,4 +20,5 @@ namespace globals {
     bool save_voro_diag1; //gnuplot Voronoi diagram
     bool save_voro_diag2; //alternative gnuplot Voronoi diagram
     bool import_vtk; //import morphology from vtk
+    bool progress_report; //show detailed progress report
 }

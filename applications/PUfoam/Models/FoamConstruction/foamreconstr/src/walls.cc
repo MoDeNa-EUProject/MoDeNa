@@ -16,12 +16,15 @@ using namespace globals;
 						 ((V_CELL(6,(i),(j),(k)) == (a)) ? 1 : 0) + \
 						 ((V_CELL(7,(i),(j),(k)) == (a)) ? 1 : 0)    )
 void makeWalls(int ***amat, int ncell, int *center_x, int *center_y, \
-			   int *center_z) {
+			   int *center_z, bool report) {
     // Make cell walls based on position of Voronoi seeds. Update `amat`.
     int i,j,k,m;
     int min_distance, m_cell;
     int dx, dy, dz, mx, my, mz;
 	int ****v_cell, *v;
+	if (report) {
+		printf("creating walls\n");
+	}
 	// v = working array, distances from centers of cells.
 	v        =    (int *)calloc((size_t)ncell, sizeof(int));
 	/*
@@ -95,7 +98,9 @@ void makeWalls(int ***amat, int ncell, int *center_x, int *center_y, \
             amat[i][j][k] = 8 - COUNT(i,j,k,-1);
             m_cell++;
         }
-    printf("Voxels with multiplicity: m_cell = %d\n", m_cell);
+	if (report) {
+    	printf("Voxels with multiplicity: m_cell = %d\n", m_cell);
+	}
 
     /*
      * Set all elements where at least one of the 6 nearest
