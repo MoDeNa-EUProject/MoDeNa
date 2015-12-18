@@ -19,6 +19,9 @@ with open('input.json') as data_file:
 locals().update(data) # Creates variables from dictionary
 filenameBox=filename+"Box"
 filenameBoxAscii = filenameBox+"-ascii"
+filenameBoxStruts = filenameBox+"Struts"
+filenameDescriptors = "descriptors.out"
+filenameParameters = "parameters.out"
 ########## Create terminal for colour output
 term = Terminal()
 ########## Function for finding size of box, which would give desired porosity
@@ -79,19 +82,19 @@ def porfsOpt(x):
     f.write("0\n")
     f.write("1\n")
     f.write("0\n")
-    f.write(filenameBox+"Struts.vtk\n")
+    f.write(filenameBoxStruts+".vtk\n")
     f.write(filenameBoxAscii+".vtk\n")
     f.write(filename+".gnu\n")
     f.write("name\n")
-    f.write("decriptors.out\n")
-    f.write("parameters.out\n")
+    f.write(filenameDescriptors+"\n")
+    f.write(filenameParameters+"\n")
     f.close()
     os.system("./foamreconstr/foamreconstr")
-    f=open("decriptors.out","r")
+    f=open(filenameDescriptors,"r")
     eps=float(f.readline())
     fs=float(f.readline())
     f.close()
-    f=open("parameters.out","r")
+    f=open(filenameParameters,"r")
     dedge=float(f.readline())
     f.close()
     resid=((eps-porosity)/porosity)**2
@@ -138,10 +141,10 @@ if moveToPeriodicBox:
         term.normal
     )
     os.system("meshconv "+filename+".stl -c ply")
+    if deleteFiles:
+        os.remove(filename+'.stl')
 if binarizeBox:
     ########## Binarize and save as .vtk
-    if deleteFiles and os.path.isfile(filename+'.stl'):
-        os.remove(filename+'.stl')
     if strutContent==0:
         # Find the size of box, which would give desired porosity
         # This method is not optimal, since the solver doesn't know that the
@@ -229,14 +232,20 @@ if binarizeBox:
         f.write("0\n")
         f.write("1\n")
         f.write("0\n")
-        f.write(filenameBox+"Struts.vtk\n")
+        f.write(filenameBoxStruts+".vtk\n")
         f.write(filenameBoxAscii+".vtk\n")
         f.write(filename+".gnu\n")
         f.write("name\n")
-        f.write("decriptors.out\n")
-        f.write("parameters.out\n")
+        f.write(filenameDescriptors+"\n")
+        f.write(filenameParameters+"\n")
         f.close()
         os.system("./foamreconstr/foamreconstr")
+        if deleteFiles:
+            os.remove(filenameBoxAscii+".vtk")
+            os.remove(filenameDescriptors)
+            os.remove(filenameParameters)
+            os.remove("binvox.out")
+            os.remove(filenameBox+".vtk")
 tf = datetime.datetime.now()
 te = tf - ts
 print "Foam created in: ",te
