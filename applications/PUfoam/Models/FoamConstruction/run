@@ -82,7 +82,7 @@ def porfsOpt(x):
     f.write("0\n")
     f.write("1\n")
     f.write("0\n")
-    f.write(filenameBoxStruts+".vtk\n")
+    f.write(filenameBoxStruts+"\n")
     f.write(filenameBoxAscii+".vtk\n")
     f.write(filename+".gnu\n")
     f.write("name\n")
@@ -140,9 +140,9 @@ if moveToPeriodicBox:
         "Convert .stl to .ply" +
         term.normal
     )
-    os.system("meshconv "+filename+".stl -c ply")
+    os.system("meshconv "+filenameBox+".stl -c ply")
     if deleteFiles:
-        os.remove(filename+'.stl')
+        os.remove(filenameBox+'.stl')
 if binarizeBox:
     ########## Binarize and save as .vtk
     if strutContent==0:
@@ -232,7 +232,7 @@ if binarizeBox:
         f.write("0\n")
         f.write("1\n")
         f.write("0\n")
-        f.write(filenameBoxStruts+".vtk\n")
+        f.write(filenameBoxStruts+"\n")
         f.write(filenameBoxAscii+".vtk\n")
         f.write(filename+".gnu\n")
         f.write("name\n")
@@ -246,6 +246,7 @@ if binarizeBox:
             os.remove(filenameParameters)
             os.remove("binvox.out")
             os.remove(filenameBox+".vtk")
+            os.remove("foamreconstr.in")
 tf = datetime.datetime.now()
 te = tf - ts
 print "Foam created in: ",te
