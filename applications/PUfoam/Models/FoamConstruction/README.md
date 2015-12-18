@@ -83,7 +83,7 @@ cell size distribution based on results of packing
 ## Execution
 Prepare `input.json`, then:
 ```
-./run
+./run.py
 ```
 Optimizing porosity and strut content of voxelized foam is relatively time
 consuming. You can switch to `Bounded` method if you approximately know the

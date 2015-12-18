@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 """
-@author: Pavel Ferkl
+@file
+Python script, which organizes creation of the foam.
+
+@author    Pavel Ferkl
+@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@ingroup   foam_constr
 """
 from __future__ import division
 import os
@@ -24,7 +29,7 @@ filenameDescriptors = "descriptors.out"
 filenameParameters = "parameters.out"
 ########## Create terminal for colour output
 term = Terminal()
-########## Function for finding size of box, which would give desired porosity
+## Objective function for finding size of box, which would give desired porosity
 def porOpt(vx):
     vx=int(vx)
     vy=vx
@@ -43,8 +48,9 @@ def porOpt(vx):
                 eps=1-solidVoxel/totalVoxel
                 print "dimension: {0:f}, porosity: {1:f}".format(vx,eps)
                 return (eps-porosity)**2
-########## Function for finding size of box, which
-# would give desired porosity and strut content
+## Objective function for finding size of box, which
+#
+#  would give desired porosity and strut content.
 def porfsOpt(x):
     global dedge
     vx=int(x)
