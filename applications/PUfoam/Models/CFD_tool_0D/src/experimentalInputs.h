@@ -107,7 +107,7 @@
 	double lambda  = 2.0e5;		
 	double C_TOT;				
 // physical blowing agent (used for solubility model)
-	int    phBL    = 2;			 
+	int    phBL    = 1;		// 1=pentane, 2=R-11	 
 // density model used
 	int    denMod  = 2;			
 // kinetics model used
@@ -133,3 +133,9 @@
 	double rel_err = 1e-6; 
 	double dt = 1e0;	 
 	double tend = 200.0;
+// Realizability
+	bool realizabilityCheck = false; 	// switch for realizability
+// 2nodes vs meanDiameter
+	std::string bubbleMode = "mean radius"; 	// mean radius, two nodes 
+	bool apparentViscosity = false;
+	bool kinetics_basf = true;

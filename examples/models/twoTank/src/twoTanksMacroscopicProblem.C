@@ -68,6 +68,7 @@ main(int argc, char *argv[])
 
     // Instantiate a model
     modena_model_t *model = modena_model_new("flowRate");
+
     if(modena_error_occurred())
     {
         return modena_error();

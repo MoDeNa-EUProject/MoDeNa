@@ -132,14 +132,12 @@ f = CFunction(
 
 void surroSolubility
 (
-    const double* parameters,
-    const double* inherited_inputs,
+    const modena_model_t* model,
     const double* inputs,
     double *outputs
 )
 {
-
-    const double T = inputs[0];
+    {% block variables %}{% endblock %}
 
     const double P0 = parameters[0];
     const double P1 = parameters[1];
@@ -155,7 +153,7 @@ void surroSolubility
 ''',
     # These are global bounds for the function
     inputs={
-        'T': { 'min': 200.0, 'max': 250.0, 'argPos': 0 },        #check if boundaries reasonable, from this range, the random values for the DOE are chosen!
+        'T': { 'min': 200.0, 'max': 250.0 },        #check if boundaries reasonable, from this range, the random values for the DOE are chosen!
     },
     outputs={
         'H': { 'min': 9e99, 'max': -9e99, 'argPos': 0 },

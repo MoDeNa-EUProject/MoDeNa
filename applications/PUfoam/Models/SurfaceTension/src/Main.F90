@@ -55,9 +55,9 @@
 !!
 !!Gross, Joachim, and Gabriele Sadowski. "Perturbed-chain SAFT: An equation of state based on a perturbation theory for chain molecules." Industrial & engineering chemistry research 40.4 (2001): 1244-1260.
 !!Gross, Joachim, and Gabriele Sadowski. "Application of the perturbed-chain SAFT equation of state to associating systems." Industrial & engineering chemistry research 41.22 (2002): 5510-5515.
-!!Gross, Joachim, and Jadran Vrabec. "An equation?of?state contribution for polar components: Dipolar molecules." AIChE journal 52.3 (2006): 1194-1204.
+!!Gross, Joachim, and Jadran Vrabec. "An equation-of-state contribution for polar components: Dipolar molecules." AIChE journal 52.3 (2006): 1194-1204.
 !!Gross, Joachim. "A density functional theory for vapor-liquid interfaces using the PCP-SAFT equation of state." The Journal of chemical physics 131.20 (2009): 204705.
-!!Klink, Christoph, and Joachim Gross. "A density functional theory for vapor?liquid interfaces of mixtures using the perturbed-chain polar statistical associating fluid theory equation of state." Industrial & Engineering Chemistry Research 53.14 (2014): 6169-6178.
+!!Klink, Christoph, and Joachim Gross. "A density functional theory for vapor-liquid interfaces of mixtures using the perturbed-chain polar statistical associating fluid theory equation of state." Industrial & Engineering Chemistry Research 53.14 (2014): 6169-6178.
 !!
 !!
 !! In order to run this code, PETSc 3.4.4 has to be installed

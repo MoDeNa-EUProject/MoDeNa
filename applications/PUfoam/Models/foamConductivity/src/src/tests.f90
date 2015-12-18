@@ -25,7 +25,7 @@ contains
 !> calculate equivalent conductivity for one specific foam
 subroutine eqcond(regions)
     integer, intent(in) :: regions
-    integer :: i,j
+    integer :: i,j,fi
     real(dp), dimension(:), allocatable :: regbound,regcond
     real(dp), dimension(:,:), allocatable :: regalpha,regsigma
     allocate(regbound(regions+1),regcond(regions),regalpha(regions,nbox),&
@@ -35,6 +35,16 @@ subroutine eqcond(regions)
     enddo
     do i=1,regions
         call foam_morpholgy
+        if (testing) then
+            write(*,*) 'TESTING: radiative properties not calculated.'
+            write(*,*) 'Ask Pavel if you want more reasonable results.'
+            krad=2e-3_dp
+            call effcond
+            open(newunit(fi),file='outputs.out')
+            write(fi,*) effc
+            close(fi)
+            stop
+        endif
         call effrad(spectra)
         call effcond
         regcond(i)=effc
@@ -126,6 +136,7 @@ subroutine loadParameters
     use physicalProperties
     integer :: fi,ios,i,j
     logical :: file_exists
+    real(dp) :: xCO2,xAir,xCyP
     inputs=TRIM(ADJUSTL(fileplacein_par))//TRIM(ADJUSTL(inputs))
     spectra=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(spectra))
     inquire(file=inputs,exist=file_exists)
@@ -136,7 +147,9 @@ subroutine loadParameters
     endif
         read(fi,*) T1           !higher temperature
         read(fi,*) T2           !lower temperature
-        read(fi,*) cond1        !gas conductivity
+        read(fi,*) xCO2,xAir,xCyP
+        call gasConductivity(cond1,(t1+t2)/2,xCO2,xAir,xCyP)
+        ! read(fi,*) cond1        !gas conductivity
 !        read(fi,*) cond2        !solid conductivity
         call polymerConductivity(cond2,(t1+t2)/2)
         read(fi,*) emi1         !emittance 1

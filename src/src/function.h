@@ -83,8 +83,7 @@ typedef struct modena_function_t
 
     void (*function)
     (
-        const double* p,
-        const double* in_i,
+        const struct modena_model_t* model,
         const double* i,
         double *o
     );

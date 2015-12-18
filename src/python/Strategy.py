@@ -41,6 +41,7 @@ Module providing strategies
 import six
 import abc
 import sys
+import copy
 import modena
 from fireworks.core.firework import FireTaskMeta
 from fireworks import Firework, Workflow, FWAction, FireTaskBase, ScriptTask
@@ -463,7 +464,7 @@ class StochasticSampling(ImproveErrorStrategy, SamplingStrategy):
             k: {
                 'min': min(model.fitData[k]),
                 'max': max(model.fitData[k])
-            } for k in model.inputs
+            } for k in model.inputs.keys()
         }
 
         return self.samplePoints(model, sampleRange, self['nNewPoints'])
@@ -596,10 +597,14 @@ class NonLinFitWithErrorContol(ParameterFittingStrategy):
 
         print 'Maximum Error = %s' % maxError
         if maxError > self['maxError']:
-            print 'Parameters ' + term.red + 'not' + term.normal + \
-                ' valid, adding samples.'
-            print 'current parameters = [%s]' % ' '.join(
-                '%g' % k for k in new_parameters
+            print(
+                'Parameters ' + term.red + 'not' + term.normal
+              + ' valid, adding samples.'
+            )
+            print(
+                'current parameters = [%s]' % ', '.join(
+                    '%g' % k for k in new_parameters
+                )
             )
 
             # Update database
@@ -610,11 +615,15 @@ class NonLinFitWithErrorContol(ParameterFittingStrategy):
             )
 
         else:
-            print('old parameters = [%s]' % ' '.join(
-                '%g' % k for k in model.parameters)
+            print(
+                'old parameters = [%s]' % ', '.join(
+                    '%g' % k for k in model.parameters
+                )
             )
-            print('new parameters = [%s]' % ' '.join(
-                '%g' % k for k in new_parameters)
+            print(
+                'new parameters = [%s]' % ', '.join(
+                    '%g' % k for k in new_parameters
+                )
             )
 
             # Update database
@@ -747,11 +756,15 @@ class NonLinFitToPointWithSmallestError(ParameterFittingStrategy):
         nlfb_ssqres = coeffs[nlfb.names.index('ssquares')]
 
         print 'Maximum Error = %s' % maxError
-        print('old parameters = [%s]' % ' '.join(
-            '%g' % k for k in model.parameters)
+        print(
+            'old parameters = [%s]' % ', '.join(
+                '%g' % k for k in model.parameters
+            )
         )
-        print('new parameters = [%s]' % ' '.join(
-            '%g' % k for k in new_parameters)
+        print(
+            'new parameters = [%s]' % ', '.join(
+                '%g' % k for k in new_parameters
+            )
         )
 
         # Update database
@@ -848,6 +861,14 @@ class OutOfBounds(Exception):
 
 class ParametersNotValid(Exception):
     pass
+'''
+    def __init__(self, *args):
+        super(ParametersNotValid, self).__init__(args)
+        print self.args[0]
+        print 'In exception'
+    def __str__(self):
+        return repr(self.value)
+'''
 
 @explicit_serialize
 class ModenaFireTask(FireTaskBase):
@@ -879,11 +900,9 @@ class ModenaFireTask(FireTaskBase):
             return FWAction(defuse_children=True)
 
 
-    def parametersNotValid(self):
+    def parametersNotValid(self, model):
 
         try:
-            model = modena.SurrogateModel.loadFromModule()
-
             # Continue with exact tasks, parameter estimation and (finally) this
             # task in order to resume normal operation
             wf = model.initialisationStrategy().workflow(model)
@@ -908,18 +927,18 @@ class ModenaFireTask(FireTaskBase):
 
             p = self['point']
 
-            print(term.yellow + 'point = {'
-                + ', '.join('%s: %g' % (k, v) for (k, v) in p.iteritems())
-                + '}' +term.normal
+            print(
+                term.yellow + 'point = {%s}' % ', '.join(
+                    '%s: %g' % (k, v) for (k, v) in p.iteritems()
+                )
+              + term.normal
             )
 
             model = modena.SurrogateModel.load(self['modelId'])
-            newP = {}
+            oldP = copy.copy(p)
             for m in model.substituteModels:
                 try:
-                    res = m.callModel(p)
-                    newP.update(res)
-                    p.update(res)
+                    p.update(m.callModel(p))
 
                 except OutOfBounds:
                     print(
@@ -929,21 +948,22 @@ class ModenaFireTask(FireTaskBase):
                     )
                     return self.outOfBounds()
 
-                except ParametersNotValid:
+                except ParametersNotValid, e:
                     print(
                         term.red
                       + 'Substituted model is not initialised, executing initialisationStrategy.'
                       + term.normal
                     )
-                    return self.parametersNotValid()
+                    return self.parametersNotValid(e.args[1])
 
-
-            if len(newP):
+            if not len(p) == len(oldP):
                 print(
                     term.yellow
-                  + 'values added by substitution = {'
-                  + ', '.join('%s: %g' % (k, v) for (k, v) in newP.iteritems())
-                  + '}' +term.normal
+                  + 'values added by substitution = {%s}' % ', '.join(
+                        '%s: %g' % (k, v) for (k, v) in p.iteritems()
+                        if k not in oldP
+                    )
+                  + term.normal
                 )
 
             try:
@@ -958,9 +978,9 @@ class ModenaFireTask(FireTaskBase):
                 )
                 return self.outOfBounds()
 
-            except ParametersNotValid:
+            except ParametersNotValid, e:
                 print term.cyan + 'Performing Initialisation' + term.normal
-                return self.parametersNotValid()
+                return self.parametersNotValid(e.args[1])
 
         else:
             try:
@@ -979,13 +999,13 @@ class ModenaFireTask(FireTaskBase):
                 )
                 return self.outOfBounds()
 
-            except ParametersNotValid:
+            except ParametersNotValid, e:
                 print(
                     term.cyan
                   + 'Model not initialised, executing initialisationStrategy'
                   + term.normal
                 )
-                return self.parametersNotValid()
+                return self.parametersNotValid(e.args[1])
 
             print('Success - We are done')
             return FWAction()
@@ -996,16 +1016,18 @@ class ModenaFireTask(FireTaskBase):
     def handleReturnCode(self, returnCode):
 
         # Analyse return code and raise appropriate exception
-        print(term.red + 'return code = %i' % returnCode + term.normal)
+        if returnCode > 0:
+            print(term.red + 'return code = %i' % returnCode + term.normal)
 
         if returnCode == 200:
             raise OutOfBounds('Exact task of model returned 200')
 
         elif returnCode == 201:
-            raise ParametersNotValid('Exact task of model returned 201')
+            model = modena.SurrogateModel.loadFromModule()
+            raise ParametersNotValid('Exact task of model returned 201', model)
 
         elif returnCode > 0:
-            print('An error occurred')
+            print('An unknow error occurred')
             sys.exit(returnCode)
 
 

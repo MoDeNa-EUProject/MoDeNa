@@ -48,8 +48,8 @@ species = IndexSet(
 
 f = CFunction(
     inputs={
-        'T': { 'min': 0, 'max': 9e99, 'argPos': 0 },
-        'p': { 'min': 0, 'max': 9e99, 'argPos': 1 },
+        'T': { 'min': 0, 'max': 9e99 },
+        'p': { 'min': 0, 'max': 9e99 },
     },
     outputs={
         'D[A]': { 'min': 0, 'max': 9e99, 'argPos': 0 },
@@ -70,14 +70,12 @@ f = CFunction(
 
 void fullerEtAlDiffusion
 (
-    const double* parameters,
-    const double* inherited_inputs,
+    const modena_model_t* model,
     const double* inputs,
     double *outputs
 )
 {
-    const double T = inputs[0];
-    const double p = inputs[1];
+    {% block variables %}{% endblock %}
 
     const double WA = parameters[0];
     const double VA = parameters[1];
