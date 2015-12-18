@@ -1,11 +1,17 @@
-# -*- coding: utf-8 -*-
 """
-Created on Thu Dec  3 12:25:27 2015
+@file
 Takes the representative volume element and moves it into a box with
-periodic boundary conditions
-@author: Pavel Ferkl
+periodic boundary conditions.
+
+@author    Pavel Ferkl
+@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@ingroup   foam_constr
 """
 import vtk
+## Main function for manipulation with RVE
+#
+#  Uses VTK to create foam in box with periodic boundary conditions.
+#  Divides the foam to 27 parts and reflects them over boundaries.
 def main(filenameIn,filenameOut,xmin,ymin,zmin,dx,dy,dz,render):
     # print vtk.VTK_MAJOR_VERSION # Check the version
     # Read the file and create polydata
