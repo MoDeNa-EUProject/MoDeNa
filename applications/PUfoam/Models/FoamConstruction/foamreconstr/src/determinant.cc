@@ -1,4 +1,9 @@
-// http://paulbourke.net/miscellaneous/determinant/determinant.c
+/*! \file
+	\brief Functions for calculating determinant
+	\ingroup foam_constr
+
+    http://paulbourke.net/miscellaneous/determinant/determinant.c
+*/
 //==============================================================================
 // Recursive definition of determinate using expansion by minors.
 //
@@ -45,8 +50,10 @@
 //==============================================================================
 #include <stdlib.h>
 #include <math.h>
-
-double Determinant(double **a,int n)
+//! Recursive function for calculation of determinant
+double Determinant(\
+    double **a /**< [in] 2D matrix */,\
+    int n /**< [in] matrix dimension */)
 {
     int i,j,j1,j2 ;                    // general loop and matrix subscripts
     double det = 0 ;                   // init determinant

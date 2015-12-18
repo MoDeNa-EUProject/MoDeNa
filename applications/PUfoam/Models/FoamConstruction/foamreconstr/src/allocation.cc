@@ -1,5 +1,15 @@
+/*! \file
+	\brief Shorthand functions for allocation of matrices
+	\author Pavel Ferkl
+	\author Juraj Kosek
+	\ingroup foam_constr
+*/
 #include <stdlib.h>
-double ***alloc_3Ddmatrix (int nx, int ny, int nz)
+//! allocate 3D double matrix
+double ***alloc_3Ddmatrix (\
+	int nx /**< [in] number of elements in 1st direction */, \
+	int ny /**< [in] number of elements in 2nd direction */, \
+	int nz /**< [in] number of elements in 3rd direction */)
 {
 	int i, j;
 	double ***amat = NULL;
@@ -23,8 +33,8 @@ double ***alloc_3Ddmatrix (int nx, int ny, int nz)
 
 	return amat;
 }
-
-double ***free_3Ddmatrix (double ***amat)
+//! free 3D double matrix
+double ***free_3Ddmatrix (double ***amat /**< [in,out] matrix */)
 {
 	free ((void *)**amat);
 	free ((void *) *amat);
@@ -32,8 +42,11 @@ double ***free_3Ddmatrix (double ***amat)
 	amat = NULL;
 	return amat;
 }
-
-float ***alloc_3Dfmatrix (int nx, int ny, int nz)
+//! allocate 3D float matrix
+float ***alloc_3Dfmatrix (\
+	int nx /**< [in] number of elements in 1st direction */, \
+	int ny /**< [in] number of elements in 2nd direction */, \
+	int nz /**< [in] number of elements in 3rd direction */)
 {
 	int i, j;
 	float ***amat = NULL;
@@ -57,8 +70,8 @@ float ***alloc_3Dfmatrix (int nx, int ny, int nz)
 
 	return amat;
 }
-
-float ***free_3Dfmatrix (float ***amat)
+//! free 3D float matrix
+float ***free_3Dfmatrix (float ***amat /**< [in,out] matrix */)
 {
 	free ((void *)**amat);
 	free ((void *) *amat);
@@ -66,8 +79,11 @@ float ***free_3Dfmatrix (float ***amat)
 	amat = NULL;
 	return amat;
 }
-
-int ***alloc_3Dmatrix (int nx, int ny, int nz)
+//! allocate 3D integer matrix
+int ***alloc_3Dmatrix (\
+	int nx /**< [in] number of elements in 1st direction */, \
+	int ny /**< [in] number of elements in 2nd direction */, \
+	int nz /**< [in] number of elements in 3rd direction */)
 {
 	int i, j;
 	int ***amat = NULL;
@@ -91,8 +107,8 @@ int ***alloc_3Dmatrix (int nx, int ny, int nz)
 
 	return amat;
 }
-
-int ***free_3Dmatrix (int ***amat)
+//! free 3D integer matrix
+int ***free_3Dmatrix (int ***amat /**< [in,out] matrix */)
 {
 	free ((void *)**amat);
 	free ((void *) *amat);
@@ -100,8 +116,10 @@ int ***free_3Dmatrix (int ***amat)
 	amat = NULL;
 	return amat;
 }
-
-double **alloc_dmatrix (int nx, int ny)
+//! allocate 2D double matrix
+double **alloc_dmatrix (\
+	int nx /**< [in] number of elements in 1st direction */, \
+	int ny /**< [in] number of elements in 2nd direction */)
 {
 	int i;
 	double **amat = NULL;
@@ -122,16 +140,18 @@ double **alloc_dmatrix (int nx, int ny)
 
 	return amat;
 }
-
-double **free_dmatrix (double **amat)
+//! free 2D double matrix
+double **free_dmatrix (double **amat /**< [in,out] matrix */)
 {
 	free ((void *)*amat);
 	free ((void *) amat);
 	amat = NULL;
 	return amat;
 }
-
-float **alloc_fmatrix (int nx, int ny)
+//! allocate 2D integer matrix
+float **alloc_fmatrix (\
+	int nx /**< [in] number of elements in 1st direction */, \
+	int ny /**< [in] number of elements in 2nd direction */)
 {
 	int i;
 	float **amat = NULL;
@@ -152,8 +172,8 @@ float **alloc_fmatrix (int nx, int ny)
 
 	return amat;
 }
-
-float **free_fmatrix (float **amat)
+//! free 2D integer matrix
+float **free_fmatrix (float **amat /**< [in,out] matrix */)
 {
 	free ((void *)*amat);
 	free ((void *) amat);
@@ -161,7 +181,9 @@ float **free_fmatrix (float **amat)
 	return amat;
 }
 
-int **alloc_matrix (int nx, int ny)
+int **alloc_matrix (\
+	int nx /**< [in] number of elements in 1st direction */, \
+	int ny /**< [in] number of elements in 2nd direction */)
 {
 	int i;
 	int **amat = NULL;
@@ -183,7 +205,7 @@ int **alloc_matrix (int nx, int ny)
 	return amat;
 }
 
-int **free_matrix (int **amat)
+int **free_matrix (int **amat /**< [in,out] matrix */)
 {
 	free ((void *)*amat);
 	free ((void *) amat);

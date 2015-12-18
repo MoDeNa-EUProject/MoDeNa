@@ -1,12 +1,16 @@
+/*! \file
+	\brief Functions for creation of walls from Voronoi tessellation.
+	\author Pavel Ferkl
+	\author Juraj Kosek
+	\ingroup foam_constr
+*/
 #include "globals.hh"
 #include <stdio.h>
 #include <stdlib.h>
 #include "allocation.hh"
 using namespace globals;
-/*
- * Some voxels have the same distance from several 'M'
- * centers of cells. Calculate the number 'M'.
- */
+//! Some voxels have the same distance from several 'M'
+//! centers of cells. Calculate the number 'M'.
 #define COUNT(i,j,k,a)	(((V_CELL(0,(i),(j),(k)) == (a)) ? 1 : 0) + \
 						 ((V_CELL(1,(i),(j),(k)) == (a)) ? 1 : 0) + \
 						 ((V_CELL(2,(i),(j),(k)) == (a)) ? 1 : 0) + \
@@ -15,8 +19,15 @@ using namespace globals;
 						 ((V_CELL(5,(i),(j),(k)) == (a)) ? 1 : 0) + \
 						 ((V_CELL(6,(i),(j),(k)) == (a)) ? 1 : 0) + \
 						 ((V_CELL(7,(i),(j),(k)) == (a)) ? 1 : 0)    )
-void makeWalls(int ***amat, int ncell, int *center_x, int *center_y, \
-			   int *center_z, bool report) {
+//! Creates walls based on position of seeds and Voronoi tessellation.
+void makeWalls(\
+	int ***amat /**< [in,out] voxel matrix */,\
+	int ncell /**< [in] number of cells */,\
+	int *center_x /**< [out] `x` position of seeds */,\
+    int *center_y /**< [out] `y` position of seeds */,\
+    int *center_z /**< [out] `z` position of seeds */,\
+    bool report /**< [in] show output */)
+{
     // Make cell walls based on position of Voronoi seeds. Update `amat`.
     int i,j,k,m;
     int min_distance, m_cell;

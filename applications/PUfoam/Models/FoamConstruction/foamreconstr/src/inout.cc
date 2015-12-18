@@ -1,3 +1,8 @@
+/*! \file
+	\brief Functions for input and output operations.
+	\author Pavel Ferkl
+	\ingroup foam_constr
+*/
 #include "globals.hh"
 #include <fstream>
 #include <iostream>
@@ -6,10 +11,26 @@
 #include "geometry.hh"
 using namespace std;
 using namespace globals;
-void readParameters(string filename, string &outputFilename, \
-    string &VTKInputFilename, string &GnuplotSkeletonFilename, \
-    string &GnuplotAltSkeletonFilename, string &descriptorsFilename, \
-    string &parametersFilename) {
+//! Reads file with options and parameters
+//!
+//! Reads parameters from file and stores them to global variables. These
+//! parameters determine what will be done.
+void readParameters(\
+    //! [in] Name of input file with parameters that determine what will be done
+    string filename,\
+    //! [in,out] Name of output file with morphology without extension
+    string &outputFilename,\
+    //! [in,out] Name of input VTK file with morphology
+    string &VTKInputFilename,\
+    //! [in,out] Name of input/output file with tessellation - gnuplot diagram
+    string &GnuplotSkeletonFilename,\
+    //! [in,out] Name of output file with tessellation - alt. gnuplot diagram
+    string &GnuplotAltSkeletonFilename,\
+    //! [in,out] Name of output file with morphology descriptors
+    string &descriptorsFilename,\
+    //! [in,out] Name of output file with parameters
+    string &parametersFilename)
+{
     // Reads inputs from text file. Returns filenames. Rest is put into global
     // variables.
     ifstream fin;
@@ -46,7 +67,12 @@ void readParameters(string filename, string &outputFilename, \
         fin >> parametersFilename; fin.ignore(256,'\n');
     fin.close();
 }
-int ***allocateFromVTK(string filename, int ***amat, bool report) {
+//! Allocates the matrix from dimensions read from VTK file
+int ***allocateFromVTK(\
+    string filename /**< [in] Name of input VTK file with morphology */,\
+    int ***amat /**< [in,out] matrix */,\
+    bool report /**< [in] show output */)
+{
     int i,j,k;
     ifstream fin;
     string line;
@@ -78,7 +104,12 @@ int ***allocateFromVTK(string filename, int ***amat, bool report) {
     nz=vtkz;
     return amat;
 }
-void importFromVTK(string filename, int ***amat, bool report) {
+//! Reads morphology from VTK file. Changes `amat`.
+void importFromVTK(\
+    string filename /**< [in] Name of input VTK file with morphology */,\
+    int ***amat /**< [in,out] matrix */,\
+    bool report /**< [in] show output */)
+{
     int i,j,k,l;
     ifstream fin;
     string line;
@@ -143,7 +174,12 @@ void importFromVTK(string filename, int ***amat, bool report) {
     ny=vtky;
     nz=vtkz;
 }
-void saveToVTK(const char* filename, int ***amat, bool report) {
+//! Saves morphology to VTK file.
+void saveToVTK(\
+    const char* filename /**< [in] Name of output file with morphology */,\
+    int ***amat /**< [in] matrix */,\
+    bool report /**< [in] show output */)
+{
     int i,j,k;
     FILE *strmo;
     // Output to file in Paraview style.
@@ -180,7 +216,12 @@ void saveToVTK(const char* filename, int ***amat, bool report) {
 
     fclose (strmo);
 }
-void saveToDX(const char* filename, int ***amat, bool report) {
+//! Saves morphology to DX file.
+void saveToDX(\
+    const char* filename /**< [in] Name of output file with morphology */,\
+    int ***amat /**< [in] matrix */,\
+    bool report /**< [in] show output */)
+{
     int i,j,k;
     FILE *strmo;
     // Output to file in DX style.
@@ -211,8 +252,15 @@ void saveToDX(const char* filename, int ***amat, bool report) {
 
     fclose (strmo);
 }
-void saveToGnuplot(string filename, int sv, int incmax, double **vert, \
-                   int **vinc, bool report) {
+//! Saves tessellation diagram to gnuplot file.
+void saveToGnuplot(\
+    string filename /**< [in] Name of output file with tessellation */,\
+    int sv /**< [in] number of vertices */,\
+    int incmax /**< [in] maximum number of connections to one vertex */,\
+    double **vert /**< [in] vertex positions */,\
+    int **vinc /**< [in] indexes of connected vertices */,\
+    bool report /**< [in] show output */)
+{
     // Stores cell edges incident to voronoi vertices in the domain
     ofstream fout;
     int i,j;
@@ -243,7 +291,13 @@ void saveToGnuplot(string filename, int sv, int incmax, double **vert, \
     }
     fout.close();
 }
-void saveDescriptors(string filename, double por, double fs, bool report) {
+//! Saves morphology descriptors (porosity and strut content) to a file.
+void saveDescriptors(\
+    string filename /**< [in] Output file with morphology descriptors */,\
+    double por /**< [in] porosity */,\
+    double fs /**< [in] strut content */,\
+    bool report /**< [in] show output */)
+{
     ofstream fout;
     if (report) {
         cout << "saving descriptors" << endl;
@@ -257,7 +311,12 @@ void saveDescriptors(string filename, double por, double fs, bool report) {
     fout << fs << endl;
     fout.close();
 }
-void saveParameters(string filename, double dedge, bool report) {
+//! Saves parameters (`dedge`) to a file.
+void saveParameters(\
+    string filename /**< [in] Name of output file with parameters */,\
+    double dedge /**< [in] edge strut size parameter */,\
+    bool report /**< [in] show output */)
+{
     ofstream fout;
     if (report) {
         cout << "saving parameters" << endl;

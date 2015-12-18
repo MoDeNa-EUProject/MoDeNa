@@ -1,9 +1,21 @@
+/*! \file
+	\brief Functions for the initialization of seeds.
+	\author Pavel Ferkl
+    \author Juraj Kosek
+	\ingroup foam_constr
+*/
 #include "globals.hh"
 #include <stdlib.h>
 #include <stdio.h>
 using namespace globals;
-void createSeeds(int &ncell, int *center_x, int *center_y, int *center_z, \
-    bool report) {
+//! Initialization of seeds. Stores positions of seeds.
+void createSeeds(\
+    int &ncell /**< [in,out] in: max number of cells, out: actual number */,\
+    int *center_x /**< [out] `x` position of seeds */,\
+    int *center_y /**< [out] `y` position of seeds */,\
+    int *center_z /**< [out] `z` position of seeds */,\
+    bool report /**< [in] show output */)
+{
     // Creates seeds for Voronoi tessellation at centers of cells at cubic or
     // hexagonal grids. Seed positions are store in `center_x`, `center_y` and
     // `center_z`. Updates `ncell`.

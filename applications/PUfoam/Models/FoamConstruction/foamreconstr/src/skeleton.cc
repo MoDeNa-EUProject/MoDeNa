@@ -1,3 +1,8 @@
+/*! \file
+	\brief Functions for geometric tessellation. Vertices and edges are used.
+	\author Pavel Ferkl
+	\ingroup foam_constr
+*/
 #include "globals.hh"
 #include <iostream>
 #include <fstream>
@@ -7,8 +12,15 @@
 using namespace std;
 using namespace voro;
 using namespace globals;
-void makeFoamSkeleton(string filename, int ncell, int *center_x, \
-                      int *center_y, int *center_z, bool report) {
+//! Make geometric tessellation using `voro++` and store it to a file.
+void makeFoamSkeleton(\
+    string filename /**< [in] Name of output file with tessellation */,\
+    int ncell /**< [in] number of cells */,\
+    int *center_x /**< [out] `x` position of seeds */,\
+    int *center_y /**< [out] `y` position of seeds */,\
+    int *center_z /**< [out] `z` position of seeds */,\
+    bool report /**< [in] show output */)
+{
     // Uses Voro++ to create foam skeleton - tessellation on provided seeds.
     // Skeleton is saved to gnuplot file.
     int i;
@@ -31,9 +43,16 @@ void makeFoamSkeleton(string filename, int ncell, int *center_x, \
     // Save the Voronoi network of all the particles to text files
     con.draw_cells_gnuplot(filename.c_str());
 }
-
-void importFoamSkeleton(string filename, double **vert, int **vinc, int vmax, \
-                        int incmax, int &sv, bool report) {
+//! Load geometric tessellation, move it to the domain and store it.
+void importFoamSkeleton(\
+    string filename /**< [in] Name of output file with tessellation */,\
+    double **vert /**< [out] vertex positions */,\
+    int **vinc /**< [out] indexes of connected vertices */,\
+    int vmax /**< [in] maximum number of vertices */,\
+    int incmax /**< [in] maximum number of vertex connections */,\
+    int &sv /**< [out] number of vertices */,\
+    bool report /**< [in] show output */)
+{
     // Imports foam skeleton from gnuplot file. Creates `vert` and `vinc` and
     // calculates `sv`.
     int i,j;

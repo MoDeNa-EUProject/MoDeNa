@@ -1,11 +1,26 @@
+/*! \file
+	\brief Functions for creating struts at cell edges.
+	\author Pavel Ferkl
+	\ingroup foam_constr
+*/
 #include "globals.hh"
 #include <iostream>
 #include <cmath>
 #include "geometry.hh"
 using namespace std;
 using namespace globals;
-void makeEdgeStruts(int ***amat, int sv, double **vert, int **vinc, \
-    bool report) {
+//! Function for creating struts at cell edges.
+//!
+//! Struts are in shape of triangular prisms. It is assumed that three cells
+//! share an edge. Edges are taken from tessellation. Size of the triangular
+//! base is determined by the `dedge` parameter. Changes `amat`.
+void makeEdgeStruts(\
+    int ***amat /**< [in,out] voxel matrix */, \
+    int sv /**< [in] number of vertices */, \
+    double **vert /**< [in] vertex positions */, \
+    int **vinc /**< [in] indexes of connected vertices */, \
+    bool report /**< [in] show output */)
+{
     // Creates struts - solid material along cell edge. Created strut has
     // a shape of triangular prism. Updates `amat`.
     int i,j,k,l,m,n;

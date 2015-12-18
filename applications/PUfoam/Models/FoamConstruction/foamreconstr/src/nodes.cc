@@ -1,3 +1,8 @@
+/*! \file
+	\brief Functions for creating struts at cell vertices.
+	\author Pavel Ferkl
+	\ingroup foam_constr
+*/
 #include "globals.hh"
 #include <iostream>
 #include <cmath>
@@ -6,8 +11,20 @@
 #include "allocation.hh"
 using namespace std;
 using namespace globals;
-void makeNodeStruts(int ***amat, int sv, int incmax, int vmax, double **vert, \
-                    int **vinc, bool report) {
+//! Function for creating struts at cell vertices.
+//!
+//! Struts are in shape of tetrahedra. It is assumed that four cells
+//! share a vertex. Vertices are taken from tessellation. Size of the
+//! tetrahedron is determined by the `dstrut` parameter. Changes `amat`.
+void makeNodeStruts(\
+    int ***amat /**< [in,out] voxel matrix */,\
+    int sv /**< [in] number of vertices */,\
+    int incmax /**< [in] maximum number of vertex connections */,\
+    int vmax /**< [in] maximum number of vertices */,\
+    double **vert /**< [in] vertex positions */,\
+    int **vinc /**< [in] indexes of connected vertices */,\
+    bool report /**< [in] show output */)
+{
     // Creates strut parts - solid material around cell vertices. Created
     // strut has a shape of tetrahedron. Updates `amat`.
     int i,j,k,l,m,n;
@@ -60,6 +77,7 @@ void makeNodeStruts(int ***amat, int sv, int incmax, int vmax, double **vert, \
             }
         }
     }
+    // determine if voxel is inside the tetrahedron
     double **A0,**A1,**A2,**A3,**A4;
     A0 = new double*[4]; //allocate
     for (i=0; i<4; ++i)
@@ -76,7 +94,6 @@ void makeNodeStruts(int ***amat, int sv, int incmax, int vmax, double **vert, \
     A4 = new double*[4]; //allocate
     for (i=0; i<4; ++i)
     A4[i] = new double[4];
-
     for (i=0; i<svd; i++) {
         mini[0]=2*xmax; maxi[0]=-2*xmax;
         mini[1]=2*ymax; maxi[1]=-2*ymax;

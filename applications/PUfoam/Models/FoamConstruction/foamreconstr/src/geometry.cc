@@ -1,13 +1,26 @@
+/*! \file
+	\brief Helpful geometric and mathematical functions.
+	\author Pavel Ferkl
+	\ingroup foam_constr
+*/
 #include "globals.hh"
 using namespace globals;
-bool in_domain(double x, double y, double z) {
+//! True if the point is in the domain, False otherwise.
+bool in_domain(\
+	double x /**< [in] `x` position */, \
+	double y /**< [in] `x` position */, \
+	double z /**< [in] `x` position */)
+{
 	if (x>0 && x<nx && y>0 && y<ny && z>0 && z<nz)
 		return true;
 	else
 		return false;
 }
-
-double *CrossProduct(double a[],double b[]) {
+//! Cross product of two points in 3D.
+double *CrossProduct(\
+	double a[] /**< [in] 1st point */,\
+	double b[] /**< [in] 2nd point */)
+{
     double *cp;
     cp = new double[3];
     cp[0]=a[1]*b[2]-a[2]*b[1];
@@ -15,8 +28,13 @@ double *CrossProduct(double a[],double b[]) {
     cp[2]=a[0]*b[1]-a[1]*b[0];
     return(cp);
 }
-
-bool SameSide(double p1[],double p2[],double a[],double b[]) {
+//! True if two points are in the same half-plane defined by other two points.
+bool SameSide(\
+	double p1[] /**< [in] 1st point */,\
+	double p2[] /**< [in] 2nd point */,\
+	double a[] /**< [in] 1st point defining half-plane */,\
+	double b[] /**< [in] 2nd point defining half-plane */)
+{
     bool dec;
     double ba[3],p1a[3],p2a[3];
     int i;
@@ -34,8 +52,13 @@ bool SameSide(double p1[],double p2[],double a[],double b[]) {
     delete cp2;
     return(dec);
 }
-
-bool PointInTriangle(double p[],double a[],double b[],double c[]) {
+//! True if point lies in the triangle.
+bool PointInTriangle(\
+	double p[] /**< [in] the point */,\
+	double a[] /**< [in] 1st point defining triangle */,\
+	double b[] /**< [in] 2nd point defining triangle */,\
+	double c[] /**< [in] 3rd point defining triangle */)
+{
     bool dec;
     dec=false;
     if (SameSide(p,a, b,c) && SameSide(p,b, a,c) && SameSide(p,c, a,b)) {
@@ -43,8 +66,8 @@ bool PointInTriangle(double p[],double a[],double b[],double c[]) {
 	}
     return(dec);
 }
-
-double porosity(int ***amat) {
+//! Calculates porosity.
+double porosity(int ***amat /**< [in] matrix */) {
 	double por=0;
 	int i,j,k;
 	for (i = 0; i < nx; i++) {

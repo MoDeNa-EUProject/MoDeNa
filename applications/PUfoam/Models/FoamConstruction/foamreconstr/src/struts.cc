@@ -1,3 +1,8 @@
+/*! \file
+	\brief Functions governing creation of struts
+	\author Pavel Ferkl
+	\ingroup foam_constr
+*/
 #include "globals.hh"
 #include "geometry.hh"
 #include "edges.hh"
@@ -8,7 +13,10 @@
 #include <iostream>
 using namespace std;
 using namespace globals;
-double fn1 (double x, void * p)
+//! Objective function for optimization. We want to have certain strut porosity.
+double fn1 (\
+	double x /**< [in] independent variable (`dstrut`) */,\
+	void * p /**< [in] function parameters (`fn1_params`) */)
 {
 	// (void)(p); /* avoid unused parameter warning */
 	struct fn1_params * params = (struct fn1_params *)p;
@@ -34,8 +42,14 @@ double fn1 (double x, void * p)
 	double por = porosity(smat);
 	return pow(por-strutPorosity,2);
 }
-
-int optim (void * params, double &m, double &a, double &b, bool report) {
+//! GSL minimizer for univariate scalar function.
+int optim (\
+	void * params /**< [in] function parameters */,\
+	double &m /**< [in] initial guess of minimum location */,\
+	double &a /**< [in] lower bracket bound */,\
+	double &b /**< [in] upper bracket bound */,\
+	bool report /**< [in] show output */)
+{
 	int status;
 	int iter = 0, max_iter = 100;
 	const gsl_min_fminimizer_type *T;
