@@ -10,11 +10,6 @@
     @param  const double p_2 - partial pressure of CO2
     @param  const double R - bubble radius
     @return void
-    @fn double bubbleRadius (const double m0, const double m1)
-    @brief radius of bubbles based on the moments 
-    @param const double m0 - moment of order zero
-    @param const double m1 - moment of order one
-    @return bubble radius
     @fn double partialPressureBA(const state_type &y)
     @brief partial pressure of the physical blowing agent
     @param const state_type &y vector of all the variables
@@ -25,7 +20,9 @@
     @return partial pressure of CO2
 */
 void 	ddtpartialPressure(const state_type &y , const double t , const double dt , double *dpdt , double *pOld, const double p_1, const double p_2, const double R);
-double 	bubbleRadius (const double m0, const double m1);
+bool isNaN(double var);
+double bubbleRadius (const double m0, const double m1);
+double nodeRadius(const double &v);
 double 	partialPressureBA(const state_type &y);
 double	partialPressureCO2(const state_type &y);
 
@@ -39,25 +36,33 @@ void ddtpartialPressure(const state_type &y , const double t , const double dt ,
     dpdt[1] = (p_2 - pOld[1])/(dt);
 	pOld[1] = p_2;
 }
-
+bool isNaN(double var)
+{
+    volatile double d = var;
+    return d != d;
+}
 double bubbleRadius (const double m0, const double m1)
 {
     double R;
     R   = pow((3.0*m1/(4.0*M_PI*m0)), 1.0/3.0);
-    if (isnan(R)) {
+    if (isNaN(R)) {
         R=init_size;
     }
     return R;
 }
 
+double nodeRadius(const double &v)
+{
+    return (pow((6.0*v/M_PI),1/3));
+}
 double partialPressureBA(const state_type &y)
 {
     double L_g      = y[4];
     double CO2_g    = y[6];
     double m0       = y[7];
     double m1       = y[8];
-    double PENTANE  = y[15];
-    double CO2      = y[14];
+    // double PENTANE  = y[15];
+    // double CO2      = y[14];
 
     double R = bubbleRadius(m0, m1);
 
@@ -80,8 +85,8 @@ double partialPressureCO2(const state_type &y)
     double CO2_g    = y[6];
     double m0       = y[7];
     double m1       = y[8];
-    double PENTANE  = y[15];
-    double CO2      = y[14];
+    // double PENTANE  = y[15];
+    // double CO2      = y[14];
 
     double R = bubbleRadius(m0, m1);
 

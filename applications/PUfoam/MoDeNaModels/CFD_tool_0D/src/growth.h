@@ -15,9 +15,9 @@
 	@return void
 */
 
-void growthSource(double *, double *, double *, double *, int &, int *, double &, double &, double &, double &, double &); // function prototype 
+void growthSource(double *, double *, double *, double *, int &, int *, double &, double &, double &, double *, double *); // function prototype 
 
-void growthSource(double *sgBA, double *sgCO2, double *we, double *vi, int &nNodes, int *mOrder, double &CO2_l, double &L_l, double &tmp, double &dVdt_2, double &dVdt_1)
+void growthSource(double *sgBA, double *sgCO2, double *we, double *vi, int &nNodes, int *mOrder, double &CO2_l, double &L_l, double &tmp, double *volumeGrowthBA, double *volumeGrowthCO2)
 {
 
 	int i;
@@ -43,8 +43,8 @@ void growthSource(double *sgBA, double *sgCO2, double *we, double *vi, int &nNod
 			{	
 				if(vi[i] > 0.0)
 				{
-					sgBA[counter]  += dVdt_1*we[i];
-					sgCO2[counter] += dVdt_2*we[i];
+					sgBA[counter]  += volumeGrowthBA[i]*we[i];
+					sgCO2[counter] += volumeGrowthCO2[i]*we[i];
 					
 				}
 				else
@@ -62,8 +62,8 @@ void growthSource(double *sgBA, double *sgCO2, double *we, double *vi, int &nNod
 			{
 				if(vi[i] > 0.0)
 				{	
-					sgBA[counter]  += k*dVdt_1*we[i]*(pow(vi[i], (k-1)));
-					sgCO2[counter] += k*dVdt_2*we[i]*(pow(vi[i], (k-1)));
+					sgBA[counter]  += k*volumeGrowthBA[i]*we[i]*(pow(vi[i], (k-1)));
+					sgCO2[counter] += k*volumeGrowthCO2[i]*we[i]*(pow(vi[i], (k-1)));
 				}
 				else
 				{
