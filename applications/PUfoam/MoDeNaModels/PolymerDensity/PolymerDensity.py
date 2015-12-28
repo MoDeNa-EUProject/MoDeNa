@@ -72,39 +72,55 @@ class DensityExactSim(FireTaskBase):
           + "Performing exact simulation (microscopic code recipe)"
           + term.normal
         )
+        # Generate input fileblock
+        self.generate_inputfile()
 
-        # Write input for detailed model
-        ff = open('in.txt', 'w')
-        Tstr = str(self['point']['T'])
-        ff.write('%s \n' %(Tstr))
-        
-        
-        ##TODO INPUT SHOULD COME FROM IndexSet
-
-        ff.write('2 \n')       #number of components in system
-        ff.write('air \n')     #component 1
-        ff.write('pu \n')      #component 2
-        ff.write('0. \n')     #molar feed (initial) composition component 1
-        ff.write('0. \n')     #molar feed (initial) composition component 2
-        ff.close()
-
-        #create output file for detailed code
-        fff = open('out.txt', 'w+')
-        fff.close()
+        #create output file for detailed code, <-------------------- ?? WHY ??
+        with open('out.txt', 'w+') as FILE:
+            pass
 
         # Execute detailed model
         os.system('../src/PCSAFT_Density')
 
         # Analyse output
-        f = open('out.txt', 'r')
-        self['point']['rho'] = float(f.readline())
-        f.close()
+        self.analyse_output()
 
         return FWAction(mod_spec=[{'_push': self['point']}])
 
+    def generate_inputfile(self):
+        """Method generating a input file using the Jinja2 template engine."""
+        Template("""
+            {#
+                     Write inputs to the template, one per line.
+            #}
+            {% for k,v in s['point'].iteritems() %}
+                {{ v }}
+            {% endfor %}
+            {#
+                     The number of species, one integer.
+            #}
+            {{ s['indices'].__len__() }}
+            {#
+                     Write the species (lower case) one per line.
+            #}
+            {% for k,v in s['indices'].iteritems() %}
+                {{ v.lower() }}
+            {% endfor %}
+            {#
+                     Set initial feed molar fractions to zero.
+            #}
+            {% for k,v in s['indices'].iteritems() %}
+                {{ 0.0 }}
+            {% endfor %}
+            """, trim_blocks=True,
+                 lstrip_blocks=True).stream(s=self).dump('in.txt')
 
-
-
+    def analyse_output(self):
+        """Method analysing the output of the file.
+        @TODO consider adding check for empty file
+        """
+        with open('out.txt', 'r') as FILE:
+            self['point']['rho'] = float(FILE.readline())
 
 
 f = CFunction(
@@ -114,14 +130,13 @@ f = CFunction(
 
 void surroDensity
 (
-    const double* parameters,
-    const double* inherited_inputs,
+    const modena_model_t* model,
     const double* inputs,
     double *outputs
 )
 {
 
-    const double T = inputs[0];
+    {% block variables %}{% endblock %}
 
     const double P0 = parameters[0];
     const double P1 = parameters[1];
@@ -138,7 +153,7 @@ void surroDensity
 ''',
     # These are global bounds for the function
     inputs={
-        'T': { 'min': 270.0, 'max': 300.0, 'argPos': 0 },        #check if boundaries reasonable, from this range, the random values for the DOE are chosen!
+        'T': { 'min': 270.0, 'max': 300.0},        #check if boundaries reasonable, from this range, the random values for the DOE are chosen!
     },
     outputs={
         'rho': { 'min': 9e99, 'max': -9e99, 'argPos': 0 },
@@ -151,10 +166,11 @@ void surroDensity
 )
 
 m = BackwardMappingModel(
-    _id= 'PolymerDensity',    
+    _id= 'PolymerDensity[A=AIR,B=PU]',    
     surrogateFunction= f,
     exactTask= DensityExactSim(),
     substituteModels= [ ],
+
     initialisationStrategy= Strategy.InitialPoints(
         initialPoints=
         {
