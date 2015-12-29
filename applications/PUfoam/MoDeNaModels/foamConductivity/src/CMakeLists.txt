@@ -1,6 +1,8 @@
 cmake_minimum_required (VERSION 2.8)
 project (tutorialModels C Fortran)
 
+set (CMAKE_NO_SYSTEM_FROM_IMPORTED yes)
+
 if( CMAKE_VERSION VERSION_GREATER "3.0" )
   cmake_policy(SET CMP0042 OLD)
   cmake_policy(SET CMP0026 OLD)
