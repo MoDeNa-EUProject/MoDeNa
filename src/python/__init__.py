@@ -54,21 +54,22 @@ def find_module(target, startsearch=MODENA_WORKING_DIR):
     @arg target: 'str' name of directory e.g. "Desktop"
     """
 
-    pdir = os.path.abspath(startsearch) 
-    while target not in os.listdir(pdir):
-        pdir = os.path.abspath(os.path.join(pdir,'..')) # step back a directory
-        if os.path.ismount(pdir):                      # break if we hit "root"
+    pth = os.path.abspath(startsearch)
+    while target not in os.listdir(pth):
+        pth = os.path.abspath(os.path.join(pth,'..'))  # step back a directory
+        if os.path.ismount(pth):                       # break if we hit "root"
+            pth = None
             break
 
-    return os.path.join(pdir,target) if not os.path.ismount(pdir) else None
+    if pth is not None:
+        sys.path.insert(0, os.path.join(pth,target))
+    else:
+        print "Could not find directory: %s" %(target)
 
 def import_helper():
     from os.path import dirname
     import imp
 
-    modena_models = find_module("MoDeNaModels")   # Look for a models directory
-    if modena_models is not None:
-        sys.path.insert(0, modena_models)
 
     fp = None
     try:
@@ -87,6 +88,7 @@ def import_helper():
         return _mod
 
 
+find_module("MoDeNaModels")   # Look for a models directory
 libmodena = import_helper()
 del import_helper
 del find_module
