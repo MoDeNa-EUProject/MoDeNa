@@ -1,23 +1,26 @@
-# -*- coding: utf-8 -*-
 """
-Created on Tue Nov 24 11:32:34 2015
-Reads binary vtk file and creates ascii vtk file
-@author: Pavel Ferkl
+@file
+Converts binary VTK to ASCII VTK file.
+
+@author    Pavel Ferkl
+@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@ingroup   foam_constr
 """
-from __future__ import division
+## Main function for the conversion.
+#
+#  Intended for VTK files with 3D voxel data.
+#  Adjusts origin and spacing.
 import vtk
-def main(filenameIn,filenameOut,dx,dy,dz,vx,vy,vz):
+def main(filenameIn,filenameOut,origin,spacing):
     r = vtk.vtkDataSetReader()
     r.SetFileName(filenameIn)
     r.Update()
     data = vtk.vtkImageData()
     data.ShallowCopy(r.GetOutput())
-    data.SetOrigin(dx,dy,dz)
-    data.SetSpacing(dx/vx,dy/vy,dz/vz)
+    data.SetOrigin(origin)
+    data.SetSpacing(spacing)
     data.Update()
-    #w = vtk.vtkDataSetWriter()
     w = vtk.vtkStructuredPointsWriter()
-    # w.SetInputConnection(data.GetProducerPort())
     w.SetInput(data)
     w.SetFileName(filenameOut)
     w.Write()

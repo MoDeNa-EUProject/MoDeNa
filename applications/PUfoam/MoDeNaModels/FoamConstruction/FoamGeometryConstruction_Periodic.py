@@ -1,8 +1,23 @@
-__author__ = 'Mohammad Marvi-Mashhadi (IMDEA Materials)'
+"""
+@file
+Packing and tesselation. Prepares representative volume element (RVE) of foam.
+
+@author    Mohammad Marvi-Mashhadi (IMDEA Materials)
+@author    Pavel Ferkl
+@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@ingroup   foam_constr
+"""
 import os
 import os.path
 import numpy as np
+import re
 mypath=os.getcwd()
+## Main function.
+#
+#  Packing algorithm for creation of seeds for tessellation.
+#  Tessellation by NEPER.
+#  Saves `.geo` and `.gnu` files with tessellation for later voxelization.
+#  Prepares input file for Hypermesh.
 def main(MU,SIGMA,NumOfCells,filenameOut,packing,tesselation,geometry,
     statistics,hypermesh,deleteFiles,dx,dy,dz):
     #####To create input file for SpherePack
@@ -184,34 +199,16 @@ def main(MU,SIGMA,NumOfCells,filenameOut,packing,tesselation,geometry,
         text_GEO.write('{0}{1}{2}{3}{4}'.format('Volume (',NumOfCells,') = {',NumOfCells,'};'))
         text_GEO.close()
         ####################################################
-        # Creating periodic domain - not working yet
-        # minDomain=[4,4,4]
-        # maxDomain=[8,8,8]
-        # def inDomain(point):
-        #     inDomain=1
-        #     for i,pos in enumerate(point):
-        #         if (pos<minDomain[i] or pos>maxDomain[i]):
-        #             inDomain=0
-        #             return inDomain
-        #     return inDomain
-        # NodesInDomain=[]
-        # NodeIndex=[]
-        # NodeIndexNew=range(len(Nodes))
-        # for i,point in enumerate(Nodes):
-        #     if (inDomain(point)):
-        #         NodesInDomain.append(point)
-        #         NodeIndex.append(i)
-        #         NodeIndexNew[i]=len(NodeIndex)-1
-        # EdgesInDomain=[]
-        # for i,index in enumerate(Edges):
-        #     if (index[0] in NodeIndex or index[1] in NodeIndex):
-        #         EdgesInDomain.append([NodeIndexNew[int(index[0])],NodeIndexNew[int(index[1])]])
-        # geofile=open('PeriodicRVEdomain.geo','w')
-        # for i,pos in enumerate(NodesInDomain):
-        #     geofile.write('Point ({0}) = {{{1},{2},{3}}};\n'.format(i,pos[0],pos[1],pos[2]))
-        # for i,index in enumerate(EdgesInDomain):
-        #     geofile.write('Line ({0}) = {{{1},{2}}};\n'.format(i,index[0],index[1]))
-        # geofile.close()
+        # Making gnuplot file containing Periodic RVE
+        myfile13=os.path.join(mypath,filenameOut+".gnu")
+        text_gnu = open(myfile13, "w")
+        for i in range(int(NumOfNodes),int(NumOfNodes+MaxIndexOfEdges)):
+            a=re.findall("[-+]?\d+[\.]?\d*", lines[i])
+            b=int(a[1])-1
+            c=int(a[2])-1
+            text_gnu.write('{0}\t{1}\t{2}\n'.format(Nodes[b][0],Nodes[b][1],Nodes[b][2]))
+            text_gnu.write('{0}\t{1}\t{2}\n\n\n'.format(Nodes[c][0],Nodes[c][1],Nodes[c][2]))
+        text_gnu.close()
     # End of Geometry construction
     ################################################################
     ######Statistical info for Periodic RVE#########################
