@@ -56,7 +56,7 @@ main(int argc, char *argv[])
 
 
     // Instantiate a model
-    modena_model_t *model = modena_model_new("Density");   //muss das FunctionModule genau so heißen??
+    modena_model_t *model = modena_model_new("SurfaceTension[A=AIR,B=THF]");   //muss das FunctionModule genau so heißen??
     if(modena_error_occurred())
     {
         return modena_error();

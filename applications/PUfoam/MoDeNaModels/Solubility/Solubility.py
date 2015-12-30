@@ -62,7 +62,7 @@ surrogate model parameters.
 
 import os
 import modena
-from modena import ForwardMappingModel,BackwardMappingModel,SurrogateModel,CFunction,IndexSet
+from modena import ForwardMappingModel,BackwardMappingModel,SurrogateModel,CFunction,IndexSet,ModenaFireTask
 import modena.Strategy as Strategy
 from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
 from fireworks import Firework, Workflow, FWAction
@@ -74,12 +74,12 @@ from jinja2 import Template
 term = Terminal()
 
 @explicit_serialize
-class SolubilityExactSim(FireTaskBase):
+class SolubilityExactSim(ModenaFireTask):
     """
     This FireTask controls the execution of the detailed model of the Solubility model.
     The detailed model uses the PC-SAFT equation of state. A 
     detailed description of PC-SAFT model can be found in Deliverable 1.3 on the MoDeNa website.
-    
+
     In order to start the detailed model, the input values for the model are first written to the
     file "in.txt". The detailed model code picks them up from this file and performs the according
     calculation. Once it is done, the output value is written to the file "out.txt". This FireTask
@@ -88,41 +88,67 @@ class SolubilityExactSim(FireTaskBase):
     """
 
 
-    def run_task(self, fw_spec):
+    def task(self, fw_spec):
         print(
             term.yellow
-          + "Performing exact simulation (microscopic code recipe)"
-          + term.normal
+            + "Performing exact simulation (microscopic code recipe)"
+            + term.normal
         )
 
         # Write input for detailed model
-        ff = open('in.txt', 'w')
-        Tstr = str(self['point']['T'])
-        ff.write('%s \n' %(Tstr))
-        
-        
-        ##TODO INPUT SHOULD COME FROM IndexSet
-
-        ff.write('2 \n')       #number of components in system
-        ff.write('co2 \n')     #component 1
-        ff.write('hexane \n')  #component 2
-        ff.write('0.5 \n')     #molar feed (initial) concentration (mol/m^3) component 1
-        ff.write('0.5 \n')     #molar feed (initial) concentration (mol/m^3) component 2
-        ff.close()
-
-        #create output file for detailed code
-        fff = open('out.txt', 'w+')
-        fff.close()
+        self.generate_inputfile()
 
         # Execute detailed model
-        os.system('../src/PCSAFT_Henry')
+        ret = os.system(os.path.join(os.path.dirname(os.path.abspath(__file__)),'src/PCSAFT_Henry'))
+
+        # Check framework for errors
+        self.handleReturnCode(ret)
 
         # Analyse output
-        f = open('out.txt', 'r')
-        self['point']['H'] = float(f.readline())
-        f.close()
+        self.analyse_output()
 
-        return FWAction(mod_spec=[{'_push': self['point']}])
+
+    def generate_inputfile(self):
+        """Method generating a input file using the Jinja2 template engine."""
+
+        Template("""
+        {#
+            Write inputs to the template, one per line.
+        #}
+        {% for k,v in s['point'].iteritems() %}
+            {{ v }}
+        {% endfor %}
+        {#
+            The number of species, one integer.
+        #}
+            {{ s['indices'].__len__() }}
+        {#
+        Write the species (lower case) one per line.
+        #}
+        {% for k,v in s['indices'].iteritems() %}
+            {{ v.lower() }}
+        {% endfor %}
+        {#
+            Set initial feed molar fractions.
+        #}
+        {% for k,v in s['indices'].iteritems() %}
+            {{ 0.5 }}
+        {% endfor %}
+        """, trim_blocks=True,
+           lstrip_blocks=True).stream(s=self).dump('in.txt')
+
+        # Create output file for application to write output
+        with open('out.txt', 'w+') as FILE:
+            pass
+
+
+    def analyse_output(self):
+        """Method analysing the output of the file.
+            @TODO consider adding check for empty file
+        """
+
+        with open('out.txt', 'r') as FILE:
+            self['point']['H'] = float(FILE.readline())
 
 
 f = CFunction(
@@ -145,7 +171,7 @@ void surroSolubility
 
     const double term1 = P1*(1/T - 1/P2);
     const double term2 = exp(term1);
-    
+
     outputs[0] = P0*term2;
 
     //outputs[0] = P0 + T*P1 + P2*T*T;
@@ -167,7 +193,7 @@ void surroSolubility
 
 
 m = BackwardMappingModel(
-    _id= 'Solubility',    
+    _id= 'Solubility[A=CO2,B=HEXANE]',
     surrogateFunction= f,
     exactTask= SolubilityExactSim(),
     substituteModels= [ ],
@@ -175,7 +201,7 @@ m = BackwardMappingModel(
         initialPoints=
         {
             'T': [200.0, 220.0],
-                 },
+        },
     ),
     outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(
         nNewPoints= 4

@@ -94,24 +94,9 @@ class SurfaceTensionExactSim(ModenaFireTask):
     """
 
     def task(self, fw_spec):
+
         # Write input for detailed model
-        ff = open('in.txt', 'w')
-        Tstr = str(self['point']['T'])
-        ff.write('%s \n' %(Tstr))
-        
-        
-        ##TODO INPUT SHOULD COME FROM IndexSet
-
-        ff.write('2 \n')       #number of components in system
-        ff.write('air \n')     #component 1
-        ff.write('thf \n')      #component 2
-        ff.write('0. \n')     #molar feed (initial) composition component 1
-        ff.write('0. \n')     #molar feed (initial) composition component 2
-        ff.close()
-
-        #create output file for detailed code
-        fff = open('out.txt', 'w+')
-        fff.close()
+        self.generate_inputfile()
 
         # Execute detailed model
         run_command = os.path.dirname(os.path.abspath(__file__))+'/src/PCSAFT_SurfaceTension -snes_monitor_short -ksp_monitor_short \
@@ -131,9 +116,47 @@ class SurfaceTensionExactSim(ModenaFireTask):
         self.handleReturnCode(ret)
 
         # Analyse output
-        f = open('out.txt', 'r')
-        self['point']['ST'] = float(f.readline())
-        f.close()
+        self.analyse_output()
+
+    def generate_inputfile(self):
+        """Method generating a input file using the Jinja2 template engine."""
+        Template("""
+            {#
+                 Write inputs to the template, one per line.
+            #}
+            {% for k,v in s['point'].iteritems() %}
+                 {{ v }}
+            {% endfor %}
+            {#
+                 The number of species, one integer.
+            #}
+                  {{ s['indices'].__len__() }}
+            {#
+                 Write the species (lower case) one per line.
+            #}
+            {% for k,v in s['indices'].iteritems() %}
+                   {{ v.lower() }}
+            {% endfor %}
+            {#
+                    Set initial feed molar fractions to zero.
+            #}
+            {% for k,v in s['indices'].iteritems() %}
+                {{ 0.0 }}
+            {% endfor %}
+            """, trim_blocks=True,
+               lstrip_blocks=True).stream(s=self).dump('in.txt')
+
+        with open('out.txt','w+') as FILE:
+            pass
+
+    def analyse_output(self):
+        """Method analysing the output of the file.
+             @TODO consider adding check for empty file
+        """
+        with open('out.txt', 'r') as FILE:
+            self['point']['ST'] = float(FILE.readline())
+
+
 
 
 f = CFunction(
@@ -143,18 +166,18 @@ f = CFunction(
 
 void surroSurfaceTension
 (
-    const modena_model_t* model,
-    const double* inputs,
-    double *outputs
+const modena_model_t* model,
+const double* inputs,
+double *outputs
 )
 {
-    {% block variables %}{% endblock %}
+{% block variables %}{% endblock %}
 
-    const double P0 = parameters[0];
-    const double P1 = parameters[1];
-    const double P2 = parameters[2];
+const double P0 = parameters[0];
+const double P1 = parameters[1];
+const double P2 = parameters[2];
 
-    outputs[0] = P0 + T*P1 + P2*T*T;
+outputs[0] = P0 + T*P1 + P2*T*T;
 }
 ''',
     # These are global bounds for the function
@@ -172,7 +195,7 @@ void surroSurfaceTension
 )
 
 m = BackwardMappingModel(
-    _id= 'SurfaceTension',    
+    _id= 'SurfaceTension[A=AIR,B=THF]',    
     surrogateFunction= f,
     exactTask= SurfaceTensionExactSim(),
     substituteModels= [ ],

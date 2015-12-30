@@ -38,7 +38,7 @@ the database.
 @author Henrik Rusche
 @copyright 2014-2015, MoDeNa Project. GNU Public License.
 """
-import modena
+
 from modena import SurrogateModel
 from modena.Strategy import Workflow2
 import flowRate
@@ -46,12 +46,6 @@ from fireworks import LaunchPad, Workflow
 from fireworks.core.rocket_launcher import rapidfire
 from fireworks.utilities.fw_serializers import load_object
 
-
-for k in modena.__dict__:
-    print k
-
-for k in modena.__builtins__:
-    print k
 
 # set up the LaunchPad and reset it
 launchpad = LaunchPad()

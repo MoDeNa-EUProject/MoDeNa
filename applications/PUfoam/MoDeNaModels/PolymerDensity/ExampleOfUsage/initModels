@@ -39,10 +39,10 @@ Authors
 Contributors
 '''
 
+import modena
 from modena import SurrogateModel
 from modena.Strategy import Workflow2
-#import flowRate
-import modDensity
+import PolymerDensity
 from fireworks import LaunchPad
 from fireworks.core.rocket_launcher import rapidfire
 from fireworks.utilities.fw_serializers import load_object

@@ -56,14 +56,14 @@ main(int argc, char *argv[])
 
 
     // Instantiate a model
-    modena_model_t *model = modena_model_new("Solubility");   //muss das FunctionModule genau so heißen??
+    modena_model_t *model = modena_model_new("Solubility[A=CO2,B=HEXANE]");
     if(modena_error_occurred())
     {
         return modena_error();
     }
 
     // Allocate memory and fetch arg positions
-    modena_inputs_t *inputs = modena_inputs_new(model);           //How many inputs and outputs is defined in the function module!! 
+    modena_inputs_t *inputs = modena_inputs_new(model);
     modena_outputs_t *outputs = modena_outputs_new(model);
 
     
