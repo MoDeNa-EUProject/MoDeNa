@@ -37,6 +37,7 @@ Authors
 Contributors
 '''
 
+import modena
 from fireworks import Firework, Workflow, LaunchPad
 from fireworks.core.rocket_launcher import rapidfire
 from foamConductivity import m_simulation as SIMULATION

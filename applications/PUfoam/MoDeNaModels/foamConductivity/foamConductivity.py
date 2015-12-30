@@ -167,11 +167,10 @@ void tcfoam_SM
 
 # use input file to Foam aging application to initialize with reasonable data.
 fname='input.in'
-print os.getcwd()
 try:
     f = open(fname,'r')
 except IOError:
-    f = open(os.path.join(os.path.abspath(os.path.join(os.getcwd(),'..')),fname),'r')
+    f = open(os.getcwd()+'/../'+fname,'r')
 
 a=f.readline()
 a=f.readline()

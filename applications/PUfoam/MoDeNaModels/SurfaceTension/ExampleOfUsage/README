@@ -20,6 +20,21 @@ cmake .
 make
 
 
+# Install petsc 3.4.4
+
+## Download PETSC tarball and unzip
+wget --directory-prefix=${HOME}/Downloads "http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-3.4.4.tar.gz"
+tar --gunzip --extract --file=${HOME}/Downloads/petsc-3.4.4.tar.gz --directory=${HOME}/Downloads
+cd ${HOME}/Downloads/petsc-3.4.4
+
+## Install in "PETSC_DIR"
+PETSC_DIR=/opt/petsc/petsc-3.4.4
+./configure --prefix=${PETSC_DIR}
+make
+sudo make install
+echo "export PETSC_DIR=${PETSC_DIR}" >> ~/.bashrc
+
+
 #Compile detailed model code (PETSc 3.4.4 needs to be installed)
 cd src/srcDetailedCode/
 make DFT

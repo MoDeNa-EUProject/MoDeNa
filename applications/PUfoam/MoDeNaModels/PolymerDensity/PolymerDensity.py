@@ -39,7 +39,7 @@ Contributors
 
 import os
 import modena
-from modena import ForwardMappingModel,BackwardMappingModel,SurrogateModel,CFunction,IndexSet
+from modena import ForwardMappingModel,BackwardMappingModel,SurrogateModel,CFunction,IndexSet,ModenaFireTask
 import modena.Strategy as Strategy
 from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
 from fireworks import Firework, Workflow, FWAction
@@ -61,12 +61,12 @@ __date__ = 'Sep 4, 2014'
 
 # ********************************* Class ********************************** #
 @explicit_serialize
-class DensityExactSim(FireTaskBase):
+class DensityExactSim(ModenaFireTask):
     """
     A FireTask that starts a microscopic code and updates the database.
     """
 
-    def run_task(self, fw_spec):
+    def task(self, fw_spec):
         print(
             term.yellow
           + "Performing exact simulation (microscopic code recipe)"
@@ -75,17 +75,16 @@ class DensityExactSim(FireTaskBase):
         # Generate input fileblock
         self.generate_inputfile()
 
-        #create output file for detailed code, <-------------------- ?? WHY ??
-        with open('out.txt', 'w+') as FILE:
-            pass
-
         # Execute detailed model
-        os.system('../src/PCSAFT_Density')
+        ret = os.system(os.path.dirname(os.path.abspath(__file__))+'/src/PCSAFT_Density')
+
+        # Check framework for errors
+        self.handleReturnCode(ret)
 
         # Analyse output
         self.analyse_output()
 
-        return FWAction(mod_spec=[{'_push': self['point']}])
+
 
     def generate_inputfile(self):
         """Method generating a input file using the Jinja2 template engine."""
@@ -114,6 +113,11 @@ class DensityExactSim(FireTaskBase):
             {% endfor %}
             """, trim_blocks=True,
                  lstrip_blocks=True).stream(s=self).dump('in.txt')
+
+        #create output file for detailed code
+        with open('out.txt', 'w+') as FILE:
+            pass
+
 
     def analyse_output(self):
         """Method analysing the output of the file.
@@ -153,7 +157,7 @@ void surroDensity
 ''',
     # These are global bounds for the function
     inputs={
-        'T': { 'min': 270.0, 'max': 300.0},        #check if boundaries reasonable, from this range, the random values for the DOE are chosen!
+        'T': { 'min': 270.0, 'max': 300.0},
     },
     outputs={
         'rho': { 'min': 9e99, 'max': -9e99, 'argPos': 0 },

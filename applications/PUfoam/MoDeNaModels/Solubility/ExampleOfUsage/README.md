@@ -20,13 +20,6 @@ cmake .
 make
 
 
-#Compile detailed model code
-cd src/srcDetailedCode/
-make EOS
-
-#copy executable of detailed model (PCSAFT_Henry) in src folder
-
-
 # Initialise the model in the database
 ./initModel
 

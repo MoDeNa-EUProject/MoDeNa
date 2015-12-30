@@ -1,11 +1,13 @@
 #!/bin/sh
-foamAging="../Models/foamAging/src"
+MODELS_DIR="../MoDeNaModels"
+
+foamAging="${MODELS_DIR}/foamAging/src"
 cmake -H${foamAging} -B${foamAging} && make --directory=${foamAging}
 
-foamConductivity="../Models/foamConductivity/src"
+foamConductivity="${MODELS_DIR}/foamConductivity/src"
 cmake -H${foamConductivity} -B${foamConductivity} && \
-    make --directory=${foamConductivity}
+  make --directory=${foamConductivity}
 
-# US_solubility="../Models/US_Solubility_Model/PythonModule_and_DetailedModelCode"
-# cmake -H${US_solubility} -B${US_solubility} && \
-#     make --directory=${US_solubility}
+solubility="${MODELS_DIR}/Solubility/src"
+cmake -H${solubility} -B${solubility} && \
+  make --directory=${solubility}

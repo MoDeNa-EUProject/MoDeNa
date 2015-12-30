@@ -35,7 +35,7 @@ Authors
 
 Contributors
 '''
-from modSolubility import f
-from modSolubility import m_solubilityCO2
-from modSolubility import m_solubilityAir
-from modSolubility import m_solubilityCyclopentane
+from Solubility import f, m, SolubilityExactSim
+# from Solubility import m_solubilityCO2
+# from Solubility import m_solubilityAir
+# from Solubility import m_solubilityCyclopentane

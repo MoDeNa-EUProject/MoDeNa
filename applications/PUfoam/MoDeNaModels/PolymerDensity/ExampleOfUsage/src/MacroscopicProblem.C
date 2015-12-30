@@ -48,7 +48,7 @@ using namespace std;
 int
 main(int argc, char *argv[])
 {
-    double T = 270;
+    double T = 280;
     double Tend = 290.0;
     
     // Instantiate index set
@@ -56,7 +56,7 @@ main(int argc, char *argv[])
 
 
     // Instantiate a model
-    modena_model_t *model = modena_model_new("Density");   //muss das FunctionModule genau so heißen??
+    modena_model_t *model = modena_model_new("PolymerDensity[A=AIR,B=PU]");   //muss das FunctionModule genau so heißen??
     if(modena_error_occurred())
     {
         return modena_error();
