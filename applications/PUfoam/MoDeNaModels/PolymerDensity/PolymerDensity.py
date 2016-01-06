@@ -59,6 +59,17 @@ __email__ = 'h.rusche@wikki.co.uk.'
 __date__ = 'Sep 4, 2014'
 
 
+blowing_agents = IndexSet(
+    name= 'blowing_agents',
+    names= [ 'air', 'CO2']
+)
+
+monomers = IndexSet(
+    name = 'monomers',
+    names = ['PU', 'THF', 'hexane']
+)
+
+
 # ********************************* Class ********************************** #
 @explicit_serialize
 class DensityExactSim(ModenaFireTask):
@@ -167,6 +178,10 @@ void surroDensity
         'param1': { 'min': -1E10, 'max': 1E10, 'argPos': 1 },
         'param2': { 'min': -1E10, 'max': 1E10, 'argPos': 2 },
     },
+    species={
+        'A' : blowing_agents,
+        'B' : monomers
+    }
 )
 
 m = BackwardMappingModel(
