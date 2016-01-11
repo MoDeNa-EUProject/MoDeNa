@@ -21,7 +21,11 @@ add_custom_target(release
   COMMENT "Switch CMAKE_BUILD_TYPE to Release"
   )
 
+set (CMAKE_NO_SYSTEM_FROM_IMPORTED yes)
+
 find_package(MODENA REQUIRED)
+
+
 
 include(CheckCInline)
 check_c_inline(C_INLINE)
