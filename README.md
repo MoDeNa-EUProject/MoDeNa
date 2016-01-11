@@ -1,4 +1,4 @@
-# MoDeNa
+# MoDeNa {#mainpage}
 A software Framework for *MO*delling of morphology *DE*velopment of
 micro- and *NA*nostructures
 

@@ -1,4 +1,4 @@
-'''
+'''@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -9,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014 MoDeNa Consortium, All rights reserved.
+    2014-2015 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -26,7 +26,14 @@ License
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
-'''
+@endcond'''
+
+"""
+@file
+Module providing the MoDeNa python interface
+
+@copyright  2014-2015, MoDeNa Project. GNU Public License.
+"""
 
 import os
 from pkg_resources import get_distribution
@@ -35,15 +42,19 @@ __version__ = get_distribution('modena').version
 
 MODENA_INSTALL_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-from Strategy import *
-from SurrogateModel import SurrogateModel, ForwardMappingModel, BackwardMappingModel, CFunction
+from Strategy import BackwardMappingScriptTask, BackwardMappingTask
+from SurrogateModel import CFunction, IndexSet, Workflow2, \
+    SurrogateModel, ForwardMappingModel, BackwardMappingModel
 
 def import_helper():
     from os.path import dirname
     import imp
     fp = None
     try:
-        fp, pathname, description = imp.find_module('libmodena', [dirname(__file__)+"/../../../"])
+        fp, pathname, description = imp.find_module(
+            'libmodena',
+            [ dirname(__file__)+"/../../../modena" ]
+        )
     except ImportError:
         import libmodena
         return libmodena
@@ -56,4 +67,7 @@ def import_helper():
 libmodena = import_helper()
 del import_helper
 
+##
+# @defgroup python_interface_library
+# Module providing the MoDeNa python interface
 

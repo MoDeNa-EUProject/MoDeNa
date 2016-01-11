@@ -10,7 +10,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014 MoDeNa Consortium, All rights reserved.
+    2014-2015 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -37,9 +37,10 @@ Authors
 Contributors
 '''
 
-from fireworks import FireWork, Workflow, LaunchPad
+from fireworks import Firework, Workflow, LaunchPad
 from fireworks.core.rocket_launcher import rapidfire
-from twoTank import *
+import twoTank
+import flowRate_idealGas
 from modulefinder import ModuleFinder
 
 
@@ -49,11 +50,7 @@ launchpad.reset('', require_password=False)
 
 # create the individual FireWorks and Workflow
 # Source code in src/twoTanksMacroscopicProblem.C
-fw1 = Firework(
-    ModenaBackwardMappingTask(
-        script='../src/twoTanksMacroscopicProblem'
-    )
-)
+fw1 = Firework(twoTank.m)
 wf = Workflow([fw1], {}, name="simulation")
 
 # store workflow and launch it locally

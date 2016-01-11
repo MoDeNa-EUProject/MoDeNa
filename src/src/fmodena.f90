@@ -9,7 +9,7 @@
 !   o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 !
 !Copyright
-!    2014 MoDeNa Consortium, All rights reserved.
+!    2014-2015 MoDeNa Consortium, All rights reserved.
 !
 !License
 !    This file is part of Modena.
@@ -26,20 +26,18 @@
 !
 !    You should have received a copy of the GNU General Public License along
 !    with Modena.  If not, see <http://www.gnu.org/licenses/>.
-!
-!Description
-!    Solving the two tank problem the MoDeNa way.
-!
-!    A prototypical macros-scopic code embeds a micro-scale model (flowRate)
-!    through the MoDeNa interface library.
-!
-!    Re-programmed to Fortran
-!
-!Authors
-!    Henrik Rusche
-!
-!Contributors
-!    Pavel Ferkl
+
+!>
+!! Fortran bindings for MoDeNa low-level interface library
+!!
+!! @author Henrik Rusche
+!! @author Pavel Ferkl
+!! @copyright  2014-2015, MoDeNa Project. GNU Public License.
+
+!>
+!! @defgroup Fortran_interface_library
+!! @{
+
 module fmodena !command line arguments not implemented yet
     use iso_c_binding
 
@@ -108,6 +106,17 @@ module fmodena !command line arguments not implemented yet
             type(c_ptr), value :: outputs
             integer(c_int) :: ret
         end function modena_model_call
+        function modena_error_occurred() result(output) bind(c)
+            import
+            logical(c_bool) :: output
+        end function modena_error_occurred
+        function modena_error() result(output) bind(c)
+            import
+            integer(c_int) :: output
+        end function modena_error
     end interface
 
 end module fmodena
+
+!>
+!!@}

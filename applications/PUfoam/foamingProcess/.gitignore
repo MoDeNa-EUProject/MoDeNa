@@ -1,0 +1,8 @@
+*.json
+*.in
+*.txt
+!CMakeLists.txt
+*~
+# directories
+func_*/
+launcher*/

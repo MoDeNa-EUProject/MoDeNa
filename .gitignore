@@ -112,4 +112,8 @@ FW.json
 launcher_*/
 func_*/
 
+# Documentation
+html/
+
+
 # end-of-file

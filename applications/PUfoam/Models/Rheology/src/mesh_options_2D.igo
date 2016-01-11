@@ -1,0 +1,5 @@
+
+//Mesh.Algorithm = 6; // Frontal for surfaces
+Mesh.ElementOrder = 2; // Second-order elements
+
+// vim: set filetype=gmsh :  //
