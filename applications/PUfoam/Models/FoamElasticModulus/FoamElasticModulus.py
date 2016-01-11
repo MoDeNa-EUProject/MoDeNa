@@ -232,7 +232,7 @@ os.remove('RVE27.stver')
 ######################################################################
                   # Creating Mesh Using GMSH
 ######################################################################
-commandMeshing="./gmsh PeriodicRVE.geo -2 -optimize_lloyd -o PeriodicRVE -format inp -saveall"
+commandMeshing="gmsh PeriodicRVE.geo -2 -optimize_lloyd -o PeriodicRVE -format inp -saveall"
 os.system(commandMeshing)
 while True:
     time.sleep(1)
