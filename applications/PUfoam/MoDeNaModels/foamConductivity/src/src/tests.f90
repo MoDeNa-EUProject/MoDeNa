@@ -16,7 +16,7 @@ module tests
     character(len=99) :: fileplacein_par='./'   !modena
     character(len=99) :: fileplacein_ref='../spectra/'  !modena
     character(len=99) :: fileplaceout='./'  !modena
-    character(len=99) :: inputs='inputs.in',spectra='spectra.out'
+    character(len=99) :: inputs='foamConductivity.in',spectra='spectra.out'
     character(len=99) :: nspec='spec_n.in'
     character(len=99) :: kspec='spec_k.in'
     character(len=99) :: gasspec='gasspec.in'

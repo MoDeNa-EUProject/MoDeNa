@@ -69,7 +69,7 @@ class FoamConductivityExactTask(ModenaFireTask):
         # xAir=0.3
         # xCyP=0.4
         # Write input
-        f = open('inputs.in', 'w')
+        f = open('foamConductivity.in', 'w')
         f.write('{0:.6e}\n'.format(temp+1))
         f.write('{0:.6e}\n'.format(temp-1))
         f.write('{0:.6e}\t{1:.6e}\t{2:.6e}\n'.format(xCO2,xAir,xCyP))
@@ -99,14 +99,14 @@ class FoamConductivityExactTask(ModenaFireTask):
         # Analyse output
         # os.getcwd() returns the path to the "launcher" directory
         try:
-            FILE = open(os.getcwd()+'/outputs.out','r')
+            FILE = open(os.getcwd()+'/foamConductivity.out','r')
         except IOError:
             raise IOError("File not found")
 
         self['point']['kfoam'] = float(FILE.readline())
 
-        os.remove('inputs.in')
-        os.remove('outputs.out')
+        os.remove('foamConductivity.in')
+        os.remove('foamConductivity.out')
 
 ## Surrogate function for thermal conductivity of the foam.
 #
@@ -166,7 +166,7 @@ void tcfoam_SM
 )
 
 # use input file to Foam aging application to initialize with reasonable data.
-fname='input.in'
+fname='foamAging.in'
 try:
     f = open(fname,'r')
 except IOError:

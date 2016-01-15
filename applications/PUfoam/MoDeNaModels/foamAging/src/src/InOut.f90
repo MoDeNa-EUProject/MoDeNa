@@ -32,7 +32,7 @@ subroutine input(rpar, ipar)
 	parameter (R = 8.314d0)
 
 !c Read input params - pak module params :)
-	open(2, file = '../input.in', status = 'old')
+	open(2, file = '../foamAging.in', status = 'old')
 	read(2, *) nroutputs
 	read(2, *) divwall
 	read(2, *) tend
