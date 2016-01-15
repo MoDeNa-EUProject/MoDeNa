@@ -42,4 +42,4 @@ You have also option to calculate foam conductivity for just one foam at specifi
 ```
 ./foamCond
 ```
-The results can be found in the last "launcher" folder. Look for files named "foamConductivity.out" and "hahtf.out".
+The results can be found in the "results" folder. Look for files named "foamConductivity.out" and "hahtf.out".
