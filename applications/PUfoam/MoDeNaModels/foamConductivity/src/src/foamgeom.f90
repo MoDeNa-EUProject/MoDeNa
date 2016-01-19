@@ -112,12 +112,14 @@ subroutine fcn_dwall(n,x,fvec,iflag)
     real (dp), intent(in) :: x(n)
     real (dp), intent(out) :: fvec(n)
     integer, intent(inout) :: iflag
-    real(dp) :: Vcell,Vstruts,Vwalls,fs,dstrut
+    real(dp) :: Vcell,Vstruts,Vwalls,fs,dstrut,dcelldd
     fs=x(1)
     dstrut=x(2)
-    Vcell=0.348_dp*dcell**3
-    Vstruts=2.8_dp*dstrut**2*dcell-3.93_dp*dstrut**3
-    Vwalls=(1.3143_dp*dcell**2-7.367_dp*dstrut*dcell+10.323_dp*dstrut**2)*dwall
+    dcelldd=(pi/6/0.348_dp)**(1/3._dp)*dcell
+    Vcell=0.348_dp*dcelldd**3
+    Vstruts=2.8_dp*dstrut**2*dcelldd-3.93_dp*dstrut**3
+    Vwalls=(1.3143_dp*dcelldd**2-7.367_dp*dstrut*dcelldd+10.323_dp*dstrut**2)*&
+        dwall
     fvec(1)=fs-Vstruts/(Vstruts+Vwalls)
     fvec(2)=1-por-(Vstruts+Vwalls)/Vcell
 end subroutine fcn_dwall
@@ -131,12 +133,14 @@ subroutine fcn_fs(n,x,fvec,iflag)
     real (dp), intent(in) :: x(n)
     real (dp), intent(out) :: fvec(n)
     integer, intent(inout) :: iflag
-    real(dp) :: Vcell,Vstruts,Vwalls,dwall,dstrut
+    real(dp) :: Vcell,Vstruts,Vwalls,dwall,dstrut,dcelldd
     dwall=x(1)
     dstrut=x(2)
-    Vcell=0.348_dp*dcell**3
-    Vstruts=2.8_dp*dstrut**2*dcell-3.93_dp*dstrut**3
-    Vwalls=(1.3143_dp*dcell**2-7.367_dp*dstrut*dcell+10.323_dp*dstrut**2)*dwall
+    dcelldd=(pi/6/0.348_dp)**(1/3._dp)*dcell
+    Vcell=0.348_dp*dcelldd**3
+    Vstruts=2.8_dp*dstrut**2*dcelldd-3.93_dp*dstrut**3
+    Vwalls=(1.3143_dp*dcelldd**2-7.367_dp*dstrut*dcelldd+10.323_dp*dstrut**2)*&
+        dwall
     fvec(1)=fs-Vstruts/(Vstruts+Vwalls)
     fvec(2)=1-por-(Vstruts+Vwalls)/Vcell
 end subroutine fcn_fs
@@ -150,12 +154,14 @@ subroutine fcn_dstrut(n,x,fvec,iflag)
     real (dp), intent(in) :: x(n)
     real (dp), intent(out) :: fvec(n)
     integer, intent(inout) :: iflag
-    real(dp) :: Vcell,Vstruts,Vwalls,dwall,fs
+    real(dp) :: Vcell,Vstruts,Vwalls,dwall,fs,dcelldd
     dwall=x(1)
     fs=x(2)
-    Vcell=0.348_dp*dcell**3
-    Vstruts=2.8_dp*dstrut**2*dcell-3.93_dp*dstrut**3
-    Vwalls=(1.3143_dp*dcell**2-7.367_dp*dstrut*dcell+10.323_dp*dstrut**2)*dwall
+    dcelldd=(pi/6/0.348_dp)**(1/3._dp)*dcell
+    Vcell=0.348_dp*dcelldd**3
+    Vstruts=2.8_dp*dstrut**2*dcelldd-3.93_dp*dstrut**3
+    Vwalls=(1.3143_dp*dcelldd**2-7.367_dp*dstrut*dcelldd+10.323_dp*dstrut**2)*&
+        dwall
     fvec(1)=fs-Vstruts/(Vstruts+Vwalls)
     fvec(2)=1-por-(Vstruts+Vwalls)/Vcell
 end subroutine fcn_dstrut
