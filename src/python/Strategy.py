@@ -920,31 +920,8 @@ class ParametersNotValid(Exception):
 
 @explicit_serialize
 class ModenaFireTask(FireTaskBase):
-    """
-    """
-#    path = None
-#    source = None
-#    script = None
-#    compile_to = None
-
-
-#    def __init__(self):
-        # path to the "model directory"
-#        if not kwargs['path']:
-#            self.path = os.path.basename(sys.modules[self.__module__].__file__)
-#        if not self.source_dir:
-#            self.source_dir= modena.find_module('src')
-#        if not self.script:
-
-
-#        compile_sequence, cmake, flags, location, 
-#        execution_sequence, script, flags
-#        generate_input
-#        analyse_output
 
     def outOfBounds(self):
-        """
-        """
 
         try:
             # TODO
@@ -972,8 +949,7 @@ class ModenaFireTask(FireTaskBase):
 
 
     def parametersNotValid(self, model):
-        """
-        """
+
         try:
             # Continue with exact tasks, parameter estimation and (finally) this
             # task in order to resume normal operation
@@ -990,8 +966,6 @@ class ModenaFireTask(FireTaskBase):
 
 
     def run_task(self, fw_spec):
-        """
-        """
         if 'point' in self:
             print(
                 term.yellow
