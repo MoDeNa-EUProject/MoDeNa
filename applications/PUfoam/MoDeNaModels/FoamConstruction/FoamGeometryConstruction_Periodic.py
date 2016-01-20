@@ -11,6 +11,9 @@ import os
 import os.path
 import numpy as np
 import re
+import time
+import random
+import math
 mypath=os.getcwd()
 ## Main function.
 #
@@ -22,46 +25,55 @@ def main(MU,SIGMA,NumOfCells,filenameOut,packing,tesselation,geometry,
     statistics,hypermesh,deleteFiles,dx,dy,dz):
     #####To create input file for SpherePack
     if packing:
-        myfile=os.path.join(mypath,'Project01.prj')
+        NumSpheres=NumOfCells
+        Rad=abs((np.random.normal(MU, SIGMA,NumSpheres)))
+        Rads1=list(range(NumSpheres))
+        t=0
+        for i in range(NumSpheres):
+            c=abs(Rad[t])
+            Rads1[t]=c.astype(np.float)
+            t=t+1
+        Rads1=sorted(Rads1)
+        v=0.00
+        for i in range(NumSpheres):
+            v=v+((2.00*Rads1[i])**3.00)
+        centers = [[0 for i in range(3)] for j in range(NumSpheres)]
+        v=v*1.40
+        lc=v**(1.00/3.00)
+        K=0
+        while K==0:
+            j=-1
+            h=0
+            timeout = time.time() + 10
+            while NumSpheres>=j and h==0:
+                if time.time()>timeout:
+                    h=1
+                    break
+                j=j+1
+                if j==NumSpheres:
+                    K=1
+                    break
+                PickCenterX,PickCenterY,PickCenterZ=lc*random.random(),lc*random.random(),lc*random.random()
+                while (lc-Rads1[j]>=PickCenterX and lc-Rads1[j]>=PickCenterY and lc-Rads1[j]>=PickCenterZ and Rads1[j]<PickCenterX and Rads1[j]<PickCenterY and Rads1[j]<PickCenterZ):
+                    PickCenterX,PickCenterY,PickCenterZ=lc*random.random(),lc*random.random(),lc*random.random()
+                centers[j][0],centers[j][1],centers[j][2]=PickCenterX,PickCenterY,PickCenterZ
+                KeepCentreX, KeepCentreY, KeepCentreZ, KeepR=PickCenterX, PickCenterY, PickCenterZ, Rads1[j]
+                if j>0:
+                    for t in range(0,j):
+                        if (((( ((KeepCentreX-centers[t][0])**2.00)+((KeepCentreY-centers[t][1])**2.00)+((KeepCentreZ-centers[t][2])**2.00))**0.50)-(KeepR+Rads1[t]))<0.000) and t!=j:
+                            centers[j][0],centers[j][0],centers[j][0]=0,0,0
+                            j=j-1
+                            break
+        mypath=os.getcwd()
+        myfile=os.path.join(mypath,'Project01.rco')
         f=open(myfile,'w')
-        f.write('{0:34s}\n'.format('# RANDOM COORDINATES: 0 OR FILE: 1'))
-        f.write('{0}\n'.format('0'))
-        f.write('{0}\n'.format('# NUMBER OF SPHERES'))
-        f.write('{0:d}\n'.format(NumOfCells))
-        f.write('{0}\n'.format('# LENGTH IN X-, Y- AND Z-DIRECTION'))
-        f.write('{0:f}\n'.format(dx))
-        f.write('{0:f}\n'.format(dy))
-        f.write('{0:f}\n'.format(dz))
-        f.write('{0}\n'.format('# EPSILON'))
-        f.write('{0}\n'.format('0.0001'))
-        f.write('{0}\n'.format('# NTAU'))
-        f.write('{0}\n'.format('963800000'))
-        f.write('{0}\n'.format('# NOMINAL DENSITY'))
-        f.write('{0}\n'.format('0.25'))
-        f.write('{0}\n'.format('# MAX. AND MINIM. DIAMETER'))
-        f.write('{0}\n'.format('3.0'))
-        f.write('{0}\n'.format('1.0'))
-        f.write('{0}\n'.format('# MAX. NUMBER OF STEPS'))
-        f.write('{0}\n'.format('50000000'))
-        f.write('{0}\n'.format('# DISTRIBUTION'))
-        f.write('{0}\n'.format('3'))
-        f.write('{0}\n'.format('# DISTRIBUTION PARAMETERS'))
-        f.write('{0:f}\n'.format(MU))
-        f.write('{0:f}\n'.format(SIGMA))
-        f.write('{0}\n'.format('0.4'))
-        f.write('{0}\n'.format('-3.3'))
-        f.write('{0}\n'.format('3'))
-        f.write('{0}\n'.format('0.10'))
-        f.write('{0}\n'.format('0.20'))
-        f.write('{0}\n'.format('0.70'))
-        f.write('{0}\n'.format('0.902113'))
-        f.write('{0}\n'.format('3.000000'))
-        f.write('{0}\n'.format('1.000000'))
+        for i in range(NumSpheres):
+            f.write('{0:f}{1}{2:f}{3}{4:f}{5}{6:f}\n'.format(centers[i][0],'	',centers[i][1],'	',centers[i][2],'	',2.0*Rads1[i]))
         f.close()
-        ###########################################################
-        os.chdir(mypath)
-        command1='wine SpherePackFB.exe'
-        os.system(command1)
+        MAXcenters=max(centers)
+        Mincenters=min(centers)
+        EdgeCubeSize=[math.ceil(MAXcenters[0]-Mincenters[0]),math.ceil(MAXcenters[1]-Mincenters[1]),math.ceil(MAXcenters[2]-Mincenters[2])]
+        EdgeRVESize=int(3.0*max(EdgeCubeSize)) #For NEPER: Size of edge of RVE
     if tesselation:
         myfile12=os.path.join(mypath,'Project01.rco')
         CentersRads=np.loadtxt(myfile12,usecols = (0,1,2,3))
@@ -82,14 +94,13 @@ def main(MU,SIGMA,NumOfCells,filenameOut,packing,tesselation,geometry,
             for j in range(0,NumOfCells):
                 ff.write('{0:f}\t{1:f}\t{2:f}\n'.format(Centers27[i,j],Centers27[i+27,j],Centers27[i+54,j]))
         ff.close()
-        #mypath4=r'/home/mohammad/'
         myfile4=os.path.join(mypath,'Rads.txt')
         fff=open(myfile4,'w')
         for i in range(0,27):
             for j in range(0,NumOfCells):
                 fff.write('{0:f}\n'.format(Rads[j]))
         fff.close()
-        commandTessellation="neper -T -n {0:d} -domain 'cube({1:d},{2:d},{3:d})' -morpho @Centers.txt -weight @Rads.txt -o RVE27 -format geo -statcell vol -statedge length -statface area -statver x".format((27*NumOfCells),3*dx,3*dy,3*dz)
+        commandTessellation="neper -T -n {0:d} -domain 'cube({1:d},{2:d},{3:d})' -morpho @Centers.txt -weight @Rads.txt -regularization 1 -mloop 15 -o RVE27 -format geo -statcell vol -statedge length -statface area -statver x".format((27*NumSpheres),EdgeRVESize,EdgeRVESize,EdgeRVESize)
         os.system(commandTessellation)
     ################################################################
     ######Extraction of middle Representative volume element########
