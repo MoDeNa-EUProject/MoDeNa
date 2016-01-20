@@ -40,7 +40,7 @@ subroutine eqcond(regions)
             write(*,*) 'Ask Pavel if you want more reasonable results.'
             krad=2e-3_dp
             call effcond
-            open(newunit(fi),file='outputs.out')
+            open(newunit(fi),file='foamConductivity.out')
             write(fi,*) effc
             close(fi)
             stop
