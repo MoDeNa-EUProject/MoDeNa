@@ -100,7 +100,8 @@ def main(MU,SIGMA,NumOfCells,filenameOut,packing,tesselation,geometry,
             for j in range(0,NumOfCells):
                 fff.write('{0:f}\n'.format(Rads[j]))
         fff.close()
-        commandTessellation="neper -T -n {0:d} -domain 'cube({1:d},{2:d},{3:d})' -morpho @Centers.txt -weight @Rads.txt -regularization 1 -mloop 15 -o RVE27 -format geo -statcell vol -statedge length -statface area -statver x".format((27*NumSpheres),EdgeRVESize,EdgeRVESize,EdgeRVESize)
+        commandTessellation="neper -T -n {0:d} -domain 'cube({1:d},{2:d},{3:d})' -morpho @Centers.txt -weight @Rads.txt -mloop 15 -o RVE27 -format geo -statcell vol -statedge length -statface area -statver x".format((27*NumSpheres),EdgeRVESize,EdgeRVESize,EdgeRVESize)
+        # commandTessellation="neper -T -n {0:d} -domain 'cube({1:d},{2:d},{3:d})' -morpho @Centers.txt -weight @Rads.txt -regularization 1 -mloop 15 -o RVE27 -format geo -statcell vol -statedge length -statface area -statver x".format((27*NumSpheres),EdgeRVESize,EdgeRVESize,EdgeRVESize)
         os.system(commandTessellation)
     ################################################################
     ######Extraction of middle Representative volume element########
@@ -217,8 +218,8 @@ def main(MU,SIGMA,NumOfCells,filenameOut,packing,tesselation,geometry,
             a=re.findall("[-+]?\d+[\.]?\d*", lines[i])
             b=int(a[1])-1
             c=int(a[2])-1
-            text_gnu.write('{0}\t{1}\t{2}\n'.format(Nodes[b][0],Nodes[b][1],Nodes[b][2]))
-            text_gnu.write('{0}\t{1}\t{2}\n\n\n'.format(Nodes[c][0],Nodes[c][1],Nodes[c][2]))
+            text_gnu.write('{0}\t{1}\t{2}\n'.format((Nodes[b][0]-L2)/L2,(Nodes[b][1]-L2)/L2,(Nodes[b][2]-L2)/L2))
+            text_gnu.write('{0}\t{1}\t{2}\n\n\n'.format((Nodes[c][0]-L2)/L2,(Nodes[c][1]-L2)/L2,(Nodes[c][2]-L2)/L2))
         text_gnu.close()
     # End of Geometry construction
     ################################################################
