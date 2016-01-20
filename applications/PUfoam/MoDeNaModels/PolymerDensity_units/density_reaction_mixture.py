@@ -47,7 +47,7 @@ term = Terminal()
 ## Surrogate function for density of the reaction mixture.
 #
 # Density is a function of temperature and conversion of gelling reaction.
-f_densityreactionmixture = CFunction(
+f = CFunction(
     Ccode='''
 #include "modena.h"
 #include "math.h"
@@ -59,8 +59,6 @@ void densityreactionmixture
 )
 {
     {% block variables %}{% endblock %}
-    const double T = inputs[0];
-    const double XOH = inputs[1];
     
     const double a_L0 = parameters[0];
     const double b_L0 = parameters[1];
@@ -72,9 +70,9 @@ void densityreactionmixture
 ''',
     # These are global bounds for the function
     inputs={
-        'T': { 'min': 273, 'max': 450, 'argPos': 0 },
-        'XOH': { 'min': 0, 'max': 1, 'argPos': 1 },
-            },
+        'T': { 'min': 273, 'max': 450},
+        'XOH': { 'min': 0, 'max': 1},
+    },
     outputs={
         'density_polymer': { 'min': 0, 'max': 8000, 'argPos': 0 },
     },
