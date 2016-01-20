@@ -31,7 +31,8 @@ module constants
         nbox,&                !<number of gray boxes
         morph_input           !<morphology input
                               !<1=wall thickness, 2=strut content,
-                              !<3=strut diameter (3 is recommended others can
+                              !<3=strut diameter, 4==strut content (alternative)
+                              !<(3 is recommended others can
                               !<have multiple solutions)
     real(dp) :: lambda,&      !<wavelength
         t1,t2,&               !<temperatures at boundaries
