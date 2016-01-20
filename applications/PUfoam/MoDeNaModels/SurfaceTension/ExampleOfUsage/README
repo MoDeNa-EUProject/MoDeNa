@@ -29,8 +29,7 @@ cd ${HOME}/Downloads/petsc-3.4.4
 
 ## Install in "PETSC_DIR"
 PETSC_DIR=/opt/petsc/petsc-3.4.4
-./configure --with-cc=gcc --with fc=gfortran --download-f-blas-lapack --download-mpich --download-metis=yes --download-parmetis=yes --download-scalapack=yes --download-mumps=yes --download-hypre=yes --download-fftw=yes --download-superlu=yes --download-superlu_dist=yes --download-adifor=yes --download-trilinos=yes --prefix=${PETSC_DIR}
-
+./configure --prefix=${PETSC_DIR}
 make
 sudo make install
 echo "export PETSC_DIR=${PETSC_DIR}" >> ~/.bashrc
