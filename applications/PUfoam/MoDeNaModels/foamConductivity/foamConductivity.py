@@ -54,8 +54,6 @@ class FoamConductivityExactTask(ModenaFireTask):
     A FireTask that starts a microscopic code and updates the database.
     """
     def task(self, fw_spec):
-
-        # print self['point']
         eps = self['point']['eps']
         dcell = self['point']['dcell']
         fstrut = self['point']['fstrut']
@@ -63,11 +61,6 @@ class FoamConductivityExactTask(ModenaFireTask):
         xCO2 = self['point']['x[CO2]']
         xAir = self['point']['x[Air]']
         xCyP = self['point']['x[CyP]']
-        # print xCO2,xAir,xCyP
-
-        # xCO2=0.3
-        # xAir=0.3
-        # xCyP=0.4
         # Write input
         f = open('foamConductivity.in', 'w')
         f.write('{0:.6e}\n'.format(temp+1))
@@ -90,12 +83,10 @@ class FoamConductivityExactTask(ModenaFireTask):
         f.write('0.2\n')
         f.write('10\n')
         f.close()
-
         # Execute the detailed model
         # path to **this** file + /src/...
         # will break if distributed computing
         os.system(os.path.dirname(os.path.abspath(__file__))+'/src/kfoam')
-
         # Analyse output
         # os.getcwd() returns the path to the "launcher" directory
         try:
@@ -168,9 +159,9 @@ void tcfoam_SM
 # use input file to Foam aging application to initialize with reasonable data.
 fname='foamAging.in'
 try:
-    f = open(fname,'r')
-except IOError:
     f = open(os.getcwd()+'/../'+fname,'r')
+except IOError:
+    f = open(os.getcwd()+'/example_inputs/'+fname,'r')
 
 a=f.readline()
 a=f.readline()
