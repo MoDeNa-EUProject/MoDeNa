@@ -100,7 +100,7 @@ def main(MU,SIGMA,NumOfCells,filenameOut,packing,tesselation,geometry,
             for j in range(0,NumOfCells):
                 fff.write('{0:f}\n'.format(Rads[j]))
         fff.close()
-        commandTessellation="neper -T -n {0:d} -domain 'cube({1:d},{2:d},{3:d})' -morpho @Centers.txt -weight @Rads.txt -mloop 15 -o RVE27 -format geo -statcell vol -statedge length -statface area -statver x".format((27*NumSpheres),EdgeRVESize,EdgeRVESize,EdgeRVESize)
+        commandTessellation="neper -T -n {0:d} -domain 'cube({1:d},{2:d},{3:d})' -morpho @Centers.txt -weight @Rads.txt -o RVE27 -format geo -statcell vol -statedge length -statface area -statver x".format((27*NumSpheres),EdgeRVESize,EdgeRVESize,EdgeRVESize)
         # commandTessellation="neper -T -n {0:d} -domain 'cube({1:d},{2:d},{3:d})' -morpho @Centers.txt -weight @Rads.txt -regularization 1 -mloop 15 -o RVE27 -format geo -statcell vol -statedge length -statface area -statver x".format((27*NumSpheres),EdgeRVESize,EdgeRVESize,EdgeRVESize)
         os.system(commandTessellation)
     ################################################################
