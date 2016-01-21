@@ -126,3 +126,23 @@ m_CyP_thermal_conductivity = ForwardMappingModel(
     substituteModels=[],
     parameters=[0.0956e-3, -14.89e-3],
 )
+
+## Surrogate model for thermal conductivity of blowing agent
+#
+# Forward mapping model is used.
+m_O2_thermal_conductivity = ForwardMappingModel(
+    _id='gas_thermal_conductivity[A=O2]',
+    surrogateFunction=f_gas_thermal_conductivity,
+    substituteModels=[],
+    parameters=[7.79027851e-05, 3.08485612e-03],
+)
+
+## Surrogate model for thermal conductivity of blowing agent
+#
+# Forward mapping model is used.
+m_N2_thermal_conductivity = ForwardMappingModel(
+    _id='gas_thermal_conductivity[A=N2]',
+    surrogateFunction=f_gas_thermal_conductivity,
+    substituteModels=[],
+    parameters=[6.93333072e-05, 4.87189502e-03],
+)
