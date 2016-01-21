@@ -91,7 +91,6 @@ def import_helper():
 find_module("MoDeNaModels")   # Look for a models directory
 libmodena = import_helper()
 del import_helper
-del find_module
 
 ##
 # @defgroup python_interface_library
