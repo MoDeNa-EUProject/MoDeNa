@@ -173,7 +173,7 @@ real(dp) function lindsayBromley(k,yin,Tb,cp,M,T) result(kmix)
     n=size(k)
     allocate(y(n),cv(n),S(n),gam(n),A(n,n))
     y=yin
-    if (minval(y)<0) stop 'Input molar fractions to extWassiljewa &
+    if (minval(y)<0) stop 'Input molar fractions to lindsayBromley &
         cannot be negative.'
     y=y/sum(y)
     do i=1,n
@@ -221,7 +221,7 @@ real(dp) function pandeyPrajapati(k,yin,Tb,M,T) result(kmix)
     n=size(k)
     allocate(y(n),S(n),A(n,n))
     y=yin
-    if (minval(y)<0) stop 'Input molar fractions to extWassiljewa &
+    if (minval(y)<0) stop 'Input molar fractions to pandeyPrajapati &
         cannot be negative.'
     y=y/sum(y)
     do i=1,n

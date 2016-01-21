@@ -51,8 +51,9 @@ subroutine gasConductivity(kgas,temp,xCO2,xAir,xCyP)
     !modena variables
     integer(c_size_t) :: kgasTemppos
     integer(c_size_t) :: kgasXCO2pos
-    integer(c_size_t) :: kgasXAirpos
     integer(c_size_t) :: kgasXCyPpos
+    integer(c_size_t) :: kgasXO2pos
+    integer(c_size_t) :: kgasXN2pos
 
     integer(c_int) :: ret
 
@@ -67,15 +68,20 @@ subroutine gasConductivity(kgas,temp,xCO2,xAir,xCyP)
         kgasModena, c_char_"T"//c_null_char)
     kgasXCO2pos = modena_model_inputs_argPos(&
         kgasModena, c_char_"x[A=CO2]"//c_null_char)
-    kgasXAirpos = modena_model_inputs_argPos(&
-        kgasModena, c_char_"x[A=Air]"//c_null_char)
     kgasXCyPpos = modena_model_inputs_argPos(&
         kgasModena, c_char_"x[A=CyP]"//c_null_char)
-    call modena_model_argPos_check(kgasModena)
+    kgasXO2pos = modena_model_inputs_argPos(&
+        kgasModena, c_char_"x[A=O2]"//c_null_char)
+    kgasXN2pos = modena_model_inputs_argPos(&
+        kgasModena, c_char_"x[A=N2]"//c_null_char)
+    write(*,*) 'ok'
+    ! call modena_model_argPos_check(kgasModena)
+    write(*,*) 'ok'
     call modena_inputs_set(kgasInputs, kgasTemppos, temp)
     call modena_inputs_set(kgasInputs, kgasXCO2pos, xCO2)
-    call modena_inputs_set(kgasInputs, kgasXAirpos, xAir)
     call modena_inputs_set(kgasInputs, kgasXCyPpos, xCyP)
+    call modena_inputs_set(kgasInputs, kgasXO2pos, xAir*0.21_dp)
+    call modena_inputs_set(kgasInputs, kgasXN2pos, xAir*0.79_dp)
     ret = modena_model_call (kgasModena, kgasInputs, kgasOutputs)
     if(ret /= 0) then
         call exit(ret)

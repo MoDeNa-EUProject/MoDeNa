@@ -59,8 +59,10 @@ class FoamConductivityExactTask(ModenaFireTask):
         fstrut = self['point']['fstrut']
         temp = self['point']['T']
         xCO2 = self['point']['x[CO2]']
-        xAir = self['point']['x[Air]']
         xCyP = self['point']['x[CyP]']
+        xO2 = self['point']['x[O2]']
+        xN2 = self['point']['x[N2]']
+        xAir = xN2+xO2
         # Write input
         f = open('foamConductivity.in', 'w')
         f.write('{0:.6e}\n'.format(temp+1))
@@ -207,8 +209,9 @@ initialPoints_foamConductivity_auto = {
     'fstrut': setIP(fstrut0),
     'T': setIP(T0),
     'x[CO2]': setIP(xCO20),
-    'x[Air]': setIP(xAir0),
     'x[CyP]': setIP(xCyP0),
+    'x[O2]': setIP(xAir0*0.21),
+    'x[N2]': setIP(xAir0*0.79),
 }
 
 ## Surrogate model for foam conductivity
