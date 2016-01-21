@@ -26,5 +26,4 @@ Authors
     Henrik Rusche
 Contributors
 '''
-
-import density_reaction_mixture
+from density_reaction_mixture import m
