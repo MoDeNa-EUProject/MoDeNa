@@ -24,9 +24,9 @@ module constants
     logical  :: &
         wdist,&               !<use wall thickness distribution
         testing=.true.,&      !<true disables calculation of radiation
-        numcond=.true.        !<calcualte effective conductivity numerically
+        numcond               !<calcualte effective conductivity numerically
     character(len=80) :: &
-        structureName         !<name of the morphology file
+        structureName         !<name of the file with morphology
     integer  :: &
         mfi,&                 !<main file index
         nrays,&               !<number of testing rays
@@ -49,6 +49,7 @@ module constants
         eqc,&                 !<equivalent conductivity
         eqc_ross,&            !<Rosseland equivalent conductivity
         effc,&                !<effective conductivity (only conduction)
+        effc_num,&            !<effective conductivity from numerical simulation
         kgas,&                !<gas conductivity
         ksol,&                !<solid conductivity
         krad,&                !<radiative conductivity

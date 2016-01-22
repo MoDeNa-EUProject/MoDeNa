@@ -84,6 +84,8 @@ class FoamConductivityExactTask(ModenaFireTask):
         f.write('t\n')
         f.write('0.2\n')
         f.write('10\n')
+        f.write('f\n')
+        f.write('PeriodicRVEBoxStruts.vtk\n')
         f.close()
         # Execute the detailed model
         # path to **this** file + /src/...

@@ -29,6 +29,7 @@ module conduction
     real(dp), dimension(:,:,:), allocatable :: &
         dx,dy,dz,&  !<voxel sizes in x,y,z
         cfiel,&     !<conductivity field
+        chfz,&      !<conductive heat flux in z
         tfiel       !<temperature field
 contains
 !********************************BEGINNING*************************************
@@ -61,11 +62,13 @@ subroutine effcond
     if (numcond) then
         write(*,*) 'Conduction - numerical:'
         write(mfi,*) 'Conduction - numerical:'
-        structureName='../PeriodicRVEBoxStruts.vtk'
+        structureName='../'//structureName
         call loadStructure_vtk(structureName)
         call initialization_oc_ss
         call calculation_oc_ss
-        ! call heatFlux_oc_ss
+        call heatFlux_oc_ss
+        write(*,fmt) 'effective conductivity:',effc_num*1e3_dp,'mW/m/K'
+        write(mfi,fmt) 'effective conductivity:',effc_num*1e3_dp,'mW/m/K'
     endif
 end subroutine effcond
 !***********************************END****************************************
@@ -85,14 +88,12 @@ subroutine loadStructure_vtk(filename)
     read(fi,*)
     read(fi,*)
     read(fi,*)
-    read(fi,'(A10,I4,I4,I4)') dummy_char,dimz,dimy,dimx
+    read(fi,'(A10,I6,I6,I6)') dummy_char,dimz,dimy,dimx
     read(fi,*)
     read(fi,*)
     read(fi,*)
     read(fi,*)
     read(fi,*)
-    write(*,*) 'dimension z,y,x'
-    write(*,*) dimz,dimy,dimx
     tnode=dimz*dimy*dimx
     allocate(sfiel(dimz+1,0:dimy+1,0:dimx+1),dx(dimz,0:dimy+1,0:dimx+1),&
         dy(dimz,0:dimy+1,0:dimx+1),dz(dimz,0:dimy+1,0:dimx+1))
@@ -339,5 +340,59 @@ subroutine make_trhs_oc_ss
         enddo
     enddo
 end subroutine make_trhs_oc_ss
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!calculates heat flux
+subroutine heatFlux_oc_ss
+    integer :: i,j,k,l
+    real(dp) :: xxx,area
+    allocate(chfz(dimz,dimy,dimx))
+    l=1
+    do i=1,dimz
+        do j=1,dimy
+            do k=1,dimx
+                tfiel(i,j,k)=tvec(l)
+                l=l+1
+            enddo
+        enddo
+    enddo
+    do i=2,dimz-1
+        do j=1,dimy
+            do k=1,dimx
+                if (sfiel(i,j,k)==sfiel(i+1,j,k)) then
+                    chfz(i,j,k)=-(tfiel(i,j,k)-tfiel(i+1,j,k))/&
+                        (dz(i,j,k)/2+dz(i+1,j,k)/2)*cfiel(i,j,k)
+                else
+                    chfz(i,j,k)=(tfiel(i,j,k)-tfiel(i-1,j,k))/&
+                        (dz(i,j,k)/2+dz(i-1,j,k)/2)*cfiel(i,j,k)
+                endif
+            enddo
+        enddo
+    enddo
+    do j=1,dimy
+        do k=1,dimx
+            chfz(1,j,k)=-(tfiel(1,j,k)-tfiel(2,j,k))/&
+                (dz(1,j,k)/2+dz(2,j,k)/2)*cfiel(1,j,k)
+            chfz(dimz,j,k)=(tfiel(dimz,j,k)-tfiel(dimz-1,j,k))/&
+                (dz(dimz,j,k)/2+dz(dimz-1,j,k)/2)*cfiel(dimz,j,k)
+        enddo
+    enddo
+    xxx=0
+    do i=1,dimz
+        effc_num=0
+        area=0
+        do j=1,dimy
+            do k=1,dimx
+                effc_num=effc_num+chfz(i,j,k)*dx(i,j,k)*dy(i,j,k)
+                area=area+dx(i,j,k)*dy(i,j,k)
+            enddo
+        enddo
+        xxx=xxx+effc_num/area/(t1-t2)*dfoam
+    enddo
+    effc_num=xxx/dimz
+    deallocate(chfz,tfiel,tvec,cfiel,sfiel,dx,dy,dz)
+end subroutine heatFlux_oc_ss
 !***********************************END****************************************
 end module conduction
