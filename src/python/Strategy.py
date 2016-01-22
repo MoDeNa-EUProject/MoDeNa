@@ -922,25 +922,6 @@ class ParametersNotValid(Exception):
 class ModenaFireTask(FireTaskBase):
     """
     """
-#    path = None
-#    source = None
-#    script = None
-#    compile_to = None
-
-
-#    def __init__(self):
-        # path to the "model directory"
-#        if not kwargs['path']:
-#            self.path = os.path.basename(sys.modules[self.__module__].__file__)
-#        if not self.source_dir:
-#            self.source_dir= modena.find_module('src')
-#        if not self.script:
-
-
-#        compile_sequence, cmake, flags, location, 
-#        execution_sequence, script, flags
-#        generate_input
-#        analyse_output
 
     def outOfBounds(self):
         """
