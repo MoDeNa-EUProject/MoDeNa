@@ -8,7 +8,7 @@ from fireworks import Firework, Workflow, FWAction
 from fireworks.utilities.fw_utilities import explicit_serialize
 from blessings import Terminal
 from jinja2 import Template
-import Rheology, Rheology_Arrhenius
+import Rheology
 
 ## Create terminal for colour output
 term = Terminal()
