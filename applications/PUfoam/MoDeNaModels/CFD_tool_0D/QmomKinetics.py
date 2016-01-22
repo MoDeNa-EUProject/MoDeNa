@@ -42,4 +42,5 @@ from modena.Strategy import BackwardMappingScriptTask
 
 # Source code in src/twoTanksMacroscopicProblem.C
 m = BackwardMappingScriptTask(
+    script=os.path.dirname(os.path.abspath(__file__))+'/src/QmomKinetics'
 )
