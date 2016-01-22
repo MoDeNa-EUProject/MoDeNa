@@ -22,8 +22,11 @@ module constants
                                         !<foam has no walls if fs>1-struttol
     complex(dp), parameter :: iu=(0.0e0_dp,1.0e0_dp)       !<imaginary constant
     logical  :: &
-        wdist,&                         !<use wall thickness distribution
-        testing=.true.                 !<true disables calculation of radiation
+        wdist,&               !<use wall thickness distribution
+        testing=.true.,&      !<true disables calculation of radiation
+        numcond=.true.        !<calcualte effective conductivity numerically
+    character(len=80) :: &
+        structureName         !<name of the morphology file
     integer  :: &
         mfi,&                 !<main file index
         nrays,&               !<number of testing rays
