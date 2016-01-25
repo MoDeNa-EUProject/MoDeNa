@@ -39,7 +39,7 @@ void makeEdgeStruts(\
     if (report) {
         cout << "creating struts at cell edges..." << dedge << endl;
     }
-    for (i=1; i<sv; i++) { // for all vertices
+    for (i=0; i<sv; i++) { // for all vertices
         if (in_domain(vert[i][0],vert[i][1],vert[i][2])) {
             for (j=0; j<4; j++) { // for every edge
                 de=sqrt(pow(vert[i][0]-vert[vinc[i][j]][0],2)+\

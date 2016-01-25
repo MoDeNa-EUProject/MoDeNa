@@ -16,7 +16,7 @@ from scipy.optimize import minimize_scalar as minimize_scalar
 import FoamGeometryConstruction_Periodic
 import periodicBox
 import vtkconv
-dx=dy=dz=4 # size of RVE
+dx=dy=dz=1 # size of RVE
 dedge=6
 ########## Read input file
 with open('input.json') as data_file:
