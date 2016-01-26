@@ -73,11 +73,24 @@ term = Terminal()
 # @{
 
 class Workflow2(Workflow):
+    """Workflow2, expanding on "Workflow" from "FireWorks"
 
+    @brief The class specifically allows the user to add dependencies
+    """
     def __init__(self, *args, **kwargs):
         Workflow.__init__(self, *args, **kwargs)
 
     def addAfterAll(self, wf):
+        """Method which adds a the workflow "wf" as a dependency to the
+        fireworks.
+
+        @param wf "Workflow2" object.
+
+        @var updated_ids 
+        @var root_ids: Root "FireWorks" of this workflow
+        @var leaf_ids: Leaf FireWorks, i.e. those with no children
+        @var my_leaf_ids
+        """
         updated_ids = []
 
         root_ids = wf.root_fw_ids
@@ -107,6 +120,7 @@ class Workflow2(Workflow):
             updated_ids = self.refresh(new_fw.fw_id, set(updated_ids))
 
     def addNoLink(self, wf):
+        """Method adding "Workflow" without dependency."""
         updated_ids = []
 
         leaf_ids = wf.leaf_fw_ids
@@ -137,17 +151,34 @@ class Workflow2(Workflow):
 
 
 class InitialisationStrategy(defaultdict, FWSerializable):
+    """Parent class for the initialisation strategies.
 
+    defaultdict: subclass of type(dict), overrides method __missing__ in dict
+                 and uses a method "defaultfactory" in order to automatically
+                 return a dictionary "key" instead of "KeyError".
+    FWSerializable: Creates a serializable object within "FireWorks"
+    """
     def __init__(self, *args, **kwargs):
+        """Constructor"""
         dict.__init__(self, *args, **kwargs)
 
 
     @abc.abstractmethod
     def newPoints(self):
+        """Method which adds new points to the database."""
         raise NotImplementedError('newPoints not implemented!')
 
 
     def workflow(self, model):
+        """Method creating a Workflow2 object for the initialisation.
+
+        @param model surrogate model object.
+
+        @var p list of dicts each representing inputs for a computation.
+        @var wf Workflow2 object containing FireTasks for every point in "p".
+
+        @return Workflow2 object
+        """
         p = self.newPoints()
         if len(p):
             wf = model.exactTasks(p)
@@ -160,12 +191,14 @@ class InitialisationStrategy(defaultdict, FWSerializable):
     @serialize_fw
     @recursive_serialize
     def to_dict(self):
+        """Method used by FireWorks to deserialise the object instance."""
         return dict(self)
 
 
     @classmethod
     @recursive_deserialize
     def from_dict(cls, m_dict):
+        """Method used by FireWorks to deserialise all insatnces."""
         return cls(m_dict)
 
 
@@ -174,8 +207,15 @@ class InitialisationStrategy(defaultdict, FWSerializable):
 
 
 class OutOfBoundsStrategy(defaultdict, FWSerializable):
+    """Parent class for the out of bounds strategies.
 
+    defaultdict: subclass of type(dict), overrides method __missing__ in dict
+                 and uses a method "defaultfactory" in order to automatically
+                 return a dictionary "key" instead of "KeyError".
+    FWSerializable: Creates a serializable object within "FireWorks"
+    """
     def __init__(self, *args, **kwargs):
+        """Constructor"""
         dict.__init__(self, *args, **kwargs)
 
 
@@ -185,6 +225,10 @@ class OutOfBoundsStrategy(defaultdict, FWSerializable):
 
 
     def workflow(self, model, **kwargs):
+        """Method generating the workflow for the 'out of bounds strategy'.
+
+        @returns wf Workflow2 object.
+        """
         wf = model.exactTasks(self.newPoints(model, **kwargs))
         wf.addAfterAll(model.parameterFittingStrategy().workflow(model))
         return wf
@@ -210,6 +254,7 @@ def recursive_serialize2(func):
     """
     a decorator to add FW serializations keys
     see documentation of FWSerializable for more details
+    <https://pythonhosted.org/FireWorks/fireworks.utilities.html#fireworks.utilities.fw_serializers.FWSerializable>
     """
 
     def _decorator(self, *args, **kwargs):
@@ -223,7 +268,8 @@ def recursive_serialize2(func):
 def recursive_deserialize2(func):
     """
     a decorator to add FW serializations keys
-    see documentation of FWSerializable for more details
+    see documentation of FWSerializable for more details:
+    <https://pythonhosted.org/FireWorks/fireworks.utilities.html#fireworks.utilities.fw_serializers.FWSerializable>
     """
 
     def _decorator(self, *args, **kwargs):
@@ -238,7 +284,7 @@ def recursive_deserialize2(func):
 
 
 class ImproveErrorStrategy(defaultdict, FWSerializable):
-
+    """Base class for strategies 'fixing' the error of a surrogate model."""
     def __init__(self, *args, **kwargs):
         dict.__init__(self, *args, **kwargs)
 
@@ -266,7 +312,7 @@ class ImproveErrorStrategy(defaultdict, FWSerializable):
 
 
 class ParameterFittingStrategy(dict, FWSerializable):
-
+    """Base Class for creating parameter fitting strategies."""
     def __init__(self, *args, **kwargs):
         dict.__init__(self, *args, **kwargs)
 
@@ -356,6 +402,7 @@ class ParameterFittingStrategy(dict, FWSerializable):
 
 
 class SamplingStrategy():
+    """Base class for Sampling strategies (DoE)."""
 
     def newPoints(self):
         raise NotImplementedError('newPoints not implemented!')
@@ -378,7 +425,9 @@ class SamplingStrategy():
 
 @explicit_serialize
 class InitialPoints(InitialisationStrategy):
-
+    """Class for initialisation of a surrogate model by fitting it to
+    user-specified points.
+    """
     def __init__(self, *args, **kwargs):
         InitialisationStrategy.__init__(self, *args, **kwargs)
 
@@ -389,8 +438,7 @@ class InitialPoints(InitialisationStrategy):
 
 @explicit_serialize
 class InitialData(InitialisationStrategy):
-    """
-    Class initialising a SurrogateModel given a dataset of input-output
+    """Class initialising a SurrogateModel given a dataset of input-output
     relations.
     """
     def __init__(self, *args, **kwargs):
@@ -427,14 +475,14 @@ class InitialData(InitialisationStrategy):
 
 @explicit_serialize
 class EmptyInitialisationStrategy(InitialisationStrategy):
-
+    """Empty initialisation strategy, used by Forward Mapping Models."""
     def newPoints(self):
         return []
 
 
 @explicit_serialize
 class ExtendSpaceStochasticSampling(OutOfBoundsStrategy, SamplingStrategy):
-
+    """Class for extending the design space using stochastic sampling."""
     def __init__(self, *args, **kwargs):
         OutOfBoundsStrategy.__init__(self, *args, **kwargs)
 
@@ -448,7 +496,7 @@ class ExtendSpaceStochasticSampling(OutOfBoundsStrategy, SamplingStrategy):
 
 @explicit_serialize
 class StochasticSampling(ImproveErrorStrategy, SamplingStrategy):
-
+    """Design of experiments class, Monte Carlo sampling."""
     def __init__(self, *args, **kwargs):
         ImproveErrorStrategy.__init__(self, *args, **kwargs)
 
@@ -472,7 +520,7 @@ class StochasticSampling(ImproveErrorStrategy, SamplingStrategy):
 
 @explicit_serialize
 class NonLinFitWithErrorContol(ParameterFittingStrategy):
-
+    """Parameter fitting class, non-linear least squares regression."""
     def __init__(self, *args, **kwargs):
         """
         @todo access tuple correctly
@@ -872,8 +920,12 @@ class ParametersNotValid(Exception):
 
 @explicit_serialize
 class ModenaFireTask(FireTaskBase):
+    """
+    """
 
     def outOfBounds(self):
+        """
+        """
 
         try:
             # TODO
@@ -901,7 +953,8 @@ class ModenaFireTask(FireTaskBase):
 
 
     def parametersNotValid(self, model):
-
+        """
+        """
         try:
             # Continue with exact tasks, parameter estimation and (finally) this
             # task in order to resume normal operation
@@ -918,6 +971,8 @@ class ModenaFireTask(FireTaskBase):
 
 
     def run_task(self, fw_spec):
+        """
+        """
         if 'point' in self:
             print(
                 term.yellow
