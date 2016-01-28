@@ -39,6 +39,8 @@ module modenastuff
     integer(c_size_t) :: kinSourceRmassPos
     integer(c_size_t) :: kinSourceRvolPos
     integer(c_size_t) :: kinSourceRtempPos
+    integer(c_size_t) :: kinInputsPos(20)
+    integer(c_size_t) :: kinOutputsPos(20)
     type(c_ptr) :: viscModena = c_null_ptr
     type(c_ptr) :: viscInputs = c_null_ptr
     type(c_ptr) :: viscOutputs = c_null_ptr
@@ -170,6 +172,91 @@ subroutine createModenaModels
         kinSourceRtempPos = modena_model_outputs_argPos(kinModena, &
             c_char_"source_R_1_temp"//c_null_char);
         call modena_model_argPos_check(kinModena)
+    elseif (kin_model==4) then
+        kinModena = modena_model_new (c_char_"RF-1-public"//c_null_char);
+        kinInputs = modena_inputs_new (kinModena);
+        kinOutputs = modena_outputs_new (kinModena);
+        kinInputsPos(1) = modena_model_inputs_argPos(kinModena, &
+            c_char_"'Catalyst_1'"//c_null_char);
+        kinInputsPos(2) = modena_model_inputs_argPos(kinModena, &
+            c_char_"'CE_A0'"//c_null_char);
+        kinInputsPos(3) = modena_model_inputs_argPos(kinModena, &
+            c_char_"'CE_A1'"//c_null_char);
+        kinInputsPos(4) = modena_model_inputs_argPos(kinModena, &
+            c_char_"'CE_B'"//c_null_char);
+        kinInputsPos(5) = modena_model_inputs_argPos(kinModena, &
+            c_char_"'CE_B2'"//c_null_char);
+        kinInputsPos(6) = modena_model_inputs_argPos(kinModena, &
+            c_char_"'CE_I0'"//c_null_char);
+        kinInputsPos(7) = modena_model_inputs_argPos(kinModena, &
+            c_char_"'CE_I1'"//c_null_char);
+        kinInputsPos(8) = modena_model_inputs_argPos(kinModena, &
+            c_char_"'CE_I2'"//c_null_char);
+        kinInputsPos(9) = modena_model_inputs_argPos(kinModena, &
+            c_char_"'CE_PBA'"//c_null_char);
+        kinInputsPos(10) = modena_model_inputs_argPos(kinModena, &
+            c_char_"'CE_Breac'"//c_null_char);
+        kinInputsPos(11) = modena_model_inputs_argPos(kinModena, &
+            c_char_"'CE_Areac0'"//c_null_char);
+        kinInputsPos(12) = modena_model_inputs_argPos(kinModena, &
+            c_char_"'CE_Areac1'"//c_null_char);
+        kinInputsPos(13) = modena_model_inputs_argPos(kinModena, &
+            c_char_"'CE_Ireac0'"//c_null_char);
+        kinInputsPos(14) = modena_model_inputs_argPos(kinModena, &
+            c_char_"'CE_Ireac1'"//c_null_char);
+        kinInputsPos(15) = modena_model_inputs_argPos(kinModena, &
+            c_char_"'CE_Ireac2'"//c_null_char);
+        kinInputsPos(16) = modena_model_inputs_argPos(kinModena, &
+            c_char_"'Bulk'"//c_null_char);
+        kinInputsPos(17) = modena_model_inputs_argPos(kinModena, &
+            c_char_"'R_1'"//c_null_char);
+        kinInputsPos(18) = modena_model_inputs_argPos(kinModena, &
+            c_char_"'R_1_mass'"//c_null_char);
+        kinInputsPos(19) = modena_model_inputs_argPos(kinModena, &
+            c_char_"'R_1_temp'"//c_null_char);
+        kinInputsPos(20) = modena_model_inputs_argPos(kinModena, &
+            c_char_"'R_1_vol'"//c_null_char);
+        kinOutputsPos(1) = modena_model_outputs_argPos(kinModena, &
+            c_char_"source_Catalyst_1"//c_null_char);
+        kinOutputsPos(2) = modena_model_outputs_argPos(kinModena, &
+            c_char_"source_CE_A0"//c_null_char);
+        kinOutputsPos(3) = modena_model_outputs_argPos(kinModena, &
+            c_char_"source_CE_A1"//c_null_char);
+        kinOutputsPos(4) = modena_model_outputs_argPos(kinModena, &
+            c_char_"source_CE_B"//c_null_char);
+        kinOutputsPos(5) = modena_model_outputs_argPos(kinModena, &
+            c_char_"source_CE_B2"//c_null_char);
+        kinOutputsPos(6) = modena_model_outputs_argPos(kinModena, &
+            c_char_"source_CE_I0"//c_null_char);
+        kinOutputsPos(7) = modena_model_outputs_argPos(kinModena, &
+            c_char_"source_CE_I1"//c_null_char);
+        kinOutputsPos(8) = modena_model_outputs_argPos(kinModena, &
+            c_char_"source_CE_I2"//c_null_char);
+        kinOutputsPos(9) = modena_model_outputs_argPos(kinModena, &
+            c_char_"source_CE_PBA"//c_null_char);
+        kinOutputsPos(10) = modena_model_outputs_argPos(kinModena, &
+            c_char_"source_CE_Breac"//c_null_char);
+        kinOutputsPos(11) = modena_model_outputs_argPos(kinModena, &
+            c_char_"source_CE_Areac0"//c_null_char);
+        kinOutputsPos(12) = modena_model_outputs_argPos(kinModena, &
+            c_char_"source_CE_Areac1"//c_null_char);
+        kinOutputsPos(13) = modena_model_outputs_argPos(kinModena, &
+            c_char_"source_CE_Ireac0"//c_null_char);
+        kinOutputsPos(14) = modena_model_outputs_argPos(kinModena, &
+            c_char_"source_CE_Ireac1"//c_null_char);
+        kinOutputsPos(15) = modena_model_outputs_argPos(kinModena, &
+            c_char_"source_CE_Ireac2"//c_null_char);
+        kinOutputsPos(16) = modena_model_outputs_argPos(kinModena, &
+            c_char_"source_Bulk"//c_null_char);
+        kinOutputsPos(17) = modena_model_outputs_argPos(kinModena, &
+            c_char_"source_R_1"//c_null_char);
+        kinOutputsPos(18) = modena_model_outputs_argPos(kinModena, &
+            c_char_"source_R_1_mass"//c_null_char);
+        kinOutputsPos(19) = modena_model_outputs_argPos(kinModena, &
+            c_char_"source_R_1_temp"//c_null_char);
+        kinOutputsPos(20) = modena_model_outputs_argPos(kinModena, &
+            c_char_"source_R_1_vol"//c_null_char);
+        call modena_model_argPos_check(kinModena)
     endif
 end subroutine createModenaModels
 !***********************************END****************************************
@@ -208,7 +295,7 @@ subroutine destroyModenaModels
             call modena_model_destroy (solModena(i));
         endif
     enddo
-    if (kin_model==2) then
+    if (kin_model==2 .or. kin_model==4) then
         call modena_inputs_destroy (kinInputs);
         call modena_outputs_destroy (kinOutputs);
         call modena_model_destroy (kinModena);
