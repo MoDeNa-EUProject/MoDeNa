@@ -161,6 +161,7 @@ subroutine save_integration_header(outputs_1d,outputs_GR,outputs_GR_c,&
         "CE_I0","CE_I1","CE_I2","CE_PBA","CE_Breac","CE_Areac0","CE_Areac1",&
         "CE_Ireac0","CE_Ireac1","CE_Ireac2","Bulk","R_1","R_1_mass","R_1_temp",&
         "R_1_vol"
+    open (unit=newunit(fi4), file = outputs_GR_c)
 end subroutine save_integration_header
 !***********************************END****************************************
 
@@ -174,11 +175,12 @@ subroutine save_integration_step
         (radius**3+S0**3-R0**3))*rhop,mb(2)*Mbl(2)/(rhop*4*pi/3*(S0**3-R0**3)),&
         mb(1)*Mbl(1)/(rhop*4*pi/3*(S0**3-R0**3))
     write(fi2,"(1000es23.15)") grrate, Y(teq), radius, KH, avconc, pressure
-    write(fi3,"(1000es23.15)") time,Y(kineq(1)),Y(kineq(2)),Y(kineq(3)),&
-        Y(kineq(4)),Y(kineq(5)),Y(kineq(6)),Y(kineq(7)),Y(kineq(8)),&
-        Y(kineq(9)),Y(kineq(10)),Y(kineq(11)),Y(kineq(12)),Y(kineq(13)),&
-        Y(kineq(14)),Y(kineq(15)),Y(kineq(16)),Y(kineq(17)),Y(kineq(18)),&
-        Y(kineq(19)),Y(kineq(20))
+    ! write(fi3,"(1000es23.15)") time,Y(kineq(1)),Y(kineq(2)),Y(kineq(3)),&
+    !     Y(kineq(4)),Y(kineq(5)),Y(kineq(6)),Y(kineq(7)),Y(kineq(8)),&
+    !     Y(kineq(9)),Y(kineq(10)),Y(kineq(11)),Y(kineq(12)),Y(kineq(13)),&
+    !     Y(kineq(14)),Y(kineq(15)),Y(kineq(16)),Y(kineq(17)),Y(kineq(18)),&
+    !     Y(kineq(19)),Y(kineq(20))
+    write(fi4,"(1000es23.15)") (Y(fceq+i+1),i=0,ngas*p,ngas)
 end subroutine save_integration_step
 !***********************************END****************************************
 
@@ -192,6 +194,7 @@ subroutine save_integration_close
     close(fi1)
     close(fi2)
     close(fi3)
+    close(fi4)
 end subroutine save_integration_close
 !***********************************END****************************************
 end module in_out
