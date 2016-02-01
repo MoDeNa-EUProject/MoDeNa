@@ -67,6 +67,13 @@ subroutine equcond(keq,ystate,neq,eps,fstrut,temp)
     ! write(*,*) kg
     ! write(*,*) "kgas: ", kgas
     ! stop
+    ! write(*,*) 'eps: ',eps
+    ! write(*,*) 'dcell: ',dcell
+    ! write(*,*) 'fstrut: ',fstrut
+    ! write(*,*) 'temp: ',temp
+    ! write(*,*) 'xcd: ',xcd
+    ! write(*,*) 'xair: ',xair
+    ! write(*,*) 'xcyp: ',xcyp
     call modena_inputs_set(kfoamInputs, kfoamEpspos, eps)
     call modena_inputs_set(kfoamInputs, kfoamDcellpos, dcell)
     call modena_inputs_set(kfoamInputs, kfoamFstrutpos, fstrut)

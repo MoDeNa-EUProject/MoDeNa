@@ -161,7 +161,10 @@ fname='foamAging.in'
 try:
     f = open(os.getcwd()+'/../'+fname,'r')
 except IOError:
-    f = open(os.getcwd()+'/example_inputs/'+fname,'r')
+    try:
+        f = open(os.getcwd()+'/'+fname,'r')
+    except IOError:
+        f = open(os.getcwd()+'/example_inputs/'+fname,'r')
 
 a=f.readline()
 a=f.readline()

@@ -155,7 +155,7 @@ program foam_diffusion
     write(fi,'(10A23)') '#time', 'eq.conductivity'
 !    call output(0, 0.0_dp, ystate, neq)
     call equcond(keq,ystate,neq,eps,fstrut,temp_cond)
-    write(fi,'(10es23.15)') 0.0_dp,keq
+    write(fi,'(10es23.15)') 0.0_dp,keq*1e3
     do i = 1, nroutputs*multiplicator       ! stabilizing multiplicator
 
         tin = dble(i-1)*(tend )/dble(nroutputs*multiplicator)    ! tbeg is 0
@@ -193,7 +193,7 @@ program foam_diffusion
             write(10,*) 'tend', tout/(3600.0d0*24.0d0),'days'
             call output(i/multiplicator, tout, ystate, neq)
             call equcond(keq,ystate,neq,eps,fstrut,temp_cond)
-            write(fi,'(10es23.15)') tout,keq
+            write(fi,'(10es23.15)') tout/(3600.0d0*24.0d0),keq*1e3
         endif
         continue
     enddo
