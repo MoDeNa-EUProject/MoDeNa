@@ -17,7 +17,7 @@ program foam_diffusion
 
 	integer nroutputs, multiplicator
 
-	double precision rpar(23)
+	double precision rpar(24)
 
     integer :: itol, itask, istate, iopt
     integer :: MF, ML, MU, LRW, LIW, LENRAT, NNZ, LWM
@@ -25,7 +25,7 @@ program foam_diffusion
     integer :: i, counter, fi
     integer, allocatable :: IWORK(:)
 
-    double precision :: tin, tout, tend, keq
+    double precision :: tin, tout, tend, keq, tbeg
     double precision :: rtol, atol
 
     double precision, allocatable :: ystate(:), yprime(:) ! vector of state
@@ -50,6 +50,7 @@ program foam_diffusion
     ! write(*,*) gasConductivity(300._dp,1._dp,0._dp,0._dp)
     ! stop
 	call input(rpar, ipar)
+    tbeg = rpar(24)
     temp=rpar(10)/8.314d0
 	nroutputs = ipar(1)
 	nFV = ipar(5) != (divwall+1)*ncell	! total number of FV
@@ -155,11 +156,11 @@ program foam_diffusion
     write(fi,'(10A23)') '#time', 'eq.conductivity'
 !    call output(0, 0.0_dp, ystate, neq)
     call equcond(keq,ystate,neq,eps,fstrut,temp_cond)
-    write(fi,'(10es23.15)') 0.0_dp,keq*1e3
+    write(fi,'(10es23.15)') tbeg/(3600.0d0*24.0d0),keq*1e3
     do i = 1, nroutputs*multiplicator       ! stabilizing multiplicator
 
-        tin = dble(i-1)*(tend )/dble(nroutputs*multiplicator)    ! tbeg is 0
-        tout = dble(i  )*(tend)/dble(nroutputs*multiplicator)
+        tin = dble(i-1)*(tend -tbeg)/dble(nroutputs*multiplicator)+tbeg
+        tout = dble(i  )*(tend-tbeg)/dble(nroutputs*multiplicator)+tbeg
 
 100     continue    ! try to make another run for the initial step simulation
         call dlsodes (modelPU, neq, ystate, tin, tout, itol, rtol, atol, itask,&

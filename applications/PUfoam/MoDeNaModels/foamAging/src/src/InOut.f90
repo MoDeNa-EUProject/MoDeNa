@@ -24,7 +24,7 @@ subroutine input(rpar, ipar)
 	double precision MA, MB, Mterm ,a, b, aToverTcsb
 	double precision fstrut,rhof
 !c
-	double precision  tend
+	double precision  tend,tbeg
 	double precision rpar(*)					! real param
 
 	double precision PI
@@ -35,6 +35,7 @@ subroutine input(rpar, ipar)
 	open(2, file = '../foamAging.in', status = 'old')
 	read(2, *) nroutputs
 	read(2, *) divwall
+	read(2, *) tbeg
 	read(2, *) tend
 	read(2, *) T
 	read(2, *) temp_cond
@@ -132,6 +133,7 @@ subroutine input(rpar, ipar)
 	rpar(21)=rhof
 	rpar(22)=temp_cond
 	rpar(23)=rhop
+	rpar(24)=tbeg
 
     continue
 
