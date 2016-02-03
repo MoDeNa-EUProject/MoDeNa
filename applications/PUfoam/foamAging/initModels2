@@ -37,25 +37,22 @@ Authors
 
 Contributors
 '''
+import modena
 
-from modena import SurrogateModel
-from modena.Strategy import Workflow2
-# import diffusivity # automatic initialization
-# import gasMixtureConductivity # imported by foamConductivity
-# import gasConductivity # imported by gasMixtureConductivity
-import foamConductivity
-# import Solubility # automatic initialization
-from fireworks import LaunchPad
-from fireworks.core.rocket_launcher import rapidfire
-
-# set up the LaunchPad and reset it
-launchpad = LaunchPad()
-launchpad.reset('', require_password=False)
-
-initWfs = Workflow2([])
-for m in SurrogateModel.get_instances():
-    initWfs.addNoLink(m.initialisationStrategy().workflow(m))
-
-# store workflow and launch it locally
-launchpad.add_wf(initWfs)
-rapidfire(launchpad)
+# A hack to re-initialise
+# TODO
+# Remove the models based on log info stored during execution of the workflow
+collection = modena.SurrogateModel._get_collection()
+collection.remove( { '_id': 'foamConductivity' } )
+collection.remove( { '_id': 'polymer_thermal_conductivity' } )
+collection.remove( { '_id': 'gas_thermal_conductivity[A=CO2]' } )
+collection.remove( { '_id': 'gas_thermal_conductivity[A=Air]' } )
+collection.remove( { '_id': 'gas_thermal_conductivity[A=CyP]' } )
+collection.remove( { '_id': 'gas_thermal_conductivity[A=O2]' } )
+collection.remove( { '_id': 'gas_thermal_conductivity[A=N2]' } )
+collection.remove( { '_id': 'gasMixtureConductivity' } )
+collection.remove( { '_id': 'diffusivityPol[A=CO2]' } )
+collection.remove( { '_id': 'diffusivityPol[A=CyP]' } )
+collection.remove( { '_id': 'diffusivityPol[A=O2]' } )
+collection.remove( { '_id': 'diffusivityPol[A=N2]' } )
+collection.remove( { '_id': 'Solubility[A=CO2,B=HEXANE]' } )
