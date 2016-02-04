@@ -127,8 +127,6 @@ int main(int argc, char *argv[])
                     #include "rheologyModel.H"
                    
                     #include "UEqn.H"  
-                
-                    #include "YEqn.H"
 
                     #include "TSSource.H"
                     #include "TSEqn.H"
@@ -178,9 +176,7 @@ int main(int argc, char *argv[])
                     #include "rheologyModel.H"
                    
                     #include "UEqn.H"  
-                
-                    #include "YEqn.H"
-    
+                   
                     #include "TSSource.H"
                     #include "TSEqn.H"
     

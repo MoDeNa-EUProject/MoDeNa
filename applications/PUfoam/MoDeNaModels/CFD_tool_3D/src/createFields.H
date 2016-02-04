@@ -168,7 +168,6 @@
     #include "KineticsFields.H"
     #include "rheologyFields.H"
     #include "thermalFields.H"
-    #include "YFields.H"
     #include "simulationMode.H"
     // Construct compressible turbulence model
     autoPtr<compressible::turbulenceModel> turbulence
