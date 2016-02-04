@@ -1,7 +1,11 @@
 // three different functions for growth rate
 // - growthRateConst() : constant growth rate
 // - growthRateCO2() : growth rate due to CO2
+// @param - double &CO2_l - weight fraction of CO2 in liquid
+// @param - double &wCO2_Max - weight fraction of maximum allowable CO2 in liquid
 // - growthRateBA() : growth rate due to blowing agent
+// @param - double &L_l - weight fraction of liquid blowing agent in liquid
+// @param - double &LMAX - weight fraction of maximum allowable blowing agent in liquid
 double growthRateConst();
 double growthRateCO2(double &, double &);
 double growthRateBA (double &, double &);
