@@ -57,7 +57,9 @@ Description
 #include "fixedFluxPressureFvPatchScalarField.H"
 
 extern "C"{void dsteqr_(char &, int *, double *, double *, double *, int *, double *, int *); }
-
+// MoDeNa
+#include "modena.h"
+#include "modenaData.h"
 // Kinetics headers
 #include "KineticsFunctions.H"
 // Moments headers
@@ -85,6 +87,8 @@ int main(int argc, char *argv[])
     #include "setInitialDeltaT.H"
     bool gellingPoint = false;
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    
+    #include "modenaCalls.h"
 
     Info<< "\nStarting time loop\n" << endl;
     Info<< "initialFoamMass : " << initialFoamMass << endl;
