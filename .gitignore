@@ -115,5 +115,14 @@ func_*/
 # Documentation
 html/
 
+# build folders of OpenFOAM - anywhere
+linux*Clang*/
+linux*Gcc*/
+linux*Icc*/
+linuxming*/
+SiCortex*Gcc*/
+solaris*Gcc*/
+SunOS*Gcc*/
+platforms/
 
 # end-of-file

@@ -7,13 +7,5 @@
 *.orig[0-9][0-9]
 \#*\#
 
-# FireWorks output
-FW.json
-launcher_*/
-func_*/
-
 # Dependencies
 *.dep
-
-# Make directory
-/Make/linux64GccDP/*
