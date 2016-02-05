@@ -8,6 +8,7 @@ mkdir obj
 cd obj
 mkdir dyn
 mkdir sta 
+cd ..
 make dynamic 
 mv libeigen.so $FOAM_USER_LIBBIN
 
