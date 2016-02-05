@@ -91,7 +91,7 @@ program foam_diffusion
 !c Allocate memory for working arrays
 !c -----------------------------------
     LENRAT = 2        ! usually for double precision
-    NNZ = 1000*nEQ      ! nonzero elements  - MV CHECK
+    NNZ = nEQ**2      ! nonzero elements  - MV CHECK
     LWM = 2*NNZ + 2*NEQ + (NNZ+10*NEQ)/LENRAT     ! MITER = 2
     LIW = 31 + NEQ + NNZ +100
     LRW = 20 + (2 + 1./LENRAT)*NNZ + (11 + 9./LENRAT)*NEQ
@@ -139,8 +139,8 @@ program foam_diffusion
     tend = rpar(3)
     counter = 1
     itol = 1
-    rtol = 1.0d-6
-    atol = 1.0d-6
+    rtol = 1.0d-1
+    atol = 1.0d-1
 
     itask = 1
     istate = 1
@@ -170,13 +170,13 @@ program foam_diffusion
         if (istate.lt.0) then
             write(*,*) 'Something is wrong, look for ISTATE =', istate
             if (istate.eq.-1) then  ! not enough steps to reach tout
-                istate = 1
+                istate = 3
                 iopt = 1   ! start to change something
                 RWORK(5:8)=0.0d0
                 IWORK(5) = 0
                 IWORK(6) = counter*1000
                 IWORK(7) = 0
-                counter = counter + 1
+                counter = counter + 2
                 write(*,*) 'MAXSTEP', IWORK(6)
                 write(10,*) 'MAXSTEP', IWORK(6)
                 goto 100
