@@ -15,7 +15,13 @@ if (PBESwitch)
 
         double CO2_l_val, L_l_val, tmp_val, alphafoam;
         double cc1_val = 0.0;
-        double LMAX, xBL_val;
+        double LMAX, xBL_val, rhoPolyS;
+        // Calling the model for density reaction mixture
+        size_t T_pos = 
+            modena_model_inputs_argPos(density_reaction_mixturemodel, "T");
+        size_t XOH_pos = 
+            modena_model_inputs_argPos(density_reaction_mixturemodel, "XOH");
+        modena_model_argPos_check(density_reaction_mixturemodel);
         
         forAll(mesh.C(), celli)
         {
@@ -27,6 +33,32 @@ if (PBESwitch)
             wCO2_g_val= wCO2_g[celli]; 
             wBA_g_val = wBA_g[celli];
             prsr = p[celli];
+
+            if (liquidMixtureDensitySurrogate)
+            {
+                // set input vector
+                modena_inputs_set(inputs_den, Td_pos, TS[celli]);
+                modena_inputs_set(inputs_den, XOHd_pos, XOH[celli]);
+                int ret_den = 
+                    modena_model_call
+                    (
+                        density_reaction_mixturemodel, 
+                        inputs_den, 
+                        outputs_den
+                    );
+                if (ret_den != 0)
+                {
+                    modena_inputs_destroy (inputs_den);
+                    modena_outputs_destroy (outputs_den);
+                    modena_model_destroy (density_reaction_mixturemodel);
+                    exit(ret_den);
+                }
+                rhoPolyS = modena_outputs_get(outputs_den, 0);
+            }
+            else
+            {
+                rhoPolyS = rhoPoly;
+            }
 
             // Using old moments to compute the new weights and nodes
             if (alphafoam > 0.5)
@@ -128,9 +160,16 @@ if (PBESwitch)
         double sources[2*nodes];
 
         double CO2_l_val, L_l_val, tmp_val, alphafoam;
-        double LMAX, xBL_val;
+        double LMAX, xBL_val, rhoPolyS;
         double cc1_val = 0.0;
         
+        // Calling the model for density reaction mixture
+        size_t T_pos = 
+            modena_model_inputs_argPos(density_reaction_mixturemodel, "T");
+        size_t XOH_pos = 
+            modena_model_inputs_argPos(density_reaction_mixturemodel, "XOH");
+        modena_model_argPos_check(density_reaction_mixturemodel);
+
         forAll(mesh.C(), celli)
         {
             CO2_l_val = wCO2_l[celli];
@@ -143,7 +182,33 @@ if (PBESwitch)
             wCO2_g_val= wCO2_g[celli]; 
             wBA_g_val = wBA_g[celli];
             prsr = p[celli];
-    
+            
+            if (liquidMixtureDensitySurrogate)
+            {
+                // set input vector
+                modena_inputs_set(inputs_den, Td_pos, TS[celli]);
+                modena_inputs_set(inputs_den, XOHd_pos, XOH[celli]);
+                int ret_den = 
+                    modena_model_call
+                    (
+                        density_reaction_mixturemodel, 
+                        inputs_den, 
+                        outputs_den
+                    );
+                if (ret_den != 0)
+                {
+                    modena_inputs_destroy (inputs_den);
+                    modena_outputs_destroy (outputs_den);
+                    modena_model_destroy (density_reaction_mixturemodel);
+                    exit(ret_den);
+                }
+                rhoPolyS = modena_outputs_get(outputs_den, 0);
+            }
+            else
+            {
+                rhoPolyS = rhoPoly;
+            }
+            
             if (alphafoam > 0.5)
             {
                 mom[0] = mZero[celli];
