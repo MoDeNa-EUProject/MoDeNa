@@ -1,5 +1,12 @@
 double dXOHdt,XOH_C,XOH_Old,dWdt,XW_C,XW_Old,dLdt,alphaFO,
-    rhoFO,C_TOT, L_l_C, L_l_Old, T_C,T_O, wBA_g_val, xBL_val; 
+    rhoFO,C_TOT, L_l_C, L_l_Old, T_C,T_O, wBA_g_val, xBL_val, rhoPolyMixture; 
+
+// Calling the model for density reaction mixture
+size_t Tm_pos = 
+    modena_model_inputs_argPos(density_reaction_mixturemodel, "T");
+size_t XOHv_pos = 
+    modena_model_inputs_argPos(density_reaction_mixturemodel, "XOH");       
+modena_model_argPos_check(density_reaction_mixturemodel);
 
 forAll(mesh.C(), celli)
 {
@@ -43,6 +50,33 @@ forAll(mesh.C(), celli)
         }   
     }
 
+    if (liquidMixtureDensitySurrogate)
+    {
+        // set input vector
+        modena_inputs_set(inputs_den, Tm_pos, T_C);
+        modena_inputs_set(inputs_den, XOHv_pos, XOH_C);
+        // call the model
+        int ret_den = 
+            modena_model_call
+            (
+                density_reaction_mixturemodel, 
+                inputs_den, 
+                outputs_den
+            );
+        if (ret_den != 0)
+        {
+            modena_inputs_destroy (inputs_den);
+            modena_outputs_destroy (outputs_den);
+            modena_model_destroy (density_reaction_mixturemodel);
+            exit(ret_den);
+        }
+        rhoPolyMixture = modena_outputs_get(outputs_den, 0);
+    }
+    else
+    {
+        rhoPolyMixture = rhoPoly;
+    }
+
     if (blowingAgent == "n-pentane")
     {
         C_TOT = C_Poly;
@@ -50,14 +84,14 @@ forAll(mesh.C(), celli)
         {
             TSSource[celli] = 
             (
-                ((-DH_OH*COH_0*dXOHdt)/(rhoPoly*C_TOT) 
-              + (-DH_W*CW_0*dWdt)/(rhoPoly*C_TOT) 
-              + (latenth*dLdt)/(rhoPoly*C_TOT))
+                ((-DH_OH*COH_0*dXOHdt)/(rhoPolyMixture*C_TOT) 
+              + (-DH_W*CW_0*dWdt)/(rhoPolyMixture*C_TOT) 
+              + (latenth*dLdt)/(rhoPolyMixture*C_TOT))
             );
         }
         else if (alphaFO > 0.5 && XOH[celli] >= XOH_Gel)
         {
-            TSSource[celli] = (latenth*dLdt)/(rhoPoly*C_TOT);
+            TSSource[celli] = (latenth*dLdt)/(rhoPolyMixture*C_TOT);
         }
         else
         {
@@ -81,8 +115,8 @@ forAll(mesh.C(), celli)
             {
                 TSSource[celli] =
                 (
-                    ((-DH_OH*COH_0*dXOHdt)/(rhoPoly*C_TOT) 
-                  + (-DH_W*CW_0*dWdt)/(rhoPoly*C_TOT))
+                    ((-DH_OH*COH_0*dXOHdt)/(rhoPolyMixture*C_TOT) 
+                  + (-DH_W*CW_0*dWdt)/(rhoPolyMixture*C_TOT))
                 );
             }
             else if (alphaFO > 0.5 && XOH[celli] >= XOH_Gel)
@@ -105,8 +139,8 @@ forAll(mesh.C(), celli)
             {
                 TSSource[celli] = 
                 (
-                    ((-DH_OH*COH_0*dXOHdt)/(rhoPoly*C_TOT) 
-                  + (-DH_W*CW_0*dWdt)/(rhoPoly*C_TOT))
+                    ((-DH_OH*COH_0*dXOHdt)/(rhoPolyMixture*C_TOT) 
+                  + (-DH_W*CW_0*dWdt)/(rhoPolyMixture*C_TOT))
                 );
             }
             else
@@ -122,8 +156,8 @@ forAll(mesh.C(), celli)
         {
             TSSource[celli] = 
             (
-                ((-DH_OH*COH_0*dXOHdt)/(rhoPoly*C_TOT) 
-              + (-DH_W*CW_0*dWdt)/(rhoPoly*C_TOT))
+                ((-DH_OH*COH_0*dXOHdt)/(rhoPolyMixture*C_TOT) 
+              + (-DH_W*CW_0*dWdt)/(rhoPolyMixture*C_TOT))
             );
         }
         else
