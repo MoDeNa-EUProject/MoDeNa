@@ -18,5 +18,5 @@ FoamFile
 PBESwitch   on;
 PBEMethod   QMOM;
 nNodes      2;
-
+bubbleGrowthSurrogateSwitch off;
 // ************************************************************************* //

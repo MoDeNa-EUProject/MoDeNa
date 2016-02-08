@@ -27,6 +27,15 @@
 // @param - double &wBA_g - weight frcation of blowing agent in gas
 // @param - double &p - ambient pressure
 // @param - double &R - bubble radius
+// partialPressureBA - partial pressure of blowing agent 
+// @param - double &M_B - molecular weight of blowing agent
+// @param - double &M_CO2 - molecular weight of CO2
+// @param - double &surfaceTension - surface tenstion
+// @param - double &wBA_g - weight frcation of blowing agent in gas
+// @param - double &wCO2_g - weight fraction of CO2 in gas
+// @param - double &p - ambient pressure
+// @param - double &R - bubble radius   
+
 // wCO2Max - dissolved amount of CO2 in liquid
 // @param - double &M_CO2 - molecular weight of CO2
 // @param - double &M_liq - molecular weight of liquid mixture
@@ -53,7 +62,8 @@
 // @param - timeStep - time step
 // thermalDiffusivityGas - return thermal diffusivity of gas as a function of T
 // @param = double &T - Temperature
-
+// nodeRadius - bubble radius at the node
+// @param - const double &v - bubble volume
 double LliqMax (double &);
 double ddT_LliqMax (double &);
 double arrhenius (double &, double &, double &);
@@ -69,6 +79,12 @@ double partialPressureCO2
         double &M_CO2, double &M_B, double &surfaceTension, double &wCO2_g,
         double &wBA_g, double &p, double &R
     );
+double partialPressureBA
+    (
+        double &M_B, double &M_CO2, double &surfaceTension, 
+        double &wBA_g_val, double &wCO2_g_val, 
+        double &prsr, double &bubble_radius
+    );
 double wCO2Max (double &M_CO2, double &M_liq, double &pCO2, double &henryCoeff);
 double xBL (double &T, double &dxdT);
 double wBL_D(double &xBL, double &M_B, double &M_NCO, double &L0);
@@ -77,6 +93,7 @@ double creamTemperature(double &xBL0, double &dxdT);
 double dTdtFirstOrder(double &Tc, double &To, double &timeStep);
 double dTdtSecondOrder(double &Tc, double &To, double &Too, double &timeStep);
 double thermalDiffusivityGas(double &T);
+double nodeRadius(const double &v);
 
 double LliqMax (double& tmptr)
 {
@@ -178,6 +195,29 @@ double partialPressureCO2
 
     return (pCO2);
 }
+double partialPressureBA
+(
+    double &M_B, double &M_CO2, double &surfaceTension, double &wBA_g,
+    double &wCO2_g, double &p, double &R
+)
+{
+    double pBA;
+    if (wBA_g == 0.0)
+    {
+        pBA = ROOTVSMALL;
+    }
+    else
+    {
+        pBA = 
+        (
+            (
+                (wBA_g/M_B)/(wBA_g/M_B + wCO2_g/M_CO2))
+                *(p + 2*surfaceTension/Foam::max(R,ROOTVSMALL))
+            );
+    }
+    return (pBA);
+}
+
 double wCO2Max (double &M_CO2, double &M_liq, double &pCO2, double &henryCoeff)
 {
     if ((henryCoeff - pCO2 ) > 0.0)
@@ -266,4 +306,8 @@ double thermalDiffusivityGas(double &T)
     double b = 0.000001038;
     double c = -0.0001518;
     return (a*T*T + b*T + c);
+}
+double nodeRadius(const double &v)
+{
+    return (pow((6.0*v/M_PI),1/3));
 }

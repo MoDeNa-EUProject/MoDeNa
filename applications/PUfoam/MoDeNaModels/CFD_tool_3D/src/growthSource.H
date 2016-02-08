@@ -13,22 +13,19 @@
 // @param - double &cc1_val - constant
 // @param - double &LMAX - weight fraction of maximum allowable blowing agent in liquid
 // Returns void
-void growthSource(double *, double *, double *, double *, int &, int *, double &, double &, double &, double &, double &, double &); 
+void growthSource(double *, double *, double *, double *, int &, int *, double &, double &, double &, double &, double &, double &, double *, double *); 
 
 void growthSource
 (
     double *sgBA, double *sgCO2, double *we, double *vi, int &nNodes, int *mOrder, 
     double &CO2_l_val, double &L_l_val, double &tmp_val, double &wCO2_Max, 
-    double &cc1_val, double &LMAX
+    double &cc1_val, double &LMAX, 
+    double *volumeGrowthBA, double *volumeGrowthCO2
 )
 {
     int i;
     int counter = 0;
     double k;
-    double c_L, c_CO2;
-
-    c_CO2 = growthRateCO2(CO2_l_val, wCO2_Max); 
-    c_L   = growthRateBA(L_l_val, LMAX);
 
     if (L_l_val > LMAX)
     {
@@ -58,8 +55,8 @@ void growthSource
             {   
                 if(vi[i] > 0.0)
                 {
-                    sgBA[counter] += c_L*we[i];
-                    sgCO2[counter] += c_CO2*we[i];
+                    sgBA[counter] += volumeGrowthBA[i]*we[i];
+                    sgCO2[counter] += volumeGrowthCO2[i]*we[i];
                 }
                 else
                 {
@@ -74,8 +71,8 @@ void growthSource
             {
                 if (vi[i] > 0.0)
                 {   
-                    sgBA[counter] += k*c_L*we[i]*Foam::pow(vi[i], k - 1);
-                    sgCO2[counter] += k*c_CO2*we[i]*Foam::pow(vi[i], k - 1);
+                    sgBA[counter] += k*volumeGrowthBA[i]*we[i]*Foam::pow(vi[i], k - 1);
+                    sgCO2[counter] += k*volumeGrowthCO2[i]*we[i]*Foam::pow(vi[i], k - 1);
                 }
                 else
                 {

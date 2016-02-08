@@ -14,7 +14,10 @@ Switch PBESwitch
 (
     PBEProperties.lookup("PBESwitch")
 );
-
+Switch bubbleGrowthSurrogateSwitch
+    (
+        PBEProperties.lookup("bubbleGrowthSurrogateSwitch")
+    );
 word PBEMethod(PBEProperties.lookup("PBEMethod"));
 if( !(PBEMethod == "QMOM") )
 {
