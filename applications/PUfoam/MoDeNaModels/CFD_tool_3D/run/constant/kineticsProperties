@@ -25,7 +25,7 @@ GellingConstants
 	gellingPoint    0.606; 			// the assumed gelling point, - 
 
 }
-
+liquidMixtureDensitySurrogate off;
 blowingAgent    	n-pentane;
 
 BlowingConstants

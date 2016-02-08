@@ -2,10 +2,18 @@ if (PBESwitch)
 {
     scalar prsr, tmpt, rho_f, alpha_f, g1_BA_val,
            QBA, cc1_value, tmptrOld, tmptrOldOld, timeStep, dTdt,
-           dXWdt, g1_CO2_val;
+           dXWdt, g1_CO2_val, XOH_val, rhoPolyS;
     scalar henry_Coefficient, mZero_val, mOne_val,
            bubble_radius, partialPressure_CO2, wCO2_g_val,
            wBA_g_val, wCO2_Max,wBL_Max;
+    
+    // call surrogate model for density reaction mixture
+    size_t T_pos = 
+        modena_model_inputs_argPos(density_reaction_mixturemodel, "T");
+    size_t XOH_pos = 
+        modena_model_inputs_argPos(density_reaction_mixturemodel, "XOH");
+    modena_model_argPos_check(density_reaction_mixturemodel);
+      
     forAll(mesh.C(), celli)
     {    
         tmpt = TS[celli]; 
@@ -21,7 +29,34 @@ if (PBESwitch)
         wBA_g_val = wBA_g[celli];        
         cc1_value = cc1[celli];     
         g1_BA_val = g1_BA[celli];
+        XOH_val = XOH[celli];
 
+        if (liquidMixtureDensitySurrogate)
+        {
+            // set input vector
+            modena_inputs_set(inputs_den, T_pos, tmpt);
+            modena_inputs_set(inputs_den, XOH_pos, XOH_val);
+            // call the model
+            int ret_den = 
+                modena_model_call
+                (
+                    density_reaction_mixturemodel, 
+                    inputs_den, 
+                    outputs_den
+                );
+            if (ret_den != 0)
+            {
+                modena_inputs_destroy (inputs_den);
+                modena_outputs_destroy (outputs_den);
+                modena_model_destroy (density_reaction_mixturemodel);
+                exit(ret_den);
+            }
+            rhoPolyS = modena_outputs_get(outputs_den, 0);
+        }
+        else
+        {
+            rhoPolyS = rhoPoly;
+        }
         if (blowingAgent == "n-pentane")
         {
             if (alpha_f > 0.5)
@@ -32,7 +67,7 @@ if (PBESwitch)
                     wBA_gSource[celli] = (-cc1_value*ddT_LliqMax(tmpt)*dTdt);
                     wBA_lSource[celli] = 
                         (
-                            (M_B/1000.0)*(1.0/rhoPoly)
+                            (M_B/1000.0)*(1.0/rhoPolyS)
                             *(prsr/(max((RR*tmpt),ROOTVSMALL)))*(-g1_BA_val)
                         );
                 }
@@ -90,8 +125,8 @@ if (PBESwitch)
             {
                 wCO2_lSource[celli] = 
                 (
-                    (CW_0*dXWdt*(M_CO2/1000.0)*(1.0/rhoPoly) 
-                    - g1_CO2_val*(prsr/(RR*tmpt))*(M_CO2/1000.0)*(1.0/rhoPoly))
+                    (CW_0*dXWdt*(M_CO2/1000.0)*(1.0/rhoPolyS) 
+                    - g1_CO2_val*(prsr/(RR*tmpt))*(M_CO2/1000.0)*(1.0/rhoPolyS))
                 );
             }
         } 
@@ -114,7 +149,7 @@ if (PBESwitch)
             wCO2_gSource[celli] = 
                 (
                     g1_CO2_val
-                    *(prsr/(RR*tmpt))*(M_CO2/1000.0)*(1.0/rhoPoly)
+                    *(prsr/(RR*tmpt))*(M_CO2/1000.0)*(1.0/rhoPolyS)
                 );
         }   
     }
@@ -126,12 +161,19 @@ else
     
     scalar henry_Coefficient,
            bubble_radius, partialPressure_CO2, wCO2_g_val,
-           wBA_g_val, wCO2_Max, wBL_Max, wBA_l_val, c1;
+           wBA_g_val, wCO2_Max, wBL_Max, wBA_l_val, c1, XOH_val, rhoPolyS;
     
     scalar m0_val, m1_val;
     m0_val = m1_val = 0.0;
     scalar xBL0, xBL_val;
 
+    // call surrogate model for density reaction mixture
+    size_t T_pos = 
+        modena_model_inputs_argPos(density_reaction_mixturemodel, "T");
+    size_t XOH_pos = 
+        modena_model_inputs_argPos(density_reaction_mixturemodel, "XOH");
+    modena_model_argPos_check(density_reaction_mixturemodel);
+    
     forAll(mesh.C(), celli)
     {       
         tmpt = TS[celli]; 
@@ -143,8 +185,36 @@ else
         alpha_f = alpha2[celli];
         wCO2_g_val = wCO2_g[celli];
         wBA_g_val = wBA_g[celli];
-        wBA_l_val = wBA_l[celli];        
-    
+        wBA_l_val = wBA_l[celli];
+        XOH_val = XOH[celli];        
+        
+        if (liquidMixtureDensitySurrogate)
+        {
+            // set input vector
+            modena_inputs_set(inputs_den, T_pos, tmpt);
+            modena_inputs_set(inputs_den, XOH_pos, XOH_val);
+            // call the model
+            int ret_den = 
+                modena_model_call
+                (
+                    density_reaction_mixturemodel, 
+                    inputs_den, 
+                    outputs_den
+                );
+            if (ret_den != 0)
+            {
+                modena_inputs_destroy (inputs_den);
+                modena_outputs_destroy (outputs_den);
+                modena_model_destroy (density_reaction_mixturemodel);
+                exit(ret_den);
+            }
+            rhoPolyS = modena_outputs_get(outputs_den, 0);
+        }
+        else
+        {
+            rhoPolyS = rhoPoly;
+        }
+
         if (blowingAgent == "n-pentane")
         {
             if (alpha_f > 0.5)
@@ -211,7 +281,7 @@ else
         {
             wCO2_gSource[celli] = 
             (    
-                ((CW_0*XW[celli]*(M_CO2/1000.0)*(1.0/rhoPoly)) - wCO2_Max)
+                ((CW_0*XW[celli]*(M_CO2/1000.0)*(1.0/rhoPolyS)) - wCO2_Max)
             );
         }
         else

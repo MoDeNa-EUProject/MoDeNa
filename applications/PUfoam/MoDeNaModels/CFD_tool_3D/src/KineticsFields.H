@@ -183,7 +183,11 @@ scalar latenth =
     ( 
         kineticsProperties.subDict("EnthalpyConstants").lookup("latentHeat")
     );
-
+// switch for the liquid mixture density
+    Switch liquidMixtureDensitySurrogate
+    (
+        kineticsProperties.lookup("liquidMixtureDensitySurrogate")
+    );
 Info<< "Reading field XW \n" << endl;
 volScalarField XW
 (
