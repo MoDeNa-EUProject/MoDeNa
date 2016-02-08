@@ -10,7 +10,15 @@ scalar temp_current,
        XOH_valOld,
        BA_dilution, 
        XOHSource_Old,
-       QW;
+       QW,
+       rhoPolyS;
+
+// call surrogate model for density reaction mixture
+    size_t T_pos = 
+        modena_model_inputs_argPos(density_reaction_mixturemodel, "T");
+    size_t XOH_pos = 
+        modena_model_inputs_argPos(density_reaction_mixturemodel, "XOH");
+    modena_model_argPos_check(density_reaction_mixturemodel);
 
 forAll(mesh.C(), celli)
 {
@@ -21,6 +29,33 @@ forAll(mesh.C(), celli)
     alphaFoam_current = alpha2[celli];
     alphaFoam_old = alpha2.oldTime()[celli];
 
+    if (liquidMixtureDensitySurrogate)
+    {
+        // set input vector
+        modena_inputs_set(inputs_den, T_pos, temp_current);
+        modena_inputs_set(inputs_den, XOH_pos, XOH[celli]);    
+        // call the model
+        int ret_den = 
+            modena_model_call
+            (
+                density_reaction_mixturemodel, 
+                inputs_den, 
+                outputs_den
+            );
+        if (ret_den != 0)
+            {
+                modena_inputs_destroy (inputs_den);
+                modena_outputs_destroy (outputs_den);
+                modena_model_destroy (density_reaction_mixturemodel);
+                exit(ret_den);
+            }
+        rhoPolyS = modena_outputs_get(outputs_den, 0);           
+    }
+    else
+    {
+        rhoPolyS = rhoPoly;
+    }
+
     if (XW[celli] < 0.0)
     {
         XW[celli] = ROOTVSMALL;
@@ -29,7 +64,7 @@ forAll(mesh.C(), celli)
     {
         XW[celli] = ROOTVSMALL;
     }
-    QW = QKinW (AW, EW, temp_current, L0, rhoPoly, rhoBL);
+    QW = QKinW (AW, EW, temp_current, L0, rhoPolyS, rhoBL);
     if (QW < 0.0 || CW_0 == 0.0)
     {
         QW = ROOTVSMALL;
@@ -67,7 +102,7 @@ forAll(mesh.C(), celli)
         XOH_valOld = XOH[celli];    
         Arhns_current = arrhenius (AOH, EOH, temp_current);
         Arhns_old = arrhenius (AOH, EOH, temp_old);
-        BA_dilution = BAdilution(L0,rhoPoly,rhoBL);
+        BA_dilution = BAdilution(L0,rhoPolyS,rhoBL);
         XOHSource_Old =
             ( 
                 (Arhns_old*COH_0*(1 - XOH_valOld)*
