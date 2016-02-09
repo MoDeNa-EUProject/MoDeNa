@@ -15,6 +15,9 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+liquidMixtureDensitySurrogate off;
+blowingAgent    	n-pentane;
+KineticsModel    generic;
 GellingConstants
 {
 	A_OH            1;			// m3/mol s 		
@@ -25,8 +28,6 @@ GellingConstants
 	gellingPoint    0.606; 			// the assumed gelling point, - 
 
 }
-liquidMixtureDensitySurrogate off;
-blowingAgent    	n-pentane;
 
 BlowingConstants
 {

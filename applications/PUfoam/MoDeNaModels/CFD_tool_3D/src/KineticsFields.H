@@ -9,6 +9,23 @@ IOdictionary kineticsProperties
         IOobject::NO_WRITE
     )
 );
+word KineticsModel(kineticsProperties.lookup("KineticsModel"));
+
+if 
+( 
+    !(KineticsModel == "generic" 
+   || KineticsModel == "simple" 
+   || KineticsModel == "RF-1" ) 
+)
+    {
+        FatalErrorIn(args.executable())
+            << "Invalid kinetics model " << KineticsModel
+            << "\nValid kinetics models are: "
+            << "\ngeneric,"
+            << "\nsimple,"
+            << "\nRF-1,"
+            << exit(FatalError);
+    }
 
 scalar AOH = 
     readScalar(kineticsProperties.subDict("GellingConstants").lookup("A_OH"));
@@ -188,6 +205,7 @@ scalar latenth =
     (
         kineticsProperties.lookup("liquidMixtureDensitySurrogate")
     );
+// Required fields for generic kinetics model
 Info<< "Reading field XW \n" << endl;
 volScalarField XW
 (
@@ -494,3 +512,741 @@ volScalarField::DimensionedInternalField TSSource
     mesh,
     dimensionedScalar("TSSource", dimensionSet(0,0,-1,1,0,0,0), 0.0)
 );
+// Required fields for simple kinetics surrogate models
+Info<< "Reading field EG_NCO \n" << endl;
+    volScalarField EG_NCO
+    (
+        IOobject
+        (
+            "EG_NCO",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh     
+    );
+
+Info<< "Reading field EG_OH \n" << endl;
+    volScalarField EG_OH
+    (
+        IOobject
+        (
+            "EG_OH",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh     
+    );
+
+Info<< "Reading field H2O \n" << endl;
+    volScalarField H2O
+    (
+        IOobject
+        (
+            "H2O",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh     
+    );
+
+Info<< "Reading field CO2_Sur \n" << endl;
+    volScalarField CO2_Sur
+    (
+        IOobject
+        (
+            "CO2_Sur",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh     
+    );
+
+Info<< "Reading field PENTANE \n" << endl;
+    volScalarField PENTANE
+    (
+        IOobject
+        (
+            "PENTANE",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh     
+    );
+
+Info<< "Reading field POLYMER \n" << endl;
+    volScalarField POLYMER
+    (
+        IOobject
+        (
+            "POLYMER",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh     
+    );
+
+Info<< "Reading field POLMERBLOW \n" << endl;
+    volScalarField POLMERBLOW
+    (
+        IOobject
+        (
+            "POLMERBLOW",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh     
+    );
+
+Info<< "Reading field UREA \n" << endl;
+    volScalarField UREA
+    (
+        IOobject
+        (
+            "UREA",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh     
+    );
+
+Info<< "Reading field R_1_temp \n" << endl;
+    volScalarField R_1_temp
+    (
+        IOobject
+        (
+            "R_1_temp",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+         mesh     
+    );
+
+// Source terms for the simple kinetics surrogate model
+Info<< "Creating source term source_EG_NCO" << endl;
+volScalarField::DimensionedInternalField source_EG_NCO
+    (
+         IOobject
+        (
+            "source_EG_NCO",
+            runTime.timeName(),
+            mesh
+        ),
+        mesh,
+        dimensionedScalar("source_EG_NCO", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+    );
+Info<< "Creating source term source_EG_OH" << endl;
+volScalarField::DimensionedInternalField source_EG_OH
+    (
+         IOobject
+        (
+            "source_EG_OH",
+            runTime.timeName(),
+            mesh
+        ),
+        mesh,
+        dimensionedScalar("source_EG_OH", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+    );
+Info<< "Creating source term source_H2O" << endl;
+volScalarField::DimensionedInternalField source_H2O
+    (
+         IOobject
+        (
+            "source_H2O",
+            runTime.timeName(),
+            mesh
+        ),
+        mesh,
+        dimensionedScalar("source_H2O", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+    );
+Info<< "Creating source term source_CO2" << endl;
+volScalarField::DimensionedInternalField source_CO2
+    (
+         IOobject
+        (
+            "source_CO2",
+            runTime.timeName(),
+            mesh
+        ),
+        mesh,
+        dimensionedScalar("source_CO2", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+    );
+Info<< "Creating source term source_PENTANE" << endl;
+volScalarField::DimensionedInternalField source_PENTANE
+    (
+         IOobject
+        (
+            "source_PENTANE",
+            runTime.timeName(),
+            mesh
+        ),
+        mesh,
+        dimensionedScalar("source_PENTANE", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+    );
+Info<< "Creating source term source_POLYMER" << endl;
+volScalarField::DimensionedInternalField source_POLYMER
+    (
+         IOobject
+        (
+            "source_POLYMER",
+            runTime.timeName(),
+            mesh
+        ),
+        mesh,
+        dimensionedScalar("source_POLYMER", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+    );
+Info<< "Creating source term source_POLMERBLOW" << endl;
+volScalarField::DimensionedInternalField source_POLMERBLOW
+    (
+         IOobject
+        (
+            "source_POLMERBLOW",
+            runTime.timeName(),
+            mesh
+        ),
+        mesh,
+        dimensionedScalar("source_POLMERBLOW", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+    );
+Info<< "Creating source term source_UREA" << endl;
+volScalarField::DimensionedInternalField source_UREA
+    (
+         IOobject
+        (
+            "source_UREA",
+            runTime.timeName(),
+            mesh
+        ),
+        mesh,
+        dimensionedScalar("source_UREA", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+    );
+Info<< "Creating source term source_R_1_temp" << endl;
+volScalarField::DimensionedInternalField source_R_1_temp
+    (
+         IOobject
+        (
+            "source_R_1_temp",
+            runTime.timeName(),
+            mesh
+        ),
+        mesh,
+        dimensionedScalar("source_R_1_temp", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+    );
+// Required fields for RF-1 kinetics surrogate model
+Info<< "Reading field Catalyst_1 \n" << endl;
+    volScalarField Catalyst_1
+    (
+        IOobject
+        (
+            "Catalyst_1",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh     
+    );
+Info<< "Reading field CE_A0 \n" << endl;
+    volScalarField CE_A0
+    (
+        IOobject
+        (
+            "CE_A0",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh     
+    );
+Info<< "Reading field CE_A1 \n" << endl;
+    volScalarField CE_A1
+    (
+        IOobject
+        (
+            "CE_A1",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh     
+    );
+Info<< "Reading field CE_B \n" << endl;
+    volScalarField CE_B
+    (
+        IOobject
+        (
+            "CE_B",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh     
+    );
+Info<< "Reading field CE_B2 \n" << endl;
+    volScalarField CE_B2
+    (
+        IOobject
+        (
+            "CE_B2",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh     
+    );
+Info<< "Reading field CE_I0 \n" << endl;
+    volScalarField CE_I0
+    (
+        IOobject
+        (
+            "CE_I0",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh     
+    );
+Info<< "Reading field CE_I1 \n" << endl;
+    volScalarField CE_I1
+    (
+        IOobject
+        (
+            "CE_I1",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh     
+    );
+Info<< "Reading field CE_I2 \n" << endl;
+    volScalarField CE_I2
+    (
+        IOobject
+        (
+            "CE_I2",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh     
+    );
+Info<< "Reading field CE_PBA \n" << endl;
+    volScalarField CE_PBA
+    (
+        IOobject
+        (
+            "CE_PBA",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh     
+    );
+Info<< "Reading field CE_Breac \n" << endl;
+    volScalarField CE_Breac
+    (
+        IOobject
+        (
+            "CE_Breac",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh     
+    );
+Info<< "Reading field CE_Areac0 \n" << endl;
+    volScalarField CE_Areac0
+    (
+        IOobject
+        (
+            "CE_Areac0",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh     
+    );
+Info<< "Reading field CE_Areac1 \n" << endl;
+    volScalarField CE_Areac1
+    (
+        IOobject
+        (
+            "CE_Areac1",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh     
+    );
+Info<< "Reading field CE_Ireac0 \n" << endl;
+    volScalarField CE_Ireac0
+    (
+        IOobject
+        (
+            "CE_Ireac0",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh     
+    );
+Info<< "Reading field CE_Ireac1 \n" << endl;
+    volScalarField CE_Ireac1
+    (
+        IOobject
+        (
+            "CE_Ireac1",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh     
+    );
+Info<< "Reading field CE_Ireac2 \n" << endl;
+    volScalarField CE_Ireac2
+    (
+        IOobject
+        (
+            "CE_Ireac2",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh     
+    );
+Info<< "Reading field Bulk \n" << endl;
+    volScalarField Bulk
+    (
+        IOobject
+        (
+            "Bulk",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh     
+    );
+Info<< "Reading field R_1 \n" << endl;
+    volScalarField R_1
+    (
+        IOobject
+        (
+            "R_1",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh     
+    );
+Info<< "Reading field R_1_mass \n" << endl;
+    volScalarField R_1_mass
+    (
+        IOobject
+        (
+            "R_1_mass",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh     
+    );
+Info<< "Reading field R_1_temp_RF1 \n" << endl;
+    volScalarField R_1_temp_RF1
+    (
+        IOobject
+        (
+            "R_1_temp_RF1",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh     
+    );
+Info<< "Reading field R_1_vol_RF1 \n" << endl;
+    volScalarField R_1_vol_RF1
+    (
+        IOobject
+        (
+            "R_1_vol_RF1",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh     
+    );
+// source terms for the RF-1 kinetics surrogate models
+Info<< "Creating source term source_Catalyst_1" << endl;
+volScalarField::DimensionedInternalField source_Catalyst_1
+    (
+         IOobject
+        (
+         "source_Catalyst_1",
+         runTime.timeName(),
+         mesh
+        ),
+        mesh,
+        dimensionedScalar("source_Catalyst_1", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+    );
+Info<< "Creating source term source_CE_A0" << endl;
+volScalarField::DimensionedInternalField source_CE_A0
+    (
+         IOobject
+        (
+         "source_CE_A0",
+         runTime.timeName(),
+         mesh
+        ),
+        mesh,
+        dimensionedScalar("source_CE_A0", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+    );
+Info<< "Creating source term source_CE_A1" << endl;
+volScalarField::DimensionedInternalField source_CE_A1
+    (
+         IOobject
+        (
+         "source_CE_A1",
+         runTime.timeName(),
+         mesh
+        ),
+        mesh,
+        dimensionedScalar("source_CE_A1", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+    );
+Info<< "Creating source term source_CE_B" << endl;
+volScalarField::DimensionedInternalField source_CE_B
+    (
+         IOobject
+        (
+         "source_CE_B",
+         runTime.timeName(),
+         mesh
+        ),
+        mesh,
+        dimensionedScalar("source_CE_B", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+    );
+Info<< "Creating source term source_CE_B2" << endl;
+volScalarField::DimensionedInternalField source_CE_B2
+    (
+         IOobject
+        (
+         "source_CE_B2",
+         runTime.timeName(),
+         mesh
+        ),
+        mesh,
+        dimensionedScalar("source_CE_B2", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+    );
+Info<< "Creating source term source_CE_I0" << endl;
+volScalarField::DimensionedInternalField source_CE_I0
+    (
+         IOobject
+        (
+         "source_CE_I0",
+         runTime.timeName(),
+         mesh
+        ),
+        mesh,
+        dimensionedScalar("source_CE_I0", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+    );
+Info<< "Creating source term source_CE_I1" << endl;
+volScalarField::DimensionedInternalField source_CE_I1
+    (
+         IOobject
+        (
+         "source_CE_I1",
+         runTime.timeName(),
+         mesh
+        ),
+        mesh,
+        dimensionedScalar("source_CE_I1", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+    );
+Info<< "Creating source term source_CE_I2" << endl;
+volScalarField::DimensionedInternalField source_CE_I2
+    (
+         IOobject
+        (
+         "source_CE_I2",
+         runTime.timeName(),
+         mesh
+        ),
+        mesh,
+        dimensionedScalar("source_CE_I2", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+    );
+Info<< "Creating source term source_CE_PBA" << endl;
+volScalarField::DimensionedInternalField source_CE_PBA
+    (
+         IOobject
+        (
+         "source_CE_PBA",
+         runTime.timeName(),
+         mesh
+        ),
+        mesh,
+        dimensionedScalar("source_CE_PBA", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+    );
+Info<< "Creating source term source_CE_Breac" << endl;
+volScalarField::DimensionedInternalField source_CE_Breac
+    (
+         IOobject
+        (
+         "source_CE_Breac",
+         runTime.timeName(),
+         mesh
+        ),
+        mesh,
+        dimensionedScalar("source_CE_Breac", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+    );
+Info<< "Creating source term source_CE_Areac0" << endl;
+volScalarField::DimensionedInternalField source_CE_Areac0
+    (
+         IOobject
+        (
+         "source_CE_Areac0",
+         runTime.timeName(),
+         mesh
+        ),
+        mesh,
+        dimensionedScalar("source_CE_Areac0", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+    );
+Info<< "Creating source term source_CE_Areac1" << endl;
+volScalarField::DimensionedInternalField source_CE_Areac1
+    (
+         IOobject
+        (
+         "source_CE_Areac1",
+         runTime.timeName(),
+         mesh
+        ),
+        mesh,
+        dimensionedScalar("source_CE_Areac1", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+    );
+Info<< "Creating source term source_CE_Ireac0" << endl;
+volScalarField::DimensionedInternalField source_CE_Ireac0
+    (
+         IOobject
+        (
+         "source_CE_Ireac0",
+         runTime.timeName(),
+         mesh
+        ),
+        mesh,
+        dimensionedScalar("source_CE_Ireac0", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+    );
+Info<< "Creating source term source_CE_Ireac1" << endl;
+volScalarField::DimensionedInternalField source_CE_Ireac1
+    (
+         IOobject
+        (
+         "source_CE_Ireac1",
+         runTime.timeName(),
+         mesh
+        ),
+        mesh,
+        dimensionedScalar("source_CE_Ireac1", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+    );
+Info<< "Creating source term source_CE_Ireac2" << endl;
+volScalarField::DimensionedInternalField source_CE_Ireac2
+    (
+         IOobject
+        (
+         "source_CE_Ireac2",
+         runTime.timeName(),
+         mesh
+        ),
+        mesh,
+        dimensionedScalar("source_CE_Ireac2", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+    );
+Info<< "Creating source term source_Bulk" << endl;
+volScalarField::DimensionedInternalField source_Bulk
+    (
+         IOobject
+        (
+         "source_Bulk",
+         runTime.timeName(),
+         mesh
+        ),
+        mesh,
+        dimensionedScalar("source_Bulk", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+    );
+Info<< "Creating source term source_R_1" << endl;
+volScalarField::DimensionedInternalField source_R_1
+    (
+         IOobject
+        (
+         "source_R_1",
+         runTime.timeName(),
+         mesh
+        ),
+        mesh,
+        dimensionedScalar("source_R_1", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+    );
+Info<< "Creating source term source_R_1_mass" << endl;
+volScalarField::DimensionedInternalField source_R_1_mass
+    (
+         IOobject
+        (
+         "source_R_1_mass",
+         runTime.timeName(),
+         mesh
+        ),
+        mesh,
+        dimensionedScalar("source_R_1_mass", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+    );
+Info<< "Creating source term source_R_1_temp_RF1" << endl;
+volScalarField::DimensionedInternalField source_R_1_temp_RF1
+    (
+         IOobject
+        (
+         "source_R_1_temp_RF1",
+         runTime.timeName(),
+         mesh
+        ),
+        mesh,
+        dimensionedScalar("sourceR_1_temp_RF1", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+    );
+Info<< "Creating source term source_R_1_vol_RF1" << endl;
+volScalarField::DimensionedInternalField source_R_1_vol_RF1
+    (
+         IOobject
+        (
+         "source_R_1_vol_RF1",
+         runTime.timeName(),
+         mesh
+        ),
+        mesh,
+        dimensionedScalar("sourceR_1_vol_RF1", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+    );
