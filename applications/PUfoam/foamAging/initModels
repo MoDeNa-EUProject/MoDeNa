@@ -40,7 +40,7 @@ Contributors
 
 from modena import SurrogateModel
 from modena.Strategy import Workflow2
-# import diffusivity # automatic initialization
+import diffusivity # automatic initialization fails
 # import gasMixtureConductivity # imported by foamConductivity
 # import gasConductivity # imported by gasMixtureConductivity
 import foamConductivity
