@@ -50,7 +50,6 @@ make
 
 ## Files
 The folder `FoamConstruction` contains following files:
-- `SpherePackFB.exe` - packing algorithm
 - `FoamGeometryConstruction_Periodic.py` - tessellation, creation of RVE
 - `periodicBox.py` - creation of the box with periodic boundary conditions
 - `vtkconv.py` - conversion from binary vtk to ascii vtk
