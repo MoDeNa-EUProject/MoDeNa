@@ -44,7 +44,7 @@ from modena.Strategy import Workflow2
 # import gasMixtureConductivity # imported by foamConductivity
 # import gasConductivity # imported by gasMixtureConductivity
 import foamConductivity
-# import Solubility # automatic initialization
+import Solubility # automatic initialization fails
 from fireworks import LaunchPad
 from fireworks.core.rocket_launcher import rapidfire
 

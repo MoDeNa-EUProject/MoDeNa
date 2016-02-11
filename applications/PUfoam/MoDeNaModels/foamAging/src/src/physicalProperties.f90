@@ -49,14 +49,20 @@ module physicalProperties
     type(c_ptr) :: scdInputs = c_null_ptr
     type(c_ptr) :: scdOutputs = c_null_ptr
     integer(c_size_t) :: scdTemppos
+    integer(c_size_t) :: scdxl1pos
+    integer(c_size_t) :: scdxl2pos
     type(c_ptr) :: sairModena = c_null_ptr
     type(c_ptr) :: sairInputs = c_null_ptr
     type(c_ptr) :: sairOutputs = c_null_ptr
     integer(c_size_t) :: sairTemppos
+    integer(c_size_t) :: sairxl1pos
+    integer(c_size_t) :: sairxl2pos
     type(c_ptr) :: scypModena = c_null_ptr
     type(c_ptr) :: scypInputs = c_null_ptr
     type(c_ptr) :: scypOutputs = c_null_ptr
     integer(c_size_t) :: scypTemppos
+    integer(c_size_t) :: scypxl1pos
+    integer(c_size_t) :: scypxl2pos
     type(c_ptr) :: dcdModena = c_null_ptr
     type(c_ptr) :: dcdInputs = c_null_ptr
     type(c_ptr) :: dcdOutputs = c_null_ptr
@@ -140,6 +146,10 @@ subroutine createModels
         sairOutputs = modena_outputs_new (sairModena);
         sairTemppos = modena_model_inputs_argPos(&
             sairModena, c_char_"T"//c_null_char);
+        sairxl1pos = modena_model_inputs_argPos(&
+            sairModena, c_char_"xl1"//c_null_char);
+        sairxl2pos = modena_model_inputs_argPos(&
+            sairModena, c_char_"xl2"//c_null_char);
         call modena_model_argPos_check(sairModena)
     endif
     if (solModel(2)==1) then
@@ -149,6 +159,10 @@ subroutine createModels
         scdOutputs = modena_outputs_new (scdModena);
         scdTemppos = modena_model_inputs_argPos(&
             scdModena, c_char_"T"//c_null_char);
+        scdxl1pos = modena_model_inputs_argPos(&
+            scdModena, c_char_"xl1"//c_null_char);
+        scdxl2pos = modena_model_inputs_argPos(&
+            scdModena, c_char_"xl2"//c_null_char);
         call modena_model_argPos_check(scdModena)
     endif
     if (solModel(3)==1) then
@@ -158,6 +172,10 @@ subroutine createModels
         scypOutputs = modena_outputs_new (scypModena);
         scypTemppos = modena_model_inputs_argPos(&
             scypModena, c_char_"T"//c_null_char);
+        scypxl1pos = modena_model_inputs_argPos(&
+            scypModena, c_char_"xl1"//c_null_char);
+        scypxl2pos = modena_model_inputs_argPos(&
+            scypModena, c_char_"xl2"//c_null_char);
         call modena_model_argPos_check(scypModena)
     endif
     if (diffModel(1)==1) then
@@ -341,12 +359,18 @@ end function oxyConductivity
 !> solubility of carbon dioxide
 real(dp) function cdSolubility(temp)
     real(dp), intent(in) :: temp
+    real(dp) :: xl1,xl2
+    xl1=1.0e-2_dp
+    xl2=1-xl1
     call modena_inputs_set(scdInputs, scdTemppos, temp)
+    call modena_inputs_set(scdInputs, scdxl1pos, xl1)
+    call modena_inputs_set(scdInputs, scdxl2pos, xl2)
     ret = modena_model_call (scdModena, scdInputs, scdOutputs)
     if(ret /= 0) then
         call exit(ret)
     endif
     cdSolubility=modena_outputs_get(scdOutputs, 0_c_size_t)
+    cdSolubility=cdSolubility*Rg*temp*1100._dp/(1e5*Mg(1))/1e5
 end function cdSolubility
 !***********************************END****************************************
 
@@ -355,12 +379,19 @@ end function cdSolubility
 !> solubility of air
 real(dp) function airSolubility(temp)
     real(dp), intent(in) :: temp
+    real(dp) :: xl1,xl2
+    xl1=1.0e-2_dp
+    xl2=1-xl1
     call modena_inputs_set(sairInputs, sairTemppos, temp)
+    call modena_inputs_set(sairInputs, sairxl1pos, xl1)
+    call modena_inputs_set(sairInputs, sairxl2pos, xl2)
     ret = modena_model_call (sairModena, sairInputs, sairOutputs)
     if(ret /= 0) then
         call exit(ret)
     endif
     airSolubility=modena_outputs_get(sairOutputs, 0_c_size_t)
+    airSolubility=airSolubility*Rg*temp*1100._dp/(1e5*&
+        (0.21_dp*Mg(2)+0.79_dp*Mg(3)))/1e5
 end function airSolubility
 !***********************************END****************************************
 
@@ -369,12 +400,18 @@ end function airSolubility
 !> solubility of cyclo pentane
 real(dp) function cypSolubility(temp)
     real(dp), intent(in) :: temp
+    real(dp) :: xl1,xl2
+    xl1=1.0e-2_dp
+    xl2=1-xl1
     call modena_inputs_set(scypInputs, scypTemppos, temp)
+    call modena_inputs_set(scypInputs, scypxl1pos, xl1)
+    call modena_inputs_set(scypInputs, scypxl2pos, xl2)
     ret = modena_model_call (scypModena, scypInputs, scypOutputs)
     if(ret /= 0) then
         call exit(ret)
     endif
     cypSolubility=modena_outputs_get(scypOutputs, 0_c_size_t)
+    cypSolubility=cypSolubility*Rg*temp*1100._dp/(1e5*Mg(4))/1e5
 end function cypSolubility
 !***********************************END****************************************
 

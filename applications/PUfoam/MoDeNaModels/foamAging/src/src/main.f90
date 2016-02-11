@@ -84,9 +84,16 @@ program foam_diffusion
     if (ipar(11)==1) then
         rpar(11)=cypDiffusivity(temp)
     endif
+	write(*,*) 'air solubility',rpar(6)
+    write(*,*) 'CO2 solubility',rpar(7)
+	write(*,*) 'pentane solubility',rpar(12)
+	write(*,*) 'air diffusivity',rpar(4)
+    write(*,*) 'CO2 diffusivity',rpar(5)
+	write(*,*) 'pentane diffusivity',rpar(11)
 	write(*,*) 'air permeability',rpar(6)*rpar(4)
     write(*,*) 'CO2 permeability',rpar(7)*rpar(5)
 	write(*,*) 'pentane permeability',rpar(12)*rpar(11)
+    ! stop
 !c -----------------------------------
 !c Allocate memory for working arrays
 !c -----------------------------------
