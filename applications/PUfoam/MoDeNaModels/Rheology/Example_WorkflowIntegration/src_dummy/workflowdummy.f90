@@ -6,13 +6,14 @@ program workflowdummy
   real(8) :: temp, shear, conv
   real(8) :: mu, surfaceTension, Viscosity
   integer :: ret
- 
+
    integer(c_size_t) :: TPos
    integer(c_size_t) :: XPos
    integer(c_size_t) :: shearPos
    type(c_ptr) :: Model, Inputs, Outputs
-
-  Model = modena_model_new (c_char_"Rheology"//c_null_char);
+  print*, "Hello World"
+  Model = modena_model_new (c_char_"Rheology_Arrhenius"//c_null_char);
+  print*, "asdf"
   Inputs = modena_inputs_new (Model);
   Outputs = modena_outputs_new (Model);
   TPos = modena_model_inputs_argPos(Model, &
@@ -21,7 +22,7 @@ program workflowdummy
              c_char_"shear"//c_null_char);
   XPos = modena_model_inputs_argPos(Model, &
              c_char_"X"//c_null_char);
-! 
+!
 ! viscosityModel = modena_model_new (c_char_"polymerViscosity"//c_null_char);
 ! viscosityInputs = modena_inputs_new (viscosityModel);
 ! viscosityOutputs = modena_outputs_new (viscosityModel);
@@ -38,16 +39,19 @@ program workflowdummy
 ! open(14, file='RheologyExact.in')
 ! read(14, * ) temp, shear, conv
 ! close(14)
- shear =0.5
- temp = 320
- conv = 0.4
+! shear =0.5
+!  temp = 305
+!  conv = 0.4
+ shear =0.01
+ temp = 300
+ conv = 0.1
   call modena_inputs_set(Inputs, TPos, temp )
   call modena_inputs_set(Inputs, XPos, conv )
   call modena_inputs_set(Inputs, shearPos, shear )
 
 ! call modena_inputs_set( viscosityInputs, viscosityTempPos, temp )
 ! call modena_inputs_set( viscosityInputs, viscosityConvPos, conv )
-! 
+!
   ret = modena_model_call(Model, Inputs, Outputs)
   if ( ret /= 0 ) then
     call modena_inputs_destroy( Inputs )
