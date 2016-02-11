@@ -93,7 +93,7 @@ program foam_diffusion
 	write(*,*) 'air permeability',rpar(6)*rpar(4)
     write(*,*) 'CO2 permeability',rpar(7)*rpar(5)
 	write(*,*) 'pentane permeability',rpar(12)*rpar(11)
-    ! stop
+    stop
 !c -----------------------------------
 !c Allocate memory for working arrays
 !c -----------------------------------
