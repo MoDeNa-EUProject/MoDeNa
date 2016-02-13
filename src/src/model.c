@@ -203,7 +203,7 @@ modena_model_t *modena_model_new
             modelId
         );
 
-        if(PyErr_ExceptionMatches(modena_DoesNotExist))
+        if(PyErr_ExceptionMatches(modena_DoesNotExist) || PyErr_ExceptionMatches(modena_ParametersNotValid) )
         {
             PyErr_Clear();
 
