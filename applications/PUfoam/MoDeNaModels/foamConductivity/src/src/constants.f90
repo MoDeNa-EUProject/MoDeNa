@@ -23,7 +23,7 @@ module constants
     complex(dp), parameter :: iu=(0.0e0_dp,1.0e0_dp)       !<imaginary constant
     logical  :: &
         wdist,&                         !<use wall thickness distribution
-        testing=.true.                 !<true disables calculation of radiation
+        testing=.false.                 !<true disables calculation of radiation
     integer  :: &
         mfi,&                 !<main file index
         nrays,&               !<number of testing rays
