@@ -76,7 +76,7 @@ term = Terminal()
 
 species = IndexSet(
     name= 'solubility_pol_species',
-    names= [ 'CO2', 'Air', 'CyP' ]
+    names= [ 'Air', 'CO2', 'CyP' ]
 )
 
 @explicit_serialize
@@ -193,9 +193,9 @@ m_solubilityCO2 = BackwardMappingModel(
     substituteModels=[],
     initialisationStrategy=Strategy.InitialPoints(
         initialPoints={
-            'T': [297.0, 340.0, 379.4 ],
-            'xl1': [0.178844E-01, 0.163910E-01, 0.147116E-01],
-            'xl2': [0.982116, 0.983609,0.985288],
+            'T': [300, 380, 390, 400],
+            'xl1': [0.168406E-03, 0.203239E-01, 0.234138E-02,0.234138E-02],
+            'xl2': [0.9998316, 0.97968,0.997659,0.997659],
         },
     ),
     outOfBoundsStrategy=Strategy.ExtendSpaceStochasticSampling(
@@ -217,9 +217,9 @@ m_solubilityAir = BackwardMappingModel(
     substituteModels=[],
     initialisationStrategy=Strategy.InitialPoints(
         initialPoints={
-            'T': [300.0, 320.0 , 340.0],
-            'xl1': [0.168406E-02, 0.203239E-02, 0.234138E-02],
-            'xl2': [0.998316, 0.997968,0.997659],
+            'T': [300, 380, 390, 400],
+            'xl1': [0.168406E-03, 0.203239E-01, 0.234138E-02,0.234138E-02],
+            'xl2': [0.9998316, 0.97968,0.997659,0.997659],
         },
     ),
     outOfBoundsStrategy=Strategy.ExtendSpaceStochasticSampling(
@@ -241,9 +241,9 @@ m_solubilityCyclopentane = BackwardMappingModel(
     substituteModels=[],
     initialisationStrategy=Strategy.InitialPoints(
         initialPoints={
-            'T': [370, 380, 390, 400],
-            'xl1': [0.168406E-02, 0.203239E-02, 0.234138E-02,0.234138E-02],
-            'xl2': [0.998316, 0.997968,0.997659,0.997659],
+            'T': [300, 380, 390, 400],
+            'xl1': [0.168406E-03, 0.203239E-01, 0.234138E-02,0.234138E-02],
+            'xl2': [0.9998316, 0.97968,0.997659,0.997659],
         },
     ),
     outOfBoundsStrategy=Strategy.ExtendSpaceStochasticSampling(
