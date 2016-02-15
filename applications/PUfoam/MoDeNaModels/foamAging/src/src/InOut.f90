@@ -12,7 +12,7 @@ subroutine input(rpar, ipar)
 	integer ipar(*)
 	integer divwall, ncell
 	integer nroutputs
-	integer solModel,diffModel
+	integer solModel(3),diffModel(3)
 	double precision dcell, dwall, L
 	double precision pressure ! initial conds
 	double precision pBCair, pBCCO2, pBCpent 	! boundary conds
