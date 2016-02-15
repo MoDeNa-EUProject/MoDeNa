@@ -193,9 +193,9 @@ m_solubilityCO2 = BackwardMappingModel(
     substituteModels=[],
     initialisationStrategy=Strategy.InitialPoints(
         initialPoints={
-            'T': [300, 380, 390, 400],
-            'xl1': [0.168406E-03, 0.203239E-01, 0.234138E-02,0.234138E-02],
-            'xl2': [0.9998316, 0.97968,0.997659,0.997659],
+            'T': [290, 320, 350, 380],
+            'xl1': [1.1e-3, 1.0e-3, 1.0e-3, 1.0e-4],
+            'xl2': [0.9989, 0.999, 0.999, 0.9999],
         },
     ),
     outOfBoundsStrategy=Strategy.ExtendSpaceStochasticSampling(
@@ -217,9 +217,9 @@ m_solubilityAir = BackwardMappingModel(
     substituteModels=[],
     initialisationStrategy=Strategy.InitialPoints(
         initialPoints={
-            'T': [300, 380, 390, 400],
-            'xl1': [0.168406E-03, 0.203239E-01, 0.234138E-02,0.234138E-02],
-            'xl2': [0.9998316, 0.97968,0.997659,0.997659],
+            'T': [290, 320, 350, 380],
+            'xl1': [1.1e-3, 1.0e-3, 1.0e-3, 1.0e-4],
+            'xl2': [0.9989, 0.999, 0.999, 0.9999],
         },
     ),
     outOfBoundsStrategy=Strategy.ExtendSpaceStochasticSampling(
@@ -241,9 +241,9 @@ m_solubilityCyclopentane = BackwardMappingModel(
     substituteModels=[],
     initialisationStrategy=Strategy.InitialPoints(
         initialPoints={
-            'T': [300, 380, 390, 400],
-            'xl1': [0.168406E-03, 0.203239E-01, 0.234138E-02,0.234138E-02],
-            'xl2': [0.9998316, 0.97968,0.997659,0.997659],
+            'T': [290, 320, 350, 380],
+            'xl1': [1.1e-3, 1.0e-3, 1.0e-3, 1.0e-4],
+            'xl2': [0.9989, 0.999, 0.999, 0.9999],
         },
     ),
     outOfBoundsStrategy=Strategy.ExtendSpaceStochasticSampling(

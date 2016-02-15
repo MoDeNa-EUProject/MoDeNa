@@ -360,7 +360,7 @@ end function oxyConductivity
 real(dp) function cdSolubility(temp)
     real(dp), intent(in) :: temp
     real(dp) :: xl1,xl2
-    xl1=1.0e-2_dp
+    xl1=1.0e-3_dp
     xl2=1-xl1
     call modena_inputs_set(scdInputs, scdTemppos, temp)
     call modena_inputs_set(scdInputs, scdxl1pos, xl1)
@@ -380,7 +380,7 @@ end function cdSolubility
 real(dp) function airSolubility(temp)
     real(dp), intent(in) :: temp
     real(dp) :: xl1,xl2
-    xl1=1.0e-2_dp
+    xl1=1.0e-3_dp
     xl2=1-xl1
     call modena_inputs_set(sairInputs, sairTemppos, temp)
     call modena_inputs_set(sairInputs, sairxl1pos, xl1)
@@ -401,7 +401,7 @@ end function airSolubility
 real(dp) function cypSolubility(temp)
     real(dp), intent(in) :: temp
     real(dp) :: xl1,xl2
-    xl1=1.0e-2_dp
+    xl1=1.0e-3_dp
     xl2=1-xl1
     call modena_inputs_set(scypInputs, scypTemppos, temp)
     call modena_inputs_set(scypInputs, scypxl1pos, xl1)
