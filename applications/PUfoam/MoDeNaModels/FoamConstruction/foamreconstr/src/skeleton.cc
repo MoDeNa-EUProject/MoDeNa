@@ -86,9 +86,9 @@ void importFoamSkeleton(\
         tmp >> x[0]; tmp >> y[0]; tmp >> z[0];
     } else {
         tmp >> z[0]; tmp >> y[0]; tmp >> x[0];
-        x[0]=(x[0]-4)/4*nx;
-        y[0]=(y[0]-4)/4*ny;
-        z[0]=(z[0]-4)/4*nz;
+        x[0]=x[0]*nx;
+        y[0]=y[0]*ny;
+        z[0]=z[0]*nz;
     }
     while (getline(fin,line)) {
     //store coordinates of vertices and their incidence to each other
@@ -98,9 +98,9 @@ void importFoamSkeleton(\
                 tmp >> x[1]; tmp >> y[1]; tmp >> z[1];
             } else {
                 tmp >> z[1]; tmp >> y[1]; tmp >> x[1];
-                x[1]=(x[1]-4)/4*nx;
-                y[1]=(y[1]-4)/4*ny;
-                z[1]=(z[1]-4)/4*nz;
+                x[1]=x[1]*nx;
+                y[1]=y[1]*ny;
+                z[1]=z[1]*nz;
             }
             if (in_domain(x[0],y[0],z[0]) && in_domain(x[1],y[1],z[1])) {
             //both vertices are in the domain
@@ -352,9 +352,9 @@ void importFoamSkeleton(\
                 tmp >> x[0]; tmp >> y[0]; tmp >> z[0];
             } else {
                 tmp >> z[0]; tmp >> y[0]; tmp >> x[0];
-                x[0]=(x[0]-4)/4*nx;
-                y[0]=(y[0]-4)/4*ny;
-                z[0]=(z[0]-4)/4*nz;
+                x[0]=x[0]*nx;
+                y[0]=y[0]*ny;
+                z[0]=z[0]*nz;
             }
         }
     }

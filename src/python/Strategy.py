@@ -920,8 +920,12 @@ class ParametersNotValid(Exception):
 
 @explicit_serialize
 class ModenaFireTask(FireTaskBase):
+    """
+    """
 
     def outOfBounds(self):
+        """
+        """
 
         try:
             # TODO
@@ -949,7 +953,8 @@ class ModenaFireTask(FireTaskBase):
 
 
     def parametersNotValid(self, model):
-
+        """
+        """
         try:
             # Continue with exact tasks, parameter estimation and (finally) this
             # task in order to resume normal operation
@@ -966,6 +971,8 @@ class ModenaFireTask(FireTaskBase):
 
 
     def run_task(self, fw_spec):
+        """
+        """
         if 'point' in self:
             print(
                 term.yellow
