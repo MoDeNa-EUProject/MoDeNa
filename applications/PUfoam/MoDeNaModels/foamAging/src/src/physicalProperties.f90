@@ -141,7 +141,10 @@ subroutine createModels
     call modena_model_argPos_check(kcypModena)
     if (solModel(1)==1) then
         sairModena = modena_model_new (&
-            c_char_"solubilityPol[A=Air]"//c_null_char);
+            c_char_"Solubility[A=Air]"//c_null_char);
+        if (modena_error_occurred()) then
+            call exit(modena_error())
+        endif
         sairInputs = modena_inputs_new (sairModena);
         sairOutputs = modena_outputs_new (sairModena);
         sairTemppos = modena_model_inputs_argPos(&
@@ -154,7 +157,10 @@ subroutine createModels
     endif
     if (solModel(2)==1) then
         scdModena = modena_model_new (&
-            c_char_"solubilityPol[A=CO2]"//c_null_char);
+            c_char_"Solubility[A=CO2]"//c_null_char);
+        if (modena_error_occurred()) then
+            call exit(modena_error())
+        endif
         scdInputs = modena_inputs_new (scdModena);
         scdOutputs = modena_outputs_new (scdModena);
         scdTemppos = modena_model_inputs_argPos(&
@@ -167,7 +173,10 @@ subroutine createModels
     endif
     if (solModel(3)==1) then
         scypModena = modena_model_new (&
-            c_char_"solubilityPol[A=CyP]"//c_null_char);
+            c_char_"Solubility[A=CyP]"//c_null_char);
+        if (modena_error_occurred()) then
+            call exit(modena_error())
+        endif
         scypInputs = modena_inputs_new (scypModena);
         scypOutputs = modena_outputs_new (scypModena);
         scypTemppos = modena_model_inputs_argPos(&
@@ -360,7 +369,7 @@ end function oxyConductivity
 real(dp) function cdSolubility(temp)
     real(dp), intent(in) :: temp
     real(dp) :: xl1,xl2
-    xl1=1.0e-3_dp
+    xl1=1.0e-2_dp
     xl2=1-xl1
     call modena_inputs_set(scdInputs, scdTemppos, temp)
     call modena_inputs_set(scdInputs, scdxl1pos, xl1)
@@ -380,7 +389,7 @@ end function cdSolubility
 real(dp) function airSolubility(temp)
     real(dp), intent(in) :: temp
     real(dp) :: xl1,xl2
-    xl1=1.0e-3_dp
+    xl1=1.0e-2_dp
     xl2=1-xl1
     call modena_inputs_set(sairInputs, sairTemppos, temp)
     call modena_inputs_set(sairInputs, sairxl1pos, xl1)
@@ -401,7 +410,7 @@ end function airSolubility
 real(dp) function cypSolubility(temp)
     real(dp), intent(in) :: temp
     real(dp) :: xl1,xl2
-    xl1=1.0e-3_dp
+    xl1=1.0e-2_dp
     xl2=1-xl1
     call modena_inputs_set(scypInputs, scypTemppos, temp)
     call modena_inputs_set(scypInputs, scypxl1pos, xl1)
