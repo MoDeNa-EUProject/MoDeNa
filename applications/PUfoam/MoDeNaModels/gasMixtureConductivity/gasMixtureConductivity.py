@@ -71,6 +71,10 @@ void gasMixtureConductivity
     int i;
     printf("x_size: %d \n",(int)x_size);
     for (i=0;i<x_size;i++) {
+        printf("%g ",x[i]);
+    }
+    printf("\n");
+    for (i=0;i<x_size;i++) {
         sumx = sumx + x[i];
         printf("%g ",gas_thermal_conductivity[i]);
     }

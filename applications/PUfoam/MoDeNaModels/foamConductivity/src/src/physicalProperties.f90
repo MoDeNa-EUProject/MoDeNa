@@ -74,9 +74,8 @@ subroutine gasConductivity(kgas,temp,xCO2,xAir,xCyP)
         kgasModena, c_char_"x[A=O2]"//c_null_char)
     kgasXN2pos = modena_model_inputs_argPos(&
         kgasModena, c_char_"x[A=N2]"//c_null_char)
-    write(*,*) 'ok'
     ! call modena_model_argPos_check(kgasModena)
-    write(*,*) 'ok'
+    write(*,'(1000es18.9)') xCO2,xCyP,xAir*0.21_dp,xAir*0.79_dp
     call modena_inputs_set(kgasInputs, kgasTemppos, temp)
     call modena_inputs_set(kgasInputs, kgasXCO2pos, xCO2)
     call modena_inputs_set(kgasInputs, kgasXCyPpos, xCyP)
