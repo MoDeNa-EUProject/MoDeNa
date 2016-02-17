@@ -520,7 +520,7 @@ class CFunction(SurrogateFunction):
     {% if 'index' in v %}
     const size_t {{k}}_argPos = {{v.argPos}};
     const double* {{k}} = &inputs[{{k}}_argPos];
-    const size_t {{k}}_size = {{ v.index|length }};
+    const size_t {{k}}_size = {{ v.index.names|length }};
     {% else %}
     const size_t {{k}}_argPos = {{v['argPos']}};
     const double {{k}} = inputs[{{k}}_argPos];
