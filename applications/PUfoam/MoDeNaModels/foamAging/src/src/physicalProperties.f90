@@ -24,15 +24,17 @@ module physicalProperties
     ! integer(c_size_t) :: kfoamKgaspos
     integer(c_size_t) :: kfoamTemppos
     integer(c_size_t) :: kfoamXCO2pos
-    integer(c_size_t) :: kfoamXAirpos
     integer(c_size_t) :: kfoamXCyPpos
+    integer(c_size_t) :: kfoamXO2pos
+    integer(c_size_t) :: kfoamXN2pos
     type(c_ptr) :: kgasModena = c_null_ptr
     type(c_ptr) :: kgasInputs = c_null_ptr
     type(c_ptr) :: kgasOutputs = c_null_ptr
     integer(c_size_t) :: kgasTemppos
-    integer(c_size_t) :: kgasXco2pos
-    integer(c_size_t) :: kgasXairpos
-    integer(c_size_t) :: kgasXcyppos
+    integer(c_size_t) :: kgasXCO2pos
+    integer(c_size_t) :: kgasXCyPpos
+    integer(c_size_t) :: kgasXO2pos
+    integer(c_size_t) :: kgasXN2pos
     type(c_ptr) :: kcdModena = c_null_ptr
     type(c_ptr) :: kcdInputs = c_null_ptr
     type(c_ptr) :: kcdOutputs = c_null_ptr
@@ -103,23 +105,27 @@ subroutine createModels
         kfoamModena, c_char_"T"//c_null_char);
     kfoamXCO2pos = modena_model_inputs_argPos(&
         kfoamModena, c_char_"x[CO2]"//c_null_char);
-    kfoamXAirpos = modena_model_inputs_argPos(&
-        kfoamModena, c_char_"x[Air]"//c_null_char);
     kfoamXCyPpos = modena_model_inputs_argPos(&
         kfoamModena, c_char_"x[CyP]"//c_null_char);
+    kfoamXO2pos = modena_model_inputs_argPos(&
+        kfoamModena, c_char_"x[O2]"//c_null_char);
+    kfoamXN2pos = modena_model_inputs_argPos(&
+        kfoamModena, c_char_"x[N2]"//c_null_char);
     call modena_model_argPos_check(kfoamModena)
     kgasModena = modena_model_new (&
-        c_char_"gasMixtureConductivity"//c_null_char);
-    kgasInputs = modena_inputs_new (kgasModena);
-    kgasOutputs = modena_outputs_new (kgasModena);
+        c_char_"gasMixtureConductivity"//c_null_char)
+    kgasInputs = modena_inputs_new (kgasModena)
+    kgasOutputs = modena_outputs_new (kgasModena)
     kgasTemppos = modena_model_inputs_argPos(&
-        kgasModena, c_char_"T"//c_null_char);
-    kgasXco2pos = modena_model_inputs_argPos(&
-        kgasModena, c_char_"x[CO2]"//c_null_char);
-    kgasXairpos = modena_model_inputs_argPos(&
-        kgasModena, c_char_"x[Air]"//c_null_char);
-    kgasXcyppos = modena_model_inputs_argPos(&
-        kgasModena, c_char_"x[CyP]"//c_null_char);
+        kgasModena, c_char_"T"//c_null_char)
+    kgasXCO2pos = modena_model_inputs_argPos(&
+        kgasModena, c_char_"x[A=CO2]"//c_null_char)
+    kgasXCyPpos = modena_model_inputs_argPos(&
+        kgasModena, c_char_"x[A=CyP]"//c_null_char)
+    kgasXO2pos = modena_model_inputs_argPos(&
+        kgasModena, c_char_"x[A=O2]"//c_null_char)
+    kgasXN2pos = modena_model_inputs_argPos(&
+        kgasModena, c_char_"x[A=N2]"//c_null_char)
     call modena_model_argPos_check(kgasModena)
     kcdModena = modena_model_new (&
         c_char_"gas_thermal_conductivity[A=CO2]"//c_null_char);
@@ -290,9 +296,10 @@ end function polymerDensity
 real(dp) function gasConductivity(temp,xco2,xair,xcyp)
     real(dp), intent(in) :: temp,xco2,xair,xcyp
     call modena_inputs_set(kgasInputs, kgasTemppos, temp)
-    call modena_inputs_set(kgasInputs, kgasXco2pos, xco2)
-    call modena_inputs_set(kgasInputs, kgasXairpos, xair)
-    call modena_inputs_set(kgasInputs, kgasXcyppos, xcyp)
+    call modena_inputs_set(kgasInputs, kgasXCO2pos, xCO2)
+    call modena_inputs_set(kgasInputs, kgasXCyPpos, xCyP)
+    call modena_inputs_set(kgasInputs, kgasXO2pos, xAir*0.21_dp)
+    call modena_inputs_set(kgasInputs, kgasXN2pos, xAir*0.79_dp)
     ret = modena_model_call (kgasModena, kgasInputs, kgasOutputs)
     if(ret /= 0) then
         call exit(ret)
