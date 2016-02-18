@@ -370,7 +370,7 @@ class SurrogateFunction(DynamicDocument):
             for k, v in kwargs['inputs'].iteritems():
                 if 'index' in v:
                     v['argPos'] = nInp
-                    nInp += len(v['index'])
+                    nInp += v['index'].iterator_size()
 
             for k, v in kwargs['inputs'].iteritems():
                 if not isinstance(v, MinMaxArgPosOpt):
@@ -520,7 +520,7 @@ class CFunction(SurrogateFunction):
     {% if 'index' in v %}
     const size_t {{k}}_argPos = {{v.argPos}};
     const double* {{k}} = &inputs[{{k}}_argPos];
-    const size_t {{k}}_size = {{ v.index.names|length }};
+    const size_t {{k}}_size = {{ v.index.iterator_size() }};
     {% else %}
     const size_t {{k}}_argPos = {{v['argPos']}};
     const double {{k}} = inputs[{{k}}_argPos];
@@ -814,7 +814,9 @@ class SurrogateModel(DynamicDocument):
             self.save()
 
         #for k, v in self.inputs.iteritems():
-        #    print k, self.inputs_argPos(k)
+        #    print 'inputs in model', k, self.inputs_argPos(k)
+        #for k, v in self.surrogateFunction.inputs_iterAll():
+        #    print 'inputs in function', k, v.argPos
         #print('parameters = [%s]' % ', '.join('%g' % v for v in self.parameters))
 
 
