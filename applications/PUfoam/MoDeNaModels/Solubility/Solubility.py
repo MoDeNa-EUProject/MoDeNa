@@ -187,7 +187,7 @@ void surroSolubility
 )
 
 m_solubilityCO2 = BackwardMappingModel(
-    _id='solubilityPol[A=CO2]',
+    _id='Solubility[A=CO2]',
     surrogateFunction=f,
     exactTask=SolubilityExactSim(),
     substituteModels=[],
@@ -211,7 +211,7 @@ m_solubilityCO2 = BackwardMappingModel(
     ),
 )
 m_solubilityAir = BackwardMappingModel(
-    _id='solubilityPol[A=Air]',
+    _id='Solubility[A=Air]',
     surrogateFunction=f,
     exactTask=SolubilityExactSim(),
     substituteModels=[],
@@ -235,7 +235,7 @@ m_solubilityAir = BackwardMappingModel(
     ),
 )
 m_solubilityCyclopentane = BackwardMappingModel(
-    _id='solubilityPol[A=CyP]',
+    _id='Solubility[A=CyP]',
     surrogateFunction=f,
     exactTask=SolubilityExactSim(),
     substituteModels=[],

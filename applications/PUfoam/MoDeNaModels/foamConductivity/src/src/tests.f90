@@ -170,6 +170,8 @@ subroutine loadParameters
         read(fi,*) wdist        !use wall thickness distribution
         read(fi,*) wsdev        !wall thickness standard deviation
         read(fi,*) nbox         !number of gray boxes
+        read(fi,*) numcond      !calcualte effective conductivity numerically
+        read(fi,*) structureName!name of the file with morphology
     close(fi)
     tmean=(t1+t2)/2
     n1=1
