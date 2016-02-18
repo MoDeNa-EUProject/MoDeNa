@@ -55,7 +55,7 @@ term = Terminal()
 ## List of components, for which surrogate model is provided
 species = IndexSet(
     name= 'gas_thermal_conductivity_species',
-    names= [ 'CO2', 'CyP', 'Air' ]
+    names= [ 'CO2', 'CyP', 'O2', 'N2' ]
 )
 
 ## Surrogate function for thermal conductivity of blowing agents.

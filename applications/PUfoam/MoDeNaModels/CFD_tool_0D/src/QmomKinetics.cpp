@@ -313,28 +313,26 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
 		case 1:
         {
             // Calling the model for density reaction mixture
-            // size_t T_denpos     = modena_model_inputs_argPos(density_reaction_mixturemodel, "T");
-            // size_t XOH_denpos   = modena_model_inputs_argPos(density_reaction_mixturemodel, "XOH");
-            // modena_model_argPos_check(density_reaction_mixturemodel);
+            size_t T_denpos     = modena_model_inputs_argPos(density_reaction_mixturemodel, "T");
+            size_t XOH_denpos   = modena_model_inputs_argPos(density_reaction_mixturemodel, "XOH");
+            modena_model_argPos_check(density_reaction_mixturemodel);
 
             // // set input vector
-            // modena_inputs_set(inputs_den, T_denpos, T);
-            // modena_inputs_set(inputs_den, XOH_denpos, EG_XOH);
+            modena_inputs_set(inputs_den, T_denpos, T);
+            modena_inputs_set(inputs_den, XOH_denpos, XOH);
 
             // // call the model
-            // int ret_den = modena_model_call (density_reaction_mixturemodel, inputs_den, outputs_den);
+            int ret_den = modena_model_call (density_reaction_mixturemodel, inputs_den, outputs_den);
             
-            // if(ret_den != 0)
-            // {
-            //     modena_inputs_destroy (inputs_den);
-            //     modena_outputs_destroy (outputs_den);
-            //     modena_model_destroy (density_reaction_mixturemodel);
-            //     exit(ret_den);
-            // }
+            if (ret_den != 0)
+            {
+                modena_inputs_destroy (inputs_den);
+                modena_outputs_destroy (outputs_den);
+                modena_model_destroy (density_reaction_mixturemodel);
+                exit(ret_den);
+            }
 
-            // rhoPolySurrgate = modena_outputs_get(outputs_den, 0);
-            // break;
-            rhoPolySurrgate = 1100.0;
+            rhoPolySurrgate = modena_outputs_get(outputs_den, 0);
             break;
 		}
 		case 2:
