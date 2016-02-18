@@ -69,16 +69,9 @@ void gasMixtureConductivity
     double kgasmix=0; // gas mixture conductivity
     double sumx=0;
     int i;
-    printf("x_size: %d \n",(int)x_size);
-    for (i=0;i<x_size;i++) {
-        printf("%g ",x[i]);
-    }
-    printf("\n");
     for (i=0;i<x_size;i++) {
         sumx = sumx + x[i];
-        printf("%g ",gas_thermal_conductivity[i]);
     }
-    printf("\n");
     for (i=0;i<x_size;i++) {
         kgasmix = kgasmix + gas_thermal_conductivity[i]*x[i]/sumx;
     }
