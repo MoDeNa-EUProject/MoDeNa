@@ -90,8 +90,6 @@ typedef struct modena_substitute_model_t
 /**
  * @brief stores a surrogate model
  *
- * adfasdfasdfsdaf
- *
 */
 typedef struct modena_model_t
 {
