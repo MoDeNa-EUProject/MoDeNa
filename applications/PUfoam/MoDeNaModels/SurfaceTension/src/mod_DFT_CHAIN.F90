@@ -1,4 +1,5 @@
-!>This file contains the subroutines which calculate the contribution of
+!> \file mod_DFT_CHAIN.F90
+!!This file contains the subroutines which calculate the contribution of
 !!chain formation to the Helmholtz energy functional. 
 
 

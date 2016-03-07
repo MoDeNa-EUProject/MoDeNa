@@ -1,5 +1,7 @@
-!>This file contains the subroutines which calculate the derivatives of the contribution of
-!!volume exclusion to the Helmholtz energy functional. 
+!> \file mod_DFT_FMT_d.F90
+!!This file contains the subroutines which calculate the derivatives of the contribution of
+!!volume exclusion to the Helmholtz energy functional. These derivatives were obtained by
+!!automatic differentiation using the TAPENADE online tool. 
 
 
 

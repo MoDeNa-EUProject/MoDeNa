@@ -1,4 +1,7 @@
-!>This file contains the subroutine which sets the method used to
+
+
+!> \file SolverSetup.f90 
+!!This file contains the subroutine which sets the method used to
 !!solve the nonlinear system of equations depending on the specifications
 !!made in the makefile.
 
@@ -265,9 +268,6 @@ subroutine MonitorTimer(snes,its,norm,dummy,ierr)
              
           End If
         
-
-
-
 
         !calculate elapsed time
         timer = MPI_WTIME()  
