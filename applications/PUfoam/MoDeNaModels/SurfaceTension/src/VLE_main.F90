@@ -1,6 +1,6 @@
-!> This file contains the subroutine which starts the phase equilibrium calculation.
-!! It also prints the calculated density to the outputfile "out.txt".
 
+!> \file VLE_main.F90
+!! This file contains the subroutine which controls the phase equilibrium calculation.
 
 
 SUBROUTINE VLE_MIX(rhob,density,chemPot_total,user)
