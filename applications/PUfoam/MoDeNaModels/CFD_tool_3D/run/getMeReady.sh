@@ -91,5 +91,35 @@ cp -v node2.org node2
 rm -v TS
 cp -v TS.org TS
 
+# simple kinetics surrogate model
+rm -v EG_NCO
+cp -v EG_NCO.org EG_NCO
+rm -v EG_OH
+cp -v EG_OH.org EG_OH
+rm -v H2O
+cp -v H2O.org H2O
+rm -v R_1_temp
+cp -v R_1_temp.org R_1_temp
+# RF-1 kinetics surrogate model
+rm -v Catalyst_1
+cp -v Catalyst_1.org Catalyst_1
+rm -v CE_A0
+cp -v CE_A0.org CE_A0
+rm -v CE_A1
+cp -v CE_A1.org CE_A1
+rm -v CE_B2
+cp -v CE_B2.org CE_B2
+rm -v CE_I0
+cp -v CE_I0.org CE_I0
+rm -v CE_I1
+cp -v CE_I1.org CE_I1
+rm -v CE_I2
+cp -v CE_I2.org CE_I2
+rm -v Bulk
+cp -v Bulk.org Bulk
+rm -v R_1_mass
+cp -v R_1_mass.org R_1_mass
+rm -v R_1_temp_RF1
+cp -v R_1_temp_RF1.org R_1_temp_RF1
 # cp -v mZero.org mZero
 cd ./..

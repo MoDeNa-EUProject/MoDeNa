@@ -40,6 +40,22 @@ defaultFieldValues
     volScalarFieldValue node1 0
     volScalarFieldValue node2 0
     volScalarFieldValue TS 298
+    // simple kinetics surrogate model
+    volScalarFieldValue EG_NCO 0
+    volScalarFieldValue EG_OH 0
+    volScalarFieldValue H2O 0
+    volScalarFieldValue R_1_temp 293.15
+    // RF-1 kinetics surrogate model
+    volScalarFieldValue Catalyst_1 0
+    volScalarFieldValue CE_A0 0
+    volScalarFieldValue CE_A1 0
+    volScalarFieldValue CE_B2 0
+    volScalarFieldValue CE_I0 0
+    volScalarFieldValue CE_I1 0
+    volScalarFieldValue CE_I2 0
+    volScalarFieldValue Bulk 0
+    volScalarFieldValue R_1_mass 0
+    volScalarFieldValue R_1_temp_RF1 295.85
 );
 
 regions
@@ -75,9 +91,23 @@ regions
         volScalarFieldValue node0 4.8065e-19
         volScalarFieldValue node1 5.8728e-19 
         volScalarFieldValue node2 5.97756e-19
-        volScalarFieldValue TS 300    
-        volScalarFieldValue p_rgh 1e5
-            volScalarFieldValue p 1e5
+        volScalarFieldValue TS 300
+        // simple kinetics surrogate model
+        volScalarFieldValue EG_NCO 5.20674
+        volScalarFieldValue EG_OH 4.79837
+        volScalarFieldValue H2O 2.04186e-1
+        volScalarFieldValue R_1_temp 293.15
+        // RF-1 kinetics surrogate model
+        volScalarFieldValue Catalyst_1 6.73000e-2
+        volScalarFieldValue CE_A0 1.92250
+        volScalarFieldValue CE_A1 2.26920
+        volScalarFieldValue CE_B2 5.46200e-1
+        volScalarFieldValue CE_I0 2.19790
+        volScalarFieldValue CE_I1 1.64000
+        volScalarFieldValue CE_I2 1.71030
+        volScalarFieldValue Bulk 4.45849
+        volScalarFieldValue R_1_mass 1
+        volScalarFieldValue R_1_temp_RF1 295.85
         );
     }
     
