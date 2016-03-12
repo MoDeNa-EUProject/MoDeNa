@@ -33,20 +33,23 @@ Description
 
 Authors
     Henrik Rusche
-    Pavel Ferkl
 
 Contributors
 '''
+
 import modena
 from fireworks import Firework, Workflow, LaunchPad
 from fireworks.core.rocket_launcher import rapidfire
-import PolymerDensity_units
-import CFD_tool_0D
 from modulefinder import ModuleFinder
-from os import system
-# delete old results
-system('touch results/aaa.txt') # prevents error message if there are no results
-system('rm results/*.txt')
+
+from modena.Strategy import BackwardMappingScriptTask
+import os
+
+# Source code in src/twoTanksMacroscopicProblem.C
+SIMULATION = BackwardMappingScriptTask(
+    script='../run.sh'
+)
+
 
 # set up the LaunchPad and reset it
 launchpad = LaunchPad()
@@ -54,8 +57,9 @@ launchpad.reset('', require_password=False)
 
 # create the individual FireWorks and Workflow
 # Source code in src/twoTanksMacroscopicProblem.C
-wf = Workflow([Firework(CFD_tool_0D.m)], {}, name="simulation")
+wf = Workflow([Firework(SIMULATION)], {}, name="simulation")
 
 # store workflow and launch it locally
 launchpad.add_wf(wf)
 rapidfire(launchpad)
+
