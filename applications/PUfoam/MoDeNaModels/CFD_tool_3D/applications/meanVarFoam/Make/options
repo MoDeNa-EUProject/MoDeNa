@@ -1,0 +1,10 @@
+EXE_INC = \
+    -ItwoPhaseMixtureThermo \
+    -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
+    -I$(LIB_SRC)/transportModels/twoPhaseMixture/lnInclude \
+    -I$(LIB_SRC)/finiteVolume/lnInclude
+
+EXE_LIBS = \
+    -lfiniteVolume \
+    -ltwoPhaseMixtureThermo \
+    -lgenericPatchFields
