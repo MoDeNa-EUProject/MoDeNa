@@ -25,6 +25,9 @@ subroutine polymerConductivity(ksol,temp)
     type(c_ptr) :: ksolOutputs = c_null_ptr
     ksolModena = modena_model_new (&
         c_char_"polymer_thermal_conductivity"//c_null_char)
+    if (modena_error_occurred()) then
+        call exit(modena_error())
+    endif
     ksolInputs = modena_inputs_new (ksolModena)
     ksolOutputs = modena_outputs_new (ksolModena)
     ksolTemppos = modena_model_inputs_argPos(&
@@ -62,6 +65,9 @@ subroutine gasConductivity(kgas,temp,xCO2,xAir,xCyP)
     type(c_ptr) :: kgasOutputs = c_null_ptr
     kgasModena = modena_model_new (&
         c_char_"gasMixtureConductivity"//c_null_char)
+    if (modena_error_occurred()) then
+        call exit(modena_error())
+    endif
     kgasInputs = modena_inputs_new (kgasModena)
     kgasOutputs = modena_outputs_new (kgasModena)
     kgasTemppos = modena_model_inputs_argPos(&

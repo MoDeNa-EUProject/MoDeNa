@@ -91,6 +91,9 @@ subroutine createModels
 !    rhopTemppos = modena_model_inputs_argPos(rhopModena, c_char_"T"//c_null_char);
 !    call modena_model_argPos_check(rhopModena)
     kfoamModena = modena_model_new (c_char_"foamConductivity"//c_null_char);
+    if (modena_error_occurred()) then
+        call exit(modena_error())
+    endif
     kfoamInputs = modena_inputs_new (kfoamModena);
     kfoamOutputs = modena_outputs_new (kfoamModena);
     kfoamEpspos = modena_model_inputs_argPos(&
@@ -114,6 +117,9 @@ subroutine createModels
     call modena_model_argPos_check(kfoamModena)
     kgasModena = modena_model_new (&
         c_char_"gasMixtureConductivity"//c_null_char)
+    if (modena_error_occurred()) then
+        call exit(modena_error())
+    endif
     kgasInputs = modena_inputs_new (kgasModena)
     kgasOutputs = modena_outputs_new (kgasModena)
     kgasTemppos = modena_model_inputs_argPos(&
@@ -129,18 +135,27 @@ subroutine createModels
     call modena_model_argPos_check(kgasModena)
     kcdModena = modena_model_new (&
         c_char_"gas_thermal_conductivity[A=CO2]"//c_null_char);
+    if (modena_error_occurred()) then
+        call exit(modena_error())
+    endif
     kcdInputs = modena_inputs_new (kcdModena);
     kcdOutputs = modena_outputs_new (kcdModena);
     kcdTemppos = modena_model_inputs_argPos(kcdModena, c_char_"T"//c_null_char);
     call modena_model_argPos_check(kcdModena)
     kairModena = modena_model_new (&
         c_char_"gas_thermal_conductivity[A=Air]"//c_null_char);
+    if (modena_error_occurred()) then
+        call exit(modena_error())
+    endif
     kairInputs = modena_inputs_new (kairModena);
     kairOutputs = modena_outputs_new (kairModena);
     kairTemppos = modena_model_inputs_argPos(kairModena, c_char_"T"//c_null_char);
     call modena_model_argPos_check(kairModena)
     kcypModena = modena_model_new (&
         c_char_"gas_thermal_conductivity[A=CyP]"//c_null_char);
+    if (modena_error_occurred()) then
+        call exit(modena_error())
+    endif
     kcypInputs = modena_inputs_new (kcypModena);
     kcypOutputs = modena_outputs_new (kcypModena);
     kcypTemppos = modena_model_inputs_argPos(kcypModena, c_char_"T"//c_null_char);
@@ -196,6 +211,9 @@ subroutine createModels
     if (diffModel(1)==1) then
         do2Modena = modena_model_new (&
             c_char_"diffusivityPol[A=O2]"//c_null_char);
+        if (modena_error_occurred()) then
+            call exit(modena_error())
+        endif
         do2Inputs = modena_inputs_new (do2Modena);
         do2Outputs = modena_outputs_new (do2Modena);
         do2Temppos = modena_model_inputs_argPos(&
@@ -212,6 +230,9 @@ subroutine createModels
     if (diffModel(2)==1) then
         dcdModena = modena_model_new (&
             c_char_"diffusivityPol[A=CO2]"//c_null_char);
+        if (modena_error_occurred()) then
+            call exit(modena_error())
+        endif
         dcdInputs = modena_inputs_new (dcdModena);
         dcdOutputs = modena_outputs_new (dcdModena);
         dcdTemppos = modena_model_inputs_argPos(&
@@ -221,6 +242,9 @@ subroutine createModels
     if (diffModel(3)==1) then
         dcypModena = modena_model_new (&
             c_char_"diffusivityPol[A=CyP]"//c_null_char);
+        if (modena_error_occurred()) then
+            call exit(modena_error())
+        endif
         dcypInputs = modena_inputs_new (dcypModena);
         dcypOutputs = modena_outputs_new (dcypModena);
         dcypTemppos = modena_model_inputs_argPos(&
