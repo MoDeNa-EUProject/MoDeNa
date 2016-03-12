@@ -26,6 +26,22 @@ if( !(PBEMethod == "QMOM") )
     << exit(FatalError);
 }
 
+word bubbleGrowthMode(PBEProperties.lookup("bubbleGrowthMode"));
+if 
+(
+    !( bubbleGrowthMode == "two nodes"
+    || bubbleGrowthMode == "mean radius"
+    )
+)    
+{
+    FatalErrorIn(args.executable())
+    << "Invalid bubble growth mode " << bubbleGrowthMode
+    << "\nValid modes are: "
+    << "\ntwo nodes,"
+    << "\nmean radius"
+    << exit(FatalError);
+}
+
 scalar nNodes = readScalar(PBEProperties.lookup("nNodes"));
 if 
 ( 

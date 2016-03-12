@@ -142,71 +142,79 @@ if (PBESwitch)
                     double c_2 = wCO2_l[celli]*rhoPolyS*1000.0/M_CO2;
                     double KH1 = (rhoPolyS*LMAX)/(M_B*prsr/1000.0);
                     double KH2 = (rhoPolyS*wCO2_Max)/(M_CO2*prsr/1000.0);
-
-                    for (int i = 0; i < nodes; i++)
+                    if (bubbleGrowthMode == "two nodes")
                     {
-                        nodeRadii[i] = nodeRadius(vi[i]);
-                        // set input vector
-                        modena_inputs_set(inputs_bblgr1, Tbblgr1pos, TS[celli]);
-                        modena_inputs_set(inputs_bblgr1, Rbblgr1pos, nodeRadii[i]);
-                        modena_inputs_set(inputs_bblgr1, KH1bblgr1pos, KH1);
-                        modena_inputs_set(inputs_bblgr1, c_1bblgr1pos, c_1);
-                        modena_inputs_set(inputs_bblgr1, p_1bblgr1pos, p_1);
-                        // call the bblgr1 model
-                        ret_bblgr1[i] = 
-                            modena_model_call (bblgr1, inputs_bblgr1, outputs_bblgr1);
-                        if (ret_bblgr1[i] != 0)
+                        for (int i = 0; i < nodes; i++)
                         {
-                            modena_inputs_destroy (inputs_bblgr1);
-                            modena_outputs_destroy (outputs_bblgr1);
-                            modena_model_destroy (bblgr1);
-                            exit(ret_bblgr1[i]);
-                        }
-                        radiusGrowthBA[i] = 
-                            modena_outputs_get(outputs_bblgr1, 0);
+                            nodeRadii[i] = nodeRadius(vi[i]);
+                            // set input vector
+                            modena_inputs_set(inputs_bblgr1, Tbblgr1pos, TS[celli]);
+                            modena_inputs_set(inputs_bblgr1, Rbblgr1pos, nodeRadii[i]);
+                            modena_inputs_set(inputs_bblgr1, KH1bblgr1pos, KH1);
+                            modena_inputs_set(inputs_bblgr1, c_1bblgr1pos, c_1);
+                            modena_inputs_set(inputs_bblgr1, p_1bblgr1pos, p_1);
+                            // call the bblgr1 model
+                            ret_bblgr1[i] = 
+                                modena_model_call (bblgr1, inputs_bblgr1, outputs_bblgr1);
+                            if (ret_bblgr1[i] != 0)
+                            {
+                                modena_inputs_destroy (inputs_bblgr1);
+                                modena_outputs_destroy (outputs_bblgr1);
+                                modena_model_destroy (bblgr1);
+                                exit(ret_bblgr1[i]);
+                            }
+                            radiusGrowthBA[i] = 
+                                modena_outputs_get(outputs_bblgr1, 0);
 
-                        // set input vector
-                        modena_inputs_set(inputs_bblgr2, Tbblgr2pos, TS[celli]);
-                        modena_inputs_set(inputs_bblgr2, Rbblgr2pos, nodeRadii[i]);
-                        modena_inputs_set(inputs_bblgr2, KH2bblgr2pos, KH2);
-                        modena_inputs_set(inputs_bblgr2, c_2bblgr2pos, c_2);
-                        modena_inputs_set(inputs_bblgr2, p_2bblgr2pos, p_2);
-                        // call the bblgr2 model
-                        ret_bblgr2[i] = 
-                            modena_model_call (bblgr2, inputs_bblgr2, outputs_bblgr2);
-                        if (ret_bblgr2[i] != 0)
-                        {
-                            modena_inputs_destroy (inputs_bblgr2);
-                            modena_outputs_destroy (outputs_bblgr2);
-                            modena_model_destroy (bblgr2);
-                            exit(ret_bblgr2[i]);
-                        }
-                        radiusGrowthCO2[i] = 
-                            modena_model_call (bblgr2, inputs_bblgr2, outputs_bblgr2);
-                        
-                        volumeGrowthBA[i] = 
-                            (radiusGrowthBA[i]*RR*TS[celli])/(p_1);
-                        volumeGrowthCO2[i] = 
-                            (radiusGrowthCO2[i]*RR*TS[celli])/(p_2);
-                        if 
-                        (
-                            volumeGrowthBA[i] < 0.0 
-                         || radiusGrowthBA[i] < 0.0 
-                         || L0 < 1.0e-8
-                        )
-                        {
-                            volumeGrowthBA[i] = 0.0;
-                        }
-                        if 
-                        (
-                            volumeGrowthCO2[i] < 0.0 
-                         || radiusGrowthCO2[i] < 0.0 
-                         || CW_0 < 1.0e-8
-                        )
-                        {
-                            volumeGrowthCO2[i] = 0.0;
-                        }
+                            // set input vector
+                            modena_inputs_set(inputs_bblgr2, Tbblgr2pos, TS[celli]);
+                            modena_inputs_set(inputs_bblgr2, Rbblgr2pos, nodeRadii[i]);
+                            modena_inputs_set(inputs_bblgr2, KH2bblgr2pos, KH2);
+                            modena_inputs_set(inputs_bblgr2, c_2bblgr2pos, c_2);
+                            modena_inputs_set(inputs_bblgr2, p_2bblgr2pos, p_2);
+                            // call the bblgr2 model
+                            ret_bblgr2[i] = 
+                                modena_model_call (bblgr2, inputs_bblgr2, outputs_bblgr2);
+                            if (ret_bblgr2[i] != 0)
+                            {
+                                modena_inputs_destroy (inputs_bblgr2);
+                                modena_outputs_destroy (outputs_bblgr2);
+                                modena_model_destroy (bblgr2);
+                                exit(ret_bblgr2[i]);
+                            }
+                            radiusGrowthCO2[i] = 
+                                modena_model_call (bblgr2, inputs_bblgr2, outputs_bblgr2);
+                            
+                            volumeGrowthBA[i] = 
+                                (radiusGrowthBA[i]*RR*TS[celli])/(p_1);
+                            volumeGrowthCO2[i] = 
+                                (radiusGrowthCO2[i]*RR*TS[celli])/(p_2);
+                            Info<< "volumeGrowthBA[" << i << "] " << volumeGrowthBA[i] << endl;
+                            Info<< "volumeGrowthCO2[" << i << "] " << volumeGrowthCO2[i] << endl;
+                            if 
+                            (
+                                volumeGrowthBA[i] < 0.0 
+                             || radiusGrowthBA[i] < 0.0 
+                             || L0 < 1.0e-8
+                            )
+                            {
+                                volumeGrowthBA[i] = 0.0;
+                            }
+                            if 
+                            (
+                                volumeGrowthCO2[i] < 0.0 
+                             || radiusGrowthCO2[i] < 0.0 
+                             || CW_0 < 1.0e-8
+                            )
+                            {
+                                volumeGrowthCO2[i] = 0.0;
+                            }
+                        }    
                     }
+                    else if (bubbleGrowthMode == "mean radius")
+                    {
+
+                    }    
                 }
                 else
                 {
