@@ -46,6 +46,8 @@ subroutine equcond(keq,ystate,neq,eps,fstrut,temp)
     kg(3)=oxyConductivity(temp)
     kg(4)=cypConductivity(temp)
     yg=(/xcd,0.79_dp*xair,0.21_dp*xair,xcyp/)
+    ! write(*,*) yg
+    ! write(*,*) 'x argPos:', kfoamXCO2pos, kfoamXCyPpos, kfoamXO2pos, kfoamXN2pos
     ! yg=(/0.0_dp,0.79_dp*0.5_dp,0.21_dp*0.5_dp,0.5_dp/)
     cpg(1)=cdHeatCapacity(temp)
     cpg(2)=nitrHeatCapacity(temp)
@@ -79,15 +81,17 @@ subroutine equcond(keq,ystate,neq,eps,fstrut,temp)
     call modena_inputs_set(kfoamInputs, kfoamFstrutpos, fstrut)
     ! call modena_inputs_set(kfoamInputs, kfoamKgaspos, kgas)
     call modena_inputs_set(kfoamInputs, kfoamTemppos, temp)
-    call modena_inputs_set(kgasInputs, kgasXCO2pos, xcd)
-    call modena_inputs_set(kgasInputs, kgasXCyPpos, xCyP)
-    call modena_inputs_set(kgasInputs, kgasXO2pos, xAir*0.21_dp)
-    call modena_inputs_set(kgasInputs, kgasXN2pos, xAir*0.79_dp)
+    call modena_inputs_set(kfoamInputs, kfoamXCO2pos, xcd)
+    call modena_inputs_set(kfoamInputs, kfoamXCyPpos, xCyP)
+    call modena_inputs_set(kfoamInputs, kfoamXO2pos, xAir*0.21_dp)
+    call modena_inputs_set(kfoamInputs, kfoamXN2pos, xAir*0.79_dp)
     ret = modena_model_call (kfoamModena, kfoamInputs, kfoamOutputs)
     if (modena_error_occurred()) then
         call exit(modena_error())
     endif
     keq = modena_outputs_get(kfoamOutputs, 0_c_size_t); !fetch results
+    ! write(*,*) keq
+    ! stop
 end subroutine equcond
 !***********************************END****************************************
 
