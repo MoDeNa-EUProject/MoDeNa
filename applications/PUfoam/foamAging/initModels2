@@ -1,3 +1,4 @@
+#!/usr/bin/python
 '''
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
@@ -9,7 +10,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -21,25 +22,37 @@ License
 
     Modena is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
+    FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+    details.
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
-    Python library of FireTasks
+    Initialisation script for the Foam aging application.
 
 Authors
     Henrik Rusche
+    Pavel Ferkl
 
 Contributors
 '''
+import modena
 
-from gasConductivity import species
-from gasConductivity import m_CyP_thermal_conductivity
-from gasConductivity import m_Air_thermal_conductivity
-from gasConductivity import m_CO2_thermal_conductivity
-from gasConductivity import m_O2_thermal_conductivity
-from gasConductivity import m_N2_thermal_conductivity
-from gasConductivity import f_gas_thermal_conductivity
+# A hack to re-initialise
+# TODO
+# Remove the models based on log info stored during execution of the workflow
+collection = modena.SurrogateModel._get_collection()
+collection.remove( { '_id': 'foamConductivity' } )
+collection.remove( { '_id': 'polymer_thermal_conductivity' } )
+collection.remove( { '_id': 'gas_thermal_conductivity[A=CO2]' } )
+collection.remove( { '_id': 'gas_thermal_conductivity[A=Air]' } )
+collection.remove( { '_id': 'gas_thermal_conductivity[A=CyP]' } )
+collection.remove( { '_id': 'gas_thermal_conductivity[A=O2]' } )
+collection.remove( { '_id': 'gas_thermal_conductivity[A=N2]' } )
+collection.remove( { '_id': 'gasMixtureConductivity' } )
+collection.remove( { '_id': 'diffusivityPol[A=CO2]' } )
+collection.remove( { '_id': 'diffusivityPol[A=CyP]' } )
+collection.remove( { '_id': 'diffusivityPol[A=O2]' } )
+collection.remove( { '_id': 'diffusivityPol[A=N2]' } )
+collection.remove( { '_id': 'Solubility[A=CO2,B=HEXANE]' } )

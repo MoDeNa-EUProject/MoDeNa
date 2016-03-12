@@ -1212,10 +1212,11 @@ class SurrogateModel(DynamicDocument):
         collection = self._get_collection()
         doc = collection.find_one({ '_cls': { '$exists': False}})
         modName = re.search('(.*)(\[.*\])?', doc['_id']).group(1)
-        mod = __import__(modName)
-        # TODO:
-        # Give a better name to the variable a model is imported from
-        return mod.m
+        try:
+            mod = __import__(modName)
+            return (i for i in modena.BackwardMappingModel.get_instances() if i._id == modName).next()
+        except ImportError:
+            print "Could not find MoDeNa model '%s'" %(modName)
 
 
     @classmethod

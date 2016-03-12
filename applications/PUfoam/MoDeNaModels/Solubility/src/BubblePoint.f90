@@ -55,8 +55,15 @@ Module BubblePoint
   H = xi(2,1) * p / xi(1,1)
   filename = './out.txt'
   CALL file_open(filename,78)
-  write(78,*) H / 100000.
-  write(*,*)'Solubility Coefficient /bar', H/100000.0
+  ! write(78,*) H / 100000.
+  ! write(*,*)'Solubility Coefficient /bar', H/100000.0
+  if (ncomp == 2) then
+      H=xi(1,1)*mm(1)/(xi(1,2)*mm(2))/p*1e5
+  elseif (ncomp == 3) then
+      H=xi(1,1)*mm(1)/(xi(1,2)*mm(2)+xi(1,3)*mm(3))/p*1e5
+  endif
+  write(78,*) H
+  write(*,*)'Solubility Coefficient g/g/bar', H
 
 
  End Subroutine BubblePointCalculation
