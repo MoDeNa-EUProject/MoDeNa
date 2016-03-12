@@ -692,13 +692,6 @@ void {name}
         else:
             return model
 
-class ModelFactory:
-
-    @classmethod
-    def register_model(cls, *args, **kwargs):
-        # save meta information
-
-
 class SurrogateModel(DynamicDocument):
     """Base class for surrogate models.
 
@@ -1211,19 +1204,19 @@ class SurrogateModel(DynamicDocument):
             __raw__={'outsidePoint': { '$exists': True}}
         ).first()
 
-        @classmethod
-        def loadFromModule(self):
-            """Method importing a surrogate model module."""
-            collection = self._get_collection()
-            llection.find_one({ '_cls': { '$exists': False}})
-            modName = re.search('(.*)(\[.*\])?', doc['_id']).group(1)
-            #TODO: This solution still requires the user to give the modena
-            #      application the same name as the surrogate model '_id'
-            try:
-                mod = __import__(modName)
-                return (i for i in modena.BackwardMappingModel.get_instances() if i._id == modName).next()
-            except ImportError:
-                print "Could not find MoDeNa model '%s'" %(modName)
+    @classmethod
+    def loadFromModule(self):
+        """Method importing a surrogate model module."""
+        collection = self._get_collection()
+        llection.find_one({ '_cls': { '$exists': False}})
+        modName = re.search('(.*)(\[.*\])?', doc['_id']).group(1)
+        #TODO: This solution still requires the user to give the modena
+        #      application the same name as the surrogate model '_id'
+        try:
+            mod = __import__(modName)
+            return (i for i in modena.BackwardMappingModel.get_instances() if i._id == modName).next()
+        except ImportError:
+            print "Could not find MoDeNa model '%s'" %(modName)
 
     @classmethod
     def get_instances(self):
