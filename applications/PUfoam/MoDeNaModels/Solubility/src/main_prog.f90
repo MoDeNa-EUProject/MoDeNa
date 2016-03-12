@@ -1,7 +1,7 @@
 !> \file main_prog.f90
 !! \brief Main program.
 !!
-!! \todo detailed file description.
+!! 
 
 !> \mainpage The PC-SAFT Documentation
 !!
@@ -24,9 +24,9 @@
 !WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
 !> \brief Starting Point of PC-SAFT program.
 !!
-!! Here, the user is asked to choose one of the given possibilities \n
-!! to calculate physical properties and phase equilibira useing the \n
-!! PC-SAFT equation of state.
+!! Here, some basic options are set, the model constants are read \n
+!! and the bubble point routine is called.
+!! 
 !WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
 
 PROGRAM PC_SAFT

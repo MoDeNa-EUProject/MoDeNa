@@ -1,3 +1,9 @@
+!> \file starting_value.f90
+!! \brief This subroutine performs a phase equilibrium calculation.
+
+
+
+
 !WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
 ! module STARTING_VALUES
 !
@@ -30,29 +36,29 @@ CONTAINS
 
 
 !WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-! subroutine start_var
-!
-! This subroutine generates a converged solution for binary systems
-! or performes a flash calculation for mixtues.
-!
-! IF a polymer is considered, starting values for mole fractions
-! are determined from the SUBROUTINGE POLY_STA_VAR (see below). The
-! polymer needs to be placed as component 1 (first line) in INPUT
-! file.
-!
-! A phase equilib. iteration is started at the end of this routine.
-! If no solution is found (converg=0), the program will stop within
-! this routine.
-!
-! Currently, this routine assumes two-phase equilibrium and derives
-! starting values (xi,density) only for two phases.
-!
-! Prerequisites are:
-! subroutine INPUT needs to be called prior to this routine, because
-! all pure comp. parameters as well as (T,P,kij) need to be in place.
-! Also, the variable to be iterated "it(i)" and the variables to be
-! calculated through the summation relation "sum_rel(i)" have to be
-! defined.
+!> subroutine start_var
+!>
+!> This subroutine generates a converged solution for binary systems
+!> or performes a flash calculation for mixtues.
+!>
+!> IF a polymer is considered, starting values for mole fractions
+!> are determined from the SUBROUTINGE POLY_STA_VAR (see below). The
+!> polymer needs to be placed as component 1 (first line) in INPUT
+!> file.
+!>
+!> A phase equilib. iteration is started at the end of this routine.
+!> If no solution is found (converg=0), the program will stop within
+!> this routine.
+!>
+!> Currently, this routine assumes two-phase equilibrium and derives
+!> starting values (xi,density) only for two phases.
+!>
+!> Prerequisites are:
+!> subroutine INPUT needs to be called prior to this routine, because
+!> all pure comp. parameters as well as (T,P,kij) need to be in place.
+!> Also, the variable to be iterated "it(i)" and the variables to be
+!> calculated through the summation relation "sum_rel(i)" have to be
+!> defined.
 !WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
 
 subroutine start_var (converg)

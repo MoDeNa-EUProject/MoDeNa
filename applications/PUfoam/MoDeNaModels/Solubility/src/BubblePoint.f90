@@ -1,3 +1,9 @@
+
+!> \file BubblePoint.f90
+!! \brief This Subroutine performs a bubble point calculation.
+
+
+
 Module BubblePoint
 
  Implicit None
@@ -8,10 +14,10 @@ Module BubblePoint
  Contains
 
 
- !This subroutine finds the equilibrium pressure and vapor composition
- !for a given liquid compostion and fixed temperature
- !By setting the variable iterate_t = 1, pressure can be fixed and
- !temperature will be an output
+ !> This subroutine finds the equilibrium pressure and vapor composition
+ !> for a given liquid composition and fixed temperature.
+ !> By setting the variable iterate_t = 1, pressure can be fixed and
+ !> temperature will be an output.
 
  Subroutine BubblePointCalculation
 
@@ -29,7 +35,7 @@ Module BubblePoint
   Call READ_INPUT
   nphas = 2
   iterate_t = 0 !iterate pressure to reach the given liquid composition
-  !initial values of liaquid and gas packing fraction
+  !initial values of liaquid and gas packing fraction 
   dense(1) = 0.4
   dense(2) = 1.E-05
   !set initial mole fractions for gas and liquid phase
@@ -44,7 +50,7 @@ Module BubblePoint
 !   write(*,*)'xl',xi(1,1:ncomp)
 !   write(*,*)'xv',xi(2,1:ncomp)
 
-  !Calculate solubility coefficient H of component 1
+  !Calculate solubility coefficient H of component 1 
   !according to x1*H = y1*p
   H = xi(2,1) * p / xi(1,1)
   filename = './out.txt'
@@ -63,4 +69,4 @@ Module BubblePoint
  End Subroutine BubblePointCalculation
 
 
-End Module BubblePoint
+End Module BubblePoint 

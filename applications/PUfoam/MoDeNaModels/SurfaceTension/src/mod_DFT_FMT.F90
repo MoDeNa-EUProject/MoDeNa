@@ -1,4 +1,5 @@
-!>This file contains the subroutines which calculate the contribution of
+!> \file mod_DFT_FMT.F90
+!!This file contains the subroutines which calculate the contribution of
 !!volume exclusion to the Helmholtz energy functional. 
 
 
