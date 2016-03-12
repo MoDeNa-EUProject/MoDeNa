@@ -29,10 +29,12 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
+#include "calc.H"
 #include "twoPhaseMixtureThermo.H"
+#include "fvCFD.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 class BSDProperties
 {
 private:
@@ -48,7 +50,7 @@ public:
     (
         volScalarField &M0_, volScalarField &M1_, 
         volScalarField &M2_, volScalarField &alpha1_,
-        fvMesh &mesh_
+        const fvMesh &mesh_
     )
     :
     M0(M0_),
@@ -145,23 +147,8 @@ public:
     }
 };
 
-int main(int argc, char *argv[])
+void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
 {
-    timeSelector::addOptions();
-
-#   include "setRootCase.H"
-#   include "createTime.H"
-
-    instantList timeDirs = timeSelector::select0(runTime, args);
-
-#   include "createMesh.H"
-
-    forAll(timeDirs, timeI)
-    {
-        runTime.setTime(timeDirs[timeI], timeI);
-
-        Info<< "Time = " << runTime.timeName() << endl;
-
         IOobject M0header
         (
             "M0",
@@ -194,7 +181,7 @@ int main(int argc, char *argv[])
          && M2header.headerOk()
         )
         {
-            mesh.readUpdate();
+            //mesh.readUpdate();
 
             Info<< "    Reading M0" << endl;
             volScalarField M0(M0header, mesh);
@@ -247,15 +234,6 @@ int main(int argc, char *argv[])
             Info<< "    Moments are not available." << endl;
         }
 
-        Info<< endl;
-    }
-
-    return 0;
+        Info<< "\nEnd\n" << endl;
 }
 
-// ************************************************************************* //
-/* Note to myself:
-headerOk(): read and check the header info. boolean member function of IOobject, take an Istream pointer and check if the input system is valid.
-readUpdate(): takes a mesh object and update the mesh based on the mesh files saved in time directories. 
-
-*/
