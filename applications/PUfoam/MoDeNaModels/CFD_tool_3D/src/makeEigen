@@ -10,6 +10,7 @@ mkdir dyn
 mkdir sta 
 cd ..
 make dynamic 
+mkdir -p $FOAM_USER_LIBBIN
 mv libeigen.so $FOAM_USER_LIBBIN
 
 # -----EOF

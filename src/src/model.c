@@ -173,15 +173,6 @@ modena_model_t *modena_model_new
     const char *modelId
 )
 {
-    // Initialize the Python Interpreter
-    if(!Py_IsInitialized())
-    {
-        Py_Initialize();
-    }
-
-    // Initialize this module
-    initlibmodena();
-
     PyObject *args = PyTuple_New(0);
     PyObject *kw = Py_BuildValue("{s:s}", "modelId", modelId);
 
