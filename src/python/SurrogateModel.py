@@ -692,6 +692,12 @@ void {name}
         else:
             return model
 
+class ModelFactory:
+
+    @classmethod
+    def register_model(cls, *args, **kwargs):
+        # save meta information
+
 
 class SurrogateModel(DynamicDocument):
     """Base class for surrogate models.
@@ -919,7 +925,7 @@ class SurrogateModel(DynamicDocument):
                     v.max = min(v.max, i[k].max)
                 else:
                     i[k] = new(v.min, v.max)
-                
+
         return i
 
 
