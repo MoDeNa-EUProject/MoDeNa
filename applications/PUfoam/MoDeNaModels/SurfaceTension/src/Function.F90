@@ -1,5 +1,6 @@
-!>This file contains the residual function of the density functional theory
-!!calculation.
+!> \file Function.F90
+!! \brief This file contains the residual function of the density functional theory calculation.
+
 
 
 

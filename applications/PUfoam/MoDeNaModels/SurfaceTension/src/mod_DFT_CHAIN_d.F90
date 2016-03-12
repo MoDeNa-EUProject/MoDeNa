@@ -1,5 +1,7 @@
-!>This file contains the subroutines which calculate the derivatives of the contribution of
-!!chain formation to the Helmholtz energy functional. 
+!> \file mod_DFT_CHAIN_d.F90
+!!This file contains the subroutines which calculate the derivatives of the contribution of
+!!chain formation to the Helmholtz energy functional. These derivatives were obtained 
+!!from the TAPENADE automatic differentiation online tool. 
  
  
   
