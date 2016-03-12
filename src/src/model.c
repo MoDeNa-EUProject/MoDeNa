@@ -203,7 +203,7 @@ modena_model_t *modena_model_new
             modelId
         );
 
-        if(PyErr_ExceptionMatches(modena_DoesNotExist) || PyErr_ExceptionMatches(modena_ParametersNotValid) )
+        if(PyErr_ExceptionMatches(modena_DoesNotExist) || PyErr_ExceptionMatches(modena_ParametersNotValid))
         {
             PyErr_Clear();
 
@@ -315,9 +315,10 @@ int modena_substitute_model_call
         /*
         printf
         (
-            "i%zu <- ip%zu\n",
+            "i%zu <- ip%zu (%g)\n",
             sm->map_inputs[2*j+1],
-            sm->map_inputs[2*j]
+            sm->map_inputs[2*j],
+            inputs->inputs[sm->map_inputs[2*j]]
         );
         */
         sm->inputs->inputs[sm->map_inputs[2*j+1]] =
@@ -325,16 +326,17 @@ int modena_substitute_model_call
     }
 
     int ret = modena_model_call(sm->model, sm->inputs, sm->outputs);
-    if(ret){ return ret; }
+    if(ret){ return ret; }	
 
     for(j = 0; j < sm->map_outputs_size; j++)
     {
         /*
         printf
         (
-            "ip%zu <- o%zu\n",
+            "ip%zu <- o%zu (%g)\n",
             sm->map_outputs[2*j+1],
-            sm->map_outputs[2*j]
+            sm->map_outputs[2*j],
+            sm->outputs->outputs[sm->map_outputs[2*j]]
         );
         */
         inputs->inputs[sm->map_outputs[2*j+1]] =

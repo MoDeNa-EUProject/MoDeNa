@@ -34,35 +34,36 @@ Python library of FireTasks
 This is the Solubility python module. Basically, it contains the following:
 
 The FireTask which controls the call of the detailed model. This detailed model is called
-at the very beginning of the simulation in order to generate initial data points 
+at the very beginning of the simulation in order to generate initial data points
 which can be used to fit the parameters of the surrogate model and during a running simulation
 as soon as the Solubility model is called with input parameters which lie outside the range
 the parameters of the surrogate model was so far fitted for. This FireTask is stored in the class
 "SolubilityExactSim" and a more detailed description of the detailed model can be found
 in the description of this class.
 
-Furthermore, this module contains the code of the surrogate model function as well as the 
+Furthermore, this module contains the code of the surrogate model function as well as the
 definitions of its input and output values and its fittable parameters. Care should be
 taken to set reasonable bounds for these variables.
 
-Also, this module contains the backward mapping model. This model consits of the 
+Also, this module contains the backward mapping model. This model consits of the
 surrogate model function, an initialisation strategy, the out of bounds strategy and the
 parameter fitting strategy. The initialisation strategy defines the initial data points where the
 detailed model will be evaluated at simulation start for an initial fit of the surrogate model parameters.
-The out of bounds strategy determines, how many new points and where to place these new 
-points, once the Solubility model is called for input values outside of the 
-fitted range. The parameter fitting strategy defines tolerances and maximal iterations 
+The out of bounds strategy determines, how many new points and where to place these new
+points, once the Solubility model is called for input values outside of the
+fitted range. The parameter fitting strategy defines tolerances and maximal iterations
 which are passed to the numerical solver which performs the actual fitting of the
 surrogate model parameters.
 
-@author    Jonas Mairhofer
+@author    Jonas Mairhofer, Pavel Ferkl
 @copyright 2014-2015, MoDeNa Project. GNU Public License.
 @ingroup   app_foaming
 """
 
 import os
 import modena
-from modena import ForwardMappingModel,BackwardMappingModel,SurrogateModel,CFunction,IndexSet,ModenaFireTask
+from modena import ForwardMappingModel,BackwardMappingModel,SurrogateModel,\
+    CFunction,IndexSet
 import modena.Strategy as Strategy
 from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
 from fireworks import Firework, Workflow, FWAction
@@ -73,82 +74,71 @@ from jinja2 import Template
 # Create terminal for colour output
 term = Terminal()
 
+species = IndexSet(
+    name= 'solubility_pol_species',
+    names= [ 'Air', 'CO2', 'CyP' ]
+)
+
 @explicit_serialize
-class SolubilityExactSim(ModenaFireTask):
+class SolubilityExactSim(FireTaskBase):
     """
     This FireTask controls the execution of the detailed model of the Solubility model.
-    The detailed model uses the PC-SAFT equation of state. A 
+    The detailed model uses the PC-SAFT equation of state. A
     detailed description of PC-SAFT model can be found in Deliverable 1.3 on the MoDeNa website.
 
     In order to start the detailed model, the input values for the model are first written to the
     file "in.txt". The detailed model code picks them up from this file and performs the according
     calculation. Once it is done, the output value is written to the file "out.txt". This FireTask
-    then reads in the calculated solubility from "out.txt" and inserts this value into the 
+    then reads in the calculated solubility from "out.txt" and inserts this value into the
     database.
     """
-
-
-    def task(self, fw_spec):
+    def run_task(self, fw_spec):
         print(
             term.yellow
-            + "Performing exact simulation (microscopic code recipe)"
-            + term.normal
+          + "Performing exact simulation (microscopic code recipe)"
+          + term.normal
         )
 
         # Write input for detailed model
-        self.generate_inputfile()
+        ff = open('in.txt', 'w')
+        Tstr = str(self['point']['T'])
+        ff.write('%s \n' %(Tstr))
+        ff.write('2 \n')       #number of components in system
+        if (self['indices']['A']=='CO2'):
+            ff.write('co2 \n')
+        elif (self['indices']['A']=='Air'):
+            ff.write('air \n')
+        elif (self['indices']['A']=='CyP'):
+            ff.write('cyclopentane \n')
 
-        # Execute detailed model
-        ret = os.system(os.path.join(os.path.dirname(os.path.abspath(__file__)),'src/PCSAFT_Henry'))
+        #pass molar liquid composition
+        x1l_str = str(self['point']['xl1'])
+        x2l_str = str(self['point']['xl2'])
+        ff.write('%s \n' %(x1l_str))
+        ff.write('%s \n' %(x2l_str))
 
-        # Check framework for errors
-        self.handleReturnCode(ret)
+        ff.close()
+
+        #create output file for detailed code
+        fff = open('out.txt', 'w+')
+        fff.close()
+
+        # Execute the detailed model
+        # path to **this** file + /src/...
+        # will break if distributed computing
+        os.system(os.path.dirname(os.path.abspath(__file__))+\
+            '/src/pcsaft')
 
         # Analyse output
-        self.analyse_output()
+        # os.getcwd() returns the path to the "launcher" directory
+        try:
+            FILE = open(os.getcwd()+'/out.txt','r')
+        except IOError:
+            raise IOError("File not found")
+        self['point']['H'] = float(FILE.readline())
+        FILE.close()
 
-
-    def generate_inputfile(self):
-        """Method generating a input file using the Jinja2 template engine."""
-
-        Template("""
-        {#
-            Write inputs to the template, one per line.
-        #}
-        {% for k,v in s['point'].iteritems() %}
-            {{ v }}
-        {% endfor %}
-        {#
-            The number of species, one integer.
-        #}
-            {{ s['indices'].__len__() }}
-        {#
-        Write the species (lower case) one per line.
-        #}
-        {% for k,v in s['indices'].iteritems() %}
-            {{ v.lower() }}
-        {% endfor %}
-        {#
-            Set initial feed molar fractions.
-        #}
-        {% for k,v in s['indices'].iteritems() %}
-            {{ 0.5 }}
-        {% endfor %}
-        """, trim_blocks=True,
-           lstrip_blocks=True).stream(s=self).dump('in.txt')
-
-        # Create output file for application to write output
-        with open('out.txt', 'w+') as FILE:
-            pass
-
-
-    def analyse_output(self):
-        """Method analysing the output of the file.
-            @TODO consider adding check for empty file
-        """
-
-        with open('out.txt', 'r') as FILE:
-            self['point']['H'] = float(FILE.readline())
+        return FWAction(mod_spec=[{'_push': self['point']}])
 
 
 f = CFunction(
@@ -179,7 +169,9 @@ void surroSolubility
 ''',
     # These are global bounds for the function
     inputs={
-        'T': { 'min': 200.0, 'max': 250.0 },        #check if boundaries reasonable, from this range, the random values for the DOE are chosen!
+        'T': { 'min': 200.0, 'max': 500.0},        #check if boundaries reasonable, from this range, the random values for the DOE are chosen!
+        'xl1': { 'min': 0.0, 'max': 1.0 },
+        'xl2': { 'min': 0.0, 'max': 1.0 },
     },
     outputs={
         'H': { 'min': 9e99, 'max': -9e99, 'argPos': 0 },
@@ -187,32 +179,82 @@ void surroSolubility
     parameters={
         'param0': { 'min': -1E10, 'max': 1E10, 'argPos': 0 },    #check if boundaries are reasonable!!!
         'param1': { 'min': -1E10, 'max': 1E10, 'argPos': 1 },
-        'param2': { 'min': 1.0, 'max': 1E10, 'argPos': 2 },
+        'param2': { 'min': -1.0e9, 'max': 1E10, 'argPos': 2 },
+    },
+    indices={
+        'A': species
     },
 )
 
-
-m = BackwardMappingModel(
-    _id= 'Solubility[A=CO2,B=HEXANE]',
-    surrogateFunction= f,
-    exactTask= SolubilityExactSim(),
-    substituteModels= [ ],
-    initialisationStrategy= Strategy.InitialPoints(
-        initialPoints=
-        {
-            'T': [200.0, 220.0],
+m_solubilityCO2 = BackwardMappingModel(
+    _id='Solubility[A=CO2]',
+    surrogateFunction=f,
+    exactTask=SolubilityExactSim(),
+    substituteModels=[],
+    initialisationStrategy=Strategy.InitialPoints(
+        initialPoints={
+            'T': [290, 320, 350, 380],
+            'xl1': [1.1e-3, 1.0e-3, 1.0e-3, 1.0e-4],
+            'xl2': [0.9989, 0.999, 0.999, 0.9999],
         },
     ),
-    outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(
-        nNewPoints= 4
+    outOfBoundsStrategy=Strategy.ExtendSpaceStochasticSampling(
+        nNewPoints=4
     ),
-    parameterFittingStrategy= Strategy.NonLinFitWithErrorContol(
-        testDataPercentage= 0.2,
-        maxError= 50.0,
-        improveErrorStrategy= Strategy.StochasticSampling(
-            nNewPoints= 2
+    parameterFittingStrategy=Strategy.NonLinFitWithErrorContol(
+        testDataPercentage=0.2,
+        maxError=0.05,
+        improveErrorStrategy=Strategy.StochasticSampling(
+            nNewPoints=2
         ),
-        maxIterations= 5 # Currently not used
+        maxIterations=5  # Currently not used
     ),
 )
-
+m_solubilityAir = BackwardMappingModel(
+    _id='Solubility[A=Air]',
+    surrogateFunction=f,
+    exactTask=SolubilityExactSim(),
+    substituteModels=[],
+    initialisationStrategy=Strategy.InitialPoints(
+        initialPoints={
+            'T': [290, 320, 350, 380],
+            'xl1': [1.1e-3, 1.0e-3, 1.0e-3, 1.0e-4],
+            'xl2': [0.9989, 0.999, 0.999, 0.9999],
+        },
+    ),
+    outOfBoundsStrategy=Strategy.ExtendSpaceStochasticSampling(
+        nNewPoints=4
+    ),
+    parameterFittingStrategy=Strategy.NonLinFitWithErrorContol(
+        testDataPercentage=0.2,
+        maxError=0.05,
+        improveErrorStrategy=Strategy.StochasticSampling(
+            nNewPoints=2
+        ),
+        maxIterations=5  # Currently not used
+    ),
+)
+m_solubilityCyclopentane = BackwardMappingModel(
+    _id='Solubility[A=CyP]',
+    surrogateFunction=f,
+    exactTask=SolubilityExactSim(),
+    substituteModels=[],
+    initialisationStrategy=Strategy.InitialPoints(
+        initialPoints={
+            'T': [290, 320, 350, 380],
+            'xl1': [1.1e-3, 1.0e-3, 1.0e-3, 1.0e-4],
+            'xl2': [0.9989, 0.999, 0.999, 0.9999],
+        },
+    ),
+    outOfBoundsStrategy=Strategy.ExtendSpaceStochasticSampling(
+        nNewPoints=4
+    ),
+    parameterFittingStrategy=Strategy.NonLinFitWithErrorContol(
+        testDataPercentage=0.2,
+        maxError=0.05,
+        improveErrorStrategy=Strategy.StochasticSampling(
+            nNewPoints=2
+        ),
+        maxIterations=5  # Currently not used
+    ),
+)
