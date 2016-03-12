@@ -1208,7 +1208,7 @@ class SurrogateModel(DynamicDocument):
     def loadFromModule(self):
         """Method importing a surrogate model module."""
         collection = self._get_collection()
-        llection.find_one({ '_cls': { '$exists': False}})
+        doc = collection.find_one({ '_cls': { '$exists': False}})
         modName = re.search('(.*)(\[.*\])?', doc['_id']).group(1)
         #TODO: This solution still requires the user to give the modena
         #      application the same name as the surrogate model '_id'
