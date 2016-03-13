@@ -162,7 +162,7 @@ subroutine createModels
     call modena_model_argPos_check(kcypModena)
     if (solModel(1)==1) then
         sairModena = modena_model_new (&
-            c_char_"Solubility[A=Air]"//c_null_char);
+            c_char_"Solubility[A=Air,B=2]"//c_null_char);
         if (modena_error_occurred()) then
             call exit(modena_error())
         endif
@@ -178,7 +178,7 @@ subroutine createModels
     endif
     if (solModel(2)==1) then
         scdModena = modena_model_new (&
-            c_char_"Solubility[A=CO2]"//c_null_char);
+            c_char_"Solubility[A=CO2,B=2]"//c_null_char);
         if (modena_error_occurred()) then
             call exit(modena_error())
         endif
@@ -194,7 +194,7 @@ subroutine createModels
     endif
     if (solModel(3)==1) then
         scypModena = modena_model_new (&
-            c_char_"Solubility[A=CyP]"//c_null_char);
+            c_char_"Solubility[A=CyP,B=2]"//c_null_char);
         if (modena_error_occurred()) then
             call exit(modena_error())
         endif

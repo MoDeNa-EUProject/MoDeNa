@@ -186,7 +186,7 @@ subroutine physical_properties(Y)
         if(ret /= 0) then
             call exit(ret)
         endif
-        sigma = modena_outputs_get(itensOutputs, 0_c_size_t)
+        sigma = modena_outputs_get(itensOutputs, 0_c_size_t)*1e-3_dp
     end select
     do i=1,ngas
         select case(diff_model(i))
@@ -202,7 +202,11 @@ subroutine physical_properties(Y)
         select case(sol_model(i))
         case(1)
         case(2)
+            ! TODO: implement properly
             call modena_inputs_set(solInputs(i), solTpos(i), Y(teq))
+            call modena_inputs_set(solInputs(i), solXgasPos(i), 1.0e-4_dp)
+            call modena_inputs_set(solInputs(i), solXmdiPos(i), 0.5_dp)
+            call modena_inputs_set(solInputs(i), solXpolyolPos(i), 0.5_dp)
             ret = modena_model_call(solModena(i), solInputs(i), solOutputs(i))
             if(ret /= 0) then
                 call exit(ret)
@@ -416,12 +420,14 @@ subroutine bblpreproc
     case(1)
     case(2)
         call modena_inputs_set(rhopInputs, rhopTpos, Y(teq))
+        call modena_inputs_set(rhopInputs, rhopXOHPos, 0.1_dp)
         ret = modena_model_call (rhopModena, rhopInputs, rhopOutputs)
         if(ret /= 0) then
             call exit(ret)
         endif
         rhop = modena_outputs_get(rhopOutputs, 0_c_size_t)
-        call modena_inputs_set(rhopInputs, rhopTpos, Y(teq)+150)
+        call modena_inputs_set(rhopInputs, rhopTpos, Y(teq)+100)
+        call modena_inputs_set(rhopInputs, rhopXOHPos, 0.9_dp)
         ret = modena_model_call (rhopModena, rhopInputs, rhopOutputs)
         if(ret /= 0) then
             call exit(ret)
