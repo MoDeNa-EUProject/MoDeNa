@@ -103,9 +103,17 @@ static PyMethodDef module_methods[] = {
 #ifndef PyMODINIT_FUNC    /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
+
+// TODO: Support non-Gcc compilers here
+PyMODINIT_FUNC initlibmodena(void) __attribute__((constructor));
+
 PyMODINIT_FUNC initlibmodena(void)
 {
-    PyObject* module;
+    // Initialize the Python Interpreter
+    if(!Py_IsInitialized())
+    {
+        Py_Initialize();
+    }
 
     if(PyType_Ready(&modena_index_set_tType) < 0)
     {
@@ -122,11 +130,11 @@ PyMODINIT_FUNC initlibmodena(void)
         return;
     }
 
-    module = Py_InitModule3
+    PyObject* module = Py_InitModule3
     (
         "libmodena",
         module_methods,
-        "Module that creates an extension types for modena framework."
+        "Module that creates extension types for modena framework."
     );
 
     if(!module)
