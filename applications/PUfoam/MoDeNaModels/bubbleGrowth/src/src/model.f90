@@ -186,7 +186,7 @@ subroutine physical_properties(Y)
         if(ret /= 0) then
             call exit(ret)
         endif
-        sigma = modena_outputs_get(itensOutputs, 0_c_size_t)
+        sigma = modena_outputs_get(itensOutputs, 0_c_size_t)*1e-3_dp
     end select
     do i=1,ngas
         select case(diff_model(i))
