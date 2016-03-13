@@ -61,7 +61,7 @@ surrogate model parameters.
 """
 
 import os
-import modena
+from modena import *
 from modena import ForwardMappingModel,BackwardMappingModel,SurrogateModel,\
     CFunction,IndexSet
 import modena.Strategy as Strategy
@@ -84,7 +84,7 @@ system = IndexSet(
 )
 
 @explicit_serialize
-class SolubilityExactSim(FireTaskBase):
+class SolubilityExactSim(ModenaFireTask):
     """
     This FireTask controls the execution of the detailed model of the Solubility model.
     The detailed model uses the PC-SAFT equation of state. A
@@ -96,7 +96,7 @@ class SolubilityExactSim(FireTaskBase):
     then reads in the calculated solubility from "out.txt" and inserts this value into the
     database.
     """
-    def run_task(self, fw_spec):
+    def task(self, fw_spec):
         print(
             term.yellow
           + "Performing exact simulation (microscopic code recipe)"
@@ -156,14 +156,37 @@ class SolubilityExactSim(FireTaskBase):
         self['point']['H'] = float(FILE.readline())
         FILE.close()
 
-        return FWAction(mod_spec=[{'_push': self['point']}])
 
-
-Ccode='''
+Ccode2='''
 #include "modena.h"
 #include "math.h"
 
-void surroSolubility
+void surroSolubility2
+(
+const modena_model_t* model,
+const double* inputs,
+double *outputs
+)
+{
+{% block variables %}{% endblock %}
+
+const double P0 = parameters[0];
+const double P1 = parameters[1];
+const double P2 = parameters[2];
+
+const double term1 = P1*(1/T - 1/P2);
+const double term2 = exp(term1);
+
+outputs[0] = P0*term2;
+
+outputs[0] = P0 + T*P1 + P2*T*T;
+}
+'''
+Ccode3='''
+#include "modena.h"
+#include "math.h"
+
+void surroSolubility3
 (
 const modena_model_t* model,
 const double* inputs,
@@ -207,13 +230,13 @@ inputs3={
     'xl2': { 'min': 0.0, 'max': 1.0 },
     'xl3': { 'min': 0.0, 'max': 1.0 },
 }
-f2 = CFunction(Ccode=Ccode,
+f2 = CFunction(Ccode=Ccode2,
     inputs=inputs2,
     outputs=outputs,
     parameters=parameters,
     indices=indices
 )
-f3 = CFunction(Ccode=Ccode,
+f3 = CFunction(Ccode=Ccode3,
     inputs=inputs3,
     outputs=outputs,
     parameters=parameters,
@@ -231,7 +254,7 @@ parameterFittingStrategy=Strategy.NonLinFitWithErrorContol(
     ),
     maxIterations=5  # Currently not used
 )
-m_solubilityCO2 = BackwardMappingModel(
+m_solubilityCO2PU = BackwardMappingModel(
     _id='Solubility[A=CO2,B=2]',
     surrogateFunction=f2,
     exactTask=SolubilityExactSim(),
@@ -246,7 +269,7 @@ m_solubilityCO2 = BackwardMappingModel(
     outOfBoundsStrategy=outOfBoundsStrategy,
     parameterFittingStrategy=parameterFittingStrategy
 )
-m_solubilityAir = BackwardMappingModel(
+m_solubilityAirPU = BackwardMappingModel(
     _id='Solubility[A=Air,B=2]',
     surrogateFunction=f2,
     exactTask=SolubilityExactSim(),
@@ -261,7 +284,7 @@ m_solubilityAir = BackwardMappingModel(
     outOfBoundsStrategy=outOfBoundsStrategy,
     parameterFittingStrategy=parameterFittingStrategy
 )
-m_solubilityCyclopentane = BackwardMappingModel(
+m_solubilityCyclopentanePU = BackwardMappingModel(
     _id='Solubility[A=CyP,B=2]',
     surrogateFunction=f2,
     exactTask=SolubilityExactSim(),
