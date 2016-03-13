@@ -84,7 +84,7 @@ subroutine createModenaModels
     endif
     if (itens_model==2) then
         itensModena = modena_model_new (&
-            c_char_"SurfaceTension[A=CO2,B=PU]"//c_null_char); !TODO: implement
+            c_char_"SurfaceTension[A=CO2,B=PU]"//c_null_char);
         itensInputs = modena_inputs_new (itensModena);
         itensOutputs = modena_outputs_new (itensModena);
         itensTpos = modena_model_inputs_argPos(&
