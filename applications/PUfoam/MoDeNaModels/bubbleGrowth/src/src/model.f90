@@ -202,7 +202,11 @@ subroutine physical_properties(Y)
         select case(sol_model(i))
         case(1)
         case(2)
+            ! TODO: implement properly
             call modena_inputs_set(solInputs(i), solTpos(i), Y(teq))
+            call modena_inputs_set(solInputs(i), solXgasPos(i), 1.0e-4_dp)
+            call modena_inputs_set(solInputs(i), solXmdiPos(i), 0.5_dp)
+            call modena_inputs_set(solInputs(i), solXpolyolPos(i), 0.5_dp)
             ret = modena_model_call(solModena(i), solInputs(i), solOutputs(i))
             if(ret /= 0) then
                 call exit(ret)

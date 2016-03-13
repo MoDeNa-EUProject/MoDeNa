@@ -15,6 +15,9 @@ module modenastuff
     integer(c_size_t) :: itensTPos
     integer(c_size_t) :: diffTPos(2)
     integer(c_size_t) :: solTPos(2)
+    integer(c_size_t) :: solXgasPos(2)
+    integer(c_size_t) :: solXmdiPos(2)
+    integer(c_size_t) :: solXpolyolPos(2)
     integer(c_size_t) :: kinNCOPos
     integer(c_size_t) :: kinOHPos
     integer(c_size_t) :: kinH2OPos
@@ -59,6 +62,7 @@ module modenastuff
     type(c_ptr) :: kinModena = c_null_ptr
     type(c_ptr) :: kinInputs = c_null_ptr
     type(c_ptr) :: kinOutputs = c_null_ptr
+    character(len=3) gasname(2)
 contains
 !********************************BEGINNING*************************************
 !> creates Modena models
@@ -104,16 +108,24 @@ subroutine createModenaModels
             call modena_model_argPos_check(diffModena(i))
         endif
     enddo
+    gasname(1)="CyP"
+    gasname(2)="CO2"
     if (sol_model(1)==2) solModena(1) = modena_model_new (&
-        c_char_"solubilityRM[A=CyP]"//c_null_char); !TODO: implement
+        c_char_"Solubility[A=CyP,B=3]"//c_null_char);
     if (sol_model(2)==2) solModena(1) = modena_model_new (&
-        c_char_"solubilityRM[A=CO2]"//c_null_char); !TODO: implement
+        c_char_"Solubility[A=CO2,B=3]"//c_null_char);
     do i=1,ngas
         if (sol_model(i)==2) then
             solInputs(i) = modena_inputs_new (solModena(i));
             solOutputs(i) = modena_outputs_new (solModena(i));
             solTpos(i) = modena_model_inputs_argPos(solModena(i), &
                 c_char_"T"//c_null_char);
+            solXgasPos(i) = modena_model_inputs_argPos(solModena(i), &
+                c_char_"xl["//gasname//"]"//c_null_char);
+            solXmdiPos(i) = modena_model_inputs_argPos(solModena(i), &
+                c_char_"xl[mdi]"//c_null_char);
+            solXpolyolPos(i) = modena_model_inputs_argPos(solModena(i), &
+                c_char_"xl[polyol]"//c_null_char);
             call modena_model_argPos_check(solModena(i))
         endif
     enddo
