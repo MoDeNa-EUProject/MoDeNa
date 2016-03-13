@@ -61,7 +61,7 @@ surrogate model parameters.
 """
 
 import os
-import modena
+from modena import *
 from modena import ForwardMappingModel,BackwardMappingModel,SurrogateModel,\
     CFunction,IndexSet
 import modena.Strategy as Strategy
@@ -78,9 +78,13 @@ species = IndexSet(
     name= 'solubility_pol_species',
     names= [ 'Air', 'CO2', 'CyP' ]
 )
+system = IndexSet(
+    name= 'solubility_num_of_components',
+    names= [ '2', '3' ]
+)
 
 @explicit_serialize
-class SolubilityExactSim(FireTaskBase):
+class SolubilityExactSim(ModenaFireTask):
     """
     This FireTask controls the execution of the detailed model of the Solubility model.
     The detailed model uses the PC-SAFT equation of state. A
@@ -92,7 +96,7 @@ class SolubilityExactSim(FireTaskBase):
     then reads in the calculated solubility from "out.txt" and inserts this value into the
     database.
     """
-    def run_task(self, fw_spec):
+    def task(self, fw_spec):
         print(
             term.yellow
           + "Performing exact simulation (microscopic code recipe)"
@@ -103,20 +107,34 @@ class SolubilityExactSim(FireTaskBase):
         ff = open('in.txt', 'w')
         Tstr = str(self['point']['T'])
         ff.write('%s \n' %(Tstr))
-        ff.write('2 \n')       #number of components in system
-        if (self['indices']['A']=='CO2'):
-            ff.write('co2 \n')
-        elif (self['indices']['A']=='Air'):
-            ff.write('air \n')
-        elif (self['indices']['A']=='CyP'):
-            ff.write('cyclopentane \n')
-
-        #pass molar liquid composition
-        x1l_str = str(self['point']['xl1'])
-        x2l_str = str(self['point']['xl2'])
-        ff.write('%s \n' %(x1l_str))
-        ff.write('%s \n' %(x2l_str))
-
+        if (self['indices']['B']=='2'):
+            ff.write('2 \n')       #number of components in system
+            if (self['indices']['A']=='CO2'):
+                ff.write('co2 \n')
+            elif (self['indices']['A']=='Air'):
+                ff.write('air \n')
+            elif (self['indices']['A']=='CyP'):
+                ff.write('cyclopentane \n')
+            #pass molar liquid composition
+            x1l_str = str(self['point']['xl1'])
+            x2l_str = str(self['point']['xl2'])
+            ff.write('%s \n' %(x1l_str))
+            ff.write('%s \n' %(x2l_str))
+        elif (self['indices']['B']=='3'):
+            ff.write('3 \n')       #number of components in system
+            if (self['indices']['A']=='CO2'):
+                ff.write('co2 \n')
+            elif (self['indices']['A']=='Air'):
+                ff.write('air \n')
+            elif (self['indices']['A']=='CyP'):
+                ff.write('cyclopentane \n')
+            #pass molar liquid composition
+            x1l_str = str(self['point']['xl1'])
+            x2l_str = str(self['point']['xl2'])
+            x3l_str = str(self['point']['xl3'])
+            ff.write('%s \n' %(x1l_str))
+            ff.write('%s \n' %(x2l_str))
+            ff.write('%s \n' %(x3l_str))
         ff.close()
 
         #create output file for detailed code
@@ -138,57 +156,107 @@ class SolubilityExactSim(FireTaskBase):
         self['point']['H'] = float(FILE.readline())
         FILE.close()
 
-        return FWAction(mod_spec=[{'_push': self['point']}])
 
-
-f = CFunction(
-    Ccode= '''
+Ccode2='''
 #include "modena.h"
 #include "math.h"
 
-void surroSolubility
+void surroSolubility2
 (
-    const modena_model_t* model,
-    const double* inputs,
-    double *outputs
+const modena_model_t* model,
+const double* inputs,
+double *outputs
 )
 {
-    {% block variables %}{% endblock %}
+{% block variables %}{% endblock %}
 
-    const double P0 = parameters[0];
-    const double P1 = parameters[1];
-    const double P2 = parameters[2];
+const double P0 = parameters[0];
+const double P1 = parameters[1];
+const double P2 = parameters[2];
 
-    const double term1 = P1*(1/T - 1/P2);
-    const double term2 = exp(term1);
+const double term1 = P1*(1/T - 1/P2);
+const double term2 = exp(term1);
 
-    outputs[0] = P0*term2;
+outputs[0] = P0*term2;
 
-    //outputs[0] = P0 + T*P1 + P2*T*T;
+outputs[0] = P0 + T*P1 + P2*T*T;
 }
-''',
-    # These are global bounds for the function
-    inputs={
-        'T': { 'min': 200.0, 'max': 500.0},        #check if boundaries reasonable, from this range, the random values for the DOE are chosen!
-        'xl1': { 'min': 0.0, 'max': 1.0 },
-        'xl2': { 'min': 0.0, 'max': 1.0 },
-    },
-    outputs={
-        'H': { 'min': 9e99, 'max': -9e99, 'argPos': 0 },
-    },
-    parameters={
-        'param0': { 'min': -1E10, 'max': 1E10, 'argPos': 0 },    #check if boundaries are reasonable!!!
-        'param1': { 'min': -1E10, 'max': 1E10, 'argPos': 1 },
-        'param2': { 'min': -1.0e9, 'max': 1E10, 'argPos': 2 },
-    },
-    indices={
-        'A': species
-    },
+'''
+Ccode3='''
+#include "modena.h"
+#include "math.h"
+
+void surroSolubility3
+(
+const modena_model_t* model,
+const double* inputs,
+double *outputs
+)
+{
+{% block variables %}{% endblock %}
+
+const double P0 = parameters[0];
+const double P1 = parameters[1];
+const double P2 = parameters[2];
+
+const double term1 = P1*(1/T - 1/P2);
+const double term2 = exp(term1);
+
+outputs[0] = P0*term2;
+
+outputs[0] = P0 + T*P1 + P2*T*T;
+}
+'''
+outputs={
+    'H': { 'min': 9e99, 'max': -9e99, 'argPos': 0 }
+}
+parameters={
+    'param0': { 'min': 1e-12, 'max': 1E1, 'argPos': 0 },    #check if boundaries are reasonable!!!
+    'param1': { 'min': -1e-1, 'max': 1e-1, 'argPos': 1 },
+    'param2': { 'min': -1e-1, 'max': 1e-1, 'argPos': 2 },
+}
+indices={
+    'A': species,
+    'B': system
+}
+inputs2={
+    'T': { 'min': 200.0, 'max': 500.0},        #check if boundaries reasonable, from this range, the random values for the DOE are chosen!
+    'xl1': { 'min': 0.0, 'max': 1.0 },
+    'xl2': { 'min': 0.0, 'max': 1.0 },
+}
+inputs3={
+    'T': { 'min': 200.0, 'max': 500.0},        #check if boundaries reasonable, from this range, the random values for the DOE are chosen!
+    'xl1': { 'min': 0.0, 'max': 1.0 },
+    'xl2': { 'min': 0.0, 'max': 1.0 },
+    'xl3': { 'min': 0.0, 'max': 1.0 },
+}
+f2 = CFunction(Ccode=Ccode2,
+    inputs=inputs2,
+    outputs=outputs,
+    parameters=parameters,
+    indices=indices
+)
+f3 = CFunction(Ccode=Ccode3,
+    inputs=inputs3,
+    outputs=outputs,
+    parameters=parameters,
+    indices=indices
 )
 
-m_solubilityCO2 = BackwardMappingModel(
-    _id='Solubility[A=CO2]',
-    surrogateFunction=f,
+outOfBoundsStrategy=Strategy.ExtendSpaceStochasticSampling(
+    nNewPoints=4
+)
+parameterFittingStrategy=Strategy.NonLinFitWithErrorContol(
+    testDataPercentage=0.2,
+    maxError=0.05,
+    improveErrorStrategy=Strategy.StochasticSampling(
+        nNewPoints=2
+    ),
+    maxIterations=5  # Currently not used
+)
+m_solubilityCO2PU = BackwardMappingModel(
+    _id='Solubility[A=CO2,B=2]',
+    surrogateFunction=f2,
     exactTask=SolubilityExactSim(),
     substituteModels=[],
     initialisationStrategy=Strategy.InitialPoints(
@@ -198,63 +266,84 @@ m_solubilityCO2 = BackwardMappingModel(
             'xl2': [0.9989, 0.999, 0.999, 0.9999],
         },
     ),
-    outOfBoundsStrategy=Strategy.ExtendSpaceStochasticSampling(
-        nNewPoints=4
+    outOfBoundsStrategy=outOfBoundsStrategy,
+    parameterFittingStrategy=parameterFittingStrategy
+)
+m_solubilityAirPU = BackwardMappingModel(
+    _id='Solubility[A=Air,B=2]',
+    surrogateFunction=f2,
+    exactTask=SolubilityExactSim(),
+    substituteModels=[],
+    initialisationStrategy=Strategy.InitialPoints(
+        initialPoints={
+            'T': [290, 320, 350, 380],
+            'xl1': [1.1e-3, 1.0e-3, 1.0e-3, 1.0e-4],
+            'xl2': [0.9989, 0.999, 0.999, 0.9999],
+        },
     ),
-    parameterFittingStrategy=Strategy.NonLinFitWithErrorContol(
-        testDataPercentage=0.2,
-        maxError=0.05,
-        improveErrorStrategy=Strategy.StochasticSampling(
-            nNewPoints=2
-        ),
-        maxIterations=5  # Currently not used
+    outOfBoundsStrategy=outOfBoundsStrategy,
+    parameterFittingStrategy=parameterFittingStrategy
+)
+m_solubilityCyclopentanePU = BackwardMappingModel(
+    _id='Solubility[A=CyP,B=2]',
+    surrogateFunction=f2,
+    exactTask=SolubilityExactSim(),
+    substituteModels=[],
+    initialisationStrategy=Strategy.InitialPoints(
+        initialPoints={
+            'T': [290, 320, 350, 380],
+            'xl1': [1.1e-3, 1.0e-3, 1.0e-3, 1.0e-4],
+            'xl2': [0.9989, 0.999, 0.999, 0.9999],
+        },
     ),
+    outOfBoundsStrategy=outOfBoundsStrategy,
+    parameterFittingStrategy=parameterFittingStrategy
+)
+m_solubilityCO2 = BackwardMappingModel(
+    _id='Solubility[A=CO2,B=3]',
+    surrogateFunction=f3,
+    exactTask=SolubilityExactSim(),
+    substituteModels=[],
+    initialisationStrategy=Strategy.InitialPoints(
+        initialPoints={
+            'T': [290, 320, 350, 380],
+            'xl1': [0.43, 0.42, 0.40, 0.38],
+            'xl2': [0.53, 0.52, 0.50, 0.48],
+            'xl3': [0.04, 0.06, 0.10, 0.14],
+        },
+    ),
+    outOfBoundsStrategy=outOfBoundsStrategy,
+    parameterFittingStrategy=parameterFittingStrategy
 )
 m_solubilityAir = BackwardMappingModel(
-    _id='Solubility[A=Air]',
-    surrogateFunction=f,
+    _id='Solubility[A=Air,B=3]',
+    surrogateFunction=f3,
     exactTask=SolubilityExactSim(),
     substituteModels=[],
     initialisationStrategy=Strategy.InitialPoints(
         initialPoints={
-            'T': [290, 320, 350, 380],
-            'xl1': [1.1e-3, 1.0e-3, 1.0e-3, 1.0e-4],
-            'xl2': [0.9989, 0.999, 0.999, 0.9999],
+            'T': [280, 300, 320, 350],
+            'xl1': [0.08, 0.078, 0.074, 0.068],
+            'xl2': [0.85, 0.82, 0.79, 0.72],
+            'xl3': [0.07, 0.102, 0.136, 0.212],
         },
     ),
-    outOfBoundsStrategy=Strategy.ExtendSpaceStochasticSampling(
-        nNewPoints=4
-    ),
-    parameterFittingStrategy=Strategy.NonLinFitWithErrorContol(
-        testDataPercentage=0.2,
-        maxError=0.05,
-        improveErrorStrategy=Strategy.StochasticSampling(
-            nNewPoints=2
-        ),
-        maxIterations=5  # Currently not used
-    ),
+    outOfBoundsStrategy=outOfBoundsStrategy,
+    parameterFittingStrategy=parameterFittingStrategy
 )
 m_solubilityCyclopentane = BackwardMappingModel(
-    _id='Solubility[A=CyP]',
-    surrogateFunction=f,
+    _id='Solubility[A=CyP,B=3]',
+    surrogateFunction=f3,
     exactTask=SolubilityExactSim(),
     substituteModels=[],
     initialisationStrategy=Strategy.InitialPoints(
         initialPoints={
-            'T': [290, 320, 350, 380],
-            'xl1': [1.1e-3, 1.0e-3, 1.0e-3, 1.0e-4],
-            'xl2': [0.9989, 0.999, 0.999, 0.9999],
+            'T': [280, 300, 320, 350],
+            'xl1': [0.021, 0.023, 0.025, 0.027],
+            'xl2': [0.12e-4, 0.71e-4, 0.31e-3, 0.19e-2],
+            'xl3': [0.97886, 0.97629, 0.9719, 0.954],
         },
     ),
-    outOfBoundsStrategy=Strategy.ExtendSpaceStochasticSampling(
-        nNewPoints=4
-    ),
-    parameterFittingStrategy=Strategy.NonLinFitWithErrorContol(
-        testDataPercentage=0.2,
-        maxError=0.05,
-        improveErrorStrategy=Strategy.StochasticSampling(
-            nNewPoints=2
-        ),
-        maxIterations=5  # Currently not used
-    ),
+    outOfBoundsStrategy=outOfBoundsStrategy,
+    parameterFittingStrategy=parameterFittingStrategy
 )
