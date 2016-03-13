@@ -420,12 +420,14 @@ subroutine bblpreproc
     case(1)
     case(2)
         call modena_inputs_set(rhopInputs, rhopTpos, Y(teq))
+        call modena_inputs_set(rhopInputs, rhopXOHPos, 0.1_dp)
         ret = modena_model_call (rhopModena, rhopInputs, rhopOutputs)
         if(ret /= 0) then
             call exit(ret)
         endif
         rhop = modena_outputs_get(rhopOutputs, 0_c_size_t)
-        call modena_inputs_set(rhopInputs, rhopTpos, Y(teq)+150)
+        call modena_inputs_set(rhopInputs, rhopTpos, Y(teq)+100)
+        call modena_inputs_set(rhopInputs, rhopXOHPos, 0.9_dp)
         ret = modena_model_call (rhopModena, rhopInputs, rhopOutputs)
         if(ret /= 0) then
             call exit(ret)

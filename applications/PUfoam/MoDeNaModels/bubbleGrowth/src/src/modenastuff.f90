@@ -12,6 +12,7 @@ module modenastuff
     integer(c_size_t) :: viscTpos
     integer(c_size_t) :: viscXPos
     integer(c_size_t) :: rhopTPos
+    integer(c_size_t) :: rhopXOHPos
     integer(c_size_t) :: itensTPos
     integer(c_size_t) :: diffTPos(2)
     integer(c_size_t) :: solTPos(2)
@@ -79,11 +80,14 @@ subroutine createModenaModels
         call modena_model_argPos_check(viscModena)
     endif
     if (rhop_model==2) then
-        rhopModena = modena_model_new (c_char_"polymerDensity"//c_null_char);
+        rhopModena = modena_model_new (&
+            c_char_"density_reaction_mixture"//c_null_char);
         rhopInputs = modena_inputs_new (rhopModena);
         rhopOutputs = modena_outputs_new (rhopModena);
         rhopTpos = modena_model_inputs_argPos(rhopModena, &
             c_char_"T"//c_null_char);
+        rhopXOHPos = modena_model_inputs_argPos(rhopModena, &
+            c_char_"XOH"//c_null_char);
         call modena_model_argPos_check(rhopModena)
     endif
     if (itens_model==2) then
