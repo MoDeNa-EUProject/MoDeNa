@@ -52,7 +52,7 @@ configure_file(
 )
 
 # Installation
-if(CMAKE_VERSION VERSION_GREATER "2.8.11")
+if(CMAKE_VERSION VERSION_GREATER "2.8.12")
   install(
     TARGETS twoTanksFullProblem modena fmodena
     EXPORT MODENATargets
