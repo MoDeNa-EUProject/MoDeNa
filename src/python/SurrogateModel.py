@@ -51,6 +51,7 @@ import random
 from mongoengine import *
 from mongoengine.document import TopLevelDocumentMetaclass
 from mongoengine.base import BaseField
+import pymongo
 from fireworks import Firework, FireTaskBase
 from collections import defaultdict
 import jinja2
@@ -60,6 +61,11 @@ import jinja2
 MODENA_URI = os.environ.get('MODENA_URI', 'mongodb://localhost:27017/test')
 (uri, database) = MODENA_URI.rsplit('/', 1)
 connect(database, host=MODENA_URI)
+
+MODENA_PARSED_URI = pymongo.uri_parser.parse_uri(MODENA_URI, default_port=27017)
+(MODENA_PARSED_URI['host'], MODENA_PARSED_URI['port']) = MODENA_PARSED_URI.pop('nodelist')[0]
+MODENA_PARSED_URI['name'] = MODENA_PARSED_URI.pop('database')
+del MODENA_PARSED_URI['collection'], MODENA_PARSED_URI['options']
 
 ##
 # @addtogroup python_interface_library

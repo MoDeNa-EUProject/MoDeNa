@@ -46,7 +46,7 @@ MODENA_WORKING_DIR = os.path.realpath(os.getcwd())
 from Strategy import BackwardMappingScriptTask, ModenaFireTask
 from SurrogateModel import CFunction, IndexSet, Workflow2, \
     SurrogateModel, ForwardMappingModel, BackwardMappingModel, \
-    ModenaFireTask
+    ModenaFireTask, MODENA_PARSED_URI
 
 def find_module(target, startsearch=MODENA_WORKING_DIR):
     """Function recursively searching through the file tree for "target"
