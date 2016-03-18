@@ -303,6 +303,7 @@ subroutine kinModel
             call modena_inputs_set(kinInputs, kinInputsPos(i), Y(kineq(i)))
         enddo
     endif
+    call modena_inputs_set(kinInputs, kinInputsPos(19), 60.0_dp)
     ret = modena_model_call (kinModena, kinInputs, kinOutputs)
     if(ret /= 0) then
         call exit(ret)
@@ -325,11 +326,9 @@ subroutine kinModel
         kinsource=0
         do i=1,size(kineq)
             kinsource(i) = modena_outputs_get(kinOutputs, kinOutputsPos(i))
-            if (kinsource(2)>1e-12) then
-                write(*,*) i,kinsource(2)
-                stop
-            endif
+            ! write(*,*) i,kinsource(i)
         enddo
+        ! stop
     endif
 end subroutine kinModel
 !***********************************END****************************************
@@ -385,8 +384,8 @@ subroutine bblpreproc
         Y(kineq(2)) = 1.92250e+00_dp
         Y(kineq(3)) = 2.26920e+00_dp
         Y(kineq(4)) = 0.00000e+00_dp
-        ! Y(kineq(5)) = 5.46200e-01_dp
-        Y(kineq(5)) = 1.0924e+00_dp
+        Y(kineq(5)) = 5.46200e-01_dp
+        ! Y(kineq(5)) = 1.0924e+00_dp
         Y(kineq(6)) = 2.19790e+00_dp
         Y(kineq(7)) = 1.64000e+00_dp
         Y(kineq(8)) = 1.71030e+00_dp
@@ -534,6 +533,7 @@ subroutine bblinteg(outputs_1d,outputs_GR,outputs_GR_c,outputs_GR_p,concloc)
         call molar_balance
         call restoreDV
         call save_integration_step
+        ! write(*,*) tout,kinsource(2)
         TOUT = TOUT+timestep
         if (eta==maxeta) exit
     END DO
