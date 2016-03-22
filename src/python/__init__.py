@@ -44,7 +44,7 @@ MODENA_INSTALL_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODENA_WORKING_DIR = os.path.realpath(os.getcwd())
 
 from Strategy import BackwardMappingScriptTask, ModenaFireTask
-from SurrogateModel import CFunction, IndexSet, Workflow2, \
+from SurrogateModel import CFunction, IndexSet, \
     SurrogateModel, ForwardMappingModel, BackwardMappingModel, \
     ModenaFireTask, MODENA_PARSED_URI
 

@@ -62,10 +62,7 @@ surrogate model parameters.
 """
 
 import os
-import modena
-from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, CFunction, IndexSet, ModenaFireTask
-import modena.Strategy as Strategy
-from fireworks import Firework, Workflow, FWAction
+from modena import *
 from fireworks.utilities.fw_utilities import explicit_serialize
 from jinja2 import Template
 

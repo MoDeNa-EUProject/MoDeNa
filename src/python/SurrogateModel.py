@@ -1266,7 +1266,7 @@ class ForwardMappingModel(SurrogateModel):
         """
         Return an empty workflow
         """
-        return Workflow2([])
+        return Workflow([])
 
 
 class BackwardMappingModel(SurrogateModel):
@@ -1321,7 +1321,7 @@ class BackwardMappingModel(SurrogateModel):
 
             tl.append(fw)
 
-        return Workflow2(tl, name='exact tasks for new points')
+        return Workflow(tl, name='exact tasks for new points')
 
 
     def parameterFittingStrategy(self):

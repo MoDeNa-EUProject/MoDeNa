@@ -9,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014-2016 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -35,7 +35,7 @@ Module providing strategies
 @author    Henrik Rusche
 @author    Sigve Karolius
 @author    Mandar Thombre
-@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@copyright 2014-2016, MoDeNa Project. GNU Public License.
 """
 
 import six
@@ -72,83 +72,6 @@ term = Terminal()
 # @addtogroup python_interface_library
 # @{
 
-class Workflow2(Workflow):
-    """Workflow2, expanding on "Workflow" from "FireWorks"
-
-    @brief The class specifically allows the user to add dependencies
-    """
-    def __init__(self, *args, **kwargs):
-        Workflow.__init__(self, *args, **kwargs)
-
-    def addAfterAll(self, wf):
-        """Method which adds a the workflow "wf" as a dependency to the
-        fireworks.
-
-        @param wf "Workflow2" object.
-
-        @var updated_ids 
-        @var root_ids: Root "FireWorks" of this workflow
-        @var leaf_ids: Leaf FireWorks, i.e. those with no children
-        @var my_leaf_ids
-        """
-        updated_ids = []
-
-        root_ids = wf.root_fw_ids
-        leaf_ids = wf.leaf_fw_ids
-
-        my_leaf_ids = self.leaf_fw_ids
-
-        for new_fw in wf.fws:
-            if new_fw.fw_id > 0:
-                raise ValueError(
-                    'FireWorks to add must use a negative fw_id! Got fw_id: '
-                    '{}'.format(
-                        new_fw.fw_id))
-
-            self.id_fw[new_fw.fw_id] = new_fw  # add new_fw to id_fw
-
-            if new_fw.fw_id in leaf_ids:
-                self.links[new_fw.fw_id] = []
-            else:
-                self.links[new_fw.fw_id] = wf.links[new_fw.fw_id]
-            updated_ids.append(new_fw.fw_id)
-
-        for fw_id in my_leaf_ids:
-            self.links[fw_id].extend(root_ids)  # add the root id as my child
-
-        for new_fw in wf.fws:
-            updated_ids = self.refresh(new_fw.fw_id, set(updated_ids))
-
-    def addNoLink(self, wf):
-        """Method adding "Workflow" without dependency."""
-        updated_ids = []
-
-        leaf_ids = wf.leaf_fw_ids
-
-        for new_fw in wf.fws:
-            if new_fw.fw_id > 0:
-                raise ValueError(
-                    'FireWorks to add must use a negative fw_id! Got fw_id: '
-                    '{}'.format(
-                        new_fw.fw_id))
-
-            self.id_fw[new_fw.fw_id] = new_fw  # add new_fw to id_fw
-
-            if new_fw.fw_id in leaf_ids:
-                self.links[new_fw.fw_id] = []
-            else:
-                self.links[new_fw.fw_id] = wf.links[new_fw.fw_id]
-            updated_ids.append(new_fw.fw_id)
-
-        for new_fw in wf.fws:
-            updated_ids = self.refresh(new_fw.fw_id, set(updated_ids))
-
-    def printWf(self):
-        for k, v in self.id_fw.iteritems():
-            print k, v.spec
-        print sorted(self.root_fw_ids)
-        print sorted(self.leaf_fw_ids)
-
 
 class InitialisationStrategy(defaultdict, FWSerializable):
     """Parent class for the initialisation strategies.
@@ -182,10 +105,13 @@ class InitialisationStrategy(defaultdict, FWSerializable):
         p = self.newPoints()
         if len(p):
             wf = model.exactTasks(p)
-            wf.addAfterAll(model.parameterFittingStrategy().workflow(model))
+            wf.append_wf(
+                model.parameterFittingStrategy().workflow(model),
+                wf.leaf_fw_ids
+            )
             return wf
         else:
-            return Workflow2([])
+            return Workflow([])
 
 
     @serialize_fw
@@ -230,7 +156,10 @@ class OutOfBoundsStrategy(defaultdict, FWSerializable):
         @returns wf Workflow2 object.
         """
         wf = model.exactTasks(self.newPoints(model, **kwargs))
-        wf.addAfterAll(model.parameterFittingStrategy().workflow(model))
+        wf.append_wf(
+            model.parameterFittingStrategy().workflow(model),
+            wf.leaf_fw_ids
+        )
         return wf
 
 
@@ -291,7 +220,10 @@ class ImproveErrorStrategy(defaultdict, FWSerializable):
 
     def workflow(self, model, **kwargs):
         wf = model.exactTasks(self.newPoints(model))
-        wf.addAfterAll(model.parameterFittingStrategy().workflow(model))
+        wf.append_wf(
+            model.parameterFittingStrategy().workflow(model),
+            wf.leaf_fw_ids
+        )
         return wf
 
 
@@ -322,7 +254,7 @@ class ParameterFittingStrategy(dict, FWSerializable):
         raise NotImplementedError('newPointsFWAction not implemented!')
 
     def workflow(self, model):
-        return Workflow2(
+        return Workflow(
             [
                 Firework(
                     ParameterFitting(surrogateModelId=model._id),
@@ -466,9 +398,12 @@ class InitialData(InitialisationStrategy):
         t['indices'] = indices
         t['modelId'] = self._id
         fw = Firework(t)
-        wf = Workflow2( [fw], name='initialising to dataset')
+        wf = Workflow( [fw], name='initialising to dataset')
 
-        wf.addAfterAll(model.parameterFittingStrategy().workflow(model))
+        wf.append_wf(
+            model.parameterFittingStrategy().workflow(model),
+            wf.leaf_fw_ids
+        )
 
         return wf
 
@@ -941,8 +876,9 @@ class ModenaFireTask(FireTaskBase):
                 model,
                 outsidePoint= model.outsidePoint
             )
-            wf.addAfterAll(
-                Workflow2([Firework(self)], name='original task')
+            wf.append_wf(
+                Workflow([Firework(self)], name='original task'),
+                wf.leaf_fw_ids
             )
             return FWAction(detours=wf)
 

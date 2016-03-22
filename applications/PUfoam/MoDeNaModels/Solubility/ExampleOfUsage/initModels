@@ -39,8 +39,8 @@ Authors
 Contributors
 '''
 
-from modena import SurrogateModel, Workflow2, MODENA_PARSED_URI
-from fireworks import LaunchPad
+from modena import SurrogateModel, MODENA_PARSED_URI
+from fireworks import LaunchPad, Workflow
 from fireworks.core.rocket_launcher import rapidfire
 
 import Solubility
@@ -49,9 +49,9 @@ import Solubility
 launchpad = LaunchPad(**MODENA_PARSED_URI)
 launchpad.reset('', require_password=False)
 
-initWfs = Workflow2([])
+initWfs = Workflow([])
 for m in SurrogateModel.get_instances():
-    initWfs.addNoLink(m.initialisationStrategy().workflow(m))
+    initWfs.append_wf(m.initialisationStrategy().workflow(m), [])
 
 # store workflow and launch it locally
 launchpad.add_wf(initWfs)

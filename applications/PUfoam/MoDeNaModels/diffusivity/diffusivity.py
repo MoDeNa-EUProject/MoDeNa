@@ -40,18 +40,11 @@ polymer.
 """
 
 import os
-import modena
-from modena import CFunction, IndexSet, Workflow2, \
-    ForwardMappingModel, BackwardMappingModel, SurrogateModel
-import modena.Strategy as Strategy
-from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
-from fireworks import Firework, Workflow, FWAction
+from modena import *
 from fireworks.utilities.fw_utilities import explicit_serialize
-from blessings import Terminal
 from jinja2 import Template
 
-## Create terminal for colour output
-term = Terminal()
+
 ## List of components, for which surrogate model is provided
 species = IndexSet(
     name= 'diffusivity_pol_species',

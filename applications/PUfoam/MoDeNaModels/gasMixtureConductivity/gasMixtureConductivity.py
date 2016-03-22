@@ -39,18 +39,10 @@ blowing agents.
 """
 
 import os
-import modena
-from modena import CFunction, IndexSet, Workflow2, \
-    ForwardMappingModel, BackwardMappingModel, SurrogateModel
-import modena.Strategy as Strategy
-from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
-from fireworks import Firework, Workflow, FWAction
+from modena import *
 from fireworks.utilities.fw_utilities import explicit_serialize
-from blessings import Terminal
 import gasConductivity
 
-## Create terminal for colour output
-term = Terminal()
 ## simple weighted average
 weightedAverageCode=r'''
 #include "modena.h"

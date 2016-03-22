@@ -40,17 +40,8 @@ agents.
 """
 
 import os
-import modena
-from modena import CFunction, IndexSet, Workflow2, \
-    ForwardMappingModel, BackwardMappingModel, SurrogateModel
-import modena.Strategy as Strategy
-from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
-from fireworks import Firework, Workflow, FWAction
+from modena import *
 from fireworks.utilities.fw_utilities import explicit_serialize
-from blessings import Terminal
-
-## Create terminal for colour output
-term = Terminal()
 
 ## List of components, for which surrogate model is provided
 species = IndexSet(
@@ -125,24 +116,4 @@ m_CyP_thermal_conductivity = ForwardMappingModel(
     surrogateFunction=f_gas_thermal_conductivity,
     substituteModels=[],
     parameters=[0.0956e-3, -14.89e-3],
-)
-
-## Surrogate model for thermal conductivity of blowing agent
-#
-# Forward mapping model is used.
-m_O2_thermal_conductivity = ForwardMappingModel(
-    _id='gas_thermal_conductivity[A=O2]',
-    surrogateFunction=f_gas_thermal_conductivity,
-    substituteModels=[],
-    parameters=[7.79027851e-05, 3.08485612e-03],
-)
-
-## Surrogate model for thermal conductivity of blowing agent
-#
-# Forward mapping model is used.
-m_N2_thermal_conductivity = ForwardMappingModel(
-    _id='gas_thermal_conductivity[A=N2]',
-    surrogateFunction=f_gas_thermal_conductivity,
-    substituteModels=[],
-    parameters=[6.93333072e-05, 4.87189502e-03],
 )
