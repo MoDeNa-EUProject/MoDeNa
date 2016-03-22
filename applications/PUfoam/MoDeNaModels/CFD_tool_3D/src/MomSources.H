@@ -141,9 +141,18 @@ if (PBESwitch)
                     double c_1 = wBA_l[celli]*rhoPolyS*1000.0/M_B;
                     double c_2 = wCO2_l[celli]*rhoPolyS*1000.0/M_CO2;
                     double KH1 = (rhoPolyS*LMAX)/(M_B*prsr/1000.0);
-                    double KH2 = (rhoPolyS*wCO2_Max)/(M_CO2*prsr/1000.0);
-                    if (bubbleGrowthMode == "two nodes")
+                    double KH2 = (rhoPolyS*4.4e-4)/(M_CO2*prsr/1000.0);
+                    if (bubbleGrowthMode == "two-nodes")
                     {
+                        Info<< "p_1: " << p_1 << endl;
+                        Info<< "p_2: " << p_2 << endl;
+                        Info<< "c_1: " << c_1 << endl;
+                        Info<< "c_2: " << c_2 << endl;
+                        Info<< "KH1: " << KH1 << endl;
+                        Info<< "KH2: " << KH2 << endl;
+                        Info<< "bubble_radius: " << bubble_radius << endl;
+                        Info<< "c_2 - KH2*p_2:" << (c_2 - KH2*p_2) << endl;
+                        Info<< "T: " << TS[celli] << endl;
                         for (int i = 0; i < nodes; i++)
                         {
                             nodeRadii[i] = nodeRadius(vi[i]);
@@ -189,6 +198,8 @@ if (PBESwitch)
                                 (radiusGrowthBA[i]*RR*TS[celli])/(p_1);
                             volumeGrowthCO2[i] = 
                                 (radiusGrowthCO2[i]*RR*TS[celli])/(p_2);
+                            Info<< "radiusGrowthBA[" << i << "] " << radiusGrowthBA[i] << endl;
+                            Info<< "radiusGrowthCO2[" << i << "] " << radiusGrowthCO2[i] << endl;
                             Info<< "volumeGrowthBA[" << i << "] " << volumeGrowthBA[i] << endl;
                             Info<< "volumeGrowthCO2[" << i << "] " << volumeGrowthCO2[i] << endl;
                             if 
@@ -211,9 +222,91 @@ if (PBESwitch)
                             }
                         }    
                     }
-                    else if (bubbleGrowthMode == "mean radius")
+                    else if (bubbleGrowthMode == "mean-radius")
                     {
+                        Info<< "p_1: " << p_1 << endl;
+                        Info<< "p_2: " << p_2 << endl;
+                        Info<< "c_1: " << c_1 << endl;
+                        Info<< "c_2: " << c_2 << endl;
+                        Info<< "KH1: " << KH1 << endl;
+                        Info<< "KH2: " << KH2 << endl;
+                        Info<< "bubble_radius: " << bubble_radius << endl;
+                        Info<< "c_2 - KH2*p_2:" << (c_2 - KH2*p_2) << endl;
+                        Info<< "T: " << TS[celli] << endl;
 
+                        // double air_g = (mom[1]/(1+mom[1]))*(29.0e-3)*
+                        // set input vector
+                        modena_inputs_set(inputs_bblgr1, Tbblgr1pos, TS[celli]);
+                        modena_inputs_set(inputs_bblgr1, Rbblgr1pos, bubble_radius);
+                        modena_inputs_set(inputs_bblgr1, KH1bblgr1pos, KH1);
+                        modena_inputs_set(inputs_bblgr1, c_1bblgr1pos, c_1);
+                        modena_inputs_set(inputs_bblgr1, p_1bblgr1pos, p_1);
+                        // set input vector
+                        modena_inputs_set(inputs_bblgr2, Tbblgr2pos, TS[celli]);
+                        modena_inputs_set(inputs_bblgr2, Rbblgr2pos, bubble_radius);
+                        modena_inputs_set(inputs_bblgr2, KH2bblgr2pos, KH2);
+                        modena_inputs_set(inputs_bblgr2, c_2bblgr2pos, c_2);
+                        modena_inputs_set(inputs_bblgr2, p_2bblgr2pos, p_2);
+                        // call the bblgr1 model
+                        int ret_bblgr_1 = modena_model_call (bblgr1, inputs_bblgr1, outputs_bblgr1);
+                        if (ret_bblgr_1 != 0)
+                        {
+                            modena_inputs_destroy (inputs_bblgr1);
+                            modena_outputs_destroy (outputs_bblgr1);
+                            modena_model_destroy (bblgr1);
+                            exit(ret_bblgr_1);
+                        }
+                        // call the bblgr2 model
+                        int ret_bblgr_2 = modena_model_call (bblgr2, inputs_bblgr2, outputs_bblgr2);
+                        if (ret_bblgr_2 != 0)
+                        {
+                            modena_inputs_destroy (inputs_bblgr2);
+                            modena_outputs_destroy (outputs_bblgr2);
+                            modena_model_destroy (bblgr2);
+                            exit(ret_bblgr_2);
+                        }
+                        double G1, G2;
+                        for (int i = 0; i < nNodes; i++)
+                        {
+                            volumeGrowthBA[i] = 0.0;
+                            volumeGrowthCO2[i] = 0.0;
+                        }
+                        G1 = modena_outputs_get(outputs_bblgr1, 0);
+                        G2 = modena_outputs_get(outputs_bblgr2, 0);
+                        Info<< "G1: " << G1 << endl;
+                        Info<< "G2: " << G2 << endl;
+
+                        volumeGrowthBA[0] = (G1*RR*TS[celli])/(p_1);
+                        volumeGrowthCO2[0] = (G2*RR*TS[celli])/(p_2);
+                        Info<< "volumeGrowthBA[0]" << volumeGrowthBA[0] << endl;
+                        Info<< "volumeGrowthCO2[0]" << volumeGrowthCO2[0] << endl;
+                        if 
+                        (
+                            volumeGrowthBA[0] < 0.0 
+                         || G1 < 0.0 
+                         || L0 < 1.0e-8
+                        )
+                        {
+                            volumeGrowthBA[0] = 0.0;
+                        }
+                        if 
+                        (
+                            volumeGrowthCO2[0] < 0.0 
+                         || G2 < 0.0 
+                         || CW_0 < 1.0e-8
+                        )
+                        {
+                            volumeGrowthCO2[0] = 0.0;
+                        }
+                    }
+                    else
+                    {
+                        FatalErrorIn(args.executable())
+                        << "Invalid bubble growth mode " << bubbleGrowthMode
+                        << "\nValid modes are: "
+                        << "\ntwo-nodes,"
+                        << "\nmean-radius"
+                        << exit(FatalError);
                     }    
                 }
                 else

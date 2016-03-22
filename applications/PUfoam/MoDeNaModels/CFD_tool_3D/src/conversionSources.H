@@ -325,25 +325,26 @@ if (KineticsModel == "RF-1")
         alphaFoam = alpha2[celli];
         rhoFoam = rho_foam[celli];
         // set input vector
-        modena_inputs_set(inputs_kinetics, Catalyst_1_Pos, Catalyst_1[celli]);
-        modena_inputs_set(inputs_kinetics, CE_A0_Pos, CE_A0[celli]);
-        modena_inputs_set(inputs_kinetics, CE_A1_Pos, CE_A1[celli]);
-        modena_inputs_set(inputs_kinetics, CE_B_Pos, CE_B[celli]);
-        modena_inputs_set(inputs_kinetics, CE_B2_Pos, CE_B2[celli]);
-        modena_inputs_set(inputs_kinetics, CE_I0_Pos, CE_I0[celli]);
-        modena_inputs_set(inputs_kinetics, CE_I1_Pos, CE_I1[celli]);
-        modena_inputs_set(inputs_kinetics, CE_I2_Pos, CE_I2[celli]);
-        modena_inputs_set(inputs_kinetics, CE_PBA_Pos, CE_PBA[celli]);
-        modena_inputs_set(inputs_kinetics, CE_Breac_Pos, CE_Breac[celli]);
-        modena_inputs_set(inputs_kinetics, CE_Areac0_Pos, CE_Areac0[celli]);
-        modena_inputs_set(inputs_kinetics, CE_Areac1_Pos, CE_Areac1[celli]);
-        modena_inputs_set(inputs_kinetics, CE_Ireac0_Pos, CE_Ireac0[celli]);
-        modena_inputs_set(inputs_kinetics, CE_Ireac1_Pos, CE_Ireac1[celli]);
-        modena_inputs_set(inputs_kinetics, CE_Ireac2_Pos, CE_Ireac2[celli]);
+
+        modena_inputs_set(inputs_kinetics, Catalyst_1_Pos, (rhoPoly*(1/scalar(1000))*(1/2.65000e-1)*Catalyst_1[celli]));
+        modena_inputs_set(inputs_kinetics, CE_A0_Pos, (rhoPoly*(1/scalar(1000))*(1/2.65000e-1)*CE_A0[celli]));
+        modena_inputs_set(inputs_kinetics, CE_A1_Pos, (rhoPoly*(1/scalar(1000))*(1/2.65000e-1)*CE_A1[celli]));
+        modena_inputs_set(inputs_kinetics, CE_B_Pos, (rhoPoly*(1/scalar(1000))*(1/2.65000e-1)*CE_B[celli]));
+        modena_inputs_set(inputs_kinetics, CE_B2_Pos, (rhoPoly*(1/scalar(1000))*(1/2.65000e-1)*CE_B2[celli]));
+        modena_inputs_set(inputs_kinetics, CE_I0_Pos, (rhoPoly*(1/scalar(1000))*(1/2.65000e-1)*CE_I0[celli]));
+        modena_inputs_set(inputs_kinetics, CE_I1_Pos, (rhoPoly*(1/scalar(1000))*(1/2.65000e-1)*CE_I1[celli]));
+        modena_inputs_set(inputs_kinetics, CE_I2_Pos, (rhoPoly*(1/scalar(1000))*(1/2.65000e-1)*CE_I2[celli]));
+        modena_inputs_set(inputs_kinetics, CE_PBA_Pos, (rhoPoly*(1/scalar(1000))*(1/2.65000e-1)*CE_PBA[celli]));
+        modena_inputs_set(inputs_kinetics, CE_Breac_Pos, (rhoPoly*(1/scalar(1000))*(1/2.65000e-1)*CE_Breac[celli]));
+        modena_inputs_set(inputs_kinetics, CE_Areac0_Pos, (rhoPoly*(1/scalar(1000))*(1/2.65000e-1)*CE_Areac0[celli]));
+        modena_inputs_set(inputs_kinetics, CE_Areac1_Pos, (rhoPoly*(1/scalar(1000))*(1/2.65000e-1)*CE_Areac1[celli]));
+        modena_inputs_set(inputs_kinetics, CE_Ireac0_Pos, (rhoPoly*(1/scalar(1000))*(1/2.65000e-1)*CE_Ireac0[celli]));
+        modena_inputs_set(inputs_kinetics, CE_Ireac1_Pos, (rhoPoly*(1/scalar(1000))*(1/2.65000e-1)*CE_Ireac1[celli]));
+        modena_inputs_set(inputs_kinetics, CE_Ireac2_Pos, (rhoPoly*(1/scalar(1000))*(1/2.65000e-1)*CE_Ireac2[celli]));
         modena_inputs_set(inputs_kinetics, Bulk_Pos, Bulk[celli]);
         modena_inputs_set(inputs_kinetics, R_1_Pos, R_1[celli]);
         modena_inputs_set(inputs_kinetics, R_1_mass_Pos, R_1_mass[celli]);
-        modena_inputs_set(inputs_kinetics, R_1_temp_RF1_Pos, R_1_temp[celli]);
+        modena_inputs_set(inputs_kinetics, R_1_temp_RF1_Pos, (R_1_temp[celli]-273.15));
         modena_inputs_set(inputs_kinetics, R_1_vol_RF1_Pos, R_1_vol_RF1[celli]);
         // call the model
         int ret_kinetics = 
@@ -357,118 +358,143 @@ if (KineticsModel == "RF-1")
         }
         // source terms for RF-1 
         source_Catalyst_1[celli] = 
-            scalar(1000)*rhoFoam*alphaFoam
+            scalar(1000)*alphaFoam*scalar(2.65000e-1)
             *modena_outputs_get(outputs_kinetics, source_Catalyst_1_Pos);
-        source_Catalyst_1[celli] = 
-            (source_Catalyst_1[celli] < 0.0) ? 0.0 : source_Catalyst_1[celli];
-        
+        // source_Catalyst_1[celli] = 
+        //     (source_Catalyst_1[celli] < 0.0) ? 0.0 : source_Catalyst_1[celli];
+        Info<< "alphaFoam = " << alpha2[celli] << endl;
         source_CE_A0[celli] = 
-            scalar(1000)*rhoFoam*alphaFoam
+            1000.0*alphaFoam*2.65000e-1
             *modena_outputs_get(outputs_kinetics, source_CE_A0_Pos);
-        source_CE_A0[celli] =
-            (source_CE_A0[celli] < 0.0) ? 0.0 : source_CE_A0[celli];
+        Info<< "source_CE_A0[celli] with multiplication: " << source_CE_A0[celli] << endl;
+        Info<< "source_CE_A0[celli] without multiplication: " << modena_outputs_get(outputs_kinetics, source_CE_A0_Pos) << endl; 
+        // source_CE_A0[celli] =
+        //     (source_CE_A0[celli] < 0.0) ? 0.0 : source_CE_A0[celli];
         
         source_CE_A1[celli] = 
-            scalar(1000)*rhoFoam*alphaFoam
+            scalar(1000)*alphaFoam*scalar(2.65000e-1)
             *modena_outputs_get(outputs_kinetics, source_CE_A1_Pos);
-        source_CE_A1[celli] =
-            (source_CE_A1[celli] < 0.0) ? 0.0 : source_CE_A1[celli];
+        // source_CE_A1[celli] =
+        //     (source_CE_A1[celli] < 0.0) ? 0.0 : source_CE_A1[celli];
 
         source_CE_B[celli] = 
-            scalar(1000)*rhoFoam*alphaFoam
+            scalar(1000)*alphaFoam*scalar(2.65000e-1)
             *modena_outputs_get(outputs_kinetics, source_CE_B_Pos);
-        source_CE_B[celli] =
-            (source_CE_B[celli] < 0.0) ? 0.0 : source_CE_B[celli];
+        // source_CE_B[celli] =
+        //     (source_CE_B[celli] < 0.0) ? 0.0 : source_CE_B[celli];
 
         source_CE_B2[celli] = 
-            scalar(1000)*rhoFoam*alphaFoam
+            scalar(1000)*alphaFoam*scalar(2.65000e-1)
             *modena_outputs_get(outputs_kinetics, source_CE_B2_Pos);
-        source_CE_B2[celli] =
-            (source_CE_B2[celli] < 0.0) ? 0.0 : source_CE_B2[celli];
+        // source_CE_B2[celli] =
+        //     (source_CE_B2[celli] < 0.0) ? 0.0 : source_CE_B2[celli];
 
         source_CE_I0[celli] = 
-        scalar(1000)*rhoFoam*alphaFoam
+        scalar(1000)*alphaFoam*scalar(2.65000e-1)
         *modena_outputs_get(outputs_kinetics, source_CE_I0_Pos);
-        source_CE_I0[celli] =
-            (source_CE_I0[celli] < 0.0) ? 0.0 : source_CE_I0[celli];
+        // source_CE_I0[celli] =
+        //     (source_CE_I0[celli] < 0.0) ? 0.0 : source_CE_I0[celli];
         
         source_CE_I1[celli] = 
-            scalar(1000)*rhoFoam*alphaFoam
+            scalar(1000)*alphaFoam*scalar(2.65000e-1)
             *modena_outputs_get(outputs_kinetics, source_CE_I1_Pos);
-        source_CE_I1[celli] =
-            (source_CE_I1[celli] < 0.0) ? 0.0 : source_CE_I1[celli];
+        // source_CE_I1[celli] =
+        //     (source_CE_I1[celli] < 0.0) ? 0.0 : source_CE_I1[celli];
 
         source_CE_I2[celli] = 
-            scalar(1000)*rhoFoam*alphaFoam
+            scalar(1000)*alphaFoam*scalar(2.65000e-1)
             *modena_outputs_get(outputs_kinetics, source_CE_I2_Pos);
-        source_CE_I2[celli] =
-            (source_CE_I2[celli] < 0.0) ? 0.0 : source_CE_I2[celli];
+        // source_CE_I2[celli] =
+        //     (source_CE_I2[celli] < 0.0) ? 0.0 : source_CE_I2[celli];
 
         source_CE_PBA[celli] = 
-            scalar(1000)*rhoFoam*alphaFoam
+            scalar(1000)*scalar(2.65000e-1)*alphaFoam
             *modena_outputs_get(outputs_kinetics, source_CE_PBA_Pos);
-        source_CE_PBA[celli] =
-            (source_CE_PBA[celli] < 0.0) ? 0.0 : source_CE_PBA[celli];
+        // source_CE_PBA[celli] =
+        //     (source_CE_PBA[celli] < 0.0) ? 0.0 : source_CE_PBA[celli];
 
         source_CE_Breac[celli] = 
-            scalar(1000)*rhoFoam*alphaFoam
+            scalar(1000)*alphaFoam*scalar(2.65000e-1)
             *modena_outputs_get(outputs_kinetics, source_CE_Breac_Pos);
-        source_CE_Breac[celli] =
-            (source_CE_Breac[celli] < 0.0) ? 0.0 : source_CE_Breac[celli];
+        // source_CE_Breac[celli] =
+        //     (source_CE_Breac[celli] < 0.0) ? 0.0 : source_CE_Breac[celli];
 
         source_CE_Areac0[celli] = 
-            scalar(1000)*rhoFoam*alphaFoam
+            scalar(1000)*alphaFoam*scalar(2.65000e-1)
             *modena_outputs_get(outputs_kinetics, source_CE_Areac0_Pos);
-        source_CE_Areac0[celli] =
-            (source_CE_Areac0[celli] < 0.0) ? 0.0 : source_CE_Areac0[celli];
+        // source_CE_Areac0[celli] =
+        //     (source_CE_Areac0[celli] < 0.0) ? 0.0 : source_CE_Areac0[celli];
 
         source_CE_Areac1[celli] = 
-            scalar(1000)*rhoFoam*alphaFoam
+            scalar(1000)*alphaFoam*scalar(2.65000e-1)
             *modena_outputs_get(outputs_kinetics, source_CE_Areac1_Pos);
-        source_CE_Areac1[celli] =
-            (source_CE_Areac1[celli] < 0.0) ? 0.0 : source_CE_Areac1[celli];
+        // source_CE_Areac1[celli] =
+        //     (source_CE_Areac1[celli] < 0.0) ? 0.0 : source_CE_Areac1[celli];
 
         source_CE_Ireac0[celli] = 
-            scalar(1000)*rhoFoam*alphaFoam
+            scalar(1000)*alphaFoam*scalar(2.65000e-1)
             *modena_outputs_get(outputs_kinetics, source_CE_Ireac0_Pos);
-        source_CE_Ireac0[celli] =
-            (source_CE_Ireac0[celli] < 0.0) ? 0.0 : source_CE_Ireac0[celli];
+        // source_CE_Ireac0[celli] =
+        //     (source_CE_Ireac0[celli] < 0.0) ? 0.0 : source_CE_Ireac0[celli];
 
         source_CE_Ireac1[celli] = 
-            scalar(1000)*rhoFoam*alphaFoam
+            scalar(1000)*alphaFoam*scalar(2.65000e-1)
             *modena_outputs_get(outputs_kinetics, source_CE_Ireac1_Pos);
-        source_CE_Ireac1[celli] =
-            (source_CE_Ireac1[celli] < 0.0) ? 0.0 : source_CE_Ireac1[celli];
+        // source_CE_Ireac1[celli] =
+        //     (source_CE_Ireac1[celli] < 0.0) ? 0.0 : source_CE_Ireac1[celli];
 
         source_CE_Ireac2[celli] = 
-            scalar(1000)*rhoFoam*alphaFoam
+            scalar(1000)*alphaFoam*scalar(2.65000e-1)
             *modena_outputs_get(outputs_kinetics, source_CE_Ireac2_Pos);
-        source_CE_Ireac2[celli] =
-            (source_CE_Ireac2[celli] < 0.0) ? 0.0 : source_CE_Ireac2[celli];
+        // source_CE_Ireac2[celli] =
+        //     (source_CE_Ireac2[celli] < 0.0) ? 0.0 : source_CE_Ireac2[celli];
 
         source_Bulk[celli] = 
             modena_outputs_get(outputs_kinetics, source_Bulk_Pos);
-        source_Bulk[celli] =
-            (source_Bulk[celli] < 0.0) ? 0.0 : source_Bulk[celli];
+        // source_Bulk[celli] =
+        //     (source_Bulk[celli] < 0.0) ? 0.0 : source_Bulk[celli];
 
         source_R_1[celli] = 
             modena_outputs_get(outputs_kinetics, source_R_1_Pos);
-        source_R_1[celli] =
-            (source_R_1[celli] < 0.0) ? 0.0 : source_R_1[celli];
+        // source_R_1[celli] =
+        //     (source_R_1[celli] < 0.0) ? 0.0 : source_R_1[celli];
 
         source_R_1_mass[celli] = 
             modena_outputs_get(outputs_kinetics, source_R_1_mass_Pos);
-        source_R_1_mass[celli] =
-            (source_R_1_mass[celli] < 0.0) ? 0.0 : source_R_1_mass[celli];
+        // source_R_1_mass[celli] =
+        //     (source_R_1_mass[celli] < 0.0) ? 0.0 : source_R_1_mass[celli];
 
         source_R_1_temp_RF1[celli] = 
             modena_outputs_get(outputs_kinetics, source_R_1_temp_RF1_Pos);
-        source_R_1_temp_RF1[celli] =
-            (source_R_1_temp_RF1[celli] < 0.0) ? 0.0 : source_R_1_temp_RF1[celli];
+        // source_R_1_temp_RF1[celli] =
+        //     (source_R_1_temp_RF1[celli] < 0.0) ? 0.0 : source_R_1_temp_RF1[celli];
 
         source_R_1_vol_RF1[celli] = 
             modena_outputs_get(outputs_kinetics, source_R_1_vol_RF1_Pos);
-        source_R_1_vol_RF1[celli] =
-            (source_R_1_vol_RF1[celli] < 0.0) ? 0.0 : source_R_1_vol_RF1[celli];
+        // source_R_1_vol_RF1[celli] =
+        //     (source_R_1_vol_RF1[celli] < 0.0) ? 0.0 : source_R_1_vol_RF1[celli];
+    
+    // Info<< "source_Catalyst_1[celli] = "    << source_Catalyst_1[celli] << endl;
+    // Info<< "source_CE_A0[celli] = "         << source_CE_A0[celli] << endl;
+    // Info<< "source_CE_A1[celli] = "         << source_CE_A1[celli] << endl;
+    // Info<< "source_CE_B[celli] = "          << source_CE_B[celli] << endl;
+    // Info<< "source_CE_B2[celli] = "         << source_Catalyst_1[celli] << endl;
+    // Info<< "ssource_CE_I0[celli] = "        << source_CE_I0[celli] << endl;
+    // Info<< "source_CE_I0[celli] = "         << source_CE_I0[celli] << endl;
+    // Info<< "source_CE_I1[celli] = "         << source_CE_I1[celli] << endl;
+    // Info<< "source_CE_I2[celli] = "         << source_CE_I2[celli] << endl;
+    // Info<< "source_CE_PBA[celli] = "        << source_CE_PBA[celli] << endl;
+    // Info<< "source_CE_Breac[celli] = "      << source_CE_Breac[celli] << endl;
+    // Info<< "source_CE_Areac0[celli] = "     << source_CE_Areac0[celli] << endl;
+    // Info<< "source_CE_Areac1[celli] = "     << source_CE_Areac1[celli] << endl;
+    // Info<< "source_CE_Ireac0[celli] = "     << source_CE_Ireac0[celli] << endl;
+    // Info<< "source_CE_Ireac1[celli] = "     << source_CE_Ireac1[celli] << endl;
+    // Info<< "source_CE_Ireac2[celli] = "     << source_CE_Ireac2[celli] << endl;
+    // Info<< "source_Bulk[celli] = "          << source_Bulk[celli] << endl;
+    // Info<< "source_R_1[celli] = "           << source_R_1[celli] << endl;
+    // Info<< "source_R_1_mass[celli] = "      << source_R_1_mass[celli] << endl;
+    // Info<< "source_R_1_vol_RF1[celli] = "   << source_R_1_vol_RF1[celli] << endl;
+    Info<< endl;
     }
+
 }
