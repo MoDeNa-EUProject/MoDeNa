@@ -28,7 +28,10 @@ results of the detailed model as closely as possible.
 In order to compile and run the module a fortran compiler, preferably gfortran, needs to be installed. A makefile to compile the
 detailed model code is provided. 
 
+## Compilation and Execution of the detailed model
 
+* Compilation: make 
+* Execution: ./pcsaft
 
 ## Input / Output
 
