@@ -23,8 +23,18 @@ results of the detailed model as closely as possible.
 
 
 ## Prerequisites
-In order to compile and run the module a fortran compiler, preferably gfortran, as well as PETSc 3.4.4 needs to be installed. 
+In order to compile and run the module a fortran compiler, preferably gfortran, as well as PETSc 3.4.5 need to be installed. 
 As there is no backward compatibility of different versions of PETSc, older as well as newer version of PETSc will most likely not work.
+
+
+## Installing PETSc
+PETSc should be configured with the following options:
+./configure --with-cc=gcc --with-fc=gfortran --download-f-blas-lapack --download-mpich -- download-scalapak=yes
+
+## Compiling and running the detailed model code
+
+* Compilation: make DFT
+* Execution: make run_mf
 
 
 ## Input / Output
