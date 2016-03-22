@@ -64,6 +64,19 @@ solvers
 	$wCO2_l;
         relTol           0;
     } 
+// For Kinetics using surrogate model
+    "(Catalyst_1|CE_A0|CE_A1|CE_B|CE_B2|CE_I0|CE_I1|CE_I2|CE_PBA|CE_Breac|CE_Areac0|CE_Areac1|CE_Ireac0|CE_Ireac1|CE_Ireac2|Bulk|R_1|R_1_temp_RF1)"
+    {
+        solver          PBiCG;
+        preconditioner  none;
+        tolerance       1.0e-6;
+        relTol          1.0e-6;
+    }
+    "(Catalyst_1|CE_A0|CE_A1|CE_B|CE_B2|CE_I0|CE_I1|CE_I2|CE_PBA|CE_Breac|CE_Areac0|CE_Areac1|CE_Ireac0|CE_Ireac1|CE_Ireac2|Bulk|R_1|R_1_temp_RF1)Final"
+    {
+        $Catalyst_1;
+        relTol           0;
+    }
 "(alpha.foam*rho_foam)Final"
   {
         solver          PCG;

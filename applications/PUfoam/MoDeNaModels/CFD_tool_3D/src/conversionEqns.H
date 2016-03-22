@@ -134,7 +134,7 @@ if (KineticsModel == "RF-1")
     (
         fvm::ddt(rhoFoamAlpha2,CE_A0)
       + fvm::div(frhoFoamAlpha2,CE_A0)
-     == source_CE_A0
+     == source_CE_A0 
     );
     CE_A0Eqn.relax();
     CE_A0Eqn.solve();

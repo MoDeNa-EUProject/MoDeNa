@@ -2,7 +2,7 @@
 
 # delete everything but the good stuff!
 ls > list
-egrep -v 'constant|system|results|0$|getMeReady.sh|log*|README|run.sh|prep.sh|case.foam' list > list2
+egrep -v 'constant|system|results|0$|getMeReady.sh|workflow.py|log*|README|run.sh|prep.sh|case.foam' list > list2
 mv list2 list
 rm -rf $(<list)
 
@@ -55,6 +55,15 @@ cp -v M5.org M5
 
 rm -v wBA_l
 cp -v wBA_l.org wBA_l
+
+rm -v wCO2_l
+cp -v wCO2_l.org wCO2_l
+
+rm -v wCO2_g
+cp -v wCO2_g.org wCO2_g
+
+rm -v wBA_g
+cp -v wBA_g.org wBA_g
 
 rm -v rho_gas 
 cp -v rho_gas.org rho_gas

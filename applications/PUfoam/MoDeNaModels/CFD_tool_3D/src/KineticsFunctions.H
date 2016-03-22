@@ -180,20 +180,20 @@ double partialPressureCO2
 )
 {
     double pCO2;  
-    if (wCO2_g == 0.0) 
-    {
-        pCO2 = ROOTVSMALL;
-    }
-    else
-    {
+    // if (wCO2_g == 0.0) 
+    // {
+    //     pCO2 = ROOTVSMALL;
+    // }
+    // else
+    // {
         pCO2 = 
         (
-            (wCO2_g/M_CO2)/(wBA_g/M_B + wCO2_g/M_CO2))
-           *(p + 2*surfaceTension/Foam::max(R,ROOTVSMALL)
+            (wCO2_g/M_CO2)/(wBA_g/M_B + wCO2_g/M_CO2)
+           // *(p + 2*surfaceTension/Foam::max(R,ROOTVSMALL)
         );
-    }
+    // }
 
-    return (pCO2);
+    return (1e5*pCO2);
 }
 double partialPressureBA
 (
@@ -202,20 +202,20 @@ double partialPressureBA
 )
 {
     double pBA;
-    if (wBA_g == 0.0)
-    {
-        pBA = ROOTVSMALL;
-    }
-    else
-    {
+    // if (wBA_g == 0.0)
+    // {
+    //     pBA = ROOTVSMALL;
+    // }
+    // else
+    // {
         pBA = 
-        (
+        
             (
-                (wBA_g/M_B)/(wBA_g/M_B + wCO2_g/M_CO2))
-                *(p + 2*surfaceTension/Foam::max(R,ROOTVSMALL))
+                (wBA_g/M_B)/(wBA_g/M_B + wCO2_g/M_CO2)
+                // *(p + 2*surfaceTension/Foam::max(R,ROOTVSMALL))
             );
-    }
-    return (pBA);
+    // }
+    return (1e5*pBA);
 }
 
 double wCO2Max (double &M_CO2, double &M_liq, double &pCO2, double &henryCoeff)

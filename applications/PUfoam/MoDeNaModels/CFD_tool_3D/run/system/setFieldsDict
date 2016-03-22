@@ -55,14 +55,17 @@ defaultFieldValues
     volScalarFieldValue CE_I2 0
     volScalarFieldValue Bulk 0
     volScalarFieldValue R_1_mass 0
-    volScalarFieldValue R_1_temp_RF1 295.85
+    volScalarFieldValue R_1_temp_RF1 333
+    volScalarFieldValue wCO2_g 0
+    volScalarFieldValue wBA_g 0
+    volScalarFieldValue wCO2_l 0
 );
 
 regions
 (
     boxToCell
     {
-        box (0 0 0) (0.1 0.02 0.01);
+        box (0 0 0) (0.1 0.01 0.01);
 
         fieldValues
         (
@@ -107,7 +110,10 @@ regions
         volScalarFieldValue CE_I2 1.71030
         volScalarFieldValue Bulk 4.45849
         volScalarFieldValue R_1_mass 1
-        volScalarFieldValue R_1_temp_RF1 295.85
+        volScalarFieldValue R_1_temp_RF1 333
+        volScalarFieldValue wCO2_g 5.7897e-10
+        volScalarFieldValue wBA_g 1.30294e-8
+        volScalarFieldValue wCO2_l 2.988303e-5
         );
     }
     
