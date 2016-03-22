@@ -18,14 +18,15 @@ FoamFile
 // Fields to be probed. runTime modifiable!
         fields
         (   
-            M0
-            M1
-            rho
-            rho_foam
-            T
-            TS
-            wBA_g
-            wCO2_g
+            CE_I0
+            CE_I1
+            CE_I2
+            CE_A0
+            CE_A1
+            CE_Areac0
+            CE_Areac1
+            CE_B
+            CE_B2
         );
 
 
