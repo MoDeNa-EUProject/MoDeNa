@@ -194,7 +194,7 @@ subroutine SI_DENS (density,w)
              /(1.0+0.33163*t/parame(i,3) +1.0477E-3*(t/parame(i,3))**2 )
      ELSE
         write (*,*) 'define EOS in subroutine: SI_DENS'
-        stop
+        stop 5
      END IF
   END DO
 
@@ -335,7 +335,7 @@ subroutine determine_flash_it
   read (*,*)
 
   IF (nphas /= 2) WRITE (*,*) 'DETERMINE_FLASH_IT: only 2 phases!'
-  IF (nphas /= 2) STOP
+  IF (nphas /= 2) STOP 2
 
   !-----------------------------------------------------------------------------
   ! determine component (max_index) with largest difference in xi of both phases
@@ -636,7 +636,7 @@ subroutine x_summation
 
      ELSE
         WRITE (*,*) 'summation relation not defined'
-        STOP
+        STOP 3
      END IF
 
   END DO
@@ -742,7 +742,7 @@ subroutine flash_alpha
      END DO
   ELSE
      WRITE (*,*) ' FLASH_ALPHA: undefined flash-case'
-     STOP
+     STOP 2
   END IF
 
 end subroutine flash_alpha
@@ -935,8 +935,8 @@ subroutine file_open(filename,file_number)
   IF (filefound) THEN
      OPEN (file_number, FILE = filename)
   ELSE
-     write (*,*) ' FOLLOWING FILE CAN NOT BE OPENED', filename
-     stop
+     write (*,*) ' Solubility Code: FOLLOWING FILE CAN NOT BE OPENED', filename
+     stop 6
   END IF
 
 end subroutine file_open
@@ -964,7 +964,7 @@ subroutine p_calc (pges_transfer, zges)
 
   IF (nphas /= 1 ) THEN
      write (*,*) 'P_CALC: can only be called for single phases'
-     stop
+     stop 5
   ENDIF
 
   IF (eos < 2) THEN
@@ -982,7 +982,7 @@ subroutine p_calc (pges_transfer, zges)
 
   ELSE
      write (*,*) ' subroutine P_CALC not available for cubic EOS'
-     stop
+     stop 6
   END IF
 
 end subroutine p_calc
@@ -1025,7 +1025,7 @@ subroutine dens_calc ( rho_phas )
 
      ELSE
         write (*,*) ' subroutine DENS_CALC not available for cubic EOS'
-        stop
+        stop 6
      END IF
 
   END DO
@@ -1123,7 +1123,7 @@ subroutine CRITICAL ( tc, pc, rhoc )
   ELSE
      write (*,*) ' PURE_CRIT_POINT_ITERATION not available for cubic EOS'
      write (*,*) ' and not for mixtures'
-     stop
+     stop 5
   END IF
 
   nphas = phassav
@@ -1249,7 +1249,7 @@ subroutine fden_calc (fden, rhoi)
 
   ELSE
      write (*,*) ' subroutine FDEN_CALC not available for cubic EOS'
-     stop
+     stop 5
   END IF
 
 end subroutine fden_calc
@@ -1363,7 +1363,7 @@ subroutine error_message ( message_to_screen )
   character (LEN=*)                               :: message_to_screen
 
   write (*,*) message_to_screen
-  stop
+  stop 6
 
 end subroutine error_message
 

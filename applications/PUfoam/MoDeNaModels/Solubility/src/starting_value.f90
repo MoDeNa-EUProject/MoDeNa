@@ -98,8 +98,8 @@ subroutine start_var (converg)
      flashcase = .true.
 
      if ( ncomp > 2 ) then
-        write (*,*) 'SR starting_value requires a defined feed composition for all but binary mixtures'
-        stop
+        write (*,*) 'Solubility Code: SR starting_value requires a defined feed composition for all but binary mixtures'
+        stop 5
      end if
 
      if ( scan_index == 2 ) then
@@ -156,7 +156,7 @@ subroutine scan_compositions ( converg )
   x1_right = 0.0
   converg_overall = 0
   if ( ncomp > 2 ) write (*,*) 'SR scan_compositions only suited for binary systems'
-  if ( ncomp > 2 ) stop
+  if ( ncomp > 2 ) stop 5
 
   do i = 0, steps
 
@@ -351,8 +351,8 @@ subroutine start_var_fixed_composition ( converg )
   real                                    :: phi_1, fmin
   !-----------------------------------------------------------------------------
 
-  if ( sum( xiF(1:ncomp) ) /= 1.0 ) write (*,*) 'define feed composition', sum( xiF(1:ncomp) )
-  if ( sum( xiF(1:ncomp) ) /= 1.0 ) stop
+  if ( sum( xiF(1:ncomp) ) /= 1.0 ) write (*,*) 'Solubility Code: feed composition /= 1.0', sum( xiF(1:ncomp) )
+  if ( sum( xiF(1:ncomp) ) /= 1.0 ) stop 5
 
   xi(1,1:ncomp) = xiF(1:ncomp)
   xi(2,1:ncomp) = xiF(1:ncomp)

@@ -46,8 +46,8 @@ SUBROUTINE para_input
   IF (eos == 1) THEN
      CALL pcsaft_par
   ELSE
-     write (*,*) 'no pure component parameters defined for EOS=',eos
-     stop
+     write (*,*) 'Solubility Code: no pure component parameters defined for EOS=',eos
+     stop 5 
   END IF
 
   DO i = 1, ncomp
@@ -605,7 +605,7 @@ SUBROUTINE pcsaft_par
         IF (pol == 2) parame(i,11)= 2.911
      CASE ('co')
         IF (pol /= 1) write (*,*) 'parameters for co missing'
-        IF (pol /= 1) stop
+        IF (pol /= 1) stop 5
         IF (pol >= 1) mm(i)       = 28.01
         IF (pol >= 1) parame(i,1) = mm(i)*  5.126059746332587E-002  ! 1.43580933494776     
         IF (pol >= 1) parame(i,2) = 3.13556624711756     
@@ -1172,7 +1172,7 @@ SUBROUTINE pcsaft_par
         IF (pol == 2) parame(i,11)= 4.72
      CASE ('fluoromethane')    ! R41
         IF (pol /= 1) write (*,*) 'non-polar parameters missing for fluoromethane'
-        IF (pol /= 1) stop
+        IF (pol /= 1) stop 5
         IF (pol >= 1) mm(i)       =   34.0329000000000     
         IF (pol >= 1) parame(i,1) =   1.94494757526896     
         IF (pol >= 1) parame(i,2) =   2.96858005012635     
@@ -1196,7 +1196,7 @@ SUBROUTINE pcsaft_par
         IF (pol == 2) parame(i,11)= 6.48
      CASE ('difluoromethane')   ! R32
         IF (pol /= 1) write (*,*) 'non-polar parameters missing for difluoromethane'
-        IF (pol /= 1) stop
+        IF (pol /= 1) stop 5
         IF (pol >= 1) mm(i)       = 52.0236             ! PCP-SAFT
         IF (pol >= 1) parame(i,1) = mm(i)*  4.814700934384165E-002  !  2.50478075530028
         IF (pol >= 1) parame(i,2) = 2.79365980535456
@@ -1204,7 +1204,7 @@ SUBROUTINE pcsaft_par
         IF (pol >= 1) parame(i,6) = 1.97850000000000
      CASE ('trifluoromethane')   ! R23
         IF (pol /= 1) write (*,*) 'non-polar parameters missing for trifluoromethane'
-        IF (pol /= 1) stop
+        IF (pol /= 1) stop 5
         IF (pol >= 1) mm(i)       =   70.0138000000000     
         IF (pol >= 1) parame(i,1) =   2.66039274225485     
         IF (pol >= 1) parame(i,2) =   2.82905884530501     
@@ -1217,7 +1217,7 @@ SUBROUTINE pcsaft_par
         parame(i,3) = 292.838632
      CASE ('trichlorofluoromethane')   ! R11
         IF (pol /= 1) write (*,*) 'non-polar parameters missing for trichlorofluoromethane'
-        IF (pol /= 1) stop
+        IF (pol /= 1) stop 5
         IF (pol >= 1) mm(i)       =   137.368000000000     
         IF (pol >= 1) parame(i,1) =   2.28793359008803     
         IF (pol >= 1) parame(i,2) =   3.69013104930876     
@@ -1225,7 +1225,7 @@ SUBROUTINE pcsaft_par
         IF (pol >= 1) parame(i,6) =   0.23225538492979
      CASE ('chlorodifluoromethane')   ! R22   ( CHClF2 or CHF2Cl)
         IF (pol /= 1) write (*,*) 'non-polar parameters missing for chlorodifluoromethane'
-        IF (pol /= 1) stop
+        IF (pol /= 1) stop 5
         IF (pol >= 1) mm(i)       =   86.4684000000000     
         IF (pol >= 1) parame(i,1) =   2.47218586047893     
         IF (pol >= 1) parame(i,2) =   3.13845692489930     
@@ -2649,7 +2649,7 @@ SUBROUTINE pcsaft_par
            !kij(i,j) =  1.641053794134795E-002  ! PCP-SAFT
            !lij(i,j) = -5.850421759950764E-003  ! PCP-SAFT
            if ( num == 0 ) write (*,*) 'calculation with lij only possible with num=1'
-           if ( num == 0 ) stop
+           if ( num == 0 ) stop 5
         ELSE IF(compna(i) == 'acetone'.AND.compna(j) == 'co2')THEN
            kij(i,j) = 0.015  ! PC-SAFT
            IF (pol == 1) kij(i,j) = -0.02  ! PCP-SAFT
@@ -2944,7 +2944,7 @@ SUBROUTINE pcsaft_par
            kij(i,j) = -0.0
         ELSE IF(compna(i) == 'h2o'.AND.compna(j) == 'co2') THEN
            if (pol == 0) kij(i,j) = 0.0030625  ! for T=50C, according to X.Tang
-           ! stop                                ! very T-dependent
+           ! stop 5                                ! very T-dependent
         ELSE IF(compna(i) == 'toluene'.AND.compna(j) == 'acetic-acid') THEN
            kij(i,j) = -0.1
         ELSE IF(compna(i) == 'caproic-acid'.AND.compna(j) == 'cyclohexane') THEN
