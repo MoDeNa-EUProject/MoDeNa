@@ -243,11 +243,15 @@ modena_model_t *modena_model_new
             modelId
         );
 
+<<<<<<< .merge_file_aPEHXq
         if
         (
             PyErr_ExceptionMatches(modena_DoesNotExist)
          || PyErr_ExceptionMatches(modena_ParametersNotValid)
         )
+=======
+        if(PyErr_ExceptionMatches(modena_DoesNotExist) || PyErr_ExceptionMatches(modena_ParametersNotValid) )
+>>>>>>> .merge_file_Kxqbdr
         {
             PyErr_Clear();
 
