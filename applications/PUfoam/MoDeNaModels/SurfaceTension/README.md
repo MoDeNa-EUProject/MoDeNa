@@ -29,7 +29,8 @@ As there is no backward compatibility of different versions of PETSc, older as w
 
 ## Installing PETSc
 PETSc should be configured with the following options:
-./configure --with-cc=gcc --with-fc=gfortran --download-f-blas-lapack --download-mpich -- download-scalapak=yes
+./configure --with-cc=gcc --with-fc=gfortran --download-f-blas-lapack --download-mpich --download-scalapak=yes
+Furthermore, the variables PETSC_DIR and PETSC_ARCH need to be set.
 
 ## Compiling and running the detailed model code
 
