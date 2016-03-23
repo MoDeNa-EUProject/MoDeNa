@@ -1128,7 +1128,7 @@ class SurrogateModel(DynamicDocument):
 
     def callModel(self, inputs):
         """Method for calling the surrogate function.
-        @param inputs (dict) inputs to the surrogate modek
+        @param inputs (dict) inputs to the surrogate model
         @returns outputs (dict) outputs from the surrogate model
         """
         #print 'In callModel', self._id
