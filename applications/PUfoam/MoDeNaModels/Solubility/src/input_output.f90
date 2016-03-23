@@ -84,7 +84,8 @@ SUBROUTINE READ_INPUT
       compna(2) = 'polyol'!'hexane'
       compna(3) = 'mdi'!'butane'
   Else
-      Stop 'PCSAFT: This code is only for systems with 2 or 3 components!'
+      write(*,*) 'Solubility Code: This code is only for systems with 2 or 3 components!'
+      Stop 5 
   End If
 
 

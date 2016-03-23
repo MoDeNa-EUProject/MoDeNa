@@ -137,9 +137,18 @@ external MonitorTimer
                If(user%rank == 0) write(*,*)'Using matrix-free AD Jacobian.'
                !determine local size of shell matrix
                JacLocal = INT(ngrid / user%num_procs) 
-               If(mod(ngrid,user%num_procs) /= 0 ) Stop 'Dimensions and number of cores dont match! mod(ngrid,nc) must equal 0'         
+               If(mod(ngrid,user%num_procs) /= 0 ) Then
+                   write(*,*)'Surface Tension Code: Dimensions and number of cores dont match! mod(ngrid,n_cores) must equal 0'
+                   Stop 5                        
+               End if
+               
                !Make sure that local parts of JacShell have the same size as the local DMDA-Arrays (local size JacShell != user%xm!!)
-               If(JacLocal /= user%xm) Stop 'Shell-Jacobi-Matrix and DMDA have to be parallelized accordingly!!(JacLocal = user%xm)'
+               If(JacLocal /= user%xm) Then
+                   write(*,*)'Surface Tension Code: Shell-Jacobi-Matrix and DMDA have to be parallelized accordingly.'
+!               write(*,*) 'Surface Tension Code: Shell-Jacobi-Matrix and DMDA have to be parallelized accordingly!!(JacLocal = user%xm)'
+                   Stop 6 
+               End If
+               
                call MatCreateShell(PETSC_COMM_WORLD,ncomp*JacLocal,ncomp*JacLocal,ncomp*ngrid,ncomp*ngrid,PETSC_NULL_OBJECT,J,ierr)
                call MatShellSetOperation( J, MATOP_MULT, Jac_Shell_AD, ierr )
                call SNESSetJacobian( snes, J, J, Jac_Matrix_Empty, PETSC_NULL_OBJECT, ierr)
@@ -155,9 +164,9 @@ external MonitorTimer
 
                
            Case (3) !build the complete Jacobi matrix via AD
-               If(user%rank == 0) write(*,*)'Using AD-generated Jacobian.'
-               write(*,*)'Funktioniert noch nicht!' 
-               stop              
+               If(user%rank == 0) write(*,*)'Surface Tension Code: Using AD-generated Jacobian.'
+               write(*,*)'Not working yet!' 
+               stop 6              
                !create Matrix that has the appropriate sparsity pattern for the da
                !But that also means that when values are inserted in positions that
                !dont fit this structure, an error occurs!
