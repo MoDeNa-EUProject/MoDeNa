@@ -1216,15 +1216,6 @@ class SurrogateModel(DynamicDocument):
         collection = self._get_collection()
         doc = collection.find_one({ '_cls': { '$exists': False}})
         modName = re.search('(.*)(\[.*\])?', doc['_id']).group(1)
-<<<<<<< .merge_file_KUc3ls
-        #TODO: This solution still requires the user to give the modena
-        #      application the same name as the surrogate model '_id'
-        try:
-            mod = __import__(modName)
-            return (i for i in modena.BackwardMappingModel.get_instances() if i._id == modName).next()
-        except ImportError:
-            print "Could not find MoDeNa model '%s'" %(modName)
-=======
         # TODO:
         # Give a better name to the variable a model is imported from
         try:
@@ -1232,7 +1223,6 @@ class SurrogateModel(DynamicDocument):
             return (m for m in modena.BackwardMappingModel.get_instances() if m._id == modName).next()
         except ImportError:
             print "MoDeNa framework error: could not find  '%s' " %(modName)
->>>>>>> .merge_file_W4PrTr
 
     @classmethod
     def get_instances(self):

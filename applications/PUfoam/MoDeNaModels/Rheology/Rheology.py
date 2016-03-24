@@ -73,7 +73,7 @@ class RheologyExactTask(ModenaFireTask):
 
 
         # Execute the detailed model
-        ret = os.system('../src/rheologyexactdummy')
+        ret = os.system(os.path.dirname(os.path.abspath(__file__)) + '/src/rheologyexactdummy')
         # This enables backward mapping capabilities (not needed in this example)
         self.handleReturnCode(ret)
 
