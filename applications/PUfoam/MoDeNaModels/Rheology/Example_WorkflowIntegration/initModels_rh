@@ -44,13 +44,13 @@ from modena import SurrogateModel, Workflow2, MODENA_PARSED_URI
 from fireworks import LaunchPad
 from fireworks.core.rocket_launcher import rapidfire
 
-import Rheology
+import Rheology_Arrhenius
 
 # set up the LaunchPad and reset it
 launchpad = LaunchPad(**MODENA_PARSED_URI)
 launchpad.reset('', require_password=False)
 
-m = Rheology.m
+m = Rheology_Arrhenius.m
 initWfs = m.initialisationStrategy().workflow(m)
 
 # store workflow and launch it locally
