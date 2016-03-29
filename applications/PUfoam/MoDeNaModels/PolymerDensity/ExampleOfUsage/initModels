@@ -39,17 +39,15 @@ Authors
 Contributors
 '''
 
-import modena
 from modena import SurrogateModel
-from modena.Strategy import Workflow2
-import PolymerDensity
+from modena.SurrogateModel import Workflow2, MODENA_PARSED_URI
 from fireworks import LaunchPad
 from fireworks.core.rocket_launcher import rapidfire
-from fireworks.utilities.fw_serializers import load_object
 
+import PolymerDensity
 
 # set up the LaunchPad and reset it
-launchpad = LaunchPad()
+launchpad = LaunchPad(**MODENA_PARSED_URI)
 launchpad.reset('', require_password=False)
 
 initWfs = Workflow2([])
@@ -59,4 +57,3 @@ for m in SurrogateModel.get_instances():
 # store workflow and launch it locally
 launchpad.add_wf(initWfs)
 rapidfire(launchpad)
-

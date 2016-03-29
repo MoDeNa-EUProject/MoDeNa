@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 '''@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
@@ -10,7 +10,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014-2016 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -36,19 +36,17 @@ data points and fits the surrogate model. Then the model is inserted into
 the database.
 
 @author Henrik Rusche
-@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@copyright 2014-2016, MoDeNa Project. GNU Public License.
 """
 
-from modena import SurrogateModel
-from modena.Strategy import Workflow2
-import flowRate_idealGas
-from fireworks import LaunchPad, Workflow
+from modena import SurrogateModel, Workflow2, MODENA_PARSED_URI
+from fireworks import LaunchPad
 from fireworks.core.rocket_launcher import rapidfire
-from fireworks.utilities.fw_serializers import load_object
 
+import flowRate_idealGas
 
 # set up the LaunchPad and reset it
-launchpad = LaunchPad()
+launchpad = LaunchPad(**MODENA_PARSED_URI)
 launchpad.reset('', require_password=False)
 
 initWfs = Workflow2([])
@@ -58,6 +56,3 @@ for m in SurrogateModel.get_instances():
 # store workflow and launch it locally
 launchpad.add_wf(initWfs)
 rapidfire(launchpad)
-
-##
-# @} # end of examples

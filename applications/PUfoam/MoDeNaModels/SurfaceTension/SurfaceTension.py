@@ -34,24 +34,24 @@ Python library of FireTasks
 This is the Surface Tension python module. Basically, it contains the following:
 
 The FireTask which controls the call of the detailed model. This detailed model is called
-at the very beginning of the simulation in order to generate initial data points 
+at the very beginning of the simulation in order to generate initial data points
 which can be used to fit the parameters of the surrogate model and during a running simulation
 as soon as the Surface Tension model is called with input parameters which lie outside the range
 the parameters of the surrogate model was so far fitted for. This FireTask is stored in the class
 "SurfaceTensionExactSim" and a more detailed description of the detailed model can be found
 in the description of this class.
 
-Furthermore, this module contains the code of the surrogate model function as well as the 
+Furthermore, this module contains the code of the surrogate model function as well as the
 definitions of its input and output values and its fittable parameters. Care should be
 taken to set reasonable bounds for these variables.
 
-Also, this module contains the backward mapping model. This model consits of the 
+Also, this module contains the backward mapping model. This model consits of the
 surrogate model function, an initialisation strategy, the out of bounds strategy and the
 parameter fitting strategy. The initialisation strategy defines the initial data points where the
 detailed model will be evaluated at simulation start for an initial fit of the surrogate model parameters.
-The out of bounds strategy determines, how many new points and where to place these new 
-points, once the Surface Tension model is called for input values outside of the 
-fitted range. The parameter fitting strategy defines tolerances and maximal iterations 
+The out of bounds strategy determines, how many new points and where to place these new
+points, once the Surface Tension model is called for input values outside of the
+fitted range. The parameter fitting strategy defines tolerances and maximal iterations
 which are passed to the numerical solver which performs the actual fitting of the
 surrogate model parameters.
 
@@ -80,12 +80,12 @@ __date__ = 'Sep 4, 2014'
 
 blowing_agents = IndexSet(
     name= 'blowing_agents',
-    names= [ 'air', 'CO2']
+    names= [ 'AIR', 'CO2']
 )
 
 monomers = IndexSet(
     name = 'monomers',
-    names = ['PU', 'THF', 'hexane']
+    names = ['PU', 'THF', 'HEXANE']
 )
 
 
@@ -95,13 +95,13 @@ monomers = IndexSet(
 class SurfaceTensionExactSim(ModenaFireTask):
     """
     This FireTask controls the execution of the detailed model of the Surface Tension model.
-    The detailed model is a density functional theory implementation based on PC-SAFT. A 
+    The detailed model is a density functional theory implementation based on PC-SAFT. A
     detailed description of this model can be found in Deliverable 1.3 on the MoDeNa website.
-    
+
     In order to start the detailed model, the input values for the model are first written to the
     file "in.txt". The detailed model code picks them up from this file and performs the according
     calculation. Once it is done, the output value is written to the file "out.txt". This FireTask
-    then reads in the calculated surface tension from "out.txt" and inserts this value into the 
+    then reads in the calculated surface tension from "out.txt" and inserts this value into the
     database.
     """
 
@@ -211,7 +211,7 @@ outputs[0] = P0 + T*P1 + P2*T*T;
 )
 
 m = BackwardMappingModel(
-    _id= 'SurfaceTension[A=AIR,B=THF]',    
+    _id= 'SurfaceTension[A=AIR,B=THF]',
     surrogateFunction= f,
     exactTask= SurfaceTensionExactSim(),
     substituteModels= [ ],
@@ -234,3 +234,26 @@ m = BackwardMappingModel(
     ),
 )
 
+m2 = BackwardMappingModel(
+    _id= 'SurfaceTension[A=CO2,B=PU]',
+    surrogateFunction= f,
+    exactTask= SurfaceTensionExactSim(),
+    substituteModels= [ ],
+    initialisationStrategy= Strategy.InitialPoints(
+        initialPoints=
+        {
+            'T': [270.0, 290.0, 300.0],
+        },
+    ),
+    outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(
+        nNewPoints= 4
+    ),
+    parameterFittingStrategy= Strategy.NonLinFitWithErrorContol(
+        testDataPercentage= 0.2,
+        maxError= 30.0,
+        improveErrorStrategy= Strategy.StochasticSampling(
+            nNewPoints= 2
+        ),
+        maxIterations= 5 # Currently not used
+    ),
+)

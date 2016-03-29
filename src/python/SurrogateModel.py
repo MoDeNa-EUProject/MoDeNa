@@ -51,6 +51,7 @@ import random
 from mongoengine import *
 from mongoengine.document import TopLevelDocumentMetaclass
 from mongoengine.base import BaseField
+import pymongo
 from fireworks import Firework, FireTaskBase
 from collections import defaultdict
 import jinja2
@@ -60,6 +61,11 @@ import jinja2
 MODENA_URI = os.environ.get('MODENA_URI', 'mongodb://localhost:27017/test')
 (uri, database) = MODENA_URI.rsplit('/', 1)
 connect(database, host=MODENA_URI)
+
+MODENA_PARSED_URI = pymongo.uri_parser.parse_uri(MODENA_URI, default_port=27017)
+(MODENA_PARSED_URI['host'], MODENA_PARSED_URI['port']) = MODENA_PARSED_URI.pop('nodelist')[0]
+MODENA_PARSED_URI['name'] = MODENA_PARSED_URI.pop('database')
+del MODENA_PARSED_URI['collection'], MODENA_PARSED_URI['options']
 
 ##
 # @addtogroup python_interface_library
@@ -370,7 +376,7 @@ class SurrogateFunction(DynamicDocument):
             for k, v in kwargs['inputs'].iteritems():
                 if 'index' in v:
                     v['argPos'] = nInp
-                    nInp += len(v['index'])
+                    nInp += v['index'].iterator_size()
 
             for k, v in kwargs['inputs'].iteritems():
                 if not isinstance(v, MinMaxArgPosOpt):
@@ -520,7 +526,7 @@ class CFunction(SurrogateFunction):
     {% if 'index' in v %}
     const size_t {{k}}_argPos = {{v.argPos}};
     const double* {{k}} = &inputs[{{k}}_argPos];
-    const size_t {{k}}_size = {{ v.index|length }};
+    const size_t {{k}}_size = {{ v.index.iterator_size() }};
     {% else %}
     const size_t {{k}}_argPos = {{v['argPos']}};
     const double {{k}} = inputs[{{k}}_argPos];
@@ -692,7 +698,6 @@ void {name}
         else:
             return model
 
-
 class SurrogateModel(DynamicDocument):
     """Base class for surrogate models.
 
@@ -814,7 +819,9 @@ class SurrogateModel(DynamicDocument):
             self.save()
 
         #for k, v in self.inputs.iteritems():
-        #    print k, self.inputs_argPos(k)
+        #    print 'inputs in model', k, self.inputs_argPos(k)
+        #for k, v in self.surrogateFunction.inputs_iterAll():
+        #    print 'inputs in function', k, v.argPos
         #print('parameters = [%s]' % ', '.join('%g' % v for v in self.parameters))
 
 
@@ -917,7 +924,7 @@ class SurrogateModel(DynamicDocument):
                     v.max = min(v.max, i[k].max)
                 else:
                     i[k] = new(v.min, v.max)
-                
+
         return i
 
 
@@ -1121,7 +1128,7 @@ class SurrogateModel(DynamicDocument):
 
     def callModel(self, inputs):
         """Method for calling the surrogate function.
-        @param inputs (dict) inputs to the surrogate modek
+        @param inputs (dict) inputs to the surrogate model
         @returns outputs (dict) outputs from the surrogate model
         """
         #print 'In callModel', self._id
@@ -1203,18 +1210,19 @@ class SurrogateModel(DynamicDocument):
             __raw__={'outsidePoint': { '$exists': True}}
         ).first()
 
-
     @classmethod
     def loadFromModule(self):
         """Method importing a surrogate model module."""
         collection = self._get_collection()
         doc = collection.find_one({ '_cls': { '$exists': False}})
         modName = re.search('(.*)(\[.*\])?', doc['_id']).group(1)
-        mod = __import__(modName)
         # TODO:
         # Give a better name to the variable a model is imported from
-        return mod.m
-
+        try:
+            mod = __import__(modName)
+            return (m for m in modena.BackwardMappingModel.get_instances() if m._id == modName).next()
+        except ImportError:
+            print "MoDeNa framework error: could not find  '%s' " %(modName)
 
     @classmethod
     def get_instances(self):

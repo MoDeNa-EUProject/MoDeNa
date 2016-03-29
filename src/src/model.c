@@ -79,8 +79,10 @@ void modena_substitute_model_calculate_maps
     Py_DECREF(pMaps);
 }
 
-void modena_model_read_substituteModels(modena_model_t *self)
+bool modena_model_read_substituteModels(modena_model_t *self)
 {
+    //printf("In modena_model_read_substituteModels\n");
+
     PyObject *pSubstituteModels = PyObject_GetAttrString
     (
         self->pModel, "substituteModels"
@@ -111,7 +113,52 @@ void modena_model_read_substituteModels(modena_model_t *self)
         );
         Py_DECREF(args);
         Py_DECREF(kw);
-        if(!self->substituteModels[i].model){ Modena_PyErr_Print(); }
+
+        if(!self->substituteModels[i].model)
+        {
+            if
+            (
+                PyErr_ExceptionMatches(modena_DoesNotExist)
+             || PyErr_ExceptionMatches(modena_ParametersNotValid)
+            )
+            {
+                PyObject *pModelId =
+                    PyObject_GetAttrString(PyList_GET_ITEM(pSeq, i), "_id");
+                if(!pModelId){ Modena_PyErr_Print(); }
+                const char* modelId = PyString_AsString(pModelId);
+                Py_DECREF(pModelId);
+
+                fprintf
+                (
+                    stderr,
+                    "Loading model %s failed - Attempting automatic initialisation\n",
+                    modelId
+                );
+
+                PyObject *pRet = PyObject_CallMethod
+                (
+                    modena_SurrogateModel,
+                    "exceptionLoad",
+                    "(z)",
+                    modelId
+                );
+                if(!pRet){ Modena_PyErr_Print(); }
+                int ret = PyInt_AsLong(pRet);
+                Py_DECREF(pRet);
+
+                modena_error_code = ret;
+
+                Py_DECREF(pSeq);
+                Py_DECREF(pSubstituteModels);
+
+                return false;
+            }
+            else
+            {
+                Modena_PyErr_Print();
+                return false;
+            }
+        }
 
         self->substituteModels[i].inputs = modena_inputs_new
         (
@@ -133,6 +180,8 @@ void modena_model_read_substituteModels(modena_model_t *self)
     Py_DECREF(pSeq);
     Py_DECREF(pSubstituteModels);
     if(PyErr_Occurred()){ Modena_PyErr_Print(); }
+
+    return true;
 }
 
 void modena_model_get_minMax
@@ -173,15 +222,6 @@ modena_model_t *modena_model_new
     const char *modelId
 )
 {
-    // Initialize the Python Interpreter
-    if(!Py_IsInitialized())
-    {
-        Py_Initialize();
-    }
-
-    // Initialize this module
-    initlibmodena();
-
     PyObject *args = PyTuple_New(0);
     PyObject *kw = Py_BuildValue("{s:s}", "modelId", modelId);
 
@@ -203,7 +243,11 @@ modena_model_t *modena_model_new
             modelId
         );
 
-        if(PyErr_ExceptionMatches(modena_DoesNotExist))
+        if
+        (
+            PyErr_ExceptionMatches(modena_DoesNotExist)
+         || PyErr_ExceptionMatches(modena_ParametersNotValid)
+        )
         {
             PyErr_Clear();
 
@@ -315,9 +359,10 @@ int modena_substitute_model_call
         /*
         printf
         (
-            "i%zu <- ip%zu\n",
+            "i%zu <- ip%zu (%g)\n",
             sm->map_inputs[2*j+1],
-            sm->map_inputs[2*j]
+            sm->map_inputs[2*j],
+            inputs->inputs[sm->map_inputs[2*j]]
         );
         */
         sm->inputs->inputs[sm->map_inputs[2*j+1]] =
@@ -325,16 +370,17 @@ int modena_substitute_model_call
     }
 
     int ret = modena_model_call(sm->model, sm->inputs, sm->outputs);
-    if(ret){ return ret; }
+    if(ret){ return ret; }	
 
     for(j = 0; j < sm->map_outputs_size; j++)
     {
         /*
         printf
         (
-            "ip%zu <- o%zu\n",
+            "ip%zu <- o%zu (%g)\n",
             sm->map_outputs[2*j+1],
-            sm->map_outputs[2*j]
+            sm->map_outputs[2*j],
+            sm->outputs->outputs[sm->map_outputs[2*j]]
         );
         */
         inputs->inputs[sm->map_outputs[2*j+1]] =
@@ -504,7 +550,7 @@ void modena_model_destroy(modena_model_t *self)
     size_t j;
     for(j = 0; j < self->substituteModels_size; j++)
     {
-        Py_DECREF(self->substituteModels[j].model);
+        Py_XDECREF(self->substituteModels[j].model);
         modena_inputs_destroy(self->substituteModels[j].inputs);
         modena_outputs_destroy(self->substituteModels[j].outputs);
         free(self->substituteModels[j].map_inputs);
@@ -714,7 +760,10 @@ static int modena_model_t_init
     self->outputs_size = PyDict_Size(pOutputs);
     Py_DECREF(pOutputs);
 
-    modena_model_read_substituteModels(self);
+    if(!modena_model_read_substituteModels(self))
+    {
+        return -1;
+    }
 
     // Avoiding double indirection in modena_model_call
     // Use modena_function_new to construct, then copy function pointer

@@ -54,22 +54,17 @@ class FoamConductivityExactTask(ModenaFireTask):
     A FireTask that starts a microscopic code and updates the database.
     """
     def task(self, fw_spec):
-
-        # print self['point']
         eps = self['point']['eps']
         dcell = self['point']['dcell']
         fstrut = self['point']['fstrut']
         temp = self['point']['T']
         xCO2 = self['point']['x[CO2]']
-        xAir = self['point']['x[Air]']
         xCyP = self['point']['x[CyP]']
-        # print xCO2,xAir,xCyP
-
-        # xCO2=0.3
-        # xAir=0.3
-        # xCyP=0.4
+        xO2 = self['point']['x[O2]']
+        xN2 = self['point']['x[N2]']
+        xAir = xN2+xO2
         # Write input
-        f = open('inputs.in', 'w')
+        f = open('foamConductivity.in', 'w')
         f.write('{0:.6e}\n'.format(temp+1))
         f.write('{0:.6e}\n'.format(temp-1))
         f.write('{0:.6e}\t{1:.6e}\t{2:.6e}\n'.format(xCO2,xAir,xCyP))
@@ -89,24 +84,24 @@ class FoamConductivityExactTask(ModenaFireTask):
         f.write('t\n')
         f.write('0.2\n')
         f.write('10\n')
+        f.write('f\n')
+        f.write('PeriodicRVEBoxStruts.vtk\n')
         f.close()
-
         # Execute the detailed model
         # path to **this** file + /src/...
         # will break if distributed computing
         os.system(os.path.dirname(os.path.abspath(__file__))+'/src/kfoam')
-
         # Analyse output
         # os.getcwd() returns the path to the "launcher" directory
         try:
-            FILE = open(os.getcwd()+'/outputs.out','r')
+            FILE = open(os.getcwd()+'/foamConductivity.out','r')
         except IOError:
             raise IOError("File not found")
 
         self['point']['kfoam'] = float(FILE.readline())
 
-        os.remove('inputs.in')
-        os.remove('outputs.out')
+        os.remove('foamConductivity.in')
+        os.remove('foamConductivity.out')
 
 ## Surrogate function for thermal conductivity of the foam.
 #
@@ -166,12 +161,16 @@ void tcfoam_SM
 )
 
 # use input file to Foam aging application to initialize with reasonable data.
-fname='input.in'
+fname='foamAging.in'
 try:
-    f = open(fname,'r')
-except IOError:
     f = open(os.getcwd()+'/../'+fname,'r')
+except IOError:
+    try:
+        f = open(os.getcwd()+'/'+fname,'r')
+    except IOError:
+        f = open(os.getcwd()+'/example_inputs/'+fname,'r')
 
+a=f.readline()
 a=f.readline()
 a=f.readline()
 a=f.readline()
@@ -216,8 +215,9 @@ initialPoints_foamConductivity_auto = {
     'fstrut': setIP(fstrut0),
     'T': setIP(T0),
     'x[CO2]': setIP(xCO20),
-    'x[Air]': setIP(xAir0),
     'x[CyP]': setIP(xCyP0),
+    'x[O2]': setIP(xAir0*0.21),
+    'x[N2]': setIP(xAir0*0.79),
 }
 
 ## Surrogate model for foam conductivity
@@ -251,5 +251,7 @@ m_foamConductivity = BackwardMappingModel(
 #
 # For the case, when only foam conductivity and no aging is needed.
 m_simulation = Strategy.BackwardMappingScriptTask(
-    script=os.path.dirname(os.path.abspath(__file__))+'/src/kfoam'
+    script=os.path.dirname(os.path.abspath(__file__))+'/src/kfoam' +
+        ' && cp foamConductivity.out ../results/' +
+        ' && cp hahtf.out ../results/'
 )

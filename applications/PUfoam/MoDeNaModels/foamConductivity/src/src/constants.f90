@@ -22,8 +22,11 @@ module constants
                                         !<foam has no walls if fs>1-struttol
     complex(dp), parameter :: iu=(0.0e0_dp,1.0e0_dp)       !<imaginary constant
     logical  :: &
-        wdist,&                         !<use wall thickness distribution
-        testing=.false.                 !<true disables calculation of radiation
+        wdist,&               !<use wall thickness distribution
+        testing=.false.,&      !<true disables calculation of radiation
+        numcond               !<calcualte effective conductivity numerically
+    character(len=80) :: &
+        structureName         !<name of the file with morphology
     integer  :: &
         mfi,&                 !<main file index
         nrays,&               !<number of testing rays
@@ -31,7 +34,8 @@ module constants
         nbox,&                !<number of gray boxes
         morph_input           !<morphology input
                               !<1=wall thickness, 2=strut content,
-                              !<3=strut diameter (3 is recommended others can
+                              !<3=strut diameter, 4==strut content (alternative)
+                              !<(3 is recommended others can
                               !<have multiple solutions)
     real(dp) :: lambda,&      !<wavelength
         t1,t2,&               !<temperatures at boundaries
@@ -45,6 +49,7 @@ module constants
         eqc,&                 !<equivalent conductivity
         eqc_ross,&            !<Rosseland equivalent conductivity
         effc,&                !<effective conductivity (only conduction)
+        effc_num,&            !<effective conductivity from numerical simulation
         kgas,&                !<gas conductivity
         ksol,&                !<solid conductivity
         krad,&                !<radiative conductivity

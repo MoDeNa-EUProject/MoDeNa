@@ -46,6 +46,8 @@ subroutine equcond(keq,ystate,neq,eps,fstrut,temp)
     kg(3)=oxyConductivity(temp)
     kg(4)=cypConductivity(temp)
     yg=(/xcd,0.79_dp*xair,0.21_dp*xair,xcyp/)
+    ! write(*,*) yg
+    ! write(*,*) 'x argPos:', kfoamXCO2pos, kfoamXCyPpos, kfoamXO2pos, kfoamXN2pos
     ! yg=(/0.0_dp,0.79_dp*0.5_dp,0.21_dp*0.5_dp,0.5_dp/)
     cpg(1)=cdHeatCapacity(temp)
     cpg(2)=nitrHeatCapacity(temp)
@@ -67,19 +69,29 @@ subroutine equcond(keq,ystate,neq,eps,fstrut,temp)
     ! write(*,*) kg
     ! write(*,*) "kgas: ", kgas
     ! stop
+    ! write(*,*) 'eps: ',eps
+    ! write(*,*) 'dcell: ',dcell
+    ! write(*,*) 'fstrut: ',fstrut
+    ! write(*,*) 'temp: ',temp
+    ! write(*,*) 'xcd: ',xcd
+    ! write(*,*) 'xair: ',xair
+    ! write(*,*) 'xcyp: ',xcyp
     call modena_inputs_set(kfoamInputs, kfoamEpspos, eps)
     call modena_inputs_set(kfoamInputs, kfoamDcellpos, dcell)
     call modena_inputs_set(kfoamInputs, kfoamFstrutpos, fstrut)
     ! call modena_inputs_set(kfoamInputs, kfoamKgaspos, kgas)
     call modena_inputs_set(kfoamInputs, kfoamTemppos, temp)
     call modena_inputs_set(kfoamInputs, kfoamXCO2pos, xcd)
-    call modena_inputs_set(kfoamInputs, kfoamXAirpos, xair)
-    call modena_inputs_set(kfoamInputs, kfoamXCyPpos, xcyp)
+    call modena_inputs_set(kfoamInputs, kfoamXCyPpos, xCyP)
+    call modena_inputs_set(kfoamInputs, kfoamXO2pos, xAir*0.21_dp)
+    call modena_inputs_set(kfoamInputs, kfoamXN2pos, xAir*0.79_dp)
     ret = modena_model_call (kfoamModena, kfoamInputs, kfoamOutputs)
     if (modena_error_occurred()) then
         call exit(modena_error())
     endif
     keq = modena_outputs_get(kfoamOutputs, 0_c_size_t); !fetch results
+    ! write(*,*) keq
+    ! stop
 end subroutine equcond
 !***********************************END****************************************
 
@@ -173,7 +185,7 @@ real(dp) function lindsayBromley(k,yin,Tb,cp,M,T) result(kmix)
     n=size(k)
     allocate(y(n),cv(n),S(n),gam(n),A(n,n))
     y=yin
-    if (minval(y)<0) stop 'Input molar fractions to extWassiljewa &
+    if (minval(y)<0) stop 'Input molar fractions to lindsayBromley &
         cannot be negative.'
     y=y/sum(y)
     do i=1,n
@@ -221,7 +233,7 @@ real(dp) function pandeyPrajapati(k,yin,Tb,M,T) result(kmix)
     n=size(k)
     allocate(y(n),S(n),A(n,n))
     y=yin
-    if (minval(y)<0) stop 'Input molar fractions to extWassiljewa &
+    if (minval(y)<0) stop 'Input molar fractions to pandeyPrajapati &
         cannot be negative.'
     y=y/sum(y)
     do i=1,n

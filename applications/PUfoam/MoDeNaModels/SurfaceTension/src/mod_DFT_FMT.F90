@@ -1,4 +1,5 @@
-!>This file contains the subroutines which calculate the contribution of
+!> \file mod_DFT_FMT.F90
+!!This file contains the subroutines which calculate the contribution of
 !!volume exclusion to the Helmholtz energy functional. 
 
 
@@ -79,7 +80,11 @@ Do k=1,ncomp
     
        If( ( zp(i)-zp(j+1) ) < d2  .and. ( zp(i) - zp(j) ) >= d2   ) Then !the position of j+1 is already within i-d/2 while j is still outside this range in this case, the integration steplength (dz) is just the distance, which j+1 overlaps with i-d/2 and what is integrated is the interpolated value of the integrand
 
-           If(n/= 1) stop 'n /=1 in FMT_Weighted_Densities' !here always n=1!
+           If(n/= 1) Then 
+               write(*,*)'Surface Tension Code: n /=1 in FMT_Weighted_Densities' !here always n=1!
+               stop 5
+           End If    
+
            zz = zp(j) - zp(i)                    !distance between grid points j and i
            dz = zp(j+1) - (zp(i) - d2)           !the part of the intervall between zp(j) and zp(j+1) which is already within i-d/2
            !if(dz < epsilon(dz)) dz = epsilon(dz) !bei unguenstiger Kombination von sig und ngrid kann dz unter Machinengenauigkeit epsilon liegen, dann ist x(2) = x(1) + dz = x(1) -> das fuehrt zu Abbruch in Spline Interpolation           
@@ -125,7 +130,10 @@ Do k=1,ncomp
     xlo = x_int(1)
     xhi = x_int(n)
 
-    If(n > NMAX) stop 'Increase NMAX in FMT_Weighted_Densities (auch in AD Routine!!)'
+    If(n > NMAX) Then
+        write(*,*) 'Increase NMAX in FMT_Weighted_Densities (also in AD Routine!!)'
+        stop 5 
+    End If    
 
     call spline ( x_int, n2_int, n, 1.E30, 1.E30, y2_n2 )
     call spline ( x_int, n3_int, n, 1.E30, 1.E30, y2_n3 )
@@ -174,8 +182,10 @@ Do i=user%xs-maxval((fa(1:ncomp)+1)/2),user%xe+maxval((fa(1:ncomp)+1)/2)
     zms2 = zms*zms
     zms3 = zms2*zms
     logzms = log(zms)
-    if(isnan(logzms)) stop 'zms < 0, log(zms) undefined FMT_Weighted_Densities'    
-    
+    if(isnan(logzms)) Then
+        write(*,*)'Surface Tension Code: zms < 0, log(zms) undefined FMT_Weighted_Densities'
+        stop 5     
+    End If
     phi_dn0(i) = -logzms
     phi_dn1(i) = nn2/zms 
     phi_dn2(i) = nn1/zms + 3.0*(nn2*nn2-nnv2*nnv2) * (nn3+zms2*logzms) / (36.0*PI*nn3*nn3*zms2)  
@@ -239,7 +249,10 @@ Do k=1,ncomp !das einzige, das hier von k abhaengt, sind fa und dhs!! die Ableit
    
        If( ( zp(i)-zp(j+1) ) < d2  .and. ( zp(i) - zp(j) ) >= d2   ) Then !the position of j+1 is already within i-d/2 while j is still outside this range in this case, the integration steplength (dz) is just the distance, which j+1 overlaps with i-d/2 and what is integrated is the interpolated value of the integrand
           x_int(n) = 0.0
-          If(n/=1) stop 'error in FMT_dFdrho, n should be 1 here!'
+          If(n/=1) Then
+             write(*,*) 'Surface Tension Code: error in FMT_dFdrho, n should be 1 here!'
+             stop 5
+          End If
           dz = zp(j+1) - (zp(i) - d2)
           zz = zp(j) - zp(i)
           zz_jp1 = zp(j+1) - zp(i)     
@@ -313,8 +326,11 @@ Do k=1,ncomp !das einzige, das hier von k abhaengt, sind fa und dhs!! die Ableit
   xlo = x_int(1)
   xhi = x_int(n)
 
-  If(n > NMAX) stop 'Increase NMAX in FMT_dFdrho (auch in AD Routine!!)'
-
+  If(n > NMAX) Then
+      write(*,*)'Surface Tension code: Increase NMAX in FMT_dFdrho (also in AD Routine!!)'
+      stop 5 
+  End If
+  
   call spline(x_int,y_int,n,1.E30,1.E30,y2)
   call splint_integral(x_int,y_int,y2,n,xlo,xhi,integral)
   

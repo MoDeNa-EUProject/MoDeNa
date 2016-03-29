@@ -9,6 +9,7 @@ Python script, which organizes creation of the foam.
 """
 from __future__ import division
 import os
+import sys
 from blessings import Terminal
 import json
 import datetime

@@ -3,6 +3,9 @@
 !! @author    Michal Vonka
 !! @author    Pavel Ferkl
 !! @ingroup   foam_aging
+!! @page deps Dependencies
+!! @section dep_foam_aging  Dependencies of Foam aging model
+!! - NONE
 !c  30.5.2012 - MV (michal.vonka@seznam.cz)
 !c	2.7.2012 - MV, remaking to partial pressures of H2 and N2
 !c   6.3.2015 - MV, application to PU foams solved by CO2 penetrating air
@@ -17,7 +20,7 @@ program foam_diffusion
 
 	integer nroutputs, multiplicator
 
-	double precision rpar(23)
+	double precision rpar(24)
 
     integer :: itol, itask, istate, iopt
     integer :: MF, ML, MU, LRW, LIW, LENRAT, NNZ, LWM
@@ -25,7 +28,7 @@ program foam_diffusion
     integer :: i, counter, fi
     integer, allocatable :: IWORK(:)
 
-    double precision :: tin, tout, tend, keq
+    double precision :: tin, tout, tend, keq, tbeg
     double precision :: rtol, atol
 
     double precision, allocatable :: ystate(:), yprime(:) ! vector of state
@@ -50,6 +53,7 @@ program foam_diffusion
     ! write(*,*) gasConductivity(300._dp,1._dp,0._dp,0._dp)
     ! stop
 	call input(rpar, ipar)
+    tbeg = rpar(24)
     temp=rpar(10)/8.314d0
 	nroutputs = ipar(1)
 	nFV = ipar(5) != (divwall+1)*ncell	! total number of FV
@@ -83,14 +87,21 @@ program foam_diffusion
     if (ipar(11)==1) then
         rpar(11)=cypDiffusivity(temp)
     endif
+	write(*,*) 'air solubility',rpar(6)
+    write(*,*) 'CO2 solubility',rpar(7)
+	write(*,*) 'pentane solubility',rpar(12)
+	write(*,*) 'air diffusivity',rpar(4)
+    write(*,*) 'CO2 diffusivity',rpar(5)
+	write(*,*) 'pentane diffusivity',rpar(11)
 	write(*,*) 'air permeability',rpar(6)*rpar(4)
     write(*,*) 'CO2 permeability',rpar(7)*rpar(5)
 	write(*,*) 'pentane permeability',rpar(12)*rpar(11)
+    ! stop
 !c -----------------------------------
 !c Allocate memory for working arrays
 !c -----------------------------------
     LENRAT = 2        ! usually for double precision
-    NNZ = 1000*nEQ      ! nonzero elements  - MV CHECK
+    NNZ = nEQ**2      ! nonzero elements  - MV CHECK
     LWM = 2*NNZ + 2*NEQ + (NNZ+10*NEQ)/LENRAT     ! MITER = 2
     LIW = 31 + NEQ + NNZ +100
     LRW = 20 + (2 + 1./LENRAT)*NNZ + (11 + 9./LENRAT)*NEQ
@@ -138,8 +149,8 @@ program foam_diffusion
     tend = rpar(3)
     counter = 1
     itol = 1
-    rtol = 1.0d-6
-    atol = 1.0d-6
+    rtol = 1.0d-1
+    atol = 1.0d-1
 
     itask = 1
     istate = 1
@@ -155,11 +166,11 @@ program foam_diffusion
     write(fi,'(10A23)') '#time', 'eq.conductivity'
 !    call output(0, 0.0_dp, ystate, neq)
     call equcond(keq,ystate,neq,eps,fstrut,temp_cond)
-    write(fi,'(10es23.15)') 0.0_dp,keq
+    write(fi,'(10es23.15)') tbeg/(3600.0d0*24.0d0),keq*1e3
     do i = 1, nroutputs*multiplicator       ! stabilizing multiplicator
 
-        tin = dble(i-1)*(tend )/dble(nroutputs*multiplicator)    ! tbeg is 0
-        tout = dble(i  )*(tend)/dble(nroutputs*multiplicator)
+        tin = dble(i-1)*(tend -tbeg)/dble(nroutputs*multiplicator)+tbeg
+        tout = dble(i  )*(tend-tbeg)/dble(nroutputs*multiplicator)+tbeg
 
 100     continue    ! try to make another run for the initial step simulation
         call dlsodes (modelPU, neq, ystate, tin, tout, itol, rtol, atol, itask,&
@@ -169,13 +180,13 @@ program foam_diffusion
         if (istate.lt.0) then
             write(*,*) 'Something is wrong, look for ISTATE =', istate
             if (istate.eq.-1) then  ! not enough steps to reach tout
-                istate = 1
+                istate = 3
                 iopt = 1   ! start to change something
                 RWORK(5:8)=0.0d0
                 IWORK(5) = 0
                 IWORK(6) = counter*1000
                 IWORK(7) = 0
-                counter = counter + 1
+                counter = counter + 2
                 write(*,*) 'MAXSTEP', IWORK(6)
                 write(10,*) 'MAXSTEP', IWORK(6)
                 goto 100
@@ -193,7 +204,7 @@ program foam_diffusion
             write(10,*) 'tend', tout/(3600.0d0*24.0d0),'days'
             call output(i/multiplicator, tout, ystate, neq)
             call equcond(keq,ystate,neq,eps,fstrut,temp_cond)
-            write(fi,'(10es23.15)') tout,keq
+            write(fi,'(10es23.15)') tout/(3600.0d0*24.0d0),keq*1e3
         endif
         continue
     enddo

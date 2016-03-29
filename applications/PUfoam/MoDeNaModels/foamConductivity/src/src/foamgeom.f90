@@ -84,6 +84,31 @@ subroutine foam_morpholgy
                 parameters, try different initial guess'
             stop
         endif
+    case(4) !fs is input; dwall and dstrut are calculated
+        if  (fs<struttol) then
+            dwall=(1-por)*dcell/3.775_dp
+            dstrut=0
+        else
+            x(1)=dwall
+            x(2)=dstrut
+            call hbrd(fcn_fs2,n,x,fvec,epsilon(pi),tol,info,diag)
+            if (info /= 1) then
+                write(*,*) 'unable to determine foam morphology parameters, &
+                    hbrd returned',info
+                write(mfi,*) 'unable to determine foam morphology parameters, &
+                    hbrd returned',info
+                stop
+            endif
+            dwall=x(1)
+            dstrut=x(2)
+            if (dwall<0 .or. dstrut< 0) then
+                write(*,*) 'unable to determine foam &
+                    morphology parameters, try different initial guess'
+                write(mfi,*) 'unable to determine foam &
+                    morphology parameters, try different initial guess'
+                stop
+            endif
+        endif
     case default
         write(*,*) 'unknown foam morphology input'
         write(mfi,*) 'unknown foam morphology input'
@@ -112,12 +137,14 @@ subroutine fcn_dwall(n,x,fvec,iflag)
     real (dp), intent(in) :: x(n)
     real (dp), intent(out) :: fvec(n)
     integer, intent(inout) :: iflag
-    real(dp) :: Vcell,Vstruts,Vwalls,fs,dstrut
+    real(dp) :: Vcell,Vstruts,Vwalls,fs,dstrut,dcelldd
     fs=x(1)
     dstrut=x(2)
-    Vcell=0.348_dp*dcell**3
-    Vstruts=2.8_dp*dstrut**2*dcell-3.93_dp*dstrut**3
-    Vwalls=(1.3143_dp*dcell**2-7.367_dp*dstrut*dcell+10.323_dp*dstrut**2)*dwall
+    dcelldd=dcell*(pi/6/0.348_dp)**(1/3._dp)
+    Vcell=0.348_dp*dcelldd**3
+    Vstruts=2.8_dp*dstrut**2*dcelldd-3.93_dp*dstrut**3
+    Vwalls=(1.3143_dp*dcelldd**2-7.367_dp*dstrut*dcelldd+10.323_dp*dstrut**2)*&
+        dwall
     fvec(1)=fs-Vstruts/(Vstruts+Vwalls)
     fvec(2)=1-por-(Vstruts+Vwalls)/Vcell
 end subroutine fcn_dwall
@@ -131,12 +158,14 @@ subroutine fcn_fs(n,x,fvec,iflag)
     real (dp), intent(in) :: x(n)
     real (dp), intent(out) :: fvec(n)
     integer, intent(inout) :: iflag
-    real(dp) :: Vcell,Vstruts,Vwalls,dwall,dstrut
+    real(dp) :: Vcell,Vstruts,Vwalls,dwall,dstrut,dcelldd
     dwall=x(1)
     dstrut=x(2)
-    Vcell=0.348_dp*dcell**3
-    Vstruts=2.8_dp*dstrut**2*dcell-3.93_dp*dstrut**3
-    Vwalls=(1.3143_dp*dcell**2-7.367_dp*dstrut*dcell+10.323_dp*dstrut**2)*dwall
+    dcelldd=dcell*(pi/6/0.348_dp)**(1/3._dp)
+    Vcell=0.348_dp*dcelldd**3
+    Vstruts=2.8_dp*dstrut**2*dcelldd-3.93_dp*dstrut**3
+    Vwalls=(1.3143_dp*dcelldd**2-7.367_dp*dstrut*dcelldd+10.323_dp*dstrut**2)*&
+        dwall
     fvec(1)=fs-Vstruts/(Vstruts+Vwalls)
     fvec(2)=1-por-(Vstruts+Vwalls)/Vcell
 end subroutine fcn_fs
@@ -150,14 +179,38 @@ subroutine fcn_dstrut(n,x,fvec,iflag)
     real (dp), intent(in) :: x(n)
     real (dp), intent(out) :: fvec(n)
     integer, intent(inout) :: iflag
-    real(dp) :: Vcell,Vstruts,Vwalls,dwall,fs
+    real(dp) :: Vcell,Vstruts,Vwalls,dwall,fs,dcelldd
     dwall=x(1)
     fs=x(2)
-    Vcell=0.348_dp*dcell**3
-    Vstruts=2.8_dp*dstrut**2*dcell-3.93_dp*dstrut**3
-    Vwalls=(1.3143_dp*dcell**2-7.367_dp*dstrut*dcell+10.323_dp*dstrut**2)*dwall
+    dcelldd=dcell*(pi/6/0.348_dp)**(1/3._dp)
+    Vcell=0.348_dp*dcelldd**3
+    Vstruts=2.8_dp*dstrut**2*dcelldd-3.93_dp*dstrut**3
+    Vwalls=(1.3143_dp*dcelldd**2-7.367_dp*dstrut*dcelldd+10.323_dp*dstrut**2)*&
+        dwall
     fvec(1)=fs-Vstruts/(Vstruts+Vwalls)
     fvec(2)=1-por-(Vstruts+Vwalls)/Vcell
 end subroutine fcn_dstrut
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> residual function for dwall and dstrut
+!! based on Kaemmerlen (10.1016/j.jqsrt.2009.11.018)
+subroutine fcn_fs2(n,x,fvec,iflag)
+    integer, intent(in) :: n
+    real (dp), intent(in) :: x(n)
+    real (dp), intent(out) :: fvec(n)
+    integer, intent(inout) :: iflag
+    real(dp) :: Vcell,Vstruts,Vwalls,dwall,dstrut,dcelldd,x1,x2,x3
+    dwall=x(1)
+    dstrut=x(2)
+    dcelldd=dcell*(pi/6/0.348_dp)**(1/3._dp)
+    Vcell=0.348_dp*dcelldd**3
+    Vstruts=2.8_dp*dstrut**2*dcelldd
+    Vwalls=(1.317_dp*dcelldd**2-13.4284_dp*dstrut*dcelldd+34.2375_dp*dstrut**2)*&
+        dwall+(4.639_dp*dcell-17.976_dp*dstrut)*dwall**2
+    fvec(1)=fs-Vstruts/(Vstruts+Vwalls)
+    fvec(2)=1-por-(Vstruts+Vwalls)/Vcell
+end subroutine fcn_fs2
 !***********************************END****************************************
 end module foamgeom

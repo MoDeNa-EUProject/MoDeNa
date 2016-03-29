@@ -12,7 +12,7 @@ subroutine input(rpar, ipar)
 	integer ipar(*)
 	integer divwall, ncell
 	integer nroutputs
-	integer solModel,diffModel
+	integer solModel(3),diffModel(3)
 	double precision dcell, dwall, L
 	double precision pressure ! initial conds
 	double precision pBCair, pBCCO2, pBCpent 	! boundary conds
@@ -24,7 +24,7 @@ subroutine input(rpar, ipar)
 	double precision MA, MB, Mterm ,a, b, aToverTcsb
 	double precision fstrut,rhof
 !c
-	double precision  tend
+	double precision  tend,tbeg
 	double precision rpar(*)					! real param
 
 	double precision PI
@@ -32,9 +32,10 @@ subroutine input(rpar, ipar)
 	parameter (R = 8.314d0)
 
 !c Read input params - pak module params :)
-	open(2, file = '../input.in', status = 'old')
+	open(2, file = '../foamAging.in', status = 'old')
 	read(2, *) nroutputs
 	read(2, *) divwall
+	read(2, *) tbeg
 	read(2, *) tend
 	read(2, *) T
 	read(2, *) temp_cond
@@ -132,6 +133,7 @@ subroutine input(rpar, ipar)
 	rpar(21)=rhof
 	rpar(22)=temp_cond
 	rpar(23)=rhop
+	rpar(24)=tbeg
 
     continue
 

@@ -62,7 +62,7 @@ subroutine equcond
     write(mfi,fmt) 'contribution of gas:',gcontr*1e2_dp,'%'
     write(mfi,fmt) 'contribution of solid:',scontr*1e2_dp,'%'
     write(mfi,fmt) 'contribution of radiation:',rcontr*1e2_dp,'%'
-    open(newunit(fi),file='outputs.out')
+    open(newunit(fi),file='foamConductivity.out')
     write(fi,*) eqc
     close(fi)
     deallocate(tmatrix,gmatrix,tipiv,gipiv,trhs,grhs,tvec,qcon,qrad,qtot,gqrad)

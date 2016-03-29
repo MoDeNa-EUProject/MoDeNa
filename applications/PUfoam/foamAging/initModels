@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 '''
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
@@ -10,7 +10,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014 MoDeNa Consortium, All rights reserved.
+    2014-2016 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -38,18 +38,18 @@ Authors
 Contributors
 '''
 
-from modena import SurrogateModel
-from modena.Strategy import Workflow2
-import diffusivity
-# import gasConductivity
-import foamConductivity
-import Solubility
+from modena import SurrogateModel, Workflow2, MODENA_PARSED_URI
 from fireworks import LaunchPad
 from fireworks.core.rocket_launcher import rapidfire
-from fireworks.utilities.fw_serializers import load_object
+
+import diffusivity # automatic initialization fails
+# import gasMixtureConductivity # imported by foamConductivity
+# import gasConductivity # imported by gasMixtureConductivity
+import foamConductivity
+import Solubility # automatic initialization fails
 
 # set up the LaunchPad and reset it
-launchpad = LaunchPad()
+launchpad = LaunchPad(**MODENA_PARSED_URI)
 launchpad.reset('', require_password=False)
 
 initWfs = Workflow2([])

@@ -1,0 +1,35 @@
+AND	main_prog.f90	/^     WRITE (*,*) ' (hE-x) AND (rho-x) DIAGRAMS    /
+DENS_INVERS2	DFT-nMF2.f90	/^     REAL FUNCTION DENS_INVERS2 ( rhob, mu_rho )$/
+DFT_RAD_INT	DFT-utilities.f90	/^SUBROUTINE DFT_RAD_INT (i,j,ih,zz1,rhop,f_int_r,my/
+FUGACITY	eos.f90	/^SUBROUTINE FUGACITY (ln_phi)$/
+F_IDEAL_GAS	eos_f_contributions.f90	/^SUBROUTINE F_IDEAL_GAS ( fid )$/
+Heidemann_Khalil_obj	crit_point_mixtures.f90	/^     SUBROUTINE Heidemann_Khalil_obj ( iter_no, y,/
+IF	eos_critical_renorm.f90	/^  IF (RGT_variant == 'phase_cell' .AND. ncomp >= 2/
+Newton_Opt_2D	2D_optimizer.f90	/^  subroutine Newton_Opt_2D ( f_val, x, n, min_grad/
+OBJECTIVE_FF	force_field_fit.f90	/^SUBROUTINE OBJECTIVE_FF (lm_m_dat, n_fit, para, fv/
+SELECTED_REAL_KIND	powell_minimize.f90	/^!INTEGER, PARAMETER  :: dp = SELECTED_REAL_KIND(15/
+THE	hbrd.f90	/^  !     EXECUTION, INFO IS SET TO THE (NEGATIVE) V/
+adjustment	phase_equilib.f90	/^! enforce convergence, a step-width adjustment (re/
+ap	eos_const.f90	/^ REAL, INTENT(OUT)                      :: ap(0:6,/
+c_name	visco-fit.f90	/^  CHARACTER (LEN=30)                    :: c_name(/
+coef_ig	eos_enthalpy.f90	/^ REAL, INTENT(IN)                       :: coef_ig/
+compna	para_input.f90	/^! compna(i)                  component name$/
+dense	utilities.f90	/^  val_conv(0)  = dense(3)$/
+dim1min	minimize.f90	/^subroutine dim1min ( t0, h0, n, x, fff, fmin )$/
+f_pt1	pt1.f90	/^SUBROUTINE f_pt1 ( fres )$/
+fac	rdf_hs.f90	/^  real, dimension(0:20)                         ::/
+if	eos_numerical.f90	/^  if ( eta < 1.E-100 ) return$/
+integr	eos_critical_renorm_mix.f90	/^SUBROUTINE integr(n,k1,k2,kk1,kk2,kn,combi,combi2,/
+kij	kij-fitting.f90	/^! routine for fitting kij (and lij, if needed) to /
+my0	DFT-nMF-mixtures.f90	/^  REAL                                   :: my0(nc/
+myrho	DFT-MF.f90	/^  REAL                                   :: tc, pc/
+name	input_output.f90	/^! compna, mm    name (string) and molec.mass of pu/
+nhb_no	saft_par.f90	/^  INTEGER                                :: nhb_ty/
+or	cg_descent.f90	/^!     |the License, or (at your option) any later /
+st_macro	DFT-nMF-units.f90	/^  REAL                                   :: surfte/
+subst	gc_method.f90	/^  CHARACTER (LEN=30)                    :: subst(2/
+the	levenberg_marquardt.f90	/^  !      info is set to the (negative) value of if/
+theory	DFT-nMF-mixtures.f90	/^! the fundamental measure theory (FMT) for the har/
+tolerance	cg_descent.f90	/^400 FORMAT ('   - your tolerance (grad_tol = ', d1/
+types	pure_par_fit.f90	/^  INTEGER, PARAMETER          :: cont = 4         /
+values	starting_value.f90	/^! starting values (xi,density) only for two phases/

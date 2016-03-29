@@ -1,0 +1,16 @@
+#!/bin/sh
+
+set -x
+
+# Go to eigen directory and make dynamic libraries, then move them to $FOAM_USER_LIBBIN
+cd eigen	
+mkdir obj
+cd obj
+mkdir dyn
+mkdir sta 
+cd ..
+make dynamic 
+mkdir -p $FOAM_USER_LIBBIN
+mv libeigen.so $FOAM_USER_LIBBIN
+
+# -----EOF

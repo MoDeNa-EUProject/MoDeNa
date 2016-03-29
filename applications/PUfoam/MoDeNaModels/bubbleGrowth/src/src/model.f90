@@ -60,23 +60,25 @@ SUBROUTINE  FEX (NEQ, T, Y, YDOT)
         YDOT(xOHeq)=YDOT(xOHeq)*dil
         YDOT(xWeq)=YDOT(xWeq)*dil
     endif
-    if (kin_model==2) then
+    if (kin_model==2 .or. kin_model==4) then
         call kinModel
         do i=1,size(kineq)
             YDOT(kineq(i))=kinsource(i)
         enddo
-        YDOT(xOHeq) = -YDOT(kineq(2))/OH0
-        YDOT(xWeq) = -YDOT(kineq(3))/W0
+        ! YDOT(xOHeq) = -YDOT(kineq(2))/OH0
+        ! YDOT(xWeq) = -YDOT(kineq(3))/W0
     endif
     !temperature (enthalpy balance)
     YDOT(teq) = -dHOH*OH0/(rhop*cp)*YDOT(xOHeq)-dHW*W0/(rhop*cp)*YDOT(xWeq)
-    if (kin_model==2) then
-        YDOT(kineq(12))=YDOT(teq)
-    endif
     do i=1,ngas
         YDOT(teq) = YDOT(teq) - dHv(i)*12*pi*Mbl(i)*D(i)*Y(req)**4/&
             (rhop*cp*Vsh)*(Y(fceq+i-1)-KH(i)*Y(fpeq+i-1))/(dz(1)/2)
     enddo
+    if (kin_model==2) then
+        YDOT(kineq(12))=YDOT(teq)
+    elseif (kin_model==4) then
+        ! YDOT(kineq(19))=YDOT(teq)
+    endif
     if (inertial_term) then
         YDOT(req) = Y(req+1)    !radius (momentum balance)
         YDOT(req+1) = (sum(Y(fpeq:lpeq)) + Pair0*R0**3/Y(req)**3 - Pamb - &
@@ -184,7 +186,7 @@ subroutine physical_properties(Y)
         if(ret /= 0) then
             call exit(ret)
         endif
-        sigma = modena_outputs_get(itensOutputs, 0_c_size_t)
+        sigma = modena_outputs_get(itensOutputs, 0_c_size_t)*1e-3_dp
     end select
     do i=1,ngas
         select case(diff_model(i))
@@ -200,7 +202,11 @@ subroutine physical_properties(Y)
         select case(sol_model(i))
         case(1)
         case(2)
+            ! TODO: implement properly
             call modena_inputs_set(solInputs(i), solTpos(i), Y(teq))
+            call modena_inputs_set(solInputs(i), solXgasPos(i), 1.0e-4_dp)
+            call modena_inputs_set(solInputs(i), solXmdiPos(i), 0.5_dp)
+            call modena_inputs_set(solInputs(i), solXpolyolPos(i), 0.5_dp)
             ret = modena_model_call(solModena(i), solInputs(i), solOutputs(i))
             if(ret /= 0) then
                 call exit(ret)
@@ -276,36 +282,54 @@ end subroutine restoreDV
 
 !********************************BEGINNING*************************************
 !> evaluates kinetic source terms
+!! modena models
 subroutine kinModel
-    call modena_inputs_set(kinInputs, kinNCOPos, Y(kineq(1)));
-	call modena_inputs_set(kinInputs, kinOHPos, Y(kineq(2)));
-	call modena_inputs_set(kinInputs, kinH2OPos, Y(kineq(3)));
-    call modena_inputs_set(kinInputs, kinCO2Pos, Y(kineq(4)));
-    call modena_inputs_set(kinInputs, kinPentanePos, Y(kineq(5)));
-    call modena_inputs_set(kinInputs, kinPolymerPos, Y(kineq(6)));
-    call modena_inputs_set(kinInputs, kinPolymerBlowPos, Y(kineq(7)));
-    call modena_inputs_set(kinInputs, kinUreaPos, Y(kineq(8)));
-    call modena_inputs_set(kinInputs, kinR1Pos, Y(kineq(9)));
-    call modena_inputs_set(kinInputs, kinRmassPos, Y(kineq(10)));
-    call modena_inputs_set(kinInputs, kinRvolPos, Y(kineq(11)));
-    call modena_inputs_set(kinInputs, kinRtempPos, Y(kineq(12)));
+    integer :: i
+    if (kin_model==2) then
+        call modena_inputs_set(kinInputs, kinNCOPos, Y(kineq(1)));
+    	call modena_inputs_set(kinInputs, kinOHPos, Y(kineq(2)));
+    	call modena_inputs_set(kinInputs, kinH2OPos, Y(kineq(3)));
+        call modena_inputs_set(kinInputs, kinCO2Pos, Y(kineq(4)));
+        call modena_inputs_set(kinInputs, kinPentanePos, Y(kineq(5)));
+        call modena_inputs_set(kinInputs, kinPolymerPos, Y(kineq(6)));
+        call modena_inputs_set(kinInputs, kinPolymerBlowPos, Y(kineq(7)));
+        call modena_inputs_set(kinInputs, kinUreaPos, Y(kineq(8)));
+        call modena_inputs_set(kinInputs, kinR1Pos, Y(kineq(9)));
+        call modena_inputs_set(kinInputs, kinRmassPos, Y(kineq(10)));
+        call modena_inputs_set(kinInputs, kinRvolPos, Y(kineq(11)));
+        call modena_inputs_set(kinInputs, kinRtempPos, Y(kineq(12)));
+    elseif (kin_model==4) then
+        do i=1,size(kineq)
+            call modena_inputs_set(kinInputs, kinInputsPos(i), Y(kineq(i)))
+        enddo
+    endif
+    call modena_inputs_set(kinInputs, kinInputsPos(19), 60.0_dp)
     ret = modena_model_call (kinModena, kinInputs, kinOutputs)
     if(ret /= 0) then
         call exit(ret)
     endif
-    kinsource(kineq(1)) = modena_outputs_get(kinOutputs, kinSourceNCOPos);
-    kinsource(kineq(2)) = modena_outputs_get(kinOutputs, kinSourceOHPos);
-    kinsource(kineq(3)) = modena_outputs_get(kinOutputs, kinSourceH2OPos);
-    kinsource(kineq(4)) = modena_outputs_get(kinOutputs, kinSourceCO2Pos);
-    kinsource(kineq(5)) = modena_outputs_get(kinOutputs, kinSourcePentanePos);
-    kinsource(kineq(6)) = modena_outputs_get(kinOutputs, kinSourcePolymerPos);
-    kinsource(kineq(7)) = modena_outputs_get(kinOutputs, &
-        kinSourcePolymerBlowPos);
-    kinsource(kineq(8)) = modena_outputs_get(kinOutputs, kinSourceUreaPos);
-    kinsource(kineq(9)) = modena_outputs_get(kinOutputs, kinSourceR1Pos);
-    kinsource(kineq(10)) = modena_outputs_get(kinOutputs, kinSourceRmassPos);
-    kinsource(kineq(11)) = modena_outputs_get(kinOutputs, kinSourceRvolPos);
-    kinsource(kineq(12)) = modena_outputs_get(kinOutputs, kinSourceRtempPos);
+    if (kin_model==2) then
+        kinsource(kineq(1)) = modena_outputs_get(kinOutputs, kinSourceNCOPos);
+        kinsource(kineq(2)) = modena_outputs_get(kinOutputs, kinSourceOHPos);
+        kinsource(kineq(3)) = modena_outputs_get(kinOutputs, kinSourceH2OPos);
+        kinsource(kineq(4)) = modena_outputs_get(kinOutputs, kinSourceCO2Pos);
+        kinsource(kineq(5)) = modena_outputs_get(kinOutputs, kinSourcePentanePos);
+        kinsource(kineq(6)) = modena_outputs_get(kinOutputs, kinSourcePolymerPos);
+        kinsource(kineq(7)) = modena_outputs_get(kinOutputs, &
+            kinSourcePolymerBlowPos);
+        kinsource(kineq(8)) = modena_outputs_get(kinOutputs, kinSourceUreaPos);
+        kinsource(kineq(9)) = modena_outputs_get(kinOutputs, kinSourceR1Pos);
+        kinsource(kineq(10)) = modena_outputs_get(kinOutputs, kinSourceRmassPos);
+        kinsource(kineq(11)) = modena_outputs_get(kinOutputs, kinSourceRvolPos);
+        kinsource(kineq(12)) = modena_outputs_get(kinOutputs, kinSourceRtempPos);
+    elseif (kin_model==4) then
+        kinsource=0
+        do i=1,size(kineq)
+            kinsource(i) = modena_outputs_get(kinOutputs, kinOutputsPos(i))
+            ! write(*,*) i,kinsource(i)
+        enddo
+        ! stop
+    endif
 end subroutine kinModel
 !***********************************END****************************************
 
@@ -330,6 +354,11 @@ subroutine bblpreproc
     xWeq=xOHeq+1  !water conversion index
     fceq = xWeq+1    !concentration index
     if (kin_model==2) then
+        allocate(kineq(12),kinsource(12))
+    elseif (kin_model==4) then
+        allocate(kineq(20),kinsource(20))
+    endif
+    if (kin_model==2 .or. kin_model==4) then
         NEQ=NEQ+size(kineq)
         do i=1,size(kineq)
             kineq(i)=xWeq+i
@@ -350,6 +379,29 @@ subroutine bblpreproc
         Y(kineq(2))=OH0*1e3_dp
         Y(kineq(3))=W0*1e3_dp
     endif
+    if (kin_model==4) then
+        Y(kineq(1)) = 6.73000e-02_dp
+        Y(kineq(2)) = 1.92250e+00_dp
+        Y(kineq(3)) = 2.26920e+00_dp
+        Y(kineq(4)) = 0.00000e+00_dp
+        Y(kineq(5)) = 5.46200e-01_dp
+        ! Y(kineq(5)) = 1.0924e+00_dp
+        Y(kineq(6)) = 2.19790e+00_dp
+        Y(kineq(7)) = 1.64000e+00_dp
+        Y(kineq(8)) = 1.71030e+00_dp
+        Y(kineq(9)) = 0.00000e+00_dp
+        Y(kineq(10)) = 0.00000e+00_dp
+        Y(kineq(11)) = 0.00000e+00_dp
+        Y(kineq(12)) = 0.00000e+00_dp
+        Y(kineq(13)) = 0.00000e+00_dp
+        Y(kineq(14)) = 0.00000e+00_dp
+        Y(kineq(15)) = 0.00000e+00_dp
+        Y(kineq(16)) = 4.45849e+00_dp
+        Y(kineq(17)) = 0.00000e+00_dp
+        Y(kineq(18)) = 1.00000e+00_dp
+        Y(kineq(19)) = 60!2.27000e+01_dp
+        Y(kineq(20)) = 1e0_dp!8.46382e-01_dp
+    endif
     do j=1,ngas
         do i=1,p+1
             Y(fceq+(i-1)*ngas+j-1) = cbl(j)      !blowing agent concentration
@@ -367,12 +419,14 @@ subroutine bblpreproc
     case(1)
     case(2)
         call modena_inputs_set(rhopInputs, rhopTpos, Y(teq))
+        call modena_inputs_set(rhopInputs, rhopXOHPos, 0.1_dp)
         ret = modena_model_call (rhopModena, rhopInputs, rhopOutputs)
         if(ret /= 0) then
             call exit(ret)
         endif
         rhop = modena_outputs_get(rhopOutputs, 0_c_size_t)
-        call modena_inputs_set(rhopInputs, rhopTpos, Y(teq)+150)
+        call modena_inputs_set(rhopInputs, rhopTpos, Y(teq)+100)
+        call modena_inputs_set(rhopInputs, rhopXOHPos, 0.9_dp)
         ret = modena_model_call (rhopModena, rhopInputs, rhopOutputs)
         if(ret /= 0) then
             call exit(ret)
@@ -479,6 +533,7 @@ subroutine bblinteg(outputs_1d,outputs_GR,outputs_GR_c,outputs_GR_p,concloc)
         call molar_balance
         call restoreDV
         call save_integration_step
+        ! write(*,*) tout,kinsource(2)
         TOUT = TOUT+timestep
         if (eta==maxeta) exit
     END DO

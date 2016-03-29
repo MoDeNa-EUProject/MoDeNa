@@ -24,15 +24,17 @@ module physicalProperties
     ! integer(c_size_t) :: kfoamKgaspos
     integer(c_size_t) :: kfoamTemppos
     integer(c_size_t) :: kfoamXCO2pos
-    integer(c_size_t) :: kfoamXAirpos
     integer(c_size_t) :: kfoamXCyPpos
+    integer(c_size_t) :: kfoamXO2pos
+    integer(c_size_t) :: kfoamXN2pos
     type(c_ptr) :: kgasModena = c_null_ptr
     type(c_ptr) :: kgasInputs = c_null_ptr
     type(c_ptr) :: kgasOutputs = c_null_ptr
     integer(c_size_t) :: kgasTemppos
-    integer(c_size_t) :: kgasXco2pos
-    integer(c_size_t) :: kgasXairpos
-    integer(c_size_t) :: kgasXcyppos
+    integer(c_size_t) :: kgasXCO2pos
+    integer(c_size_t) :: kgasXCyPpos
+    integer(c_size_t) :: kgasXO2pos
+    integer(c_size_t) :: kgasXN2pos
     type(c_ptr) :: kcdModena = c_null_ptr
     type(c_ptr) :: kcdInputs = c_null_ptr
     type(c_ptr) :: kcdOutputs = c_null_ptr
@@ -49,14 +51,20 @@ module physicalProperties
     type(c_ptr) :: scdInputs = c_null_ptr
     type(c_ptr) :: scdOutputs = c_null_ptr
     integer(c_size_t) :: scdTemppos
+    integer(c_size_t) :: scdxl1pos
+    integer(c_size_t) :: scdxl2pos
     type(c_ptr) :: sairModena = c_null_ptr
     type(c_ptr) :: sairInputs = c_null_ptr
     type(c_ptr) :: sairOutputs = c_null_ptr
     integer(c_size_t) :: sairTemppos
+    integer(c_size_t) :: sairxl1pos
+    integer(c_size_t) :: sairxl2pos
     type(c_ptr) :: scypModena = c_null_ptr
     type(c_ptr) :: scypInputs = c_null_ptr
     type(c_ptr) :: scypOutputs = c_null_ptr
     integer(c_size_t) :: scypTemppos
+    integer(c_size_t) :: scypxl1pos
+    integer(c_size_t) :: scypxl2pos
     type(c_ptr) :: dcdModena = c_null_ptr
     type(c_ptr) :: dcdInputs = c_null_ptr
     type(c_ptr) :: dcdOutputs = c_null_ptr
@@ -83,6 +91,9 @@ subroutine createModels
 !    rhopTemppos = modena_model_inputs_argPos(rhopModena, c_char_"T"//c_null_char);
 !    call modena_model_argPos_check(rhopModena)
     kfoamModena = modena_model_new (c_char_"foamConductivity"//c_null_char);
+    if (modena_error_occurred()) then
+        call exit(modena_error())
+    endif
     kfoamInputs = modena_inputs_new (kfoamModena);
     kfoamOutputs = modena_outputs_new (kfoamModena);
     kfoamEpspos = modena_model_inputs_argPos(&
@@ -97,72 +108,112 @@ subroutine createModels
         kfoamModena, c_char_"T"//c_null_char);
     kfoamXCO2pos = modena_model_inputs_argPos(&
         kfoamModena, c_char_"x[CO2]"//c_null_char);
-    kfoamXAirpos = modena_model_inputs_argPos(&
-        kfoamModena, c_char_"x[Air]"//c_null_char);
     kfoamXCyPpos = modena_model_inputs_argPos(&
         kfoamModena, c_char_"x[CyP]"//c_null_char);
+    kfoamXO2pos = modena_model_inputs_argPos(&
+        kfoamModena, c_char_"x[O2]"//c_null_char);
+    kfoamXN2pos = modena_model_inputs_argPos(&
+        kfoamModena, c_char_"x[N2]"//c_null_char);
     call modena_model_argPos_check(kfoamModena)
     kgasModena = modena_model_new (&
-        c_char_"gasMixtureConductivity"//c_null_char);
-    kgasInputs = modena_inputs_new (kgasModena);
-    kgasOutputs = modena_outputs_new (kgasModena);
+        c_char_"gasMixtureConductivity"//c_null_char)
+    if (modena_error_occurred()) then
+        call exit(modena_error())
+    endif
+    kgasInputs = modena_inputs_new (kgasModena)
+    kgasOutputs = modena_outputs_new (kgasModena)
     kgasTemppos = modena_model_inputs_argPos(&
-        kgasModena, c_char_"T"//c_null_char);
-    kgasXco2pos = modena_model_inputs_argPos(&
-        kgasModena, c_char_"x[CO2]"//c_null_char);
-    kgasXairpos = modena_model_inputs_argPos(&
-        kgasModena, c_char_"x[Air]"//c_null_char);
-    kgasXcyppos = modena_model_inputs_argPos(&
-        kgasModena, c_char_"x[CyP]"//c_null_char);
+        kgasModena, c_char_"T"//c_null_char)
+    kgasXCO2pos = modena_model_inputs_argPos(&
+        kgasModena, c_char_"x[A=CO2]"//c_null_char)
+    kgasXCyPpos = modena_model_inputs_argPos(&
+        kgasModena, c_char_"x[A=CyP]"//c_null_char)
+    kgasXO2pos = modena_model_inputs_argPos(&
+        kgasModena, c_char_"x[A=O2]"//c_null_char)
+    kgasXN2pos = modena_model_inputs_argPos(&
+        kgasModena, c_char_"x[A=N2]"//c_null_char)
     call modena_model_argPos_check(kgasModena)
     kcdModena = modena_model_new (&
         c_char_"gas_thermal_conductivity[A=CO2]"//c_null_char);
+    if (modena_error_occurred()) then
+        call exit(modena_error())
+    endif
     kcdInputs = modena_inputs_new (kcdModena);
     kcdOutputs = modena_outputs_new (kcdModena);
     kcdTemppos = modena_model_inputs_argPos(kcdModena, c_char_"T"//c_null_char);
     call modena_model_argPos_check(kcdModena)
     kairModena = modena_model_new (&
         c_char_"gas_thermal_conductivity[A=Air]"//c_null_char);
+    if (modena_error_occurred()) then
+        call exit(modena_error())
+    endif
     kairInputs = modena_inputs_new (kairModena);
     kairOutputs = modena_outputs_new (kairModena);
     kairTemppos = modena_model_inputs_argPos(kairModena, c_char_"T"//c_null_char);
     call modena_model_argPos_check(kairModena)
     kcypModena = modena_model_new (&
         c_char_"gas_thermal_conductivity[A=CyP]"//c_null_char);
+    if (modena_error_occurred()) then
+        call exit(modena_error())
+    endif
     kcypInputs = modena_inputs_new (kcypModena);
     kcypOutputs = modena_outputs_new (kcypModena);
     kcypTemppos = modena_model_inputs_argPos(kcypModena, c_char_"T"//c_null_char);
     call modena_model_argPos_check(kcypModena)
     if (solModel(1)==1) then
         sairModena = modena_model_new (&
-            c_char_"solubilityPol[A=Air]"//c_null_char);
+            c_char_"Solubility[A=Air,B=2]"//c_null_char);
+        if (modena_error_occurred()) then
+            call exit(modena_error())
+        endif
         sairInputs = modena_inputs_new (sairModena);
         sairOutputs = modena_outputs_new (sairModena);
         sairTemppos = modena_model_inputs_argPos(&
             sairModena, c_char_"T"//c_null_char);
+        sairxl1pos = modena_model_inputs_argPos(&
+            sairModena, c_char_"xl1"//c_null_char);
+        sairxl2pos = modena_model_inputs_argPos(&
+            sairModena, c_char_"xl2"//c_null_char);
         call modena_model_argPos_check(sairModena)
     endif
     if (solModel(2)==1) then
         scdModena = modena_model_new (&
-            c_char_"solubilityPol[A=CO2]"//c_null_char);
+            c_char_"Solubility[A=CO2,B=2]"//c_null_char);
+        if (modena_error_occurred()) then
+            call exit(modena_error())
+        endif
         scdInputs = modena_inputs_new (scdModena);
         scdOutputs = modena_outputs_new (scdModena);
         scdTemppos = modena_model_inputs_argPos(&
             scdModena, c_char_"T"//c_null_char);
+        scdxl1pos = modena_model_inputs_argPos(&
+            scdModena, c_char_"xl1"//c_null_char);
+        scdxl2pos = modena_model_inputs_argPos(&
+            scdModena, c_char_"xl2"//c_null_char);
         call modena_model_argPos_check(scdModena)
     endif
     if (solModel(3)==1) then
         scypModena = modena_model_new (&
-            c_char_"solubilityPol[A=CyP]"//c_null_char);
+            c_char_"Solubility[A=CyP,B=2]"//c_null_char);
+        if (modena_error_occurred()) then
+            call exit(modena_error())
+        endif
         scypInputs = modena_inputs_new (scypModena);
         scypOutputs = modena_outputs_new (scypModena);
         scypTemppos = modena_model_inputs_argPos(&
             scypModena, c_char_"T"//c_null_char);
+        scypxl1pos = modena_model_inputs_argPos(&
+            scypModena, c_char_"xl1"//c_null_char);
+        scypxl2pos = modena_model_inputs_argPos(&
+            scypModena, c_char_"xl2"//c_null_char);
         call modena_model_argPos_check(scypModena)
     endif
     if (diffModel(1)==1) then
         do2Modena = modena_model_new (&
             c_char_"diffusivityPol[A=O2]"//c_null_char);
+        if (modena_error_occurred()) then
+            call exit(modena_error())
+        endif
         do2Inputs = modena_inputs_new (do2Modena);
         do2Outputs = modena_outputs_new (do2Modena);
         do2Temppos = modena_model_inputs_argPos(&
@@ -179,6 +230,9 @@ subroutine createModels
     if (diffModel(2)==1) then
         dcdModena = modena_model_new (&
             c_char_"diffusivityPol[A=CO2]"//c_null_char);
+        if (modena_error_occurred()) then
+            call exit(modena_error())
+        endif
         dcdInputs = modena_inputs_new (dcdModena);
         dcdOutputs = modena_outputs_new (dcdModena);
         dcdTemppos = modena_model_inputs_argPos(&
@@ -188,6 +242,9 @@ subroutine createModels
     if (diffModel(3)==1) then
         dcypModena = modena_model_new (&
             c_char_"diffusivityPol[A=CyP]"//c_null_char);
+        if (modena_error_occurred()) then
+            call exit(modena_error())
+        endif
         dcypInputs = modena_inputs_new (dcypModena);
         dcypOutputs = modena_outputs_new (dcypModena);
         dcypTemppos = modena_model_inputs_argPos(&
@@ -263,9 +320,10 @@ end function polymerDensity
 real(dp) function gasConductivity(temp,xco2,xair,xcyp)
     real(dp), intent(in) :: temp,xco2,xair,xcyp
     call modena_inputs_set(kgasInputs, kgasTemppos, temp)
-    call modena_inputs_set(kgasInputs, kgasXco2pos, xco2)
-    call modena_inputs_set(kgasInputs, kgasXairpos, xair)
-    call modena_inputs_set(kgasInputs, kgasXcyppos, xcyp)
+    call modena_inputs_set(kgasInputs, kgasXCO2pos, xCO2)
+    call modena_inputs_set(kgasInputs, kgasXCyPpos, xCyP)
+    call modena_inputs_set(kgasInputs, kgasXO2pos, xAir*0.21_dp)
+    call modena_inputs_set(kgasInputs, kgasXN2pos, xAir*0.79_dp)
     ret = modena_model_call (kgasModena, kgasInputs, kgasOutputs)
     if(ret /= 0) then
         call exit(ret)
@@ -341,12 +399,18 @@ end function oxyConductivity
 !> solubility of carbon dioxide
 real(dp) function cdSolubility(temp)
     real(dp), intent(in) :: temp
+    real(dp) :: xl1,xl2
+    xl1=1.0e-3_dp
+    xl2=1-xl1
     call modena_inputs_set(scdInputs, scdTemppos, temp)
+    call modena_inputs_set(scdInputs, scdxl1pos, xl1)
+    call modena_inputs_set(scdInputs, scdxl2pos, xl2)
     ret = modena_model_call (scdModena, scdInputs, scdOutputs)
     if(ret /= 0) then
         call exit(ret)
     endif
     cdSolubility=modena_outputs_get(scdOutputs, 0_c_size_t)
+    cdSolubility=cdSolubility*Rg*temp*1100._dp/(1e5*Mg(1))/1e5
 end function cdSolubility
 !***********************************END****************************************
 
@@ -355,12 +419,19 @@ end function cdSolubility
 !> solubility of air
 real(dp) function airSolubility(temp)
     real(dp), intent(in) :: temp
+    real(dp) :: xl1,xl2
+    xl1=1.0e-3_dp
+    xl2=1-xl1
     call modena_inputs_set(sairInputs, sairTemppos, temp)
+    call modena_inputs_set(sairInputs, sairxl1pos, xl1)
+    call modena_inputs_set(sairInputs, sairxl2pos, xl2)
     ret = modena_model_call (sairModena, sairInputs, sairOutputs)
     if(ret /= 0) then
         call exit(ret)
     endif
     airSolubility=modena_outputs_get(sairOutputs, 0_c_size_t)
+    airSolubility=airSolubility*Rg*temp*1100._dp/(1e5*&
+        (0.21_dp*Mg(2)+0.79_dp*Mg(3)))/1e5
 end function airSolubility
 !***********************************END****************************************
 
@@ -369,12 +440,18 @@ end function airSolubility
 !> solubility of cyclo pentane
 real(dp) function cypSolubility(temp)
     real(dp), intent(in) :: temp
+    real(dp) :: xl1,xl2
+    xl1=1.0e-3_dp
+    xl2=1-xl1
     call modena_inputs_set(scypInputs, scypTemppos, temp)
+    call modena_inputs_set(scypInputs, scypxl1pos, xl1)
+    call modena_inputs_set(scypInputs, scypxl2pos, xl2)
     ret = modena_model_call (scypModena, scypInputs, scypOutputs)
     if(ret /= 0) then
         call exit(ret)
     endif
     cypSolubility=modena_outputs_get(scypOutputs, 0_c_size_t)
+    cypSolubility=cypSolubility*Rg*temp*1100._dp/(1e5*Mg(4))/1e5
 end function cypSolubility
 !***********************************END****************************************
 

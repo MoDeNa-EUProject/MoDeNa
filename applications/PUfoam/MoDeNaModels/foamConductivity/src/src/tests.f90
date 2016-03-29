@@ -16,7 +16,7 @@ module tests
     character(len=99) :: fileplacein_par='./'   !modena
     character(len=99) :: fileplacein_ref='../spectra/'  !modena
     character(len=99) :: fileplaceout='./'  !modena
-    character(len=99) :: inputs='inputs.in',spectra='spectra.out'
+    character(len=99) :: inputs='foamConductivity.in',spectra='spectra.out'
     character(len=99) :: nspec='spec_n.in'
     character(len=99) :: kspec='spec_k.in'
     character(len=99) :: gasspec='gasspec.in'
@@ -40,7 +40,7 @@ subroutine eqcond(regions)
             write(*,*) 'Ask Pavel if you want more reasonable results.'
             krad=2e-3_dp
             call effcond
-            open(newunit(fi),file='outputs.out')
+            open(newunit(fi),file='foamConductivity.out')
             write(fi,*) effc
             close(fi)
             stop
@@ -170,6 +170,8 @@ subroutine loadParameters
         read(fi,*) wdist        !use wall thickness distribution
         read(fi,*) wsdev        !wall thickness standard deviation
         read(fi,*) nbox         !number of gray boxes
+        read(fi,*) numcond      !calcualte effective conductivity numerically
+        read(fi,*) structureName!name of the file with morphology
     close(fi)
     tmean=(t1+t2)/2
     n1=1
