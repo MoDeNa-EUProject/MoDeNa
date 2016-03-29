@@ -458,8 +458,8 @@ If(n > NMAX) stop 'Increase NMAX in Spline!!'
  END IF
  DO  i = 2, n-1
     IF ( (x(i+1)-x(i)) == 0.0 .OR. (x(i)-x(i-1)) == 0.0 .OR. (x(i+1)-x(i-1)) == 0.0 ) THEN
-       write (*,*) 'error in spline-interpolation'
-       stop
+       write (*,*) 'Surface Tension Code: error in spline-interpolation'
+       stop 5
     END IF
     sig = (x(i)-x(i-1)) / (x(i+1)-x(i-1))
     p = sig*y2(i-1) + 2.0

@@ -1,4 +1,5 @@
-!>This file contains the subroutines which calculate the contribution of
+!> \file mod_DFT_CHAIN.F90
+!!This file contains the subroutines which calculate the contribution of
 !!chain formation to the Helmholtz energy functional. 
 
 
@@ -64,7 +65,11 @@ Do k = 1,ncomp
 
        If( ( zp(i)-zp(j+1) ) < dhsk  .and. ( zp(i) - zp(j) ) >= dhsk   ) Then !the position of j+1 is already within i-d while j is still outside this range in this case, the integration steplength (dz) is just the distance, which j+1 overlaps with i-d and what is integrated is the interpolated value of the integrand
 
-           If(n/= 1) stop 'n /=1 in Chain_aux' !here always n=1!
+           If(n/= 1) Then
+              write(*,*) 'Surface Tension Code: n /=1 in Chain_aux' !here always n=1!
+              stop 5
+           End If
+              
            zz = zp(j) - zp(i)                    !distance between grid points j and i
            dz = zp(j+1) - (zp(i) - dhsk)           !the part of the intervall between zp(j) and zp(j+1) which is already within i-d
            !if(dz < epsilon(dz)) dz = epsilon(dz) !bei unguenstiger Kombination von sig und ngrid kann dz unter Machinengenauigkeit epsilon liegen, dann ist x(2) = x(1) + dz = x(1) -> das fuehrt zu Abbruch in Spline Interpolation           
@@ -107,8 +112,11 @@ Do k = 1,ncomp
     xlo = x_int(1)
     xhi = x_int(n)
 
-    If(n > NMAX) stop 'Increase NMAX in Chain_aux (auch in AD Routine!!)'
-
+    If(n > NMAX) Then
+        write(*,*)'Surface Tension Code: Increase NMAX in Chain_aux (also in AD Routine!!)'
+        stop 5
+    End If 
+    
     call spline ( x_int, lamb_int, n, 1.E30, 1.E30, y2_lamb )
     call spline ( x_int, rb_int, n, 1.E30, 1.E30, y2_rb )
     
@@ -189,7 +197,11 @@ REAL    :: lamy
        
        If( ( zp(i)-zp(j+1) ) < dhsk  .and. ( zp(i) - zp(j) ) >= dhsk   ) Then !the position of j+1 is already within i-d while j is still outside this range in this case, the integration steplength (dz) is just the distance, which j+1 overlaps with i-d and what is integrated is the interpolated value of the integrand
 
-           If(n/= 1) stop 'n /=1 in Chain_dFdrho' !here always n=1!
+           If(n/= 1) Then
+              write(*,*) 'Surface Tension Code: n /=1 in Chain_dFdrho' !here always n=1!
+              stop 5 
+           End If
+           
            zz = zp(j) - zp(i)                    !distance between grid points j and i
            dz = zp(j+1) - (zp(i) - dhsk)           !the part of the intervall between zp(j) and zp(j+1) which is already within i-d
            !if(dz < epsilon(dz)) dz = epsilon(dz) !bei unguenstiger Kombination von sig und ngrid kann dz unter Machinengenauigkeit epsilon liegen, dann ist x(2) = x(1) + dz = x(1) -> das fuehrt zu Abbruch in Spline Interpolation           
@@ -230,8 +242,11 @@ REAL    :: lamy
       xlo = x_int(1)
       xhi = x_int(n)   
 
-      If(n > NMAX) stop 'Increase NMAX in Chain_dFdrho (auch in AD Routine!!)'
-
+      If(n > NMAX) Then
+         write(*,*)'Surface Tension Code: Increase NMAX in Chain_dFdrho (also in AD Routine!!)'
+         stop 5
+      End If 
+ 
       CALL spline         ( x_int, int_1, n, 1.E30, 1.E30, y2_1 )
       CALL splint_integral( x_int, int_1, y2_1, n, xlo, xhi, integral_1 )
       CALL spline         ( x_int, int_2, n, 1.E30, 1.E30, y2_2 )

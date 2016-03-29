@@ -1,0 +1,58 @@
+# 1 "options"
+# 1 "<built-in>"
+# 1 "<command-line>"
+
+
+
+
+# 1 "/usr/include/stdc-predef.h" 1 3 4
+
+# 17 "/usr/include/stdc-predef.h" 3 4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 4 "<command-line>" 2
+# 1 "options"
+EXE_INC = -ItwoPhaseMixtureThermo -I$(LIB_SRC)/transportModels/compressible/lnInclude -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude -I$(LIB_SRC)/transportModels/twoPhaseMixture/lnInclude -I$(LIB_SRC)/transportModels/interfaceProperties/lnInclude -I$(LIB_SRC)/turbulenceModels/compressible/turbulenceModel -I$(LIB_SRC)/finiteVolume/lnInclude -I$(HOME)/include/modena -I/usr/include/python2.7 -I/usr/local/include/libmongoc-1.0 -I/usr/local/include/libbson-1.0
+# 13 "options"
+
+EXE_LIBS = -L$(FOAM_USER_LIBBIN) -L$(HOME)/lib/modena -L/usr/local/lib -ltwoPhaseMixtureThermo -lfluidThermophysicalModels -lspecie -ltwoPhaseMixture -ltwoPhaseProperties -linterfaceProperties -lcompressibleTurbulenceModel -lcompressibleRASModels -lcompressibleLESModels -lfiniteVolume -leigen -lgfortran -lmodena -lrt -lmongoc-1.0 -lbson-1.0

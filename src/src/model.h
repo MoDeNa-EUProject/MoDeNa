@@ -95,7 +95,7 @@ typedef struct modena_model_t
 {
     PyObject_HEAD
 
-    PyObject *pModel;
+    PyObject *pModel;                        /**< Reference to python object.*/
 
     size_t outputs_size;                        /**< Length of output vector.*/
 
@@ -105,7 +105,7 @@ typedef struct modena_model_t
 
     double *inputs_max;            /**< Upper bounds of the input arguments. */
 
-    bool *argPos_used;
+    bool *argPos_used;         /**< Indicators used to track argument usage. */
 
     size_t parameters_size;                 /**< Length of parameter vector. */
 
@@ -118,7 +118,7 @@ typedef struct modena_model_t
         const struct modena_model_t* model,
         const double* i,
         double *o
-    ); /**< asdfasdfasdf*/
+    );               /**< Function pointer to pre-compiled surrogate function*/
 
     size_t substituteModels_size;    /**< Length of substitute models vector */
 

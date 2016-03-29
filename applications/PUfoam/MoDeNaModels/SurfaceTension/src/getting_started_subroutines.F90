@@ -506,8 +506,8 @@ INQUIRE (FILE=filename, EXIST = filefound)
 IF (filefound) THEN
   OPEN (file_number, FILE = filename)
 ELSE
-  write (*,*) ' FOLLOWING FILE CAN NOT BE OPENED', filename
-  stop
+  write (*,*) ' Surface Tension Code: FOLLOWING FILE CAN NOT BE OPENED', filename
+  stop 5
 END IF
 
 END SUBROUTINE file_open
@@ -563,11 +563,11 @@ IF (eos == 1) THEN
 ELSE IF (eos == 4 .OR. eos == 5 .OR. eos == 6 .OR. eos == 8) THEN
   ! CALL lj_par
   write (*,*) 'deactivated this line when making a transition to f90'
-  stop
+  stop 5
 ELSE IF (eos == 7) THEN
   ! CALL sw_par
   write (*,*) 'deactivated this line when making a transition to f90'
-  stop
+  stop 5
 ELSE IF (eos == 10) THEN
   i = 1
   IF (compna(i) == 'LC_generic' .AND. ncomp == 1 ) THEN
@@ -577,7 +577,7 @@ ELSE IF (eos == 10) THEN
     parame(i,3) = 0.0
   ELSE
     write (*,*) 'PARA_INPUT: define the component !'
-    stop
+    stop 5
   ENDIF
 ELSE
   !CALL saft_par
@@ -1130,7 +1130,7 @@ ELSE IF (compna(i) == 'tetradecane') THEN
     IF (pol == 2) parame(i,11)= 2.911
   ELSE IF (compna(i) == 'co') THEN
     IF (pol /= 1) write (*,*) 'parameters for co missing'
-    IF (pol /= 1) stop
+    IF (pol /= 1) stop 5
     IF (pol >= 1) mm(i)       = 28.01
     IF (pol >= 1) parame(i,1) = mm(i)*  5.126059746332587E-002  ! 1.43580933494776     
     IF (pol >= 1) parame(i,2) = 3.13556624711756     
@@ -1666,7 +1666,7 @@ ELSE IF (compna(i) == 'tetradecane') THEN
     IF (pol == 2) parame(i,11)= 4.72
   ELSE IF (compna(i) == 'fluoromethane') THEN    ! R41
     IF (pol /= 1) write (*,*) 'non-polar parameters missing for fluoromethane'
-    IF (pol /= 1) stop
+    IF (pol /= 1) stop 5
     IF (pol >= 1) mm(i)       =   34.0329000000000     
     IF (pol >= 1) parame(i,1) =   1.94494757526896     
     IF (pol >= 1) parame(i,2) =   2.96858005012635     
@@ -1690,7 +1690,7 @@ ELSE IF (compna(i) == 'tetradecane') THEN
     IF (pol == 2) parame(i,11)= 6.48
   ELSE IF (compna(i) == 'difluoromethane') THEN   ! R32
     IF (pol /= 1) write (*,*) 'non-polar parameters missing for difluoromethane'
-    IF (pol /= 1) stop
+    IF (pol /= 1) stop 5
     IF (pol >= 1) mm(i)       = 52.0236             ! PCP-SAFT
     IF (pol >= 1) parame(i,1) = mm(i)*  4.814700934384165E-002  !  2.50478075530028
     IF (pol >= 1) parame(i,2) = 2.79365980535456
@@ -1698,7 +1698,7 @@ ELSE IF (compna(i) == 'tetradecane') THEN
     IF (pol >= 1) parame(i,6) = 1.97850000000000
   ELSE IF (compna(i) == 'trifluoromethane') THEN   ! R23
     IF (pol /= 1) write (*,*) 'non-polar parameters missing for trifluoromethane'
-    IF (pol /= 1) stop
+    IF (pol /= 1) stop 5
     IF (pol >= 1) mm(i)       =   70.0138000000000     
     IF (pol >= 1) parame(i,1) =   2.66039274225485     
     IF (pol >= 1) parame(i,2) =   2.82905884530501     
@@ -1711,7 +1711,7 @@ ELSE IF (compna(i) == 'tetradecane') THEN
     parame(i,3) = 292.838632
   ELSE IF (compna(i) == 'trichlorofluoromethane') THEN   ! R11
     IF (pol /= 1) write (*,*) 'non-polar parameters missing for trichlorofluoromethane'
-    IF (pol /= 1) stop
+    IF (pol /= 1) stop 5
     IF (pol >= 1) mm(i)       =   137.368000000000     
     IF (pol >= 1) parame(i,1) =   2.28793359008803     
     IF (pol >= 1) parame(i,2) =   3.69013104930876     
@@ -1719,7 +1719,7 @@ ELSE IF (compna(i) == 'tetradecane') THEN
     IF (pol >= 1) parame(i,6) =   0.23225538492979
   ELSE IF (compna(i) == 'chlorodifluoromethane') THEN   ! R22   ( CHClF2 or CHF2Cl)
     IF (pol /= 1) write (*,*) 'non-polar parameters missing for chlorodifluoromethane'
-    IF (pol /= 1) stop
+    IF (pol /= 1) stop 5
     IF (pol >= 1) mm(i)       =   86.4684000000000     
     IF (pol >= 1) parame(i,1) =   2.47218586047893     
     IF (pol >= 1) parame(i,2) =   3.13845692489930     
@@ -2955,7 +2955,7 @@ DO  i = 1,ncomp
       !kij(i,j) =  1.641053794134795E-002  ! PCP-SAFT
       !lij(i,j) = -5.850421759950764E-003  ! PCP-SAFT
       if ( num == 0 ) write (*,*) 'calculation with lij only possible with num=1'
-      if ( num == 0 ) stop
+      if ( num == 0 ) stop 5
     ELSE IF(compna(i) == 'acetone'.AND.compna(j) == 'co2')THEN
       kij(i,j) = 0.015  ! PC-SAFT
       IF (pol == 1) kij(i,j) = -0.02  ! PCP-SAFT
@@ -3239,7 +3239,7 @@ DO  i = 1,ncomp
       kij(i,j) = -0.0
     ELSE IF(compna(i) == 'h2o'.AND.compna(j) == 'co2') THEN
       if (pol == 0) kij(i,j) = 0.0030625  ! for T=50C, according to X.Tang
-      stop                                ! very T-dependent
+      stop 5                                ! very T-dependent
     ELSE IF(compna(i) == 'toluene'.AND.compna(j) == 'acetic-acid') THEN
       kij(i,j) = -0.1
     ELSE IF(compna(i) == 'caproic-acid'.AND.compna(j) == 'cyclohexane') THEN
@@ -3677,7 +3677,7 @@ READ(compno,*) comp_e
 
 sum_c = 0.0
 write (*,*) 'there must be an error in neutr_charge'
-stop
+stop 5
 ! there is an error in the following passage. The index i is an
 ! argument to this subroutine - I guess it is INTENT(IN), so the
 ! index in the following loop can not be i.
@@ -3925,7 +3925,7 @@ DO i = 1,ncomp
         /(1.0+0.33163*t/parame(i,3) +1.0477E-3*(t/parame(i,3))**2 )
   ELSE
     write (*,*) 'define EOS in subroutine: SI_DENS'
-    stop
+    stop 5
   END IF
 END DO
 
@@ -4027,7 +4027,7 @@ END FUNCTION F_STABILITY
 
 IF (nphas /= 1 ) THEN
   write (*,*) 'P_CALC: can only be called for single phases'
-  stop
+  stop 5
 ENDIF
 
 IF (eos < 2) THEN
@@ -4047,7 +4047,7 @@ IF (eos < 2) THEN
   
 ELSE
   write (*,*) ' SUBROUTINE P_CALC not available for cubic EOS'
-  stop
+  stop 5
 END IF
 
 END SUBROUTINE p_calc

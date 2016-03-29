@@ -2,7 +2,6 @@ Foam Construction
 ============================
 ## Installation
 The code depends on several third-party applications:
-- `wine` to have ability of running windows executable files (i.e. file.exe).
 - `neper` and `voro++` for tessellation
 - `gmsh`, `vtk` and `meshconv` for mesh manipulation
 - `binvox` for voxelization
@@ -10,10 +9,8 @@ The code depends on several third-party applications:
 
 To install all of these on Ubuntu, do:
 ```
-sudo add-apt-repository ppa:ubuntu-wine/ppa
-sudo apt-get update
-sudo apt-get install wine1.7 libmatheval-dev gmsh gsl-bin libgsl0-dev \
-    python-vtk
+sudo apt-get install libmatheval-dev gmsh gsl-bin libgsl0-dev python-vtk \
+    lib3ds-1-3 libjpeg62 freeglut3
 ```
 Then download and install `neper` from http://neper.sourceforge.net/downloads.html.
 You will need to unpack `neper`, go to its `src` folder and then:

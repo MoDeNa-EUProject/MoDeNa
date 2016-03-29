@@ -14,17 +14,17 @@ module in_out
         fpeq,lpeq,& !first and last pressure equation (index)
         req,& !radius equation (index)
         teq,& !temperature equation (index)
-        xOHeq,xWeq,& !conversion equations (indexes)
-        kineq(12) !kinetics state variable equations (indexes)
+        xOHeq,xWeq !conversion equations (indexes)
     real(dp) :: mshco,& !mesh coarsening parameter
         Temp0,R0,Sn,OH0,W0,NCO0,AOH,EOH,AW,EW,dHOH,dHW,&
         time,radius,eqconc,grrate(2),st,S0,&
         T,TEND,RTOL,ATOL,&
         eta,maxeta,Aeta,Eeta,Cg,AA,B,&
-        Pamb,sigma,rhop,cp,cppol,rhobl,&
-        kinsource(12) !kinetic source term
-    integer, dimension(:), allocatable :: diff_model,sol_model,fic
+        Pamb,sigma,rhop,cp,cppol,rhobl
+    integer, dimension(:), allocatable :: diff_model,sol_model,fic,&
+        kineq !kinetics state variable equations (indexes)
     real(dp), dimension(:), allocatable :: Y,cbl,xgas,&
+        kinsource,& !kinetic source term
         D,KH,Mbl,dHv,cpblg,cpbll,&
         mb,mb2,mb3,avconc,pressure
 contains
@@ -82,7 +82,8 @@ subroutine read_inputs(inputs)
         read(fi,*) xgas    !initial molar fraction of gases in the bubble (for
             ! air and each dissolved gas)
         read(fi,*)
-        read(fi,*) kin_model   !reaction kinetics model. 1=Baser,2=modena
+        read(fi,*) kin_model   !reaction kinetics model. 1=Baser,2=modena simple
+            ! kinetics, 3=Baser with R(x), 4=modena RF-1-private
         read(fi,*) dilution   !use dilution effect
         read(fi,*) AOH    !frequential factor of gelling reaction
         read(fi,*) EOH    !activation energy of gelling reaction
@@ -155,6 +156,12 @@ subroutine save_integration_header(outputs_1d,outputs_GR,outputs_GR_c,&
     open (unit=newunit(fi2), file = outputs_GR)
     write(fi2,'(1000A23)') '#GrowthRate1', 'GrowthRate2', 'temperature', &
         'bubbleRadius', 'KH1','KH2','c1','c2','p1','p2'
+    open (unit=newunit(fi3), file = '../results/kinetics.out')
+    write(fi3,'(1000A23)') "time","Catalyst_1","CE_A0","CE_A1","CE_B","CE_B2",&
+        "CE_I0","CE_I1","CE_I2","CE_PBA","CE_Breac","CE_Areac0","CE_Areac1",&
+        "CE_Ireac0","CE_Ireac1","CE_Ireac2","Bulk","R_1","R_1_mass","R_1_temp",&
+        "R_1_vol"
+    open (unit=newunit(fi4), file = outputs_GR_c)
 end subroutine save_integration_header
 !***********************************END****************************************
 
@@ -168,6 +175,12 @@ subroutine save_integration_step
         (radius**3+S0**3-R0**3))*rhop,mb(2)*Mbl(2)/(rhop*4*pi/3*(S0**3-R0**3)),&
         mb(1)*Mbl(1)/(rhop*4*pi/3*(S0**3-R0**3))
     write(fi2,"(1000es23.15)") grrate, Y(teq), radius, KH, avconc, pressure
+    ! write(fi3,"(1000es23.15)") time,Y(kineq(1)),Y(kineq(2)),Y(kineq(3)),&
+    !     Y(kineq(4)),Y(kineq(5)),Y(kineq(6)),Y(kineq(7)),Y(kineq(8)),&
+    !     Y(kineq(9)),Y(kineq(10)),Y(kineq(11)),Y(kineq(12)),Y(kineq(13)),&
+    !     Y(kineq(14)),Y(kineq(15)),Y(kineq(16)),Y(kineq(17)),Y(kineq(18)),&
+    !     Y(kineq(19)),Y(kineq(20))
+    write(fi4,"(1000es23.15)") (Y(fceq+i+1),i=0,ngas*p,ngas)
 end subroutine save_integration_step
 !***********************************END****************************************
 
@@ -180,6 +193,8 @@ subroutine save_integration_close
 !******************************BODY**********************************
     close(fi1)
     close(fi2)
+    close(fi3)
+    close(fi4)
 end subroutine save_integration_close
 !***********************************END****************************************
 end module in_out
