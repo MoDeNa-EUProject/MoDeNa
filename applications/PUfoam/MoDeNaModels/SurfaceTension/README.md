@@ -24,7 +24,7 @@ results of the detailed model as closely as possible.
 
 ## Prerequisites
 In order to compile and run the module a fortran compiler, preferably gfortran, as well as PETSc 3.4.5 need to be installed. PETSc 3.4.5 requires 
-specific versions of MPI, BLAS and Lapack. In order to ensure compatibility, PETSc should be configured to automatically download and install 
+specific versions of MPI, BLAS, Lapack and Scalapack. In order to ensure compatibility, PETSc should be configured to automatically download and install 
 the correct versions, see section Installing PETSc.
  
 As there is no backward compatibility of different versions of PETSc, older as well as newer version of PETSc will most likely not work.

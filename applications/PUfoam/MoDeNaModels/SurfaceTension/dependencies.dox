@@ -3,5 +3,5 @@
     - a current gfortran compiler
     - PETSc 3.4.5
     - MPI (compatible to PETSc 3.4.5, see README file)
-    - BLAS and LAPACK (compatible to PETSc 3.4.5, see README file)
+    - BLAS, LAPACK and SCALAPACK (compatible to PETSc 3.4.5, see README file)
 */
