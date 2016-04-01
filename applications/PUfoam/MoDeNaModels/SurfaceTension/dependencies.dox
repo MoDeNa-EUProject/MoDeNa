@@ -1,5 +1,5 @@
 /*! \page deps Dependencies
-  \section dep_Solubility Dependencies of Solubility model
+  \section dep_Solubility Dependencies of Surface tension model
     - a current gfortran compiler
     - PETSc 3.4.5
     - MPI (compatible to PETSc 3.4.5, see README file)
