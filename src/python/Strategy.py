@@ -184,6 +184,13 @@ class InitialisationStrategy(defaultdict, FWSerializable):
             wf = model.exactTasks(p)
             wf.addAfterAll(model.parameterFittingStrategy().workflow(model))
             return wf
+
+        elif not len(p) and len(model.substituteModels):
+            wf = Workflow2([])
+            for sm in model.substituteModels:
+                wf.addNoLink(sm.initialisationStrategy().workflow(sm))
+            return wf
+
         else:
             return Workflow2([])
 

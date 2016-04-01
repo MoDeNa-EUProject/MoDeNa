@@ -13,7 +13,12 @@ program workflowdummy
    type(c_ptr) :: Model, Inputs, Outputs
   print*, "Hello World"
   Model = modena_model_new (c_char_"Rheology_Arrhenius"//c_null_char);
-  print*, "asdf"
+
+  if ( modena_error_occurred() ) then
+    call exit( modena_error() )
+  end if
+
+  print*, "Check Complete"
   Inputs = modena_inputs_new (Model);
   Outputs = modena_outputs_new (Model);
   TPos = modena_model_inputs_argPos(Model, &
@@ -31,8 +36,9 @@ program workflowdummy
 ! viscosityConvPos = modena_model_inputs_argPos(viscosityModel, &
 !            c_char_"X"//c_null_char);
 
-  call modena_model_argPos_check(Model)
+!  call modena_model_argPos_check(Model)
 
+  print*, "Argpos"
 ! call modena_model_argPos_check(viscosityModel)
 
 

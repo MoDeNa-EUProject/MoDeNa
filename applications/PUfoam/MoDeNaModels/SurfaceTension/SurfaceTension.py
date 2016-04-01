@@ -80,12 +80,12 @@ __date__ = 'Sep 4, 2014'
 
 blowing_agents = IndexSet(
     name= 'blowing_agents',
-    names= [ 'air', 'CO2']
+    names= [ 'AIR', 'CO2']
 )
 
 monomers = IndexSet(
     name = 'monomers',
-    names = ['PU', 'THF', 'hexane']
+    names = ['PU', 'THF', 'HEXANE']
 )
 
 

@@ -2,6 +2,10 @@
 !! Main program. Homogenization approach to heat transfer in polymer foams
 !! @author    Pavel Ferkl
 !! @ingroup   foam_cond
+!! @page deps Dependencies
+!! @section dep_foam_cond  Dependencies of Foam conductivity model
+!! - LAPACK 3.4.2 or higher
+!! - BLAS 3.4.2 or higher
 program hahtf
     use tests
     use ioutils
