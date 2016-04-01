@@ -1,0 +1,4 @@
+/*! \page deps Dependencies
+  \section dep_Solubility Dependencies of Solubility model
+    - a current gfortran compiler
+*/
