@@ -34,6 +34,8 @@ SUBROUTINE  FEX (NEQ, T, Y, YDOT)
     INTEGER :: NEQ,i,j
     real(dp) ::  T, Y(NEQ), YDOT(NEQ),z,zw,ze,zww,zee,lamw,lame,cw,ce,cww,cee,&
         c,dcw,dce,dil,bll
+    ! radius=Y(req)
+    radius=Rb(t)
     call molar_balance
     YDOT=0
     YDOT(xOHeq) = AOH*exp(-EOH/Rg/Y(teq))*(1-Y(xOHeq))*&
@@ -71,7 +73,7 @@ SUBROUTINE  FEX (NEQ, T, Y, YDOT)
     !temperature (enthalpy balance)
     YDOT(teq) = -dHOH*OH0/(rhop*cp)*YDOT(xOHeq)-dHW*W0/(rhop*cp)*YDOT(xWeq)
     do i=1,ngas
-        YDOT(teq) = YDOT(teq) - dHv(i)*12*pi*Mbl(i)*D(i)*Y(req)**4/&
+        YDOT(teq) = YDOT(teq) - dHv(i)*12*pi*Mbl(i)*D(i)*radius**4/&
             (rhop*cp*Vsh)*(Y(fceq+i-1)-KH(i)*Y(fpeq+i-1))/(dz(1)/2)
     enddo
     if (kin_model==2) then
@@ -79,18 +81,18 @@ SUBROUTINE  FEX (NEQ, T, Y, YDOT)
     elseif (kin_model==4) then
         ! YDOT(kineq(19))=YDOT(teq)
     endif
-    if (inertial_term) then
-        YDOT(req) = Y(req+1)    !radius (momentum balance)
-        YDOT(req+1) = (sum(Y(fpeq:lpeq)) + Pair0*R0**3/Y(req)**3 - Pamb - &
-            2*sigma/Y(req) - 4*eta*Y(req+1)/Y(req) - &
-            3._dp/2*Y(req+1)**2)/(Y(req)*rhop)
-    else
-        YDOT(req) = (sum(Y(fpeq:lpeq)) + Pair0*R0**3/Y(req)**3 - Pamb - &
-            2*sigma/Y(req))*Y(req)/(4*eta)   !radius (momentum balance)
-    endif
+    ! if (inertial_term) then
+    !     YDOT(req) = Y(req+1)    !radius (momentum balance)
+    !     YDOT(req+1) = (sum(Y(fpeq:lpeq)) + Pair0*R0**3/radius**3 - Pamb - &
+    !         2*sigma/radius - 4*eta*Y(req+1)/radius - &
+    !         3._dp/2*Y(req+1)**2)/(radius*rhop)
+    ! else
+    !     YDOT(req) = (sum(Y(fpeq:lpeq)) + Pair0*R0**3/radius**3 - Pamb - &
+    !         2*sigma/radius)*radius/(4*eta)   !radius (momentum balance)
+    ! endif
     do i=fpeq,lpeq
-        YDOT(i) = -3*Y(i)*YDOT(req)/Y(req) + Y(i)/Y(teq)*YDOT(teq) + &
-            9*Rg*Y(teq)*D(i-fpeq+1)*Y(req)*(Y(fceq+i-fpeq)-KH(i-fpeq+1)*Y(i))/&
+        YDOT(i) = -3*Y(i)*Rderiv(t)/radius + Y(i)/Y(teq)*YDOT(teq) + &
+            9*Rg*Y(teq)*D(i-fpeq+1)*radius*(Y(fceq+i-fpeq)-KH(i-fpeq+1)*Y(i))/&
             (dz(1)/2)    !partial pressure (molar balance)
     enddo
     do j=1,ngas
@@ -136,8 +138,8 @@ SUBROUTINE  FEX (NEQ, T, Y, YDOT)
                 dce=(cee-c)/(zee-z)
             endif
             !concentration (molar balance)
-            YDOT(fceq+(i-1)*ngas+j-1) = 9*D(j)*((ze+Y(req)**3)**(4._dp/3)*dce -&
-                (zw+Y(req)**3)**(4._dp/3)*dcw)/dz(i)
+            YDOT(fceq+(i-1)*ngas+j-1) = 9*D(j)*((ze+radius**3)**(4._dp/3)*dce -&
+                (zw+radius**3)**(4._dp/3)*dcw)/dz(i)
             if (j==co2_pos) YDOT(fceq+(i-1)*ngas+j-1) = &
                 YDOT(fceq+(i-1)*ngas+j-1) + W0*YDOT(xWeq) !reaction source
         enddo
@@ -228,7 +230,7 @@ subroutine physical_properties(Y)
                 exp(-(Y(teq)-203.3556_dp)**2/(2*40.016_dp**2)))
         end select
     enddo
-    if (solcorr) KH=KH*exp(2*sigma*Mbl/(rhop*Rg*Y(teq)*Y(req)))
+    if (solcorr) KH=KH*exp(2*sigma*Mbl/(rhop*Rg*Y(teq)*radius))
     cp=cppol+sum(cbl*Mbl*cpbll)/rhop
 end subroutine physical_properties
 !***********************************END****************************************
@@ -249,10 +251,10 @@ subroutine molar_balance
     enddo
     mb=mb*4*pi/3 !moles in polymer
     do i=1,ngas
-    	mb2(i)=Y(fpeq+i-1)*Y(req)**3*4*pi/(3*Rg*Y(teq)) !moles in bubble
+    	mb2(i)=Y(fpeq+i-1)*radius**3*4*pi/(3*Rg*Y(teq)) !moles in bubble
     enddo
     mb3=mb+mb2 !total moles
-    st=(S0**3+Y(req)**3-R0**3)**(1._dp/3)-Y(req) !thickness of the shell
+    st=(S0**3+radius**3-R0**3)**(1._dp/3)-radius !thickness of the shell
 end subroutine molar_balance
 !***********************************END****************************************
 
@@ -262,14 +264,12 @@ end subroutine molar_balance
 subroutine restoreDV
 	integer :: i
     time=TOUT
-    radius=Y(req)
     eqconc=Y(fpeq)*KH(1)  !only first gas
     do i=1,ngas
     	pressure(i)=Y(fpeq+i-1)
         grrate(i)=(mb2(i)-nold(i))/timestep
     enddo
     i=1
-    Rold=Y(req)
     Told=Y(teq)
     do i=1,ngas
         pold(i)=Y(fpeq+i-1)
@@ -343,11 +343,11 @@ subroutine bblpreproc
     NEQ=(p+1)*ngas
     NEQ = NEQ+4+ngas
     req=1   !radius index
-    fpeq=2  !pressure index
-    if (inertial_term) then
-        NEQ=NEQ+1
-        fpeq=fpeq+1
-    endif
+    fpeq=1  !pressure index
+    ! if (inertial_term) then
+    !     NEQ=NEQ+1
+    !     fpeq=fpeq+1
+    ! endif
     lpeq=fpeq+ngas-1
     teq=lpeq+1   !temperature index
     xOHeq=teq+1 !polyol conversion index
@@ -367,10 +367,11 @@ subroutine bblpreproc
     endif
 
     !set initial values
+    radius = R0
     allocate(Y(NEQ))
     Y=0
-    Y(req) = R0        !radius
-    if (inertial_term) Y(req+1) = 0        !velocity
+    ! Y(req)=radius   !radius
+    ! if (inertial_term) Y(req+1) = 0        !velocity
     Y(teq) = Temp0   !temperature
     Y(xOHeq) = 0        !xOH
     Y(xWeq) = 0        !xW
@@ -440,11 +441,7 @@ subroutine bblpreproc
         Y(fpeq+i-1) = xgas(i+1)*(Pamb+2*sigma/R0) !pressure
         if (Y(fpeq+i-1)<1e-16_dp) Y(fpeq+i-1)=1e-16_dp
     enddo
-    Rold=Y(req)
-    Told=Y(teq)
-    pold(1)=Y(fpeq)
-    pold(2)=Y(fpeq+1)
-    S0=Sn*Y(req)
+    S0=Sn*radius
     Vsh=4*pi/3*(S0**3-R0**3)
     gelpoint=.false.
     timestep=(TEND-T)/its
@@ -505,6 +502,7 @@ subroutine bblpreproc
     IWORK(6)=maxts
     TOUT =T+timestep
     ITOL = 1 !don't change, or you must declare ATOL as ATOL(NEQ)
+    call load_old_results
     write(*,*) 'done: simulation prepared'
     write(*,*)
 end subroutine bblpreproc
@@ -534,6 +532,7 @@ subroutine bblinteg(outputs_1d,outputs_GR,outputs_GR_c,outputs_GR_p,concloc)
         call restoreDV
         call save_integration_step
         ! write(*,*) tout,kinsource(2)
+        write(*,*) radius,Rb(tout)
         TOUT = TOUT+timestep
         if (eta==maxeta) exit
     END DO
@@ -542,5 +541,36 @@ subroutine bblinteg(outputs_1d,outputs_GR,outputs_GR_c,outputs_GR_p,concloc)
     call destroyModenaModels
     call exit(0)
 end subroutine bblinteg
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> performs integration
+real(dp) function Rderiv(t)
+    use interpolation
+    real(dp) :: t,dt=1.e-3_dp
+    ! integer :: ni=1   !number of points, where we want to interpolate
+    ! real(dp) :: xi(1)   !x-values of points, where we want to interpolate
+    ! real(dp) :: yi(1)   !interpolated y-values
+    ! xi(1)=t
+    ! call pwl_interp_1d ( size(tdRdt), tdRdt, dRdt, ni, xi, yi )
+    ! Rderiv=yi(1)
+    Rderiv=(Rb(t+dt)-Rb(t))/dt
+endfunction Rderiv
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> performs integration
+real(dp) function Rb(t)
+    use interpolation
+    real(dp) :: t
+    integer :: ni=1   !number of points, where we want to interpolate
+    real(dp) :: xi(1)   !x-values of points, where we want to interpolate
+    real(dp) :: yi(1)   !interpolated y-values
+    xi(1)=t
+    call pwl_interp_1d ( size(tdRdt), tdRdt, Rt, ni, xi, yi )
+    Rb=yi(1)
+endfunction Rb
 !***********************************END****************************************
 end module model

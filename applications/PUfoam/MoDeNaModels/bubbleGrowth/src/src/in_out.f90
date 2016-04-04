@@ -7,7 +7,7 @@ module in_out
     use ioutils, only:newunit,str
     implicit none
     logical :: inertial_term,solcorr,gelpoint,dilution
-    integer :: fi1,fi2,fi3,fi4,&
+    integer :: fi1,fi2,fi3,fi4,fi5,&
         integrator,p,maxts,its,visc_model,rhop_model,itens_model,ngas,co2_pos,&
         kin_model,MF,NEQ,&
         fceq,& !first concentration equation (index)
@@ -26,7 +26,7 @@ module in_out
     real(dp), dimension(:), allocatable :: Y,cbl,xgas,&
         kinsource,& !kinetic source term
         D,KH,Mbl,dHv,cpblg,cpbll,&
-        mb,mb2,mb3,avconc,pressure
+        mb,mb2,mb3,avconc,pressure,tdRdt,dRdt,Rt
 contains
 !********************************BEGINNING*************************************
 !> reads input values from a file
@@ -196,5 +196,26 @@ subroutine save_integration_close
     close(fi3)
     close(fi4)
 end subroutine save_integration_close
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> loads old results
+subroutine load_old_results
+    integer :: i,j,ios
+    j=0
+    open(newunit(fi5),file='../results/dRdt2.out')
+        do  !find number of points
+            read(fi5,*,iostat=ios)
+            if (ios/=0) exit
+            j=j+1
+        enddo
+        rewind(fi5)
+        allocate(tdRdt(j),dRdt(j),Rt(j))
+        do i=1,j
+            read(fi5,*) tdRdt(i),Rt(i),dRdt(i)
+        enddo
+    close(fi5)
+end subroutine load_old_results
 !***********************************END****************************************
 end module in_out
