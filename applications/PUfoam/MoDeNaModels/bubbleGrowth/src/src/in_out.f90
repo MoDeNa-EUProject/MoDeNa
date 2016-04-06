@@ -3,6 +3,7 @@
 !! @author    Pavel Ferkl
 !! @ingroup   bblgr
 module in_out
+    use foaming_globals_m
     use constants
     use ioutils, only:newunit,str
     implicit none
@@ -18,15 +19,15 @@ module in_out
     real(dp) :: mshco,& !mesh coarsening parameter
         Temp0,R0,Sn,OH0,W0,NCO0,AOH,EOH,AW,EW,dHOH,dHW,&
         time,radius,eqconc,grrate(2),st,S0,&
-        T,TEND,RTOL,ATOL,&
+        T,RTOL,ATOL,&
         eta,maxeta,Aeta,Eeta,Cg,AA,B,&
-        Pamb,sigma,rhop,cp,cppol,rhobl
+        Pamb,sigma,rhop,cp,cppol,rhobl,porosity
     integer, dimension(:), allocatable :: diff_model,sol_model,fic,&
         kineq !kinetics state variable equations (indexes)
     real(dp), dimension(:), allocatable :: Y,cbl,xgas,&
         kinsource,& !kinetic source term
         D,KH,Mbl,dHv,cpblg,cpbll,&
-        mb,mb2,mb3,avconc,pressure,tdRdt,dRdt,Rt
+        mb,mb2,mb3,avconc,pressure,times,dRdt,Rt,pt
 contains
 !********************************BEGINNING*************************************
 !> reads input values from a file
@@ -149,10 +150,12 @@ subroutine save_integration_header(outputs_1d,outputs_GR,outputs_GR_c,&
         concloc !file names
     integer :: i
     open (unit=newunit(fi1), file = outputs_1d)
-    write(fi1,'(1000A23)') '#time', 'radius','pressure','conversion of polyol',&
-        'conversion of water', 'eq. concentration', 'first concentration', &
-        'viscosity', 'moles in polymer', 'moles in bubble', 'total moles', &
-        'shell thickness', 'temperature', 'foam density', 'weight fraction'
+    write(fi1,'(1000A23)') '#time', 'radius','pressure1', 'pressure2',&
+        'conversion_of_polyol',&
+        'conversion_of_water', 'eq.concentration', 'first_concentration', &
+        'viscosity', 'moles_in_polymer', 'moles_in_bubble', 'total_moles', &
+        'shell_thickness', 'temperature', 'foam_density', 'weight_fraction1', &
+        'weight_fraction2','porosity'
     open (unit=newunit(fi2), file = outputs_GR)
     write(fi2,'(1000A23)') '#GrowthRate1', 'GrowthRate2', 'temperature', &
         'bubbleRadius', 'KH1','KH2','c1','c2','p1','p2'
@@ -162,6 +165,9 @@ subroutine save_integration_header(outputs_1d,outputs_GR,outputs_GR_c,&
         "CE_Ireac0","CE_Ireac1","CE_Ireac2","Bulk","R_1","R_1_mass","R_1_temp",&
         "R_1_vol"
     open (unit=newunit(fi4), file = outputs_GR_c)
+    if (firstrun) then
+        open (unit=newunit(fi5), file = '../results/dRdt.out')
+    endif
 end subroutine save_integration_header
 !***********************************END****************************************
 
@@ -170,10 +176,13 @@ end subroutine save_integration_header
 !> writes an integration step to output file
 subroutine save_integration_step
     integer :: i
-    write(fi1,"(1000es23.15)") time,radius, pressure(1), Y(xOHeq), Y(xWeq), &
+    real(dp) :: rder
+    rder=0
+    write(fi1,"(1000es23.15)") time,radius, pressure(1), pressure(2), &
+        Y(xOHeq), Y(xWeq), &
         eqconc,Y(fceq),eta,mb(1),mb2(1),mb3(1),st,Y(teq),(1-radius**3/&
         (radius**3+S0**3-R0**3))*rhop,mb(2)*Mbl(2)/(rhop*4*pi/3*(S0**3-R0**3)),&
-        mb(1)*Mbl(1)/(rhop*4*pi/3*(S0**3-R0**3))
+        mb(1)*Mbl(1)/(rhop*4*pi/3*(S0**3-R0**3)),porosity
     write(fi2,"(1000es23.15)") grrate, Y(teq), radius, KH, avconc, pressure
     ! write(fi3,"(1000es23.15)") time,Y(kineq(1)),Y(kineq(2)),Y(kineq(3)),&
     !     Y(kineq(4)),Y(kineq(5)),Y(kineq(6)),Y(kineq(7)),Y(kineq(8)),&
@@ -181,6 +190,9 @@ subroutine save_integration_step
     !     Y(kineq(14)),Y(kineq(15)),Y(kineq(16)),Y(kineq(17)),Y(kineq(18)),&
     !     Y(kineq(19)),Y(kineq(20))
     write(fi4,"(1000es23.15)") (Y(fceq+i+1),i=0,ngas*p,ngas)
+    if (firstrun) then
+        write(fi5,"(1000es23.15)") time,radius,rder,pressure(1)
+    endif
 end subroutine save_integration_step
 !***********************************END****************************************
 
@@ -195,6 +207,9 @@ subroutine save_integration_close
     close(fi2)
     close(fi3)
     close(fi4)
+    if (firstrun) then
+        close(fi5)
+    endif
 end subroutine save_integration_close
 !***********************************END****************************************
 
@@ -203,19 +218,46 @@ end subroutine save_integration_close
 !> loads old results
 subroutine load_old_results
     integer :: i,j,ios
+    real(dp), dimension(:,:), allocatable :: matrix
     j=0
-    open(newunit(fi5),file='../results/dRdt2.out')
+    open(newunit(fi5),file='../results/outputs_1d.out')
+        do  !find number of points
+            read(fi5,*,iostat=ios)
+            if (ios/=0) exit
+            j=j+1
+        enddo
+        allocate(matrix(j,18))
+        rewind(fi5)
+        read(fi5,*)
+        do i=2,j
+            read(fi5,*) matrix(i,:)
+        enddo
+    close(fi5)
+    allocate(times(j),dRdt(j),Rt(j),pt(j))
+    times=matrix(:,1)
+    Rt=matrix(:,2)
+end subroutine load_old_results
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> loads old results
+subroutine load_old_results2
+    integer :: i,j,ios
+    j=0
+    open(newunit(fi5),file='../results/dr.out')
         do  !find number of points
             read(fi5,*,iostat=ios)
             if (ios/=0) exit
             j=j+1
         enddo
         rewind(fi5)
-        allocate(tdRdt(j),dRdt(j),Rt(j))
+        deallocate(times,Rt)
+        allocate(times(j),Rt(j))
         do i=1,j
-            read(fi5,*) tdRdt(i),Rt(i),dRdt(i)
+            read(fi5,*) times(i),Rt(i)
         enddo
     close(fi5)
-end subroutine load_old_results
+end subroutine load_old_results2
 !***********************************END****************************************
 end module in_out

@@ -8,6 +8,7 @@ module model
     use iso_c_binding
     use fmodena
     use modenastuff
+    use foaming_globals_m
     implicit none
     integer :: info
     real(dp) :: Pair0,timestep,GR,Rold,Told,pold(2),nold(2),Vsh
@@ -34,8 +35,11 @@ SUBROUTINE  FEX (NEQ, T, Y, YDOT)
     INTEGER :: NEQ,i,j
     real(dp) ::  T, Y(NEQ), YDOT(NEQ),z,zw,ze,zww,zee,lamw,lame,cw,ce,cww,cee,&
         c,dcw,dce,dil,bll
-    ! radius=Y(req)
-    radius=Rb(t)
+    if (firstrun) then
+        radius=Y(req)
+    else
+        radius=Rb(t)
+    endif
     call molar_balance
     YDOT=0
     YDOT(xOHeq) = AOH*exp(-EOH/Rg/Y(teq))*(1-Y(xOHeq))*&
@@ -81,20 +85,28 @@ SUBROUTINE  FEX (NEQ, T, Y, YDOT)
     elseif (kin_model==4) then
         ! YDOT(kineq(19))=YDOT(teq)
     endif
-    ! if (inertial_term) then
-    !     YDOT(req) = Y(req+1)    !radius (momentum balance)
-    !     YDOT(req+1) = (sum(Y(fpeq:lpeq)) + Pair0*R0**3/radius**3 - Pamb - &
-    !         2*sigma/radius - 4*eta*Y(req+1)/radius - &
-    !         3._dp/2*Y(req+1)**2)/(radius*rhop)
-    ! else
-    !     YDOT(req) = (sum(Y(fpeq:lpeq)) + Pair0*R0**3/radius**3 - Pamb - &
-    !         2*sigma/radius)*radius/(4*eta)   !radius (momentum balance)
-    ! endif
-    do i=fpeq,lpeq
-        YDOT(i) = -3*Y(i)*Rderiv(t)/radius + Y(i)/Y(teq)*YDOT(teq) + &
-            9*Rg*Y(teq)*D(i-fpeq+1)*radius*(Y(fceq+i-fpeq)-KH(i-fpeq+1)*Y(i))/&
-            (dz(1)/2)    !partial pressure (molar balance)
-    enddo
+    if (firstrun) then
+        if (inertial_term) then
+            YDOT(req) = Y(req+1)    !radius (momentum balance)
+            YDOT(req+1) = (sum(Y(fpeq:lpeq)) + Pair0*R0**3/radius**3 - Pamb - &
+                2*sigma/radius - 4*eta*Y(req+1)/radius - &
+                3._dp/2*Y(req+1)**2)/(radius*rhop)
+        else
+            YDOT(req) = (sum(Y(fpeq:lpeq)) + Pair0*R0**3/radius**3 - Pamb - &
+                2*sigma/radius)*radius/(4*eta)   !radius (momentum balance)
+        endif
+        do i=fpeq,lpeq
+            YDOT(i) = -3*Y(i)*YDOT(req)/radius + Y(i)/Y(teq)*YDOT(teq) + &
+                9*Rg*Y(teq)*D(i-fpeq+1)*radius*(Y(fceq+i-fpeq)-KH(i-fpeq+1)*Y(i))/&
+                (dz(1)/2)    !partial pressure (molar balance)
+        enddo
+    else
+        do i=fpeq,lpeq
+            YDOT(i) = -3*Y(i)*Rderiv(t)/radius + Y(i)/Y(teq)*YDOT(teq) + &
+                9*Rg*Y(teq)*D(i-fpeq+1)*radius*(Y(fceq+i-fpeq)-KH(i-fpeq+1)*Y(i))/&
+                (dz(1)/2)    !partial pressure (molar balance)
+        enddo
+    endif
     do j=1,ngas
         do i=1,p+1
             if (i==1) then !bubble boundary
@@ -276,6 +288,7 @@ subroutine restoreDV
         nold(i)=mb2(i)
     enddo
     avconc=mb/Vsh
+    porosity=radius**3/(radius**3+S0**3-R0**3)
 end subroutine restoreDV
 !***********************************END****************************************
 
@@ -341,13 +354,18 @@ subroutine bblpreproc
     write(*,*) 'preparing simulation...'
     !determine number of equations and their indexes
     NEQ=(p+1)*ngas
-    NEQ = NEQ+4+ngas
-    req=1   !radius index
-    fpeq=1  !pressure index
-    ! if (inertial_term) then
-    !     NEQ=NEQ+1
-    !     fpeq=fpeq+1
-    ! endif
+    if (firstrun) then
+        NEQ = NEQ+4+ngas
+        req=1   !radius index
+        fpeq=2  !pressure index
+        if (inertial_term) then
+            NEQ=NEQ+1
+            fpeq=fpeq+1
+        endif
+    else
+        NEQ = NEQ+3+ngas
+        fpeq=1  !pressure index
+    endif
     lpeq=fpeq+ngas-1
     teq=lpeq+1   !temperature index
     xOHeq=teq+1 !polyol conversion index
@@ -370,8 +388,10 @@ subroutine bblpreproc
     radius = R0
     allocate(Y(NEQ))
     Y=0
-    ! Y(req)=radius   !radius
-    ! if (inertial_term) Y(req+1) = 0        !velocity
+    if (firstrun) then
+        Y(req)=radius   !radius
+        if (inertial_term) Y(req+1) = 0        !velocity
+    endif
     Y(teq) = Temp0   !temperature
     Y(xOHeq) = 0        !xOH
     Y(xWeq) = 0        !xW
@@ -436,6 +456,7 @@ subroutine bblpreproc
         rhop=(rhop + modena_outputs_get(rhopOutputs, 0_c_size_t))/2
     end select
     call physical_properties(Y)
+    surface_tension=sigma
     Pair0=(Pamb+2*sigma/R0)*xgas(1)
     do i=1,ngas
         Y(fpeq+i-1) = xgas(i+1)*(Pamb+2*sigma/R0) !pressure
@@ -445,8 +466,8 @@ subroutine bblpreproc
     Vsh=4*pi/3*(S0**3-R0**3)
     gelpoint=.false.
     timestep=(TEND-T)/its
-    write(*,'(2x,A,2x,e12.6)') 'NN',Sn**(-3)/(1-Sn**(-3))/&
-        exp(log(4._dp/3*pi*R0**3))
+    ! write(*,'(2x,A,2x,e12.6)') 'NN',Sn**(-3)/(1-Sn**(-3))/&
+    !     exp(log(4._dp/3*pi*R0**3))
 
     !calculate spatial grid points
     allocate(atri(p),btri(p),ctri(p),rtri(p),utri(p),dz(p+1))
@@ -502,7 +523,13 @@ subroutine bblpreproc
     IWORK(6)=maxts
     TOUT =T+timestep
     ITOL = 1 !don't change, or you must declare ATOL as ATOL(NEQ)
-    call load_old_results
+    if (firstrun) then
+        allocate(etat(its,2),port(its,2),init_bub_rad(its,2))
+    endif
+    if (.not. firstrun) then
+        call load_old_results
+        ! call load_old_results2
+    endif
     write(*,*) 'done: simulation prepared'
     write(*,*)
 end subroutine bblpreproc
@@ -514,9 +541,12 @@ end subroutine bblpreproc
 subroutine bblinteg(outputs_1d,outputs_GR,outputs_GR_c,outputs_GR_p,concloc)
     character(*),intent(in) :: outputs_1d,outputs_GR,outputs_GR_c,outputs_GR_p,&
         concloc !file names
+    real(dp), dimension(:,:), allocatable :: matr
     write(*,*) 'integrating...'
-    call save_integration_header(outputs_1d,outputs_GR,outputs_GR_c,&
-        outputs_GR_p,concloc)
+    if (firstrun) then
+        call save_integration_header(outputs_1d,outputs_GR,outputs_GR_c,&
+            outputs_GR_p,concloc)
+    endif
     DO IOUT = 1,its
         select case (integrator)
         case(1)
@@ -530,38 +560,76 @@ subroutine bblinteg(outputs_1d,outputs_GR,outputs_GR_c,outputs_GR_p,concloc)
         end select
         call molar_balance
         call restoreDV
-        call save_integration_step
+        if (firstrun) then
+            call save_integration_step
+            etat(iout,1)=tout
+            etat(iout,2)=eta
+            port(iout,1)=tout
+            port(iout,2)=porosity
+            init_bub_rad(iout,1)=tout
+            init_bub_rad(iout,2)=radius
+        endif
         ! write(*,*) tout,kinsource(2)
-        write(*,*) radius,Rb(tout)
+        ! write(*,*) pressure(1),pt(iout)
+        ! write(*,*) tout, radius**3/(radius**3+S0**3-R0**3), radius, eta
+        T = TOUT
         TOUT = TOUT+timestep
         if (eta==maxeta) exit
     END DO
-    call save_integration_close
+    if (firstrun) then
+        call save_integration_close
+        ! reallocate matrices for eta_rm and bub_vf functions
+        ! interpolation doesn't work otherwise
+        if (iout /= its) then
+            allocate(matr(its,2))
+            matr=etat
+            deallocate(etat)
+            allocate(etat(iout,2))
+            etat=matr(1:iout,:)
+            matr=port
+            deallocate(port)
+            allocate(port(iout,2))
+            port=matr(1:iout,:)
+            matr=init_bub_rad
+            deallocate(init_bub_rad)
+            allocate(init_bub_rad(iout,2))
+            init_bub_rad=matr(1:iout,:)
+        endif
+    else
+        bub_pres=sum(pressure)-Pamb
+    endif
     write(*,*) 'done: integration'
     call destroyModenaModels
-    call exit(0)
 end subroutine bblinteg
 !***********************************END****************************************
 
 
 !********************************BEGINNING*************************************
-!> performs integration
+!> time derivation of bubble radius as function of time
 real(dp) function Rderiv(t)
-    use interpolation
-    real(dp) :: t,dt=1.e-3_dp
-    ! integer :: ni=1   !number of points, where we want to interpolate
-    ! real(dp) :: xi(1)   !x-values of points, where we want to interpolate
-    ! real(dp) :: yi(1)   !interpolated y-values
-    ! xi(1)=t
-    ! call pwl_interp_1d ( size(tdRdt), tdRdt, dRdt, ni, xi, yi )
-    ! Rderiv=yi(1)
-    Rderiv=(Rb(t+dt)-Rb(t))/dt
+    real(dp) :: t,dt=1.e-4_dp
+    Rderiv=(-0.5_dp*Rb(t+2*dt)+2*Rb(t+dt)-1.5_dp*Rb(t))/dt
 endfunction Rderiv
 !***********************************END****************************************
 
+!
+! !********************************BEGINNING*************************************
+! !> bubble radius as function of time
+! real(dp) function Rb(t)
+!     use interpolation
+!     real(dp) :: t
+!     integer :: ni=1   !number of points, where we want to interpolate
+!     real(dp) :: xi(1)   !x-values of points, where we want to interpolate
+!     real(dp) :: yi(1)   !interpolated y-values
+!     xi(1)=t
+!     call pwl_interp_1d ( size(times), times, Rt, ni, xi, yi )
+!     Rb=yi(1)
+! endfunction Rb
+! !***********************************END****************************************
+
 
 !********************************BEGINNING*************************************
-!> performs integration
+!> bubble radius as function of time
 real(dp) function Rb(t)
     use interpolation
     real(dp) :: t
@@ -569,7 +637,8 @@ real(dp) function Rb(t)
     real(dp) :: xi(1)   !x-values of points, where we want to interpolate
     real(dp) :: yi(1)   !interpolated y-values
     xi(1)=t
-    call pwl_interp_1d ( size(tdRdt), tdRdt, Rt, ni, xi, yi )
+    call pwl_interp_1d ( size(bub_rad(:,1)), bub_rad(:,1), &
+        bub_rad(:,bub_inx+1), ni, xi, yi )
     Rb=yi(1)
 endfunction Rb
 !***********************************END****************************************
