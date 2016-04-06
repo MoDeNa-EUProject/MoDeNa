@@ -9,6 +9,8 @@
 find_path(LTDL_INCLUDE_DIR ltdl.h)
 find_library(LTDL_LIBRARY NAMES ltdl)
 
+message(${LTDL_LIBRARY})
+
 if(LTDL_INCLUDE_DIR AND LTDL_LIBRARY)
 set(LTDL_FOUND 1)
 set(LTDL_LIBRARIES ${LTDL_LIBRARY})
