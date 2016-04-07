@@ -26,13 +26,14 @@ subroutine onegrowth
         outputs_GR_p='outputs_GR_p.out',spar='GR_par.dat',concloc
     real(dp) :: tsave
     concloc=fileplaceout
-    inputs=TRIM(ADJUSTL(fileplacein))//TRIM(ADJUSTL(inputs))
-    outputs_1d=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_1d))
-    outputs_GR=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_GR))
-    outputs_GR_c=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_GR_c))
-    outputs_GR_p=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_GR_p))
-    spar=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(spar))
-    if (.not. firstrun) then
+    if (firstrun) then
+        inputs=TRIM(ADJUSTL(fileplacein))//TRIM(ADJUSTL(inputs))
+        outputs_1d=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_1d))
+        outputs_GR=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_GR))
+        outputs_GR_c=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_GR_c))
+        outputs_GR_p=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_GR_p))
+        spar=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(spar))
+    else
         tsave=tend
     endif
     call read_inputs(inputs)
@@ -45,6 +46,8 @@ subroutine onegrowth
     write(*,*) etat(1,1), etat(1,2), size(etat(:,1))
     write(*,*) eta_rm(80._dp)
     write(*,*) bub_vf(80._dp)
+    deallocate(D,cbl,xgas,KH,fic,Mbl,dHv,mb,mb2,mb3,avconc,pressure,&
+        diff_model,sol_model,cpblg,cpbll,RWORK,IWORK,dz,Y)
 end subroutine onegrowth
 !***********************************END****************************************
 

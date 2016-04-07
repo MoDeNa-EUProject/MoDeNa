@@ -596,7 +596,7 @@ subroutine bblinteg(outputs_1d,outputs_GR,outputs_GR_c,outputs_GR_p,concloc)
             init_bub_rad=matr(1:iout,:)
         endif
     else
-        bub_pres=sum(pressure)-Pamb
+        bub_pres=sum(pressure)+Pair0*R0**3/radius**3-Pamb
     endif
     write(*,*) 'done: integration'
     call destroyModenaModels
