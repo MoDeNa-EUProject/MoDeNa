@@ -8,6 +8,7 @@ module foaming_globals_m
   logical :: firstrun=.true.       ! running for the first time
   integer :: bub_inx              ! bubble index
   real(dp) :: TSTART,           & ! starting time of the direct simulations
+              TEND,             & ! end time of the direct simulations
               bub_pres,         & ! bubble pressure
               surface_tension     ! surface tension
   real(dp), dimension(:,:), allocatable :: bub_rad,& ! first column represents
@@ -16,9 +17,12 @@ module foaming_globals_m
                                            etat,& ! first column represents
                                                   ! time, second column viscosity
                                                   ! for each timestep
-                                          port ! first column represents
+                                          port,& ! first column represents
                                                  ! time, second column porosity
                                                  ! for each timestep
+                                         init_bub_rad ! first column represents
+                                                ! time, second column radius
+                                                ! for each timestep
 
 
 end module foaming_globals_m

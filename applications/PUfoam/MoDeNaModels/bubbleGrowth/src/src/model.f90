@@ -570,7 +570,7 @@ subroutine bblinteg(outputs_1d,outputs_GR,outputs_GR_c,outputs_GR_p,concloc)
             init_bub_rad(iout,2)=radius
         endif
         ! write(*,*) tout,kinsource(2)
-        ! write(*,*) pressure(1),pt(iout)
+        write(*,*) tout, sum(pressure)+Pair0*R0**3/radius**3-Pamb, sum(pressure)+Pair0*R0**3/radius**3-Pamb-2*sigma/radius!,pt(iout)
         ! write(*,*) tout, radius**3/(radius**3+S0**3-R0**3), radius, eta
         T = TOUT
         TOUT = TOUT+timestep
@@ -608,7 +608,9 @@ end subroutine bblinteg
 !> time derivation of bubble radius as function of time
 real(dp) function Rderiv(t)
     real(dp) :: t,dt=1.e-4_dp
-    Rderiv=(-0.5_dp*Rb(t+2*dt)+2*Rb(t+dt)-1.5_dp*Rb(t))/dt
+    ! Rderiv=(Rb(t+dt)-Rb(t))/dt
+    ! Rderiv=(-0.5_dp*Rb(t+2*dt)+2*Rb(t+dt)-1.5_dp*Rb(t))/dt
+    Rderiv=(2*Rb(t+3*dt)-9*Rb(t+2*dt)+18*Rb(t+dt)-11*Rb(t))/(6*dt)
 endfunction Rderiv
 !***********************************END****************************************
 

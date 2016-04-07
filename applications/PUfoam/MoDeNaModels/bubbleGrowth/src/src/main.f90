@@ -10,6 +10,12 @@
 !! - BLAS 3.4.2 or higher
 program singlebubblegrowth
     use tests
+    use foaming_globals_m
     implicit none
+    call onegrowth
+    firstrun=.false.
+    allocate(bub_rad(size(init_bub_rad(:,1)),2))
+    bub_rad=init_bub_rad
+    bub_inx=1
     call onegrowth
 end program
