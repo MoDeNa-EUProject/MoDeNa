@@ -570,7 +570,10 @@ subroutine bblinteg(outputs_1d,outputs_GR,outputs_GR_c,outputs_GR_p,concloc)
             init_bub_rad(iout,2)=radius
         endif
         ! write(*,*) tout,kinsource(2)
-        write(*,*) tout, sum(pressure)+Pair0*R0**3/radius**3-Pamb, sum(pressure)+Pair0*R0**3/radius**3-Pamb-2*sigma/radius!,pt(iout)
+        write(*,'(2x,A4,F8.3,A3,A13,F10.3,A4,A25,F8.3,A4)') &
+            't = ', tout, ' s,',&
+            'p_b - p_o = ', sum(pressure)+Pair0*R0**3/radius**3-Pamb, ' Pa,'!, &
+            ! 'p_b - p_o - p_Laplace = ', sum(pressure)+Pair0*R0**3/radius**3-Pamb-2*sigma/radius, ' Pa,'!,pt(iout)
         ! write(*,*) tout, radius**3/(radius**3+S0**3-R0**3), radius, eta
         T = TOUT
         TOUT = TOUT+timestep
@@ -613,21 +616,6 @@ real(dp) function Rderiv(t)
     Rderiv=(2*Rb(t+3*dt)-9*Rb(t+2*dt)+18*Rb(t+dt)-11*Rb(t))/(6*dt)
 endfunction Rderiv
 !***********************************END****************************************
-
-!
-! !********************************BEGINNING*************************************
-! !> bubble radius as function of time
-! real(dp) function Rb(t)
-!     use interpolation
-!     real(dp) :: t
-!     integer :: ni=1   !number of points, where we want to interpolate
-!     real(dp) :: xi(1)   !x-values of points, where we want to interpolate
-!     real(dp) :: yi(1)   !interpolated y-values
-!     xi(1)=t
-!     call pwl_interp_1d ( size(times), times, Rt, ni, xi, yi )
-!     Rb=yi(1)
-! endfunction Rb
-! !***********************************END****************************************
 
 
 !********************************BEGINNING*************************************
