@@ -522,7 +522,13 @@ subroutine bblpreproc
     LIW = size(IWORK)
     IWORK(6)=maxts
     TOUT =T+timestep
-    ITOL = 1 !don't change, or you must declare ATOL as ATOL(NEQ)
+    ITOL = 2 !don't change, or you must declare ATOL as ATOL(NEQ)
+    allocate(ATOL2(NEQ))
+    ATOL2=ATOL
+    ATOL2(req)=ATOL2(req)!/1.e-1_dp
+    do i=fpeq,lpeq
+        ATOL2(i)=ATOL2(i)*1.e-2_dp
+    enddo
     if (firstrun) then
         allocate(etat(its,2),port(its,2),init_bub_rad(its,2))
     endif
@@ -553,7 +559,7 @@ subroutine bblinteg(outputs_1d,outputs_GR,outputs_GR_c,outputs_GR_p,concloc)
             CALL DLSODE (sub_ptr, NEQ, Y, T, TOUT, ITOL, RTOL, ATOL, ITASK, &
                 ISTATE, IOPT, RWORK, LRW, IWORK, LIW, JAC, MF)
         case(2)
-            call DLSODES (sub_ptr, NEQ, Y, T, TOUT, ITOL, RTOL, ATOL, ITASK, &
+            call DLSODES (sub_ptr, NEQ, Y, T, TOUT, ITOL, RTOL, ATOL2, ITASK, &
                 ISTATE, IOPT, RWORK, LRW, IWORK, LIW, JAC, MF)
         case default
             stop 'unknown integrator'
@@ -570,10 +576,11 @@ subroutine bblinteg(outputs_1d,outputs_GR,outputs_GR_c,outputs_GR_p,concloc)
             init_bub_rad(iout,2)=radius
         endif
         ! write(*,*) tout,kinsource(2)
-        write(*,'(2x,A4,F8.3,A3,A13,F10.3,A4,A25,F8.3,A4)') &
+        write(*,'(2x,A4,F8.3,A3,A13,F10.3,A4,A25,F8.3,A4,A9,EN12.3,A4)') &
             't = ', tout, ' s,',&
-            'p_b - p_o = ', sum(pressure)+Pair0*R0**3/radius**3-Pamb, ' Pa,'!, &
-            ! 'p_b - p_o - p_Laplace = ', sum(pressure)+Pair0*R0**3/radius**3-Pamb-2*sigma/radius, ' Pa,'!,pt(iout)
+            'p_b - p_o = ', sum(pressure)+Pair0*R0**3/radius**3-Pamb, ' Pa,', &
+            'p_b - p_o - p_Laplace = ', sum(pressure)+Pair0*R0**3/radius**3-Pamb-2*sigma/radius, ' Pa,',&
+            'dR/dt = ', (sum(pressure)+Pair0*R0**3/radius**3-Pamb-2*sigma/radius)*radius/4/eta, ' m/s'
         ! write(*,*) tout, radius**3/(radius**3+S0**3-R0**3), radius, eta
         T = TOUT
         TOUT = TOUT+timestep

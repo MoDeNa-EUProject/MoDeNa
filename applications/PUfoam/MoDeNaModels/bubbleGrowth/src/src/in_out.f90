@@ -27,7 +27,7 @@ module in_out
     real(dp), dimension(:), allocatable :: Y,cbl,xgas,&
         kinsource,& !kinetic source term
         D,KH,Mbl,dHv,cpblg,cpbll,&
-        mb,mb2,mb3,avconc,pressure,times,dRdt,Rt,pt
+        mb,mb2,mb3,avconc,pressure,times,dRdt,Rt,pt,ATOL2
 contains
 !********************************BEGINNING*************************************
 !> reads input values from a file
