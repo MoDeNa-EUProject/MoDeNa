@@ -7,10 +7,19 @@ module in_out
     use constants
     use ioutils, only:newunit,str
     implicit none
+    character(len=99) :: &
+        fileplacein,& ! location of input files
+        fileplaceout,& ! location of output files
+        inputs,& ! input file
+        outputs_1d,& ! output file with scalar variables
+        outputs_GR,& ! output file for the surrogate model fitting
+        outputs_c,& ! output file with concentration profiles
+        outputs_kin,& ! output file with variables of detailed kinetic model
+        outputs_drdt ! test output file for box with multiple growing bubbles
     logical :: inertial_term,solcorr,gelpoint,dilution
     integer :: fi1,fi2,fi3,fi4,fi5,&
         integrator,p,maxts,its,visc_model,rhop_model,itens_model,ngas,co2_pos,&
-        kin_model,MF,NEQ,&
+        kin_model,int_meth,&
         fceq,& !first concentration equation (index)
         fpeq,lpeq,& !first and last pressure equation (index)
         req,& !radius equation (index)
@@ -19,25 +28,46 @@ module in_out
     real(dp) :: mshco,& !mesh coarsening parameter
         Temp0,R0,Sn,OH0,W0,NCO0,AOH,EOH,AW,EW,dHOH,dHW,&
         time,radius,eqconc,grrate(2),st,S0,&
-        T,RTOL,ATOL,&
+        rel_tol,abs_tol,&
         eta,maxeta,Aeta,Eeta,Cg,AA,B,&
-        Pamb,sigma,rhop,cp,cppol,rhobl,porosity
+        pamb,sigma,rhop,cp,cppol,rhobl,porosity,rhofoam,&
+        pair0,pair,timestep,gr,nold(2),vsh
     integer, dimension(:), allocatable :: diff_model,sol_model,fic,&
         kineq !kinetics state variable equations (indexes)
     real(dp), dimension(:), allocatable :: Y,cbl,xgas,&
         kinsource,& !kinetic source term
         D,KH,Mbl,dHv,cpblg,cpbll,&
-        mb,mb2,mb3,avconc,pressure,times,dRdt,Rt,pt,ATOL2
+        mb,mb2,mb3,avconc,pressure,times,dRdt,Rt,pt,ATOL2,wblpol
 contains
 !********************************BEGINNING*************************************
+!> set paths to all files
+subroutine set_paths
+    fileplacein='../'
+    fileplaceout='../results/'
+    inputs='inputs.in'
+    outputs_1d='outputs_1d.out'
+    outputs_GR='outputs_GR.out'
+    outputs_c='outputs_c.out'
+    outputs_kin='kinetics.out'
+    outputs_drdt='dRdt.out'
+    inputs=TRIM(ADJUSTL(fileplacein))//TRIM(ADJUSTL(inputs))
+    outputs_1d=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_1d))
+    outputs_GR=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_GR))
+    outputs_c=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_c))
+    outputs_kin=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_kin))
+    outputs_drdt=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_drdt))
+end subroutine set_paths
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
 !> reads input values from a file
-subroutine read_inputs(inputs)
-    character(len=80),intent(in) :: inputs
+subroutine read_inputs
     integer :: fi
     write(*,*) 'loading input file ',TRIM(inputs)
     open(newunit(fi),file=inputs)
         read(fi,*) integrator !integrator. 1=dlsode,2=dlsodes
-        read(fi,*) MF   !10=nonstiff,22=stiff,automatic Jacobian(dlsode),
+        read(fi,*) int_meth   !10=nonstiff,22=stiff,automatic Jacobian(dlsode),
             ! 222=stiff,automatic Jacobian(dlsodes)
         read(fi,*)
         read(fi,*) inertial_term    !include inertial term in equations (t/f)
@@ -45,21 +75,25 @@ subroutine read_inputs(inputs)
         read(fi,*) mshco    !mesh coarsening parameter
         read(fi,*)
         read(fi,*) p    !number of internal nodes
-        read(fi,*) T    !initial time
-        read(fi,*) TEND    !final time
+        read(fi,*) tstart    !initial time
+        if (firstrun) then
+            read(fi,*) TEND    !final time
+        else
+            read(fi,*) ! final time is already set
+        endif
         read(fi,*) its    !number of outer integration time steps (how many
             ! times are values written)
         read(fi,*) maxts    !maximum inner time steps between t and t+h
-            ! (default 500, recommended 50000)
-        read(fi,*) RTOL    !relative tolerance
-        read(fi,*) ATOL    !absolute tolerance
+            ! (default 500)
+        read(fi,*) rel_tol    !relative tolerance
+        read(fi,*) abs_tol    !absolute tolerance
         read(fi,*)
         read(fi,*) ngas     !number of dissolved gases
         allocate(D(ngas),cbl(ngas),xgas(ngas+1),KH(ngas),fic(ngas),Mbl(ngas),&
             dHv(ngas),mb(ngas),mb2(ngas),mb3(ngas),avconc(ngas),pressure(ngas),&
-            diff_model(ngas),sol_model(ngas),cpblg(ngas),cpbll(ngas))
+            diff_model(ngas),sol_model(ngas),cpblg(ngas),cpbll(ngas),wblpol(ngas))
         read(fi,*) co2_pos     !carbon dioxide position
-        read(fi,*) Pamb    !ambient pressure
+        read(fi,*) pamb    !ambient pressure
         read(fi,*) Mbl    !blowing agent molar mass (for each dissolved gas)
         read(fi,*) cppol    !heat capacity of polymer
         read(fi,*) cpbll    !heat capacity of blowing agent in liquid phase
@@ -124,30 +158,8 @@ end subroutine read_inputs
 
 
 !********************************BEGINNING*************************************
-!> saves parameters of surrogate model
-subroutine save_surrogate_parameters(spar)
-    character(len=80),intent(in) :: spar
-    integer :: fi,i
-    write(*,*) 'saving parameters of surrogate model to ',TRIM(spar)
-    open(newunit(fi),file=spar)
-        write(fi,*) ngas    !number of dissolved gases
-        write(fi,*) sigma    !interfacial tension
-        do i=1,ngas
-        	write(fi,*) KH(i)    !Henry constants (for each dissolved gas)
-        enddo
-    close(fi)
-    write(*,*) 'done: parameters of surrogate model saved'
-    write(*,*)
-end subroutine save_surrogate_parameters
-!***********************************END****************************************
-
-
-!********************************BEGINNING*************************************
 !> opens output files and writes a header
-subroutine save_integration_header(outputs_1d,outputs_GR,outputs_GR_c,&
-    outputs_GR_p,concloc)
-    character(*),intent(in) :: outputs_1d,outputs_GR,outputs_GR_c,outputs_GR_p,&
-        concloc !file names
+subroutine save_integration_header
     integer :: i
     open (unit=newunit(fi1), file = outputs_1d)
     write(fi1,'(1000A23)') '#time', 'radius','pressure1', 'pressure2',&
@@ -159,56 +171,77 @@ subroutine save_integration_header(outputs_1d,outputs_GR,outputs_GR_c,&
     open (unit=newunit(fi2), file = outputs_GR)
     write(fi2,'(1000A23)') '#GrowthRate1', 'GrowthRate2', 'temperature', &
         'bubbleRadius', 'KH1','KH2','c1','c2','p1','p2'
-    open (unit=newunit(fi3), file = '../results/kinetics.out')
-    write(fi3,'(1000A23)') "time","Catalyst_1","CE_A0","CE_A1","CE_B","CE_B2",&
-        "CE_I0","CE_I1","CE_I2","CE_PBA","CE_Breac","CE_Areac0","CE_Areac1",&
-        "CE_Ireac0","CE_Ireac1","CE_Ireac2","Bulk","R_1","R_1_mass","R_1_temp",&
-        "R_1_vol"
-    open (unit=newunit(fi4), file = outputs_GR_c)
-    if (firstrun) then
-        open (unit=newunit(fi5), file = '../results/dRdt.out')
+    if (kin_model==4) then
+        open (unit=newunit(fi3), file = outputs_kin)
+        write(fi3,'(1000A23)') "time","Catalyst_1","CE_A0","CE_A1","CE_B",&
+            "CE_B2","CE_I0","CE_I1","CE_I2","CE_PBA","CE_Breac","CE_Areac0",&
+            "CE_Areac1","CE_Ireac0","CE_Ireac1","CE_Ireac2","Bulk","R_1",&
+            "R_1_mass","R_1_temp","R_1_vol"
     endif
+    open (unit=newunit(fi4), file = outputs_c)
+    open (unit=newunit(fi5), file = outputs_drdt)
 end subroutine save_integration_header
 !***********************************END****************************************
 
 
 !********************************BEGINNING*************************************
 !> writes an integration step to output file
-subroutine save_integration_step
-    integer :: i
+subroutine save_integration_step(iout)
+    integer :: i,iout
     real(dp) :: rder
     rder=0
-    write(fi1,"(1000es23.15)") time,radius, pressure(1), pressure(2), &
-        Y(xOHeq), Y(xWeq), &
-        eqconc,Y(fceq),eta,mb(1),mb2(1),mb3(1),st,Y(teq),(1-radius**3/&
-        (radius**3+S0**3-R0**3))*rhop,mb(2)*Mbl(2)/(rhop*4*pi/3*(S0**3-R0**3)),&
-        mb(1)*Mbl(1)/(rhop*4*pi/3*(S0**3-R0**3)),porosity
+    write(fi1,"(1000es23.15)") time,radius,pressure,Y(xOHeq),Y(xWeq),&
+        eqconc,Y(fceq),eta,mb(1),mb2(1),mb3(1),st,Y(teq),rhofoam,&
+        wblpol,porosity
     write(fi2,"(1000es23.15)") grrate, Y(teq), radius, KH, avconc, pressure
-    ! write(fi3,"(1000es23.15)") time,Y(kineq(1)),Y(kineq(2)),Y(kineq(3)),&
-    !     Y(kineq(4)),Y(kineq(5)),Y(kineq(6)),Y(kineq(7)),Y(kineq(8)),&
-    !     Y(kineq(9)),Y(kineq(10)),Y(kineq(11)),Y(kineq(12)),Y(kineq(13)),&
-    !     Y(kineq(14)),Y(kineq(15)),Y(kineq(16)),Y(kineq(17)),Y(kineq(18)),&
-    !     Y(kineq(19)),Y(kineq(20))
-    write(fi4,"(1000es23.15)") (Y(fceq+i+1),i=0,ngas*p,ngas)
-    if (firstrun) then
-        write(fi5,"(1000es23.15)") time,radius,rder,pressure(1)
+    if (kin_model==4) then
+        write(fi3,"(1000es23.15)") time,Y(kineq(1)),Y(kineq(2)),Y(kineq(3)),&
+            Y(kineq(4)),Y(kineq(5)),Y(kineq(6)),Y(kineq(7)),Y(kineq(8)),&
+            Y(kineq(9)),Y(kineq(10)),Y(kineq(11)),Y(kineq(12)),Y(kineq(13)),&
+            Y(kineq(14)),Y(kineq(15)),Y(kineq(16)),Y(kineq(17)),Y(kineq(18)),&
+            Y(kineq(19)),Y(kineq(20))
     endif
+    write(fi4,"(1000es23.15)") (Y(fceq+i+1),i=0,ngas*p,ngas)
+    write(fi5,"(1000es23.15)") time,radius,rder,pressure(1)
+    ! save arrays, which are preserved for future use
+    etat(iout,1)=time
+    etat(iout,2)=eta
+    port(iout,1)=time
+    port(iout,2)=porosity
+    init_bub_rad(iout,1)=time
+    init_bub_rad(iout,2)=radius
 end subroutine save_integration_step
 !***********************************END****************************************
 
 
 !********************************BEGINNING*************************************
 !> closes output files
-subroutine save_integration_close
-!***************************DECLARATION******************************
-    integer :: i
-!******************************BODY**********************************
+subroutine save_integration_close(iout)
+    integer :: iout
+    real(dp), dimension(:,:), allocatable :: matr
     close(fi1)
     close(fi2)
     close(fi3)
-    close(fi4)
-    if (firstrun) then
-        close(fi5)
+    if (kin_model==4) then
+        close(fi4)
+    endif
+    close(fi5)
+    ! reallocate matrices for eta_rm and bub_vf functions
+    ! interpolation doesn't work otherwise
+    if (iout /= its) then
+        allocate(matr(its,2))
+        matr=etat
+        deallocate(etat)
+        allocate(etat(iout,2))
+        etat=matr(1:iout,:)
+        matr=port
+        deallocate(port)
+        allocate(port(iout,2))
+        port=matr(1:iout,:)
+        matr=init_bub_rad
+        deallocate(init_bub_rad)
+        allocate(init_bub_rad(iout,2))
+        init_bub_rad=matr(1:iout,:)
     endif
 end subroutine save_integration_close
 !***********************************END****************************************
@@ -220,7 +253,7 @@ subroutine load_old_results
     integer :: i,j,ios
     real(dp), dimension(:,:), allocatable :: matrix
     j=0
-    open(newunit(fi5),file='../results/outputs_1d.out')
+    open(newunit(fi5),file=outputs_1d)
         do  !find number of points
             read(fi5,*,iostat=ios)
             if (ios/=0) exit
@@ -237,27 +270,5 @@ subroutine load_old_results
     times=matrix(:,1)
     Rt=matrix(:,2)
 end subroutine load_old_results
-!***********************************END****************************************
-
-
-!********************************BEGINNING*************************************
-!> loads old results
-subroutine load_old_results2
-    integer :: i,j,ios
-    j=0
-    open(newunit(fi5),file='../results/dr.out')
-        do  !find number of points
-            read(fi5,*,iostat=ios)
-            if (ios/=0) exit
-            j=j+1
-        enddo
-        rewind(fi5)
-        deallocate(times,Rt)
-        allocate(times(j),Rt(j))
-        do i=1,j
-            read(fi5,*) times(i),Rt(i)
-        enddo
-    close(fi5)
-end subroutine load_old_results2
 !***********************************END****************************************
 end module in_out

@@ -3,51 +3,21 @@
 !! @author    Pavel Ferkl
 !! @ingroup   bblgr
 module tests
-    use model
+    use foaming_globals_m
+    use constants
+    use in_out, only:set_paths,read_inputs
+    use model, only:bblpreproc,bblinteg
     implicit none
     private
     public onegrowth,eta_rm,bub_vf
 contains
 !********************************BEGINNING*************************************
-!> simulates one growth of a bubble
+!> simulates growth of a single bubble
 subroutine onegrowth
-    !HORNET windows
-!    character(len=99) :: fileplacein='C:\Pavel\Dropbox\src\bubblegrowth_src\'
-    !HORNET linux
-!    character(len=99) :: fileplacein='/home/me/Dropbox/src/bubblegrowth_src/'
-    !laptop windows
-   ! character(len=99) :: fileplacein=&
-   !      'C:\Users\pavel\Dropbox\src\bubblegrowth_src\'
-!    character(len=99) :: fileplacein='./' !current folder
-    character(len=99) :: fileplacein='../',& !modena
-        fileplaceout='../results/',& !modena
-        inputs='inputs.in',outputs_1d='outputs_1d.out',&
-        outputs_GR='outputs_GR.out',outputs_GR_c='outputs_GR_c.out',&
-        outputs_GR_p='outputs_GR_p.out',spar='GR_par.dat',concloc
-    real(dp) :: tsave
-    concloc=fileplaceout
-    if (firstrun) then
-        inputs=TRIM(ADJUSTL(fileplacein))//TRIM(ADJUSTL(inputs))
-        outputs_1d=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_1d))
-        outputs_GR=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_GR))
-        outputs_GR_c=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_GR_c))
-        outputs_GR_p=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_GR_p))
-        spar=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(spar))
-    else
-        tsave=tend
-    endif
-    call read_inputs(inputs)
-    if (.not. firstrun) then
-        tend=tsave
-    endif
-!    call save_surrogate_parameters(spar)
+    call set_paths
+    call read_inputs
     call bblpreproc
-    call bblinteg(outputs_1d,outputs_GR,outputs_GR_c,outputs_GR_p,concloc)
-    write(*,*) etat(1,1), etat(1,2), size(etat(:,1))
-    write(*,*) eta_rm(80._dp)
-    write(*,*) bub_vf(80._dp)
-    deallocate(D,cbl,xgas,KH,fic,Mbl,dHv,mb,mb2,mb3,avconc,pressure,&
-        diff_model,sol_model,cpblg,cpbll,RWORK,IWORK,dz,Y)
+    call bblinteg
 end subroutine onegrowth
 !***********************************END****************************************
 

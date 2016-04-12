@@ -5,7 +5,7 @@ module foaming_globals_m
 
   implicit none
 
-  logical :: firstrun=.true.       ! running for the first time
+  logical :: firstrun       ! running for the first time
   integer :: bub_inx              ! bubble index
   real(8) :: TSTART,           & ! starting time of the direct simulations
               TEND,             & ! end time of the direct simulations

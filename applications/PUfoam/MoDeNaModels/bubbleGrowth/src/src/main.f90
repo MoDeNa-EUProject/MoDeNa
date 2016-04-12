@@ -12,6 +12,7 @@ program singlebubblegrowth
     use tests
     use foaming_globals_m
     implicit none
+    firstrun=.true.
     call onegrowth
     ! firstrun=.false.
     ! allocate(bub_rad(size(init_bub_rad(:,1)),2))
