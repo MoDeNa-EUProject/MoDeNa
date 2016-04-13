@@ -68,7 +68,7 @@ subroutine  odesystem (neq, t, y, ydot)
         ydot(xOHeq)=ydot(xOHeq)*dil
         ydot(xWeq)=ydot(xWeq)*dil
     endif
-    if (kin_model==2 .or. kin_model==4) then
+    if (kin_model==4) then
         call kinModel
         do i=1,size(kineq)
             ydot(kineq(i))=kinsource(i)
@@ -82,9 +82,7 @@ subroutine  odesystem (neq, t, y, ydot)
         ydot(teq) = ydot(teq) - dHv(i)*12*pi*Mbl(i)*D(i)*radius**4/&
             (rhop*cp*Vsh)*(y(fceq+i-1)-KH(i)*y(fpeq+i-1))/(dz(1)/2)
     enddo
-    if (kin_model==2) then
-        ydot(kineq(12))=ydot(teq)
-    elseif (kin_model==4) then
+    if (kin_model==4) then
         ! ydot(kineq(19))=ydot(teq)
     endif
     if (firstrun) then
@@ -299,50 +297,21 @@ end subroutine restoreDV
 !! modena models
 subroutine kinModel
     integer :: i
-    if (kin_model==2) then
-        call modena_inputs_set(kinInputs, kinNCOPos, y(kineq(1)));
-    	call modena_inputs_set(kinInputs, kinOHPos, y(kineq(2)));
-    	call modena_inputs_set(kinInputs, kinH2OPos, y(kineq(3)));
-        call modena_inputs_set(kinInputs, kinCO2Pos, y(kineq(4)));
-        call modena_inputs_set(kinInputs, kinPentanePos, y(kineq(5)));
-        call modena_inputs_set(kinInputs, kinPolymerPos, y(kineq(6)));
-        call modena_inputs_set(kinInputs, kinPolymerBlowPos, y(kineq(7)));
-        call modena_inputs_set(kinInputs, kinUreaPos, y(kineq(8)));
-        call modena_inputs_set(kinInputs, kinR1Pos, y(kineq(9)));
-        call modena_inputs_set(kinInputs, kinRmassPos, y(kineq(10)));
-        call modena_inputs_set(kinInputs, kinRvolPos, y(kineq(11)));
-        call modena_inputs_set(kinInputs, kinRtempPos, y(kineq(12)));
-    elseif (kin_model==4) then
+    if (kin_model==4) then
         do i=1,size(kineq)
             call modena_inputs_set(kinInputs, kinInputsPos(i), y(kineq(i)))
         enddo
     endif
-    call modena_inputs_set(kinInputs, kinInputsPos(19), 60.0_dp)
+    call modena_inputs_set(kinInputs, kinInputsPos(19), 60.0_dp) !TODO: implement temperature
     ret = modena_model_call (kinModena, kinInputs, kinOutputs)
     if(ret /= 0) then
         call exit(ret)
     endif
-    if (kin_model==2) then
-        kinsource(kineq(1)) = modena_outputs_get(kinOutputs, kinSourceNCOPos);
-        kinsource(kineq(2)) = modena_outputs_get(kinOutputs, kinSourceOHPos);
-        kinsource(kineq(3)) = modena_outputs_get(kinOutputs, kinSourceH2OPos);
-        kinsource(kineq(4)) = modena_outputs_get(kinOutputs, kinSourceCO2Pos);
-        kinsource(kineq(5)) = modena_outputs_get(kinOutputs, kinSourcePentanePos);
-        kinsource(kineq(6)) = modena_outputs_get(kinOutputs, kinSourcePolymerPos);
-        kinsource(kineq(7)) = modena_outputs_get(kinOutputs, &
-            kinSourcePolymerBlowPos);
-        kinsource(kineq(8)) = modena_outputs_get(kinOutputs, kinSourceUreaPos);
-        kinsource(kineq(9)) = modena_outputs_get(kinOutputs, kinSourceR1Pos);
-        kinsource(kineq(10)) = modena_outputs_get(kinOutputs, kinSourceRmassPos);
-        kinsource(kineq(11)) = modena_outputs_get(kinOutputs, kinSourceRvolPos);
-        kinsource(kineq(12)) = modena_outputs_get(kinOutputs, kinSourceRtempPos);
-    elseif (kin_model==4) then
+    if (kin_model==4) then
         kinsource=0
         do i=1,size(kineq)
             kinsource(i) = modena_outputs_get(kinOutputs, kinOutputsPos(i))
-            ! write(*,*) i,kinsource(i)
         enddo
-        ! stop
     endif
 end subroutine kinModel
 !***********************************END****************************************
@@ -353,6 +322,13 @@ end subroutine kinModel
 subroutine bblpreproc
     integer :: i,j
     write(*,*) 'preparing simulation...'
+    select case (kin_model)
+    case(1)
+    case(3)
+    case(4)
+    case default
+        stop 'unknown kinetic model'
+    end select
     !determine number of equations and their indexes
     neq=(p+1)*ngas
     if (firstrun) then
@@ -372,12 +348,10 @@ subroutine bblpreproc
     xOHeq=teq+1 !polyol conversion index
     xWeq=xOHeq+1  !water conversion index
     fceq = xWeq+1    !concentration index
-    if (kin_model==2) then
-        allocate(kineq(12),kinsource(12))
-    elseif (kin_model==4) then
+    if (kin_model==4) then
         allocate(kineq(20),kinsource(20))
     endif
-    if (kin_model==2 .or. kin_model==4) then
+    if (kin_model==4) then
         neq=neq+size(kineq)
         do i=1,size(kineq)
             kineq(i)=xWeq+i
@@ -396,11 +370,6 @@ subroutine bblpreproc
     y(teq) = Temp0   !temperature
     y(xOHeq) = 0        !xOH
     y(xWeq) = 0        !xW
-    if (kin_model==2) then
-        y(kineq(1))=NCO0*1e3_dp
-        y(kineq(2))=OH0*1e3_dp
-        y(kineq(3))=W0*1e3_dp
-    endif
     if (kin_model==4) then
         y(kineq(1)) = 6.73000e-02_dp
         y(kineq(2)) = 1.92250e+00_dp

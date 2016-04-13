@@ -117,8 +117,8 @@ subroutine read_inputs
         read(fi,*) xgas    !initial molar fraction of gases in the bubble (for
             ! air and each dissolved gas)
         read(fi,*)
-        read(fi,*) kin_model   !reaction kinetics model. 1=Baser,2=modena simple
-            ! kinetics, 3=Baser with R(x), 4=modena RF-1-private
+        read(fi,*) kin_model   !reaction kinetics model. 1=Baser,
+            ! 3=Baser with R(x), 4=modena RF-1-private
         read(fi,*) dilution   !use dilution effect
         read(fi,*) AOH    !frequential factor of gelling reaction
         read(fi,*) EOH    !activation energy of gelling reaction
