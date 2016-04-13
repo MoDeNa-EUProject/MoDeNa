@@ -73,8 +73,6 @@ subroutine  odesystem (neq, t, y, ydot)
         do i=1,size(kineq)
             ydot(kineq(i))=kinsource(i)
         enddo
-        ! ydot(xOHeq) = -ydot(kineq(2))/OH0
-        ! ydot(xWeq) = -ydot(kineq(3))/W0
     endif
     !temperature (enthalpy balance)
     ydot(teq) = -dHOH*OH0/(rhop*cp)*ydot(xOHeq)-dHW*W0/(rhop*cp)*ydot(xWeq)
@@ -88,11 +86,11 @@ subroutine  odesystem (neq, t, y, ydot)
     if (firstrun) then
         if (inertial_term) then
             ydot(req) = y(req+1)    !radius (momentum balance)
-            ydot(req+1) = (sum(y(fpeq:lpeq)) + Pair0*R0**3/radius**3 - pamb - &
+            ydot(req+1) = (sum(y(fpeq:lpeq)) + Pair0*R0**3/radius**3*Y(teq)/Temp0 - pamb - &
                 2*sigma/radius - 4*eta*y(req+1)/radius - &
                 3._dp/2*y(req+1)**2)/(radius*rhop)
         else
-            ydot(req) = (sum(y(fpeq:lpeq)) + Pair0*R0**3/radius**3 - pamb - &
+            ydot(req) = (sum(y(fpeq:lpeq)) + Pair0*R0**3/radius**3*Y(teq)/Temp0 - pamb - &
                 2*sigma/radius)*radius/(4*eta)   !radius (momentum balance)
         endif
         do i=fpeq,lpeq
@@ -287,7 +285,7 @@ subroutine restoreDV
     porosity=radius**3/(radius**3+S0**3-R0**3)
     rhofoam=(1-porosity)*rhop
     st=(S0**3+radius**3-R0**3)**(1._dp/3)-radius !thickness of the shell
-    pair=Pair0*R0**3/radius**3
+    pair=Pair0*R0**3/radius**3*Y(teq)/Temp0
 end subroutine restoreDV
 !***********************************END****************************************
 
