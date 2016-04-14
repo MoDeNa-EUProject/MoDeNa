@@ -26,17 +26,18 @@ module in_out
         teq,& !temperature equation (index)
         xOHeq,xWeq !conversion equations (indexes)
     real(dp) :: mshco,& !mesh coarsening parameter
-        Temp0,R0,Sn,OH0,W0,NCO0,AOH,EOH,AW,EW,dHOH,dHW,&
+        temp0,R0,Sn,OH0,W0,NCO0,AOH,EOH,AW,EW,dHOH,dHW,&
         time,radius,eqconc,grrate(2),st,S0,&
         rel_tol,abs_tol,&
         eta,maxeta,Aeta,Eeta,Cg,AA,B,&
         pamb,sigma,rhop,cp,cppol,rhobl,porosity,rhofoam,&
-        pair0,pair,timestep,gr,nold(2),vsh
+        pair0,pair,timestep,gr,nold(2),vsh,temp,conv,&
+        Rey,pairst,pambst,Ca
     integer, dimension(:), allocatable :: diff_model,sol_model,fic,&
         kineq !kinetics state variable equations (indexes)
     real(dp), dimension(:), allocatable :: Y,cbl,xgas,&
         kinsource,& !kinetic source term
-        D,KH,Mbl,dHv,cpblg,cpbll,&
+        D,D0,KH,Mbl,dHv,cpblg,cpbll,&
         mb,mb2,mb3,avconc,pressure,times,dRdt,Rt,pt,ATOL2,wblpol
 contains
 !********************************BEGINNING*************************************
@@ -77,7 +78,7 @@ subroutine read_inputs
         read(fi,*) p    !number of internal nodes
         read(fi,*) tstart    !initial time
         if (firstrun) then
-            read(fi,*) TEND    !final time
+            read(fi,*) tend    !final time
         else
             read(fi,*) ! final time is already set
         endif
@@ -91,7 +92,8 @@ subroutine read_inputs
         read(fi,*) ngas     !number of dissolved gases
         allocate(D(ngas),cbl(ngas),xgas(ngas+1),KH(ngas),fic(ngas),Mbl(ngas),&
             dHv(ngas),mb(ngas),mb2(ngas),mb3(ngas),avconc(ngas),pressure(ngas),&
-            diff_model(ngas),sol_model(ngas),cpblg(ngas),cpbll(ngas),wblpol(ngas))
+            diff_model(ngas),sol_model(ngas),cpblg(ngas),cpbll(ngas),&
+            wblpol(ngas),D0(ngas))
         read(fi,*) co2_pos     !carbon dioxide position
         read(fi,*) pamb    !ambient pressure
         read(fi,*) Mbl    !blowing agent molar mass (for each dissolved gas)
@@ -103,7 +105,7 @@ subroutine read_inputs
         read(fi,*) dHv    !evaporation heat of blowing agent (for each gas)
         read(fi,*) rhobl    !density of liquid physical blowing agent
         read(fi,*)
-        read(fi,*) Temp0    !initial temperature
+        read(fi,*) temp0    !initial temperature
         read(fi,*) R0    !initial radius
         read(fi,*) Sn    !how many times is initial shell larger than initial
             ! bubble radius
@@ -191,9 +193,9 @@ subroutine save_integration_step(iout)
     real(dp) :: rder
     rder=0
     write(fi1,"(1000es23.15)") time,radius,pressure,Y(xOHeq),Y(xWeq),&
-        eqconc,Y(fceq),eta,mb(1),mb2(1),mb3(1),st,Y(teq),rhofoam,&
+        eqconc,Y(fceq),eta,mb(1),mb2(1),mb3(1),st,temp,rhofoam,&
         wblpol,porosity
-    write(fi2,"(1000es23.15)") grrate, Y(teq), radius, KH, avconc, pressure
+    write(fi2,"(1000es23.15)") grrate, temp, radius, KH, avconc, pressure
     if (kin_model==4) then
         write(fi3,"(1000es23.15)") time,Y(kineq(1)),Y(kineq(2)),Y(kineq(3)),&
             Y(kineq(4)),Y(kineq(5)),Y(kineq(6)),Y(kineq(7)),Y(kineq(8)),&

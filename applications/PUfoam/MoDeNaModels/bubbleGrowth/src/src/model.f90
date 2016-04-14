@@ -36,15 +36,10 @@ subroutine  odesystem (neq, t, y, ydot)
     integer :: neq,i,j
     real(dp) :: t,y(neq),ydot(neq),z,zw,ze,zww,zee,lamw,lame,cw,ce,cww,cee,&
         c,dcw,dce,dil,bll
-    if (firstrun) then
-        radius=y(req) ! calculate bubble radius
-    else
-        radius=Rb(t) ! use calculated bubble radius
-    endif
-    call physical_properties(y)
+    call dim_var
     call molar_balance
     ydot=0
-    ydot(xOHeq) = AOH*exp(-EOH/Rg/y(teq))*(1-y(xOHeq))*&
+    ydot(xOHeq) = AOH*exp(-EOH/Rg/temp)*(1-y(xOHeq))*&
         (NCO0-2*W0*y(xWeq)-OH0*y(xOHeq)) !polyol conversion
     if (kin_model==3) then
         if (y(xOHeq)>0.5_dp .and. y(xOHeq)<0.87_dp) ydot(xOHeq)=ydot(xOHeq)*&
@@ -54,9 +49,9 @@ subroutine  odesystem (neq, t, y, ydot)
     endif
     if (W0>1e-3) then
         ! water conversion
-        ! ydot(xWeq) = AW*exp(-EW/Rg/y(teq))*(1-y(xWeq))*&
+        ! ydot(xWeq) = AW*exp(-EW/Rg/temp)*(1-y(xWeq))*&
         !     (NCO0-2*W0*y(xWeq)-OH0*y(xOHeq)) 2nd order
-        ydot(xWeq) = AW*exp(-EW/Rg/y(teq))*(1-y(xWeq)) !1st order
+        ydot(xWeq) = AW*exp(-EW/Rg/temp)*(1-y(xWeq)) !1st order
     endif
     if (dilution) then
         if (co2_pos==1) then
@@ -86,22 +81,22 @@ subroutine  odesystem (neq, t, y, ydot)
     if (firstrun) then
         if (inertial_term) then
             ydot(req) = y(req+1)    !radius (momentum balance)
-            ydot(req+1) = (sum(y(fpeq:lpeq)) + Pair0*R0**3/radius**3*Y(teq)/Temp0 - pamb - &
+            ydot(req+1) = (sum(y(fpeq:lpeq)) + pair - pamb - &
                 2*sigma/radius - 4*eta*y(req+1)/radius - &
                 3._dp/2*y(req+1)**2)/(radius*rhop)
         else
-            ydot(req) = (sum(y(fpeq:lpeq)) + Pair0*R0**3/radius**3*Y(teq)/Temp0 - pamb - &
+            ydot(req) = (sum(y(fpeq:lpeq)) + pair - pamb - &
                 2*sigma/radius)*radius/(4*eta)   !radius (momentum balance)
         endif
         do i=fpeq,lpeq
-            ydot(i) = -3*y(i)*ydot(req)/radius + y(i)/y(teq)*ydot(teq) + &
-                9*Rg*y(teq)*D(i-fpeq+1)*radius*(y(fceq+i-fpeq)-KH(i-fpeq+1)*y(i))/&
+            ydot(i) = -3*y(i)*ydot(req)/radius + y(i)/temp*ydot(teq) + &
+                9*Rg*temp*D(i-fpeq+1)*radius*(y(fceq+i-fpeq)-KH(i-fpeq+1)*y(i))/&
                 (dz(1)/2)    !partial pressure (molar balance)
         enddo
     else
         do i=fpeq,lpeq
-            ydot(i) = -3*y(i)*Rderiv(t)/radius + y(i)/y(teq)*ydot(teq) + &
-                9*Rg*y(teq)*D(i-fpeq+1)*radius*(y(fceq+i-fpeq)-KH(i-fpeq+1)*y(i))/&
+            ydot(i) = -3*y(i)*Rderiv(t)/radius + y(i)/temp*ydot(teq) + &
+                9*Rg*temp*D(i-fpeq+1)*radius*(y(fceq+i-fpeq)-KH(i-fpeq+1)*y(i))/&
                 (dz(1)/2)    !partial pressure (molar balance)
         enddo
     endif
@@ -159,19 +154,149 @@ end subroutine odesystem
 
 
 !********************************BEGINNING*************************************
+!> model supplied to integrator, FVM, nonequidistant mesh
+subroutine  odesystem_nd (neq, t, y, ydot)
+    integer :: neq,i,j
+    real(dp) :: t,y(neq),ydot(neq),z,zw,ze,zww,zee,lamw,lame,cw,ce,cww,cee,&
+        c,dcw,dce,dil,bll
+    call dim_var_nd
+    call molar_balance
+    call nondim_var
+    ydot=0
+    ydot(xOHeq) = AOH*exp(-EOH/Rg/y(teq)/temp0)*(1-y(xOHeq))*&
+        (NCO0-2*W0*y(xWeq)-OH0*y(xOHeq))*R0**2/D0(1) !polyol conversion
+    if (kin_model==3) then
+        if (y(xOHeq)>0.5_dp .and. y(xOHeq)<0.87_dp) ydot(xOHeq)=ydot(xOHeq)*&
+            (-2.027_dp*y(xOHeq)+2.013_dp) !gelling influence on kinetics
+        if (y(xOHeq)>0.87_dp) ydot(xOHeq)=ydot(xOHeq)*&
+            (3.461_dp*y(xOHeq)-2.761_dp)
+    endif
+    if (W0>1e-3) then
+        ! water conversion
+        ! ydot(xWeq) = AW*exp(-EW/Rg/y(teq)/temp0)*(1-y(xWeq))*&
+        !     (NCO0-2*W0*y(xWeq)-OH0*y(xOHeq))*R0**2/D0 2nd order
+        ydot(xWeq) = AW*exp(-EW/Rg/y(teq)/temp0)*(1-y(xWeq))*R0**2/D0(1) !1st order
+    endif
+    if (dilution) then
+        if (co2_pos==1) then
+            bll=mb(2)/Vsh*Mbl(2)/rhop
+        else
+            bll=mb(1)/Vsh*Mbl(1)/rhop
+        endif
+        dil=1/(1+rhop/rhobl*bll)
+        ydot(xOHeq)=ydot(xOHeq)*dil
+        ydot(xWeq)=ydot(xWeq)*dil
+    endif
+    if (kin_model==4) then
+        call kinModel
+        do i=1,size(kineq)
+            ydot(kineq(i))=kinsource(i)
+        enddo
+    endif
+    !temperature (enthalpy balance)
+    ydot(teq) = -dHOH*OH0/(rhop*cp/temp0)*ydot(xOHeq)&
+                -dHW*W0/(rhop*cp/temp0)*ydot(xWeq)
+    do i=1,ngas
+        ydot(teq) = ydot(teq) - dHv(i)*12*pi*Mbl(i)*D(i)*radius**4*R0**4/&
+            (rhop*cp*Vsh)*(y(fceq+i-1)-KH(i)*y(fpeq+i-1))/(dz(1)/2)*R0**2/D0(1)
+    enddo
+    if (kin_model==4) then
+        ! ydot(kineq(19))=ydot(teq)
+    endif
+    if (firstrun) then
+        if (inertial_term) then
+            ydot(req) = y(req+1)    !radius (momentum balance)
+            ydot(req+1) = sum(y(fpeq:lpeq))/y(req)/Rey + &
+                pairst*y(teq)/y(req)**4/Rey - pambst/y(req)/Rey - &
+                2/y(req)**2/Ca/Rey - 4*y(req+1)/y(req)**2/Rey - &
+                3._dp/2*y(req+1)**2/y(req)
+        else
+            ydot(req) = sum(y(fpeq:lpeq))*y(req)/4 + &
+                pairst*y(teq)/y(req)**2/4 - pambst*y(req)/4 - &
+                1._dp/2/Ca   !radius (momentum balance)
+        endif
+        do i=fpeq,lpeq
+            ydot(i) = -3*y(i)*ydot(req)/y(req) + y(i)/y(teq)*ydot(teq) + &
+                9*Rg*temp0*D(i-fpeq+1)*R0**5/eta/D0(1)*y(req)*y(teq)*&
+                (y(fceq+i-fpeq)-KH(i-fpeq+1)*y(i)*eta*D0(1)/R0**2)/&
+                (dz(1)/2)    !partial pressure (molar balance)
+        enddo
+    else
+        do i=fpeq,lpeq
+            ydot(i) = -3*y(i)*Rderiv(t)/radius*R0**2/D0(1) + &
+                y(i)/y(teq)*ydot(teq) + &
+                9*Rg*temp0*D(i-fpeq+1)*R0**5/eta/D0(1)*radius/R0*y(teq)*&
+                (y(fceq+i-fpeq)-KH(i-fpeq+1)*y(i)*eta*D0(1)/R0**2)/&
+                (dz(1)/2)    !partial pressure (molar balance)
+        enddo
+    endif
+    do j=1,ngas
+        do i=1,p+1
+            if (i==1) then !bubble boundary
+                zw=0e0_dp
+                z=dz(i)/2
+                ze=dz(i)
+                zee=ze+dz(i+1)/2
+                lame=(ze-z)/(zee-z)
+                c=y(fceq+(i-1)*ngas+j-1)
+                cee=y(fceq+i*ngas+j-1)
+                cw=KH(j)*y(fpeq+j-1)
+                ce=cee*lame+c*(1-lame)
+                dcw=(c-cw)/(z-zw)
+                dce=(cee-c)/(zee-z)
+            elseif(i==p+1) then !outer boundary
+                zww=z
+                zw=ze
+                z=zee
+                ze=ze+dz(i)
+                lamw=(zw-zww)/(z-zww)
+                cww=y(fceq+(i-2)*ngas+j-1)
+                c=y(fceq+(i-1)*ngas+j-1)
+                cw=c*lamw+cww*(1-lamw)
+                ce=c
+                dcw=(c-cww)/(z-zww)
+                dce=0e0_dp
+            else
+                zww=z
+                zw=ze
+                z=zee
+                ze=ze+dz(i)
+                zee=ze+dz(i+1)/2
+                lamw=(zw-zww)/(z-zww)
+                lame=(ze-z)/(zee-z)
+                cww=y(fceq+(i-2)*ngas+j-1)
+                c=y(fceq+(i-1)*ngas+j-1)
+                cee=y(fceq+i*ngas+j-1)
+                cw=c*lamw+cww*(1-lamw)
+                ce=cee*lame+c*(1-lame)
+                dcw=(c-cww)/(z-zww)
+                dce=(cee-c)/(zee-z)
+            endif
+            !concentration (molar balance)
+            ydot(fceq+(i-1)*ngas+j-1) = 9*D(j)*((ze+radius**3)**(4._dp/3)*dce -&
+                (zw+radius**3)**(4._dp/3)*dcw)/dz(i)*R0**2/D0(1)
+            if (j==co2_pos) ydot(fceq+(i-1)*ngas+j-1) = &
+                ydot(fceq+(i-1)*ngas+j-1) + W0*ydot(xWeq) !reaction source
+        enddo
+    enddo
+end subroutine odesystem_nd
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
 !> calculates values of physical properties
-subroutine physical_properties(y)
-    real(dp), dimension(:), intent(in) :: y
+subroutine physical_properties(temp,conv)
+    real(dp), intent(in) :: temp,conv
     integer :: i
-    if (.not. gelpoint .and. y(teq)<500) then
+    if (.not. gelpoint .and. temp<500) then
         select case(visc_model)
         case(1)
         case(2)
-            eta=Aeta*exp(Eeta/(Rg*y(teq)))*(Cg/(Cg-y(xOHeq)))**(AA+B*y(xOHeq))
+            eta=Aeta*exp(Eeta/(Rg*temp))*(Cg/(Cg-conv))**(AA+B*conv)
         case(3)
             !set input vector
-            call modena_inputs_set(viscInputs, viscTpos, y(teq));
-            call modena_inputs_set(viscInputs, viscXPos, y(xOHeq));
+            call modena_inputs_set(viscInputs, viscTpos, temp);
+            call modena_inputs_set(viscInputs, viscXPos, conv);
             !call model
             ret = modena_model_call(viscModena, viscInputs, viscOutputs)
             if(ret /= 0) then
@@ -184,8 +309,8 @@ subroutine physical_properties(y)
             eta=maxeta
             gelpoint=.true.
             write(*,'(2x,A,es8.2,A)') 'gel point reached at time t = ',TOUT,' s'
-            write(*,'(2x,A,es8.2,A)') 'temperature at gel point T = ',y(teq),' K'
-            write(*,'(2x,A,es8.2)') 'conversion at gel point X = ',y(xOHeq)
+            write(*,'(2x,A,es8.2,A)') 'temperature at gel point T = ',temp,' K'
+            write(*,'(2x,A,es8.2)') 'conversion at gel point X = ',conv
         endif
     else
         eta=maxeta
@@ -193,7 +318,7 @@ subroutine physical_properties(y)
     select case(itens_model)
     case(1)
     case(2)
-        call modena_inputs_set(itensInputs, itensTpos, y(teq))
+        call modena_inputs_set(itensInputs, itensTpos, temp)
         ret = modena_model_call(itensModena, itensInputs, itensOutputs)
         if(ret /= 0) then
             call exit(ret)
@@ -204,7 +329,7 @@ subroutine physical_properties(y)
         select case(diff_model(i))
         case(1)
         case(2)
-            call modena_inputs_set(diffInputs(i), diffTpos(i), y(teq))
+            call modena_inputs_set(diffInputs(i), diffTpos(i), temp)
             ret = modena_model_call(diffModena(i), diffInputs(i), diffOutputs(i))
             if(ret /= 0) then
                 call exit(ret)
@@ -215,7 +340,7 @@ subroutine physical_properties(y)
         case(1)
         case(2)
             ! TODO: implement properly
-            call modena_inputs_set(solInputs(i), solTpos(i), y(teq))
+            call modena_inputs_set(solInputs(i), solTpos(i), temp)
             call modena_inputs_set(solInputs(i), solXgasPos(i), 1.0e-4_dp)
             call modena_inputs_set(solInputs(i), solXmdiPos(i), 0.5_dp)
             call modena_inputs_set(solInputs(i), solXpolyolPos(i), 0.5_dp)
@@ -226,21 +351,21 @@ subroutine physical_properties(y)
             KH(i) = modena_outputs_get(solOutputs(i), 0_c_size_t)
             KH(i)=rhop/Mbl(i)/KH(i)
         case(3)
-            KH(i)=-rhop/Mbl(i)/pamb*3.3e-4_dp*(exp((2.09e4_dp-67.5_dp*(y(teq)-&
-                35.8_dp*log(pamb/1e5_dp)))/(8.68e4_dp-(y(teq)-35.8_dp*&
+            KH(i)=-rhop/Mbl(i)/pamb*3.3e-4_dp*(exp((2.09e4_dp-67.5_dp*(temp-&
+                35.8_dp*log(pamb/1e5_dp)))/(8.68e4_dp-(temp-35.8_dp*&
                 log(pamb/1e5_dp))))-1.01_dp)**(-1)
         case(4)
-            KH(i)=rhop/Mbl(i)/pamb*(0.0064_dp+0.0551_dp*exp(-(y(teq)-298)**2/&
+            KH(i)=rhop/Mbl(i)/pamb*(0.0064_dp+0.0551_dp*exp(-(temp-298)**2/&
                 (2*17.8_dp**2)))
         case(5)
-            KH(i)=rhop/Mbl(i)/pamb*(0.00001235_dp*y(teq)**2-0.00912_dp*y(teq)+&
+            KH(i)=rhop/Mbl(i)/pamb*(0.00001235_dp*temp**2-0.00912_dp*temp+&
                 1.686_dp)
         case(6)
             KH(i)=rhop/Mbl(i)/pamb*(1e-7_dp+4.2934_dp*&
-                exp(-(y(teq)-203.3556_dp)**2/(2*40.016_dp**2)))
+                exp(-(temp-203.3556_dp)**2/(2*40.016_dp**2)))
         end select
     enddo
-    if (solcorr) KH=KH*exp(2*sigma*Mbl/(rhop*Rg*y(teq)*radius))
+    if (solcorr) KH=KH*exp(2*sigma*Mbl/(rhop*Rg*temp*radius))
     cp=cppol+sum(cbl*Mbl*cpbll)/rhop
 end subroutine physical_properties
 !***********************************END****************************************
@@ -260,7 +385,7 @@ subroutine molar_balance
     enddo
     mb=mb*4*pi/3 !moles in polymer
     do i=1,ngas
-    	mb2(i)=y(fpeq+i-1)*radius**3*4*pi/(3*Rg*y(teq)) !moles in bubble
+    	mb2(i)=pressure(1)*radius**3*4*pi/(3*Rg*temp) !moles in bubble
     enddo
     mb3=mb+mb2 !total moles
 end subroutine molar_balance
@@ -268,25 +393,85 @@ end subroutine molar_balance
 
 
 !********************************BEGINNING*************************************
-!> restores dimensional variables
-subroutine restoreDV
+!> calculate dimensional variables
+subroutine dim_var
 	integer :: i
     time=t
+    if (firstrun) then
+        radius=y(req) ! calculate bubble radius
+    else
+        radius=Rb(time) ! use calculated bubble radius
+    endif
+    temp=y(teq)
+    conv=y(xOHeq)
+    call physical_properties(temp,conv)
     eqconc=y(fpeq)*KH(1)  !only first gas
     do i=1,ngas
     	pressure(i)=y(fpeq+i-1)
-        grrate(i)=(mb2(i)-nold(i))/timestep
     enddo
     do i=1,ngas
-        nold(i)=mb2(i)
         wblpol(i)=mb(i)*Mbl(i)/(rhop*4*pi/3*(S0**3-R0**3))
     enddo
     avconc=mb/Vsh
     porosity=radius**3/(radius**3+S0**3-R0**3)
     rhofoam=(1-porosity)*rhop
     st=(S0**3+radius**3-R0**3)**(1._dp/3)-radius !thickness of the shell
-    pair=Pair0*R0**3/radius**3*Y(teq)/Temp0
-end subroutine restoreDV
+    pair=pair0*R0**3/radius**3*temp/temp0
+end subroutine dim_var
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> calculate dimensional variables
+subroutine dim_var_nd
+	integer :: i
+    time=t*R0**2/D0(1)
+    if (firstrun) then
+        radius=y(req)*R0 ! calculate bubble radius
+    else
+        radius=Rb(time) ! use calculated bubble radius
+    endif
+    temp=y(teq)*temp0
+    conv=y(xOHeq)
+    call physical_properties(temp,conv)
+    eqconc=y(fpeq)*KH(1)  !only first gas
+    do i=1,ngas
+    	pressure(i)=y(fpeq+i-1)*eta*D0(1)/R0**2
+    enddo
+    do i=1,ngas
+        wblpol(i)=mb(i)*Mbl(i)/(rhop*4*pi/3*(S0**3-R0**3))
+    enddo
+    avconc=mb/Vsh
+    porosity=radius**3/(radius**3+S0**3-R0**3)
+    rhofoam=(1-porosity)*rhop
+    st=(S0**3+radius**3-R0**3)**(1._dp/3)-radius !thickness of the shell
+    pair=pair0*R0**3/radius**3*temp/temp0
+end subroutine dim_var_nd
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> calculate non-dimensional variables
+subroutine nondim_var
+	Rey=rhop*D0(1)/eta
+    pairst=pair0*R0**2/eta/D0(1)
+    pambst=pamb*R0**2/eta/D0(1)
+    Ca=eta*D0(1)/sigma/R0
+end subroutine nondim_var
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> calculate growth rate
+subroutine growth_rate
+	integer :: i
+    do i=1,ngas
+        grrate(i)=(mb2(i)-nold(i))/timestep
+    enddo
+    do i=1,ngas
+        nold(i)=mb2(i)
+    enddo
+end subroutine growth_rate
 !***********************************END****************************************
 
 
@@ -300,7 +485,8 @@ subroutine kinModel
             call modena_inputs_set(kinInputs, kinInputsPos(i), y(kineq(i)))
         enddo
     endif
-    call modena_inputs_set(kinInputs, kinInputsPos(19), 60.0_dp) !TODO: implement temperature
+    !TODO: implement temperature
+    call modena_inputs_set(kinInputs, kinInputsPos(19), 60.0_dp)
     ret = modena_model_call (kinModena, kinInputs, kinOutputs)
     if(ret /= 0) then
         call exit(ret)
@@ -357,45 +543,10 @@ subroutine bblpreproc
         fceq=kineq(size(kineq))+1
     endif
 
-    !set initial values
+    ! determine physical properties
     radius = R0
-    allocate(y(neq))
-    y=0
-    if (firstrun) then
-        y(req)=radius   !radius
-        if (inertial_term) y(req+1) = 0        !velocity
-    endif
-    y(teq) = Temp0   !temperature
-    y(xOHeq) = 0        !xOH
-    y(xWeq) = 0        !xW
-    if (kin_model==4) then
-        y(kineq(1)) = 6.73000e-02_dp
-        y(kineq(2)) = 1.92250e+00_dp
-        y(kineq(3)) = 2.26920e+00_dp
-        y(kineq(4)) = 0.00000e+00_dp
-        y(kineq(5)) = 5.46200e-01_dp
-        ! y(kineq(5)) = 1.0924e+00_dp
-        y(kineq(6)) = 2.19790e+00_dp
-        y(kineq(7)) = 1.64000e+00_dp
-        y(kineq(8)) = 1.71030e+00_dp
-        y(kineq(9)) = 0.00000e+00_dp
-        y(kineq(10)) = 0.00000e+00_dp
-        y(kineq(11)) = 0.00000e+00_dp
-        y(kineq(12)) = 0.00000e+00_dp
-        y(kineq(13)) = 0.00000e+00_dp
-        y(kineq(14)) = 0.00000e+00_dp
-        y(kineq(15)) = 0.00000e+00_dp
-        y(kineq(16)) = 4.45849e+00_dp
-        y(kineq(17)) = 0.00000e+00_dp
-        y(kineq(18)) = 1.00000e+00_dp
-        y(kineq(19)) = 60!2.27000e+01_dp
-        y(kineq(20)) = 1e0_dp!8.46382e-01_dp
-    endif
-    do j=1,ngas
-        do i=1,p+1
-            y(fceq+(i-1)*ngas+j-1) = cbl(j)      !blowing agent concentration
-        enddo
-    enddo
+    temp=temp0
+    conv=0.0_dp
     if (sum(xgas) /= 1) then
         write(*,*) 'Sum of initial molar fractions of gases in the bubble is &
             not equal to one. Normalizing...'
@@ -407,14 +558,14 @@ subroutine bblpreproc
     select case(rhop_model) !density is kept constant, calculate it only once
     case(1)
     case(2)
-        call modena_inputs_set(rhopInputs, rhopTpos, y(teq))
+        call modena_inputs_set(rhopInputs, rhopTpos, temp)
         call modena_inputs_set(rhopInputs, rhopXOHPos, 0.1_dp)
         ret = modena_model_call (rhopModena, rhopInputs, rhopOutputs)
         if(ret /= 0) then
             call exit(ret)
         endif
         rhop = modena_outputs_get(rhopOutputs, 0_c_size_t)
-        call modena_inputs_set(rhopInputs, rhopTpos, y(teq)+100)
+        call modena_inputs_set(rhopInputs, rhopTpos, temp+100)
         call modena_inputs_set(rhopInputs, rhopXOHPos, 0.9_dp)
         ret = modena_model_call (rhopModena, rhopInputs, rhopOutputs)
         if(ret /= 0) then
@@ -423,17 +574,14 @@ subroutine bblpreproc
         !average density during foaming
         rhop=(rhop + modena_outputs_get(rhopOutputs, 0_c_size_t))/2
     end select
-    call physical_properties(y)
+    call physical_properties(temp,conv)
+    D0=D
     surface_tension=sigma
-    Pair0=(pamb+2*sigma/R0)*xgas(1)
-    do i=1,ngas
-        y(fpeq+i-1) = xgas(i+1)*(pamb+2*sigma/R0) !pressure
-        if (y(fpeq+i-1)<1e-16_dp) y(fpeq+i-1)=1e-16_dp
-    enddo
+    pair0=(pamb+2*sigma/R0)*xgas(1)
     S0=Sn*radius
     Vsh=4*pi/3*(S0**3-R0**3)
     gelpoint=.false.
-    timestep=(TEND-T)/its
+    timestep=(tend-tstart)/its
     ! write(*,'(2x,A,2x,e12.6)') 'NN',Sn**(-3)/(1-Sn**(-3))/&
     !     exp(log(4._dp/3*pi*R0**3))
     if (firstrun) then
@@ -459,6 +607,8 @@ subroutine bblpreproc
     enddo
     dz(p+1)=rtri(p)-utri(p)
     deallocate(atri,btri,ctri,rtri,utri)
+
+    call set_init
 
     !choose and set integrator
     mf=int_meth
@@ -495,8 +645,6 @@ subroutine bblpreproc
     lrw = size(rwork)
     liw = size(iwork)
     iwork(6)=maxts
-    t = tstart
-    tout = t+timestep
     itol = 2 !don't change, or you must declare atol as atol(neq)
     rtol=rel_tol
     atol=abs_tol
@@ -509,6 +657,108 @@ subroutine bblpreproc
     write(*,*) 'done: simulation prepared'
     write(*,*)
 end subroutine bblpreproc
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> set initial conditions
+subroutine set_init
+    integer :: i,j
+    t = tstart
+    tout = t+timestep
+    allocate(y(neq))
+    y=0
+    if (firstrun) then
+        y(req)=radius   !radius
+        if (inertial_term) y(req+1) = 0        !velocity
+    endif
+    y(teq) = temp   !temperature
+    y(xOHeq) = conv        !xOH
+    y(xWeq) = 0        !xW
+    if (kin_model==4) then
+        y(kineq(1)) = 6.73000e-02_dp
+        y(kineq(2)) = 1.92250e+00_dp
+        y(kineq(3)) = 2.26920e+00_dp
+        y(kineq(4)) = 0.00000e+00_dp
+        y(kineq(5)) = 5.46200e-01_dp
+        ! y(kineq(5)) = 1.0924e+00_dp
+        y(kineq(6)) = 2.19790e+00_dp
+        y(kineq(7)) = 1.64000e+00_dp
+        y(kineq(8)) = 1.71030e+00_dp
+        y(kineq(9)) = 0.00000e+00_dp
+        y(kineq(10)) = 0.00000e+00_dp
+        y(kineq(11)) = 0.00000e+00_dp
+        y(kineq(12)) = 0.00000e+00_dp
+        y(kineq(13)) = 0.00000e+00_dp
+        y(kineq(14)) = 0.00000e+00_dp
+        y(kineq(15)) = 0.00000e+00_dp
+        y(kineq(16)) = 4.45849e+00_dp
+        y(kineq(17)) = 0.00000e+00_dp
+        y(kineq(18)) = 1.00000e+00_dp
+        y(kineq(19)) = 60!2.27000e+01_dp
+        y(kineq(20)) = 1e0_dp!8.46382e-01_dp
+    endif
+    do j=1,ngas
+        do i=1,p+1
+            y(fceq+(i-1)*ngas+j-1) = cbl(j)      !blowing agent concentration
+        enddo
+    enddo
+    do i=1,ngas
+        y(fpeq+i-1) = xgas(i+1)*(pamb+2*sigma/R0) !pressure
+        if (y(fpeq+i-1)<1e-16_dp) y(fpeq+i-1)=1e-16_dp
+    enddo
+end subroutine set_init
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> set initial conditions
+subroutine set_init_nd
+    integer :: i,j
+    t = tstart*R0**2/D0(1)
+    tout = (t+timestep)*R0**2/D0(1)
+    allocate(y(neq))
+    y=0
+    if (firstrun) then
+        y(req)=radius/R0   !radius
+        if (inertial_term) y(req+1) = 0        !velocity
+    endif
+    y(teq) = temp/temp0   !temperature
+    y(xOHeq) = conv        !xOH
+    y(xWeq) = 0        !xW
+    if (kin_model==4) then
+        y(kineq(1)) = 6.73000e-02_dp
+        y(kineq(2)) = 1.92250e+00_dp
+        y(kineq(3)) = 2.26920e+00_dp
+        y(kineq(4)) = 0.00000e+00_dp
+        y(kineq(5)) = 5.46200e-01_dp
+        ! y(kineq(5)) = 1.0924e+00_dp
+        y(kineq(6)) = 2.19790e+00_dp
+        y(kineq(7)) = 1.64000e+00_dp
+        y(kineq(8)) = 1.71030e+00_dp
+        y(kineq(9)) = 0.00000e+00_dp
+        y(kineq(10)) = 0.00000e+00_dp
+        y(kineq(11)) = 0.00000e+00_dp
+        y(kineq(12)) = 0.00000e+00_dp
+        y(kineq(13)) = 0.00000e+00_dp
+        y(kineq(14)) = 0.00000e+00_dp
+        y(kineq(15)) = 0.00000e+00_dp
+        y(kineq(16)) = 4.45849e+00_dp
+        y(kineq(17)) = 0.00000e+00_dp
+        y(kineq(18)) = 1.00000e+00_dp
+        y(kineq(19)) = 60!2.27000e+01_dp
+        y(kineq(20)) = 1e0_dp!8.46382e-01_dp
+    endif
+    do j=1,ngas
+        do i=1,p+1
+            y(fceq+(i-1)*ngas+j-1) = cbl(j)      !blowing agent concentration
+        enddo
+    enddo
+    do i=1,ngas
+        y(fpeq+i-1) = xgas(i+1)*(pamb+2*sigma/R0)*R0**2/eta/D0(1) !pressure
+        if (y(fpeq+i-1)<1e-16_dp) y(fpeq+i-1)=1e-16_dp
+    enddo
+end subroutine set_init_nd
 !***********************************END****************************************
 
 
@@ -530,9 +780,9 @@ subroutine bblinteg
         case default
             stop 'unknown integrator'
         end select
-        call physical_properties(y)
+        call dim_var
         call molar_balance
-        call restoredv
+        call growth_rate
         if (firstrun) then
             call save_integration_step(iout)
         endif
@@ -554,7 +804,7 @@ subroutine bblinteg
     write(*,*) 'done: integration'
     call destroyModenaModels
     deallocate(D,cbl,xgas,KH,fic,Mbl,dHv,mb,mb2,mb3,avconc,pressure,&
-        diff_model,sol_model,cpblg,cpbll,RWORK,IWORK,dz,Y,atol2,wblpol)
+        diff_model,sol_model,cpblg,cpbll,RWORK,IWORK,dz,Y,atol2,wblpol,D0)
 end subroutine bblinteg
 !***********************************END****************************************
 
