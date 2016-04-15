@@ -19,6 +19,10 @@ module model
     !mesh variables
     integer :: info
     real(dp),allocatable :: atri(:),btri(:),ctri(:),rtri(:),utri(:),dz(:)
+    ! interpolation variables
+    logical :: Rb_initialized
+    integer :: Rb_kx=5,Rb_iknot=0,Rb_inbvx
+    real(dp), dimension(:), allocatable :: Rb_tx,Rb_coef
     !needed for selection of subroutine for evaluation of derivatives
     abstract interface
         subroutine sub (neq, t, y, ydot)
@@ -35,7 +39,7 @@ contains
 subroutine  odesystem (neq, t, y, ydot)
     integer :: neq,i,j
     real(dp) :: t,y(neq),ydot(neq),z,zw,ze,zww,zee,lamw,lame,cw,ce,cww,cee,&
-        c,dcw,dce,dil,bll
+        c,dcw,dce,dil,bll,rder
     call dim_var
     call molar_balance
     ydot=0
@@ -95,7 +99,12 @@ subroutine  odesystem (neq, t, y, ydot)
         enddo
     else
         do i=fpeq,lpeq
-            ydot(i) = -3*y(i)*Rderiv(t)/radius + y(i)/temp*ydot(teq) + &
+            ! rder=(sum(y(fpeq:lpeq)) + pair - pamb - &
+            !     2*sigma/radius)*radius/(4*eta)
+            ! ydot(i) = -3*y(i)*rder/radius + y(i)/temp*ydot(teq) + &
+            !     9*Rg*temp*D(i-fpeq+1)*radius*(y(fceq+i-fpeq)-KH(i-fpeq+1)*y(i))/&
+            !     (dz(1)/2)    !partial pressure (molar balance)
+            ydot(i) = -3*y(i)*Rderiv(time)/radius + y(i)/temp*ydot(teq) + &
                 9*Rg*temp*D(i-fpeq+1)*radius*(y(fceq+i-fpeq)-KH(i-fpeq+1)*y(i))/&
                 (dz(1)/2)    !partial pressure (molar balance)
         enddo
@@ -585,7 +594,7 @@ subroutine bblpreproc
     ! write(*,'(2x,A,2x,e12.6)') 'NN',Sn**(-3)/(1-Sn**(-3))/&
     !     exp(log(4._dp/3*pi*R0**3))
     if (firstrun) then
-        allocate(etat(its,2),port(its,2),init_bub_rad(its,2))
+        allocate(etat(0:its,2),port(0:its,2),init_bub_rad(0:its,2))
     else
         ! call load_old_results
     endif
@@ -769,6 +778,12 @@ subroutine bblinteg
     if (firstrun) then
         call save_integration_header
     endif
+    call dim_var
+    call molar_balance
+    call growth_rate
+    if (firstrun) then
+        call save_integration_step(0)
+    endif
     do iout = 1,its
         select case (integrator)
         case(1)
@@ -788,12 +803,13 @@ subroutine bblinteg
         endif
         ! write(*,*) tout,kinsource(2)
         write(*,'(2x,A4,F8.3,A3,A13,F10.3,A4,A25,F8.3,A4,A9,EN12.3,A4)') &
-            't = ', t, ' s,',&
+            't = ', time, ' s,',&
             'p_b - p_o = ', sum(pressure)+pair-pamb, ' Pa,', &
             'p_b - p_o - p_Laplace = ', sum(pressure)+pair-pamb-2*sigma/radius, ' Pa,',&
             'dR/dt = ', (sum(pressure)+pair-pamb-2*sigma/radius)*radius/4/eta, ' m/s'
+            ! 'p_b = ', pressure(1), ' Pa,'
         ! write(*,*) tout, radius**3/(radius**3+S0**3-R0**3), radius, eta
-        tout = t+timestep
+        tout = time+timestep !TODO: fix for non-dimensional
         if (gelpoint) exit
     end do
     if (firstrun) then
@@ -812,10 +828,22 @@ end subroutine bblinteg
 !********************************BEGINNING*************************************
 !> time derivation of bubble radius as function of time
 real(dp) function Rderiv(t)
-    real(dp) :: t,dt=1.e-4_dp
+    use bspline_module
+    real(dp) :: t,dt=1.e-5_dp
+    integer :: nx,idx,iflag
     ! Rderiv=(Rb(t+dt)-Rb(t))/dt
     ! Rderiv=(-0.5_dp*Rb(t+2*dt)+2*Rb(t+dt)-1.5_dp*Rb(t))/dt
-    Rderiv=(2*Rb(t+3*dt)-9*Rb(t+2*dt)+18*Rb(t+dt)-11*Rb(t))/(6*dt)
+    ! Rderiv=(2*Rb(t+3*dt)-9*Rb(t+2*dt)+18*Rb(t+dt)-11*Rb(t))/(6*dt)
+    nx=size(bub_rad(:,1))
+    if (.not. Rb_initialized) then
+        allocate(Rb_tx(nx+Rb_kx),Rb_coef(nx))
+        call db1ink(bub_rad(:,1),nx,bub_rad(:,bub_inx+1),&
+            Rb_kx,Rb_iknot,Rb_tx,Rb_coef,iflag)
+        Rb_inbvx=1
+        Rb_initialized=.true.
+    endif
+    idx=1
+    call db1val(t,idx,Rb_tx,nx,Rb_kx,Rb_coef,Rderiv,iflag,Rb_inbvx)
 endfunction Rderiv
 !***********************************END****************************************
 
@@ -824,14 +852,26 @@ endfunction Rderiv
 !> bubble radius as function of time
 real(dp) function Rb(t)
     use interpolation
+    use bspline_module
     real(dp) :: t
-    integer :: ni=1   !number of points, where we want to interpolate
-    real(dp) :: xi(1)   !x-values of points, where we want to interpolate
-    real(dp) :: yi(1)   !interpolated y-values
-    xi(1)=t
-    call pwl_interp_1d ( size(bub_rad(:,1)), bub_rad(:,1), &
-        bub_rad(:,bub_inx+1), ni, xi, yi )
-    Rb=yi(1)
+    integer :: nx,idx,iflag
+    ! integer :: ni=1   !number of points, where we want to interpolate
+    ! real(dp) :: xi(1)   !x-values of points, where we want to interpolate
+    ! real(dp) :: yi(1)   !interpolated y-values
+    ! xi(1)=t
+    ! call pwl_interp_1d ( size(bub_rad(:,1)), bub_rad(:,1), &
+    !     bub_rad(:,bub_inx+1), ni, xi, yi )
+    ! Rb=yi(1)
+    nx=size(bub_rad(:,1))
+    if (.not. Rb_initialized) then
+        allocate(Rb_tx(nx+Rb_kx),Rb_coef(nx))
+        call db1ink(bub_rad(:,1),nx,bub_rad(:,bub_inx+1),&
+            Rb_kx,Rb_iknot,Rb_tx,Rb_coef,iflag)
+        Rb_inbvx=1
+        Rb_initialized=.true.
+    endif
+    idx=0
+    call db1val(t,idx,Rb_tx,nx,Rb_kx,Rb_coef,Rb,iflag,Rb_inbvx)
 endfunction Rb
 !***********************************END****************************************
 end module model

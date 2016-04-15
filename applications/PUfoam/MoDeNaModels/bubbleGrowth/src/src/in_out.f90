@@ -231,19 +231,19 @@ subroutine save_integration_close(iout)
     ! reallocate matrices for eta_rm and bub_vf functions
     ! interpolation doesn't work otherwise
     if (iout /= its) then
-        allocate(matr(its,2))
+        allocate(matr(0:its,2))
         matr=etat
         deallocate(etat)
-        allocate(etat(iout,2))
-        etat=matr(1:iout,:)
+        allocate(etat(0:iout,2))
+        etat=matr(0:iout,:)
         matr=port
         deallocate(port)
-        allocate(port(iout,2))
-        port=matr(1:iout,:)
+        allocate(port(0:iout,2))
+        port=matr(0:iout,:)
         matr=init_bub_rad
         deallocate(init_bub_rad)
-        allocate(init_bub_rad(iout,2))
-        init_bub_rad=matr(1:iout,:)
+        allocate(init_bub_rad(0:iout,2))
+        init_bub_rad=matr(0:iout,:)
     endif
 end subroutine save_integration_close
 !***********************************END****************************************
@@ -268,9 +268,10 @@ subroutine load_old_results
             read(fi5,*) matrix(i,:)
         enddo
     close(fi5)
-    allocate(times(j),dRdt(j),Rt(j),pt(j))
-    times=matrix(:,1)
-    Rt=matrix(:,2)
+    allocate(times(j-1),Rt(j-1))
+    times(1:j-1)=matrix(2:j,1)
+    Rt(1:j-1)=matrix(2:j,2)
+    deallocate(matrix)
 end subroutine load_old_results
 !***********************************END****************************************
 end module in_out
