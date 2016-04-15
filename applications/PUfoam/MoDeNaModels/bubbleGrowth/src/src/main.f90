@@ -15,8 +15,6 @@ program singlebubblegrowth
     implicit none
     ! firstrun=.true.
     ! call onegrowth
-    ! allocate(bub_rad(size(init_bub_rad(:,1)),2))
-    ! bub_rad=init_bub_rad
     tend=200
     call set_paths
     call load_old_results
