@@ -35,7 +35,7 @@ module in_out
         Rey,pairst,pambst,Ca
     integer, dimension(:), allocatable :: diff_model,sol_model,fic,&
         kineq !kinetics state variable equations (indexes)
-    real(dp), dimension(:), allocatable :: Y,cbl,xgas,&
+    real(dp), dimension(:), allocatable :: y,cbl,xgas,&
         kinsource,& !kinetic source term
         D,D0,KH,Mbl,dHv,cpblg,cpbll,&
         mb,mb2,mb3,avconc,pressure,times,dRdt,Rt,pt,ATOL2,wblpol

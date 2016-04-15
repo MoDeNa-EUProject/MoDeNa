@@ -39,8 +39,8 @@ contains
 subroutine  odesystem (neq, t, y, ydot)
     integer :: neq,i,j
     real(dp) :: t,y(neq),ydot(neq),z,zw,ze,zww,zee,lamw,lame,cw,ce,cww,cee,&
-        c,dcw,dce,dil,bll,rder
-    call dim_var
+        c,dcw,dce,dil,bll,rder,pder
+    call dim_var(t,y)
     call molar_balance
     ydot=0
     ydot(xOHeq) = AOH*exp(-EOH/Rg/temp)*(1-y(xOHeq))*&
@@ -99,14 +99,16 @@ subroutine  odesystem (neq, t, y, ydot)
         enddo
     else
         do i=fpeq,lpeq
-            ! rder=(sum(y(fpeq:lpeq)) + pair - pamb - &
-            !     2*sigma/radius)*radius/(4*eta)
-            ! ydot(i) = -3*y(i)*rder/radius + y(i)/temp*ydot(teq) + &
-            !     9*Rg*temp*D(i-fpeq+1)*radius*(y(fceq+i-fpeq)-KH(i-fpeq+1)*y(i))/&
-            !     (dz(1)/2)    !partial pressure (molar balance)
+            rder=(sum(y(fpeq:lpeq)) + pair - pamb - &
+                2*sigma/radius)*radius/(4*eta)
+            pder = -3*y(i)*rder/radius + y(i)/temp*ydot(teq) + &
+                9*Rg*temp*D(i-fpeq+1)*radius*(y(fceq+i-fpeq)-KH(i-fpeq+1)*y(i))/&
+                (dz(1)/2)    !partial pressure (molar balance)
             ydot(i) = -3*y(i)*Rderiv(time)/radius + y(i)/temp*ydot(teq) + &
                 9*Rg*temp*D(i-fpeq+1)*radius*(y(fceq+i-fpeq)-KH(i-fpeq+1)*y(i))/&
                 (dz(1)/2)    !partial pressure (molar balance)
+            ! write(*,*) t,rder,Rderiv(time)
+            ! if (i==1) write(*,*) t,pder,ydot(i),radius
         enddo
     endif
     do j=1,ngas
@@ -403,8 +405,9 @@ end subroutine molar_balance
 
 !********************************BEGINNING*************************************
 !> calculate dimensional variables
-subroutine dim_var
+subroutine dim_var(t,y)
 	integer :: i
+    real(dp) :: t,y(neq)
     time=t
     if (firstrun) then
         radius=y(req) ! calculate bubble radius
@@ -778,7 +781,7 @@ subroutine bblinteg
     if (firstrun) then
         call save_integration_header
     endif
-    call dim_var
+    call dim_var(t,y)
     call molar_balance
     call growth_rate
     if (firstrun) then
@@ -795,7 +798,7 @@ subroutine bblinteg
         case default
             stop 'unknown integrator'
         end select
-        call dim_var
+        call dim_var(t,y)
         call molar_balance
         call growth_rate
         if (firstrun) then
@@ -809,6 +812,7 @@ subroutine bblinteg
             'dR/dt = ', (sum(pressure)+pair-pamb-2*sigma/radius)*radius/4/eta, ' m/s'
             ! 'p_b = ', pressure(1), ' Pa,'
         ! write(*,*) tout, radius**3/(radius**3+S0**3-R0**3), radius, eta
+        ! stop
         tout = time+timestep !TODO: fix for non-dimensional
         if (gelpoint) exit
     end do

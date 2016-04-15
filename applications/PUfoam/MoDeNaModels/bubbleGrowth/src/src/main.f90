@@ -11,12 +11,19 @@
 program singlebubblegrowth
     use tests
     use foaming_globals_m
+    use in_out
     implicit none
-    firstrun=.true.
-    call onegrowth
+    ! firstrun=.true.
+    ! call onegrowth
+    ! allocate(bub_rad(size(init_bub_rad(:,1)),2))
+    ! bub_rad=init_bub_rad
+    tend=200
+    call set_paths
+    call load_old_results
+    allocate(bub_rad(size(times),2))
+    bub_rad(:,1)=times
+    bub_rad(:,2)=Rt
     firstrun=.false.
-    allocate(bub_rad(size(init_bub_rad(:,1)),2))
-    bub_rad=init_bub_rad
     bub_inx=1
     call onegrowth
 end program
