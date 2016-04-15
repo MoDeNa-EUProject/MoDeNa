@@ -44,7 +44,7 @@ subroutine  odesystem_nd (neq, t, y, ydot)
     real(dp) :: t,y(neq),ydot(neq),z,zw,ze,zww,zee,lamw,lame,cw,ce,cww,cee,&
         c,dcw,dce,dil,bll
     call dim_var_nd
-    call molar_balance
+    call molar_balance(y)
     call nondim_var
     ydot=0
     ydot(xOHeq) = AOH*exp(-EOH/Rg/y(teq)/temp0)*(1-y(xOHeq))*&
@@ -209,7 +209,7 @@ end subroutine nondim_var
 
 !********************************BEGINNING*************************************
 !> set initial conditions
-subroutine set_init_nd
+subroutine set_initial_conditions_nd
     integer :: i,j
     t = tstart*R0**2/D0(1)
     tout = (t+timestep)*R0**2/D0(1)
@@ -254,6 +254,6 @@ subroutine set_init_nd
         y(fpeq+i-1) = xgas(i+1)*(pamb+2*sigma/R0)*R0**2/eta/D0(1) !pressure
         if (y(fpeq+i-1)<1e-16_dp) y(fpeq+i-1)=1e-16_dp
     enddo
-end subroutine set_init_nd
+end subroutine set_initial_conditions_nd
 !***********************************END****************************************
 end module model_nd

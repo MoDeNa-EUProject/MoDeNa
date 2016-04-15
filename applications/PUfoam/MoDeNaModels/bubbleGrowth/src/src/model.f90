@@ -17,8 +17,7 @@ module model
     real(dp), dimension(:), allocatable :: rwork!,y
     integer, dimension(:), allocatable :: iwork
     !mesh variables
-    integer :: info
-    real(dp),allocatable :: atri(:),btri(:),ctri(:),rtri(:),utri(:),dz(:)
+    real(dp),allocatable :: dz(:)
     ! interpolation variables
     logical :: Rb_initialized
     integer :: Rb_kx=5,Rb_iknot=0,Rb_inbvx
@@ -32,7 +31,8 @@ module model
         end subroutine sub
     end interface
     procedure (sub), pointer :: sub_ptr => odesystem
-    public bblpreproc,bblinteg,Rb,Rderiv
+    public bblpreproc,bblinteg,Rb,Rderiv,physical_properties,molar_balance,&
+        kinModel
 contains
 !********************************BEGINNING*************************************
 !> model supplied to integrator, FVM, nonequidistant mesh
@@ -41,7 +41,7 @@ subroutine  odesystem (neq, t, y, ydot)
     real(dp) :: t,y(neq),ydot(neq),z,zw,ze,zww,zee,lamw,lame,cw,ce,cww,cee,&
         c,dcw,dce,dil,bll,rder,pder
     call dim_var(t,y)
-    call molar_balance
+    call molar_balance(y)
     ydot=0
     ydot(xOHeq) = AOH*exp(-EOH/Rg/temp)*(1-y(xOHeq))*&
         (NCO0-2*W0*y(xWeq)-OH0*y(xOHeq)) !polyol conversion
@@ -254,8 +254,9 @@ end subroutine physical_properties
 
 !********************************BEGINNING*************************************
 !> calculates molar amount of blowing agents in bubble and shell
-subroutine molar_balance
+subroutine molar_balance(y)
     integer :: i,j
+    real(dp) :: y(neq)
     !numerical integration
     mb=0e0_dp
     !rectangle rule
@@ -299,6 +300,7 @@ subroutine dim_var(t,y)
     rhofoam=(1-porosity)*rhop
     st=(S0**3+radius**3-R0**3)**(1._dp/3)-radius !thickness of the shell
     pair=pair0*R0**3/radius**3*temp/temp0
+    bub_pres=sum(pressure)+pair-pamb
 end subroutine dim_var
 !***********************************END****************************************
 
@@ -355,7 +357,21 @@ subroutine bblpreproc
     case default
         stop 'unknown kinetic model'
     end select
-    !determine number of equations and their indexes
+    call set_equation_order
+    call set_initial_physical_properties
+    call create_mesh
+    call set_initial_conditions
+    call set_integrator
+    write(*,*) 'done: simulation prepared'
+    write(*,*)
+end subroutine bblpreproc
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> determine number of equations and their indexes
+subroutine set_equation_order
+    integer :: i
     neq=(p+1)*ngas
     if (firstrun) then
         neq = neq+4+ngas
@@ -384,8 +400,13 @@ subroutine bblpreproc
         enddo
         fceq=kineq(size(kineq))+1
     endif
+end subroutine set_equation_order
+!***********************************END****************************************
 
-    ! determine physical properties
+
+!********************************BEGINNING*************************************
+!> determine physical properties
+subroutine set_initial_physical_properties
     radius = R0
     temp=temp0
     conv=0.0_dp
@@ -428,11 +449,16 @@ subroutine bblpreproc
     !     exp(log(4._dp/3*pi*R0**3))
     if (firstrun) then
         allocate(etat(0:its,2),port(0:its,2),init_bub_rad(0:its,2))
-    else
-        ! call load_old_results
     endif
+end subroutine set_initial_physical_properties
+!***********************************END****************************************
 
-    !calculate spatial grid points
+
+!********************************BEGINNING*************************************
+!> calculate spatial grid points
+subroutine create_mesh
+	integer :: i,info
+    real(dp),allocatable :: atri(:),btri(:),ctri(:),rtri(:),utri(:)
     allocate(atri(p),btri(p),ctri(p),rtri(p),utri(p),dz(p+1))
     atri=-mshco !lower diagonal
     btri=1+mshco    !main diagonal
@@ -449,10 +475,13 @@ subroutine bblpreproc
     enddo
     dz(p+1)=rtri(p)-utri(p)
     deallocate(atri,btri,ctri,rtri,utri)
+end subroutine create_mesh
+!***********************************END****************************************
 
-    call set_init
 
-    !choose and set integrator
+!********************************BEGINNING*************************************
+!> choose and set integrator
+subroutine set_integrator
     mf=int_meth
     select case(integrator)
     case(1)
@@ -490,21 +519,13 @@ subroutine bblpreproc
     itol = 2 !don't change, or you must declare atol as atol(neq)
     rtol=rel_tol
     atol=abs_tol
-    allocate(atol2(neq))
-    atol2=atol
-    atol2(req)=atol2(req)!/1.e-1_dp
-    do i=fpeq,lpeq
-        atol2(i)=atol2(i)!*1.e-2_dp
-    enddo
-    write(*,*) 'done: simulation prepared'
-    write(*,*)
-end subroutine bblpreproc
+end subroutine set_integrator
 !***********************************END****************************************
 
 
 !********************************BEGINNING*************************************
 !> set initial conditions
-subroutine set_init
+subroutine set_initial_conditions
     integer :: i,j
     t = tstart
     tout = t+timestep
@@ -549,7 +570,7 @@ subroutine set_init
         y(fpeq+i-1) = xgas(i+1)*(pamb+2*sigma/R0) !pressure
         if (y(fpeq+i-1)<1e-16_dp) y(fpeq+i-1)=1e-16_dp
     enddo
-end subroutine set_init
+end subroutine set_initial_conditions
 !***********************************END****************************************
 
 
@@ -557,32 +578,26 @@ end subroutine set_init
 !> performs integration
 subroutine bblinteg
     write(*,*) 'integrating...'
-    if (firstrun) then
-        call save_integration_header
-    endif
+    if (firstrun) call save_integration_header
     call dim_var(t,y)
-    call molar_balance
+    call molar_balance(y)
     call growth_rate
-    if (firstrun) then
-        call save_integration_step(0)
-    endif
+    if (firstrun) call save_integration_step(0)
     do iout = 1,its
         select case (integrator)
         case(1)
             call dlsode (sub_ptr, neq, y, t, tout, itol, rtol, atol, itask, &
                 istate, iopt, rwork, lrw, iwork, liw, jac, mf)
         case(2)
-            call dlsodes (sub_ptr, neq, y, t, tout, itol, rtol, atol2, itask, &
+            call dlsodes (sub_ptr, neq, y, t, tout, itol, rtol, atol, itask, &
                 istate, iopt, rwork, lrw, iwork, liw, jac, mf)
         case default
             stop 'unknown integrator'
         end select
         call dim_var(t,y)
-        call molar_balance
+        call molar_balance(y)
         call growth_rate
-        if (firstrun) then
-            call save_integration_step(iout)
-        endif
+        if (firstrun) call save_integration_step(iout)
         ! write(*,*) tout,kinsource(2)
         write(*,'(2x,A4,F8.3,A3,A13,F10.3,A4,A25,F8.3,A4,A9,EN12.3,A4)') &
             't = ', time, ' s,',&
@@ -595,15 +610,11 @@ subroutine bblinteg
         tout = time+timestep !TODO: fix for non-dimensional
         if (gelpoint) exit
     end do
-    if (firstrun) then
-        call save_integration_close(iout)
-    else
-        bub_pres=sum(pressure)+pair-pamb
-    endif
+    if (firstrun) call save_integration_close(iout)
     write(*,*) 'done: integration'
     call destroyModenaModels
     deallocate(D,cbl,xgas,KH,fic,Mbl,dHv,mb,mb2,mb3,avconc,pressure,&
-        diff_model,sol_model,cpblg,cpbll,RWORK,IWORK,dz,Y,atol2,wblpol,D0)
+        diff_model,sol_model,cpblg,cpbll,RWORK,IWORK,dz,Y,wblpol,D0)
 end subroutine bblinteg
 !***********************************END****************************************
 
