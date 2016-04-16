@@ -36,7 +36,6 @@ module modenastuff
         kinModena = c_null_ptr,&
         kinInputs = c_null_ptr,&
         kinOutputs = c_null_ptr
-    character(len=3) gasname(2)
     public ret,&
         createModenaModels,destroyModenaModels,&
         viscTpos,viscXPos,&
@@ -56,8 +55,12 @@ contains
 !> creates Modena models
 subroutine createModenaModels
     integer :: i
+    character(len=3) gasname(2)
     if (visc_model==3) then
         viscModena = modena_model_new (c_char_"polymerViscosity"//c_null_char);
+        if (modena_error_occurred()) then
+            call exit(modena_error())
+        endif
         viscInputs = modena_inputs_new (viscModena);
         viscOutputs = modena_outputs_new (viscModena);
         viscTpos = modena_model_inputs_argPos(viscModena, &
@@ -69,6 +72,9 @@ subroutine createModenaModels
     if (rhop_model==2) then
         rhopModena = modena_model_new (&
             c_char_"density_reaction_mixture"//c_null_char);
+        if (modena_error_occurred()) then
+            call exit(modena_error())
+        endif
         rhopInputs = modena_inputs_new (rhopModena);
         rhopOutputs = modena_outputs_new (rhopModena);
         rhopTpos = modena_model_inputs_argPos(rhopModena, &
@@ -80,39 +86,49 @@ subroutine createModenaModels
     if (itens_model==2) then
         itensModena = modena_model_new (&
             c_char_"SurfaceTension[A=CO2,B=PU]"//c_null_char);
+        if (modena_error_occurred()) then
+            call exit(modena_error())
+        endif
         itensInputs = modena_inputs_new (itensModena);
         itensOutputs = modena_outputs_new (itensModena);
         itensTpos = modena_model_inputs_argPos(&
             itensModena, c_char_"T"//c_null_char);
         call modena_model_argPos_check(itensModena)
     endif
-    if (diff_model(1)==2) diffModena(1) = modena_model_new (&
-        c_char_"gas_diffusivity[A=CyP]"//c_null_char);
-    if (diff_model(2)==2) diffModena(2) = modena_model_new (&
-        c_char_"gas_diffusivity[A=CO2]"//c_null_char);
+    if (co2_pos==2) then
+        gasname(1)="CyP"
+        gasname(2)="CO2"
+    elseif (co2_pos==1) then
+        gasname(2)="CyP"
+        gasname(1)="CO2"
+    else
+        stop 'CO2 position must be 1 or 2'
+    endif
     do i=1,ngas
         if (diff_model(i)==2) then
+            diffModena(i) = modena_model_new (&
+                c_char_"gas_diffusivity[A="//gasname(i)//"]"//c_null_char);
+            if (modena_error_occurred()) then
+                call exit(modena_error())
+            endif
             diffInputs(i) = modena_inputs_new (diffModena(i));
             diffOutputs(i) = modena_outputs_new (diffModena(i));
             diffTpos(i) = modena_model_inputs_argPos(diffModena(i), &
                 c_char_"T"//c_null_char);
             call modena_model_argPos_check(diffModena(i))
         endif
-    enddo
-    gasname(1)="CyP"
-    gasname(2)="CO2"
-    if (sol_model(1)==2) solModena(1) = modena_model_new (&
-        c_char_"Solubility[A=CyP,B=3]"//c_null_char);
-    if (sol_model(2)==2) solModena(1) = modena_model_new (&
-        c_char_"Solubility[A=CO2,B=3]"//c_null_char);
-    do i=1,ngas
         if (sol_model(i)==2) then
+            solModena(i) = modena_model_new (&
+                c_char_"Solubility[A="//gasname(i)//",B=3]"//c_null_char);
+            if (modena_error_occurred()) then
+                call exit(modena_error())
+            endif
             solInputs(i) = modena_inputs_new (solModena(i));
             solOutputs(i) = modena_outputs_new (solModena(i));
             solTpos(i) = modena_model_inputs_argPos(solModena(i), &
                 c_char_"T"//c_null_char);
             solXgasPos(i) = modena_model_inputs_argPos(solModena(i), &
-                c_char_"xl["//gasname//"]"//c_null_char);
+                c_char_"xl["//gasname(i)//"]"//c_null_char);
             solXmdiPos(i) = modena_model_inputs_argPos(solModena(i), &
                 c_char_"xl[mdi]"//c_null_char);
             solXpolyolPos(i) = modena_model_inputs_argPos(solModena(i), &
@@ -122,6 +138,9 @@ subroutine createModenaModels
     enddo
     if (kin_model==4) then
         kinModena = modena_model_new (c_char_"RF-1-public"//c_null_char);
+        if (modena_error_occurred()) then
+            call exit(modena_error())
+        endif
         kinInputs = modena_inputs_new (kinModena);
         kinOutputs = modena_outputs_new (kinModena);
         kinInputsPos(1) = modena_model_inputs_argPos(kinModena, &

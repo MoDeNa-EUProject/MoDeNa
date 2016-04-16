@@ -5,10 +5,10 @@
 !! @ingroup   bblgr
 module phys_prop
     use constants
+    use globals
     use foaming_globals_m
     use fmodena
     use modenastuff
-    use globals
     implicit none
     private
     public set_initial_physical_properties,physical_properties
@@ -16,7 +16,10 @@ contains
 !********************************BEGINNING*************************************
 !> determine physical properties
 subroutine set_initial_physical_properties
-    radius = R0
+    use model, only:Rb
+    time=tstart
+    if (.not. firstrun) R0=Rb(time)
+    radius=R0
     temp=temp0
     conv=0.0_dp
     if (sum(xgas) /= 1) then
@@ -49,7 +52,7 @@ subroutine set_initial_physical_properties
     call physical_properties(temp,conv,radius)
     D0=D
     surface_tension=sigma
-    pair0=(pamb+2*sigma/R0)*xgas(1)
+    pair0=(pamb+2*sigma/radius)*xgas(1)
     S0=Sn*radius
     Vsh=4*pi/3*(S0**3-R0**3)
     gelpoint=.false.

@@ -9,7 +9,7 @@ module integration
     use fmodena
     use modenastuff
     use in_out, only: save_integration_header,save_integration_step,&
-        save_integration_close,read_inputs
+        save_integration_close
     use model, only:odesystem,dim_var,molar_balance
     use phys_prop, only:set_initial_physical_properties
     implicit none
