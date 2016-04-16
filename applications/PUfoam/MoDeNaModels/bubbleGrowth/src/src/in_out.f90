@@ -5,40 +5,12 @@
 module in_out
     use foaming_globals_m
     use constants
+    use globals
     use ioutils, only:newunit,str
     implicit none
-    character(len=99) :: &
-        fileplacein,& ! location of input files
-        fileplaceout,& ! location of output files
-        inputs,& ! input file
-        outputs_1d,& ! output file with scalar variables
-        outputs_GR,& ! output file for the surrogate model fitting
-        outputs_c,& ! output file with concentration profiles
-        outputs_kin,& ! output file with variables of detailed kinetic model
-        outputs_drdt ! test output file for box with multiple growing bubbles
-    logical :: inertial_term,solcorr,gelpoint,dilution
-    integer :: fi1,fi2,fi3,fi4,fi5,&
-        integrator,p,maxts,its,visc_model,rhop_model,itens_model,ngas,co2_pos,&
-        kin_model,int_meth,&
-        fceq,& !first concentration equation (index)
-        fpeq,lpeq,& !first and last pressure equation (index)
-        req,& !radius equation (index)
-        teq,& !temperature equation (index)
-        xOHeq,xWeq !conversion equations (indexes)
-    real(dp) :: mshco,& !mesh coarsening parameter
-        temp0,R0,Sn,OH0,W0,NCO0,AOH,EOH,AW,EW,dHOH,dHW,&
-        time,radius,eqconc,grrate(2),st,S0,&
-        rel_tol,abs_tol,&
-        eta,maxeta,Aeta,Eeta,Cg,AA,B,&
-        pamb,sigma,rhop,cp,cppol,rhobl,porosity,rhofoam,&
-        pair0,pair,timestep,gr,nold(2),vsh,temp,conv,&
-        Rey,pairst,pambst,Ca
-    integer, dimension(:), allocatable :: diff_model,sol_model,fic,&
-        kineq !kinetics state variable equations (indexes)
-    real(dp), dimension(:), allocatable :: y,cbl,xgas,&
-        kinsource,& !kinetic source term
-        D,D0,KH,Mbl,dHv,cpblg,cpbll,&
-        mb,mb2,mb3,avconc,pressure,times,dRdt,Rt,pt,ATOL2,wblpol,dz
+    private
+    public set_paths,read_inputs,save_integration_header,&
+        save_integration_step,save_integration_close,load_old_results
 contains
 !********************************BEGINNING*************************************
 !> set paths to all files
@@ -61,6 +33,7 @@ end subroutine set_paths
 
 !********************************BEGINNING*************************************
 !> reads input values from a file
+!! save them to global variables
 subroutine read_inputs
     integer :: fi
     write(*,*) 'loading input file ',TRIM(inputs)
@@ -88,7 +61,7 @@ subroutine read_inputs
         read(fi,*) abs_tol    !absolute tolerance
         read(fi,*)
         read(fi,*) ngas     !number of dissolved gases
-        allocate(D(ngas),cbl(ngas),xgas(ngas+1),KH(ngas),fic(ngas),Mbl(ngas),&
+        allocate(D(ngas),cbl(ngas),xgas(ngas+1),KH(ngas),Mbl(ngas),&
             dHv(ngas),mb(ngas),mb2(ngas),mb3(ngas),avconc(ngas),pressure(ngas),&
             diff_model(ngas),sol_model(ngas),cpblg(ngas),cpbll(ngas),&
             wblpol(ngas),D0(ngas))
@@ -97,9 +70,9 @@ subroutine read_inputs
         read(fi,*) Mbl    !blowing agent molar mass (for each dissolved gas)
         read(fi,*) cppol    !heat capacity of polymer
         read(fi,*) cpbll    !heat capacity of blowing agent in liquid phase
-            ! (for each)
+            ! (for each gas)
         read(fi,*) cpblg    !heat capacity of blowing agent in gas phase
-            ! (for each)
+            ! (for each gas)
         read(fi,*) dHv    !evaporation heat of blowing agent (for each gas)
         read(fi,*) rhobl    !density of liquid physical blowing agent
         read(fi,*)
@@ -119,7 +92,7 @@ subroutine read_inputs
         read(fi,*)
         read(fi,*) kin_model   !reaction kinetics model. 1=Baser,
             ! 3=Baser with R(x), 4=modena RF-1-private
-        read(fi,*) dilution   !use dilution effect
+        read(fi,*) dilution   !use dilution effect for kinetics
         read(fi,*) AOH    !frequential factor of gelling reaction
         read(fi,*) EOH    !activation energy of gelling reaction
         read(fi,*) AW    !frequential factor of blowing reaction
@@ -261,9 +234,9 @@ subroutine load_old_results
             read(fi5,*) matrix(i,:)
         enddo
     close(fi5)
-    allocate(times(j-1),Rt(j-1))
-    times(1:j-1)=matrix(2:j,1)
-    Rt(1:j-1)=matrix(2:j,2)
+    allocate(bub_rad(j-1,2))
+    bub_rad(:,1)=matrix(2:j,1)
+    bub_rad(:,2)=matrix(2:j,2)
     deallocate(matrix)
 end subroutine load_old_results
 !***********************************END****************************************

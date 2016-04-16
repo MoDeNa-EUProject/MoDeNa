@@ -7,10 +7,10 @@
 module model_nd
     use iso_c_binding
     use constants
+    use globals
     use foaming_globals_m
     use fmodena
     use modenastuff
-    use in_out
     use model
     use phys_prop, only:physical_properties
     implicit none

@@ -4,10 +4,10 @@
 !! @ingroup   bblgr
 module model
     use constants
+    use globals
     use foaming_globals_m
+    use fmodena
     use modenastuff
-    use phys_prop, only:physical_properties
-    use in_out
     implicit none
     private
     ! interpolation variables
@@ -164,6 +164,7 @@ end subroutine molar_balance
 !********************************BEGINNING*************************************
 !> calculate dimensional variables
 subroutine dim_var(t,y)
+    use phys_prop, only:physical_properties
 	integer :: i
     real(dp) :: t,y(:)
     time=t
@@ -196,7 +197,7 @@ end subroutine dim_var
 !> evaluates kinetic source terms
 !! modena models
 subroutine kinModel(y)
-    real(dp) :: y(:)
+    real(dp), intent(in) :: y(:)
     integer :: i
     if (kin_model==4) then
         do i=1,size(kineq)

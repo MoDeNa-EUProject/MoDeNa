@@ -8,7 +8,7 @@ module phys_prop
     use foaming_globals_m
     use fmodena
     use modenastuff
-    use in_out
+    use globals
     implicit none
     private
     public set_initial_physical_properties,physical_properties

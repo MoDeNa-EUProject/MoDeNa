@@ -5,7 +5,7 @@
 module tests
     use foaming_globals_m
     use constants
-    use in_out, only:set_paths,read_inputs
+    use in_out, only:set_paths,read_inputs,load_old_results
     use integration, only:bblpreproc,bblinteg
     implicit none
     private
@@ -33,21 +33,18 @@ end subroutine onegrowth
 !> simulates growth of a single bubble
 !! uses precalculated evolution of bubble radius to calculate bubble pressure
 subroutine secondgrowth
-    use in_out!, only:times,Rt,load_old_results
+    use globals
     ! prepare to work with files
     call set_paths
     ! obtain tend and clean after yourself
     firstrun=.true.
     call read_inputs
-    deallocate(D,cbl,xgas,KH,fic,Mbl,&
+    deallocate(D,cbl,xgas,KH,Mbl,&
         dHv,mb,mb2,mb3,avconc,pressure,&
         diff_model,sol_model,cpblg,cpbll,&
         wblpol,D0)
     ! feed results to function Rb(t)
     call load_old_results
-    allocate(bub_rad(size(times),2))
-    bub_rad(:,1)=times
-    bub_rad(:,2)=Rt
     bub_inx=1
     ! simulation
     firstrun=.false.

@@ -4,66 +4,53 @@
 !! @author    Pavel Ferkl
 !! @ingroup   bblgr
 module modenastuff
-    use in_out
+    use globals
     use iso_c_binding
     use fmodena
     implicit none
+    private
     integer(c_int) :: ret
-    integer(c_size_t) :: viscTpos
-    integer(c_size_t) :: viscXPos
-    integer(c_size_t) :: rhopTPos
-    integer(c_size_t) :: rhopXOHPos
-    integer(c_size_t) :: itensTPos
-    integer(c_size_t) :: diffTPos(2)
-    integer(c_size_t) :: solTPos(2)
-    integer(c_size_t) :: solXgasPos(2)
-    integer(c_size_t) :: solXmdiPos(2)
-    integer(c_size_t) :: solXpolyolPos(2)
-    integer(c_size_t) :: kinNCOPos
-    integer(c_size_t) :: kinOHPos
-    integer(c_size_t) :: kinH2OPos
-    integer(c_size_t) :: kinCO2Pos
-    integer(c_size_t) :: kinPentanePos
-    integer(c_size_t) :: kinPolymerPos
-    integer(c_size_t) :: kinPolymerBlowPos
-    integer(c_size_t) :: kinUreaPos
-    integer(c_size_t) :: kinR1Pos
-    integer(c_size_t) :: kinRmassPos
-    integer(c_size_t) :: kinRvolPos
-    integer(c_size_t) :: kinRtempPos
-    integer(c_size_t) :: kinSourceNCOPos
-    integer(c_size_t) :: kinSourceOHPos
-    integer(c_size_t) :: kinSourceH2OPos
-    integer(c_size_t) :: kinSourceCO2Pos
-    integer(c_size_t) :: kinSourcePentanePos
-    integer(c_size_t) :: kinSourcePolymerPos
-    integer(c_size_t) :: kinSourcePolymerBlowPos
-    integer(c_size_t) :: kinSourceUreaPos
-    integer(c_size_t) :: kinSourceR1Pos
-    integer(c_size_t) :: kinSourceRmassPos
-    integer(c_size_t) :: kinSourceRvolPos
-    integer(c_size_t) :: kinSourceRtempPos
-    integer(c_size_t) :: kinInputsPos(20)
-    integer(c_size_t) :: kinOutputsPos(20)
-    type(c_ptr) :: viscModena = c_null_ptr
-    type(c_ptr) :: viscInputs = c_null_ptr
-    type(c_ptr) :: viscOutputs = c_null_ptr
-    type(c_ptr) :: rhopModena = c_null_ptr
-    type(c_ptr) :: rhopInputs = c_null_ptr
-    type(c_ptr) :: rhopOutputs = c_null_ptr
-    type(c_ptr) :: itensModena = c_null_ptr
-    type(c_ptr) :: itensInputs = c_null_ptr
-    type(c_ptr) :: itensOutputs = c_null_ptr
-    type(c_ptr) :: diffModena(2) = c_null_ptr
-    type(c_ptr) :: diffInputs(2) = c_null_ptr
-    type(c_ptr) :: diffOutputs(2) = c_null_ptr
-    type(c_ptr) :: solModena(2) = c_null_ptr
-    type(c_ptr) :: solInputs(2) = c_null_ptr
-    type(c_ptr) :: solOutputs(2) = c_null_ptr
-    type(c_ptr) :: kinModena = c_null_ptr
-    type(c_ptr) :: kinInputs = c_null_ptr
-    type(c_ptr) :: kinOutputs = c_null_ptr
+    integer(c_size_t) :: &
+        viscTpos,viscXPos,&
+        rhopTPos,rhopXOHPos,&
+        itensTPos,&
+        diffTPos(2),&
+        solTPos(2),solXgasPos(2),solXmdiPos(2),solXpolyolPos(2),&
+        kinInputsPos(20),kinOutputsPos(20)
+    type(c_ptr) :: &
+        viscModena = c_null_ptr,&
+        viscInputs = c_null_ptr,&
+        viscOutputs = c_null_ptr,&
+        rhopModena = c_null_ptr,&
+        rhopInputs = c_null_ptr,&
+        rhopOutputs = c_null_ptr,&
+        itensModena = c_null_ptr,&
+        itensInputs = c_null_ptr,&
+        itensOutputs = c_null_ptr,&
+        diffModena(2) = c_null_ptr,&
+        diffInputs(2) = c_null_ptr,&
+        diffOutputs(2) = c_null_ptr,&
+        solModena(2) = c_null_ptr,&
+        solInputs(2) = c_null_ptr,&
+        solOutputs(2) = c_null_ptr,&
+        kinModena = c_null_ptr,&
+        kinInputs = c_null_ptr,&
+        kinOutputs = c_null_ptr
     character(len=3) gasname(2)
+    public ret,&
+        createModenaModels,destroyModenaModels,&
+        viscTpos,viscXPos,&
+        rhopTPos,rhopXOHPos,&
+        itensTPos,&
+        diffTPos,&
+        solTPos,solXgasPos,solXmdiPos,solXpolyolPos,&
+        kinInputsPos,kinOutputsPos,&
+        viscModena,viscInputs,viscOutputs,&
+        rhopModena,rhopInputs,rhopOutputs,&
+        itensModena,itensInputs,itensOutputs,&
+        diffModena,diffInputs,diffOutputs,&
+        solModena,solInputs,solOutputs,&
+        kinModena,kinInputs,kinOutputs
 contains
 !********************************BEGINNING*************************************
 !> creates Modena models

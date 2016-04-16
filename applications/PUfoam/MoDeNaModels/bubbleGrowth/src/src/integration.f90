@@ -4,10 +4,12 @@
 !! @ingroup   bblgr
 module integration
     use constants
+    use globals
     use foaming_globals_m
     use fmodena
     use modenastuff
-    use in_out
+    use in_out, only: save_integration_header,save_integration_step,&
+        save_integration_close,read_inputs
     use model, only:odesystem,dim_var,molar_balance
     use phys_prop, only:set_initial_physical_properties
     implicit none
@@ -273,7 +275,7 @@ subroutine bblinteg
     if (firstrun) call save_integration_close(iout)
     write(*,*) 'done: integration'
     call destroyModenaModels
-    deallocate(D,cbl,xgas,KH,fic,Mbl,dHv,mb,mb2,mb3,avconc,pressure,&
+    deallocate(D,cbl,xgas,KH,Mbl,dHv,mb,mb2,mb3,avconc,pressure,&
         diff_model,sol_model,cpblg,cpbll,RWORK,IWORK,dz,y,wblpol,D0)
 end subroutine bblinteg
 !***********************************END****************************************
