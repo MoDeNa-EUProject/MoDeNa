@@ -166,8 +166,8 @@ end subroutine odesystem
 
 !********************************BEGINNING*************************************
 !> calculates values of physical properties
-subroutine physical_properties(temp,conv)
-    real(dp), intent(in) :: temp,conv
+subroutine physical_properties(temp,conv,radius)
+    real(dp), intent(in) :: temp,conv,radius
     integer :: i
     if (.not. gelpoint .and. temp<500) then
         select case(visc_model)
@@ -287,7 +287,7 @@ subroutine dim_var(t,y)
     endif
     temp=y(teq)
     conv=y(xOHeq)
-    call physical_properties(temp,conv)
+    call physical_properties(temp,conv,radius)
     eqconc=y(fpeq)*KH(1)  !only first gas
     do i=1,ngas
     	pressure(i)=y(fpeq+i-1)
@@ -437,7 +437,7 @@ subroutine set_initial_physical_properties
         !average density during foaming
         rhop=(rhop + modena_outputs_get(rhopOutputs, 0_c_size_t))/2
     end select
-    call physical_properties(temp,conv)
+    call physical_properties(temp,conv,radius)
     D0=D
     surface_tension=sigma
     pair0=(pamb+2*sigma/R0)*xgas(1)
@@ -601,9 +601,9 @@ subroutine bblinteg
         ! write(*,*) tout,kinsource(2)
         write(*,'(2x,A4,F8.3,A3,A13,F10.3,A4,A25,F8.3,A4,A9,EN12.3,A4)') &
             't = ', time, ' s,',&
-            'p_b - p_o = ', sum(pressure)+pair-pamb, ' Pa,', &
-            'p_b - p_o - p_Laplace = ', sum(pressure)+pair-pamb-2*sigma/radius, ' Pa,',&
-            'dR/dt = ', (sum(pressure)+pair-pamb-2*sigma/radius)*radius/4/eta, ' m/s'
+            'p_b - p_o = ', bub_pres, ' Pa,', &
+            'p_b - p_o - p_Laplace = ', bub_pres-2*sigma/radius, ' Pa,',&
+            'dR/dt = ', (bub_pres-2*sigma/radius)*radius/4/eta, ' m/s'
             ! 'p_b = ', pressure(1), ' Pa,'
         ! write(*,*) tout, radius**3/(radius**3+S0**3-R0**3), radius, eta
         ! stop

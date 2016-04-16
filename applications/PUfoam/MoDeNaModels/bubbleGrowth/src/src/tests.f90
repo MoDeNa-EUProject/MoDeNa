@@ -9,7 +9,7 @@ module tests
     use model, only:bblpreproc,bblinteg
     implicit none
     private
-    public onegrowth,eta_rm,bub_vf
+    public onegrowth,eta_rm,bub_vf,secondgrowth
 contains
 !********************************BEGINNING*************************************
 !> simulates growth of a single bubble
@@ -19,6 +19,23 @@ subroutine onegrowth
     call bblpreproc
     call bblinteg
 end subroutine onegrowth
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> simulates growth of a single bubble
+subroutine secondgrowth
+    use in_out
+    tend=200
+    call set_paths
+    call load_old_results
+    allocate(bub_rad(size(times),2))
+    bub_rad(:,1)=times
+    bub_rad(:,2)=Rt
+    firstrun=.false.
+    bub_inx=1
+    call onegrowth
+end subroutine secondgrowth
 !***********************************END****************************************
 
 

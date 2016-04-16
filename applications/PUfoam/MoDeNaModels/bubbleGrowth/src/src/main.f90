@@ -9,19 +9,10 @@
 !! - LAPACK 3.4.2 or higher
 !! - BLAS 3.4.2 or higher
 program singlebubblegrowth
-    use tests
+    use tests, only:onegrowth,secondgrowth
     use foaming_globals_m
-    use in_out
     implicit none
-    ! firstrun=.true.
-    ! call onegrowth
-    tend=200
-    call set_paths
-    call load_old_results
-    allocate(bub_rad(size(times),2))
-    bub_rad(:,1)=times
-    bub_rad(:,2)=Rt
-    firstrun=.false.
-    bub_inx=1
+    firstrun=.true.
     call onegrowth
+    ! call secondgrowth
 end program

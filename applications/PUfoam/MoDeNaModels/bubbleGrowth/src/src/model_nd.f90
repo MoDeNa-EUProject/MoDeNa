@@ -179,7 +179,7 @@ subroutine dim_var_nd
     endif
     temp=y(teq)*temp0
     conv=y(xOHeq)
-    call physical_properties(temp,conv)
+    call physical_properties(temp,conv,radius)
     eqconc=y(fpeq)*KH(1)  !only first gas
     do i=1,ngas
     	pressure(i)=y(fpeq+i-1)*eta*D0(1)/R0**2
