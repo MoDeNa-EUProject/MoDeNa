@@ -12,6 +12,7 @@ module model_nd
     use modenastuff
     use in_out
     use model
+    use phys_prop, only:physical_properties
     implicit none
     private
     !time integration variables for lsode
@@ -21,7 +22,7 @@ module model_nd
     integer, dimension(:), allocatable :: iwork
     !mesh variables
     integer :: info
-    real(dp),allocatable :: atri(:),btri(:),ctri(:),rtri(:),utri(:),dz(:)
+    real(dp),allocatable :: atri(:),btri(:),ctri(:),rtri(:),utri(:)
     ! interpolation variables
     logical :: Rb_initialized
     integer :: Rb_kx=5,Rb_iknot=0,Rb_inbvx
@@ -72,7 +73,7 @@ subroutine  odesystem_nd (neq, t, y, ydot)
         ydot(xWeq)=ydot(xWeq)*dil
     endif
     if (kin_model==4) then
-        call kinModel
+        call kinModel(y)
         do i=1,size(kineq)
             ydot(kineq(i))=kinsource(i)
         enddo

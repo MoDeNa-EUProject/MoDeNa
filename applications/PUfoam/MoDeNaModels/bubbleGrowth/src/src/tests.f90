@@ -6,13 +6,20 @@ module tests
     use foaming_globals_m
     use constants
     use in_out, only:set_paths,read_inputs
-    use model, only:bblpreproc,bblinteg
+    use integration, only:bblpreproc,bblinteg
     implicit none
     private
     public onegrowth,eta_rm,bub_vf,secondgrowth
 contains
 !********************************BEGINNING*************************************
 !> simulates growth of a single bubble
+!! you must set firstrun variable before calling this subroutine
+!! if firstrun==.true.:
+!!     no need to set anything
+!! if firstrun==.false.:
+!!     set tend
+!!     set bub_rad
+!!     set bub_inx
 subroutine onegrowth
     call set_paths
     call read_inputs
@@ -24,16 +31,26 @@ end subroutine onegrowth
 
 !********************************BEGINNING*************************************
 !> simulates growth of a single bubble
+!! uses precalculated evolution of bubble radius to calculate bubble pressure
 subroutine secondgrowth
-    use in_out
-    tend=200
+    use in_out!, only:times,Rt,load_old_results
+    ! prepare to work with files
     call set_paths
+    ! obtain tend and clean after yourself
+    firstrun=.true.
+    call read_inputs
+    deallocate(D,cbl,xgas,KH,fic,Mbl,&
+        dHv,mb,mb2,mb3,avconc,pressure,&
+        diff_model,sol_model,cpblg,cpbll,&
+        wblpol,D0)
+    ! feed results to function Rb(t)
     call load_old_results
     allocate(bub_rad(size(times),2))
     bub_rad(:,1)=times
     bub_rad(:,2)=Rt
-    firstrun=.false.
     bub_inx=1
+    ! simulation
+    firstrun=.false.
     call onegrowth
 end subroutine secondgrowth
 !***********************************END****************************************

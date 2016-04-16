@@ -38,7 +38,7 @@ module in_out
     real(dp), dimension(:), allocatable :: y,cbl,xgas,&
         kinsource,& !kinetic source term
         D,D0,KH,Mbl,dHv,cpblg,cpbll,&
-        mb,mb2,mb3,avconc,pressure,times,dRdt,Rt,pt,ATOL2,wblpol
+        mb,mb2,mb3,avconc,pressure,times,dRdt,Rt,pt,ATOL2,wblpol,dz
 contains
 !********************************BEGINNING*************************************
 !> set paths to all files
@@ -50,13 +50,11 @@ subroutine set_paths
     outputs_GR='outputs_GR.out'
     outputs_c='outputs_c.out'
     outputs_kin='kinetics.out'
-    outputs_drdt='dRdt.out'
     inputs=TRIM(ADJUSTL(fileplacein))//TRIM(ADJUSTL(inputs))
     outputs_1d=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_1d))
     outputs_GR=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_GR))
     outputs_c=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_c))
     outputs_kin=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_kin))
-    outputs_drdt=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_drdt))
 end subroutine set_paths
 !***********************************END****************************************
 
@@ -181,7 +179,6 @@ subroutine save_integration_header
             "R_1_mass","R_1_temp","R_1_vol"
     endif
     open (unit=newunit(fi4), file = outputs_c)
-    open (unit=newunit(fi5), file = outputs_drdt)
 end subroutine save_integration_header
 !***********************************END****************************************
 
@@ -190,8 +187,6 @@ end subroutine save_integration_header
 !> writes an integration step to output file
 subroutine save_integration_step(iout)
     integer :: i,iout
-    real(dp) :: rder
-    rder=0
     write(fi1,"(1000es23.15)") time,radius,pressure,Y(xOHeq),Y(xWeq),&
         eqconc,Y(fceq),eta,mb(1),mb2(1),mb3(1),st,temp,rhofoam,&
         wblpol,porosity
@@ -204,7 +199,6 @@ subroutine save_integration_step(iout)
             Y(kineq(19)),Y(kineq(20))
     endif
     write(fi4,"(1000es23.15)") (Y(fceq+i+1),i=0,ngas*p,ngas)
-    write(fi5,"(1000es23.15)") time,radius,rder,pressure(1)
     ! save arrays, which are preserved for future use
     etat(iout,1)=time
     etat(iout,2)=eta
@@ -227,7 +221,6 @@ subroutine save_integration_close(iout)
     if (kin_model==4) then
         close(fi4)
     endif
-    close(fi5)
     ! reallocate matrices for eta_rm and bub_vf functions
     ! interpolation doesn't work otherwise
     if (iout /= its) then

@@ -13,6 +13,6 @@ program singlebubblegrowth
     use foaming_globals_m
     implicit none
     firstrun=.true.
-    call onegrowth
-    ! call secondgrowth
+    ! call onegrowth
+    call secondgrowth
 end program

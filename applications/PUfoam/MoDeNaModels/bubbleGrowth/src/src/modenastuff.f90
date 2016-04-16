@@ -133,62 +133,7 @@ subroutine createModenaModels
             call modena_model_argPos_check(solModena(i))
         endif
     enddo
-    if (kin_model==2) then
-        kinModena = modena_model_new (c_char_"simpleKinetics"//c_null_char);
-        kinInputs = modena_inputs_new (kinModena);
-        kinOutputs = modena_outputs_new (kinModena);
-
-        kinNCOPos = modena_model_inputs_argPos(kinModena, &
-            c_char_"'EG_NCO'"//c_null_char);
-        kinOHPos = modena_model_inputs_argPos(kinModena, &
-            c_char_"'EG_OH'"//c_null_char);
-        kinH2OPos = modena_model_inputs_argPos(kinModena, &
-            c_char_"'H2O'"//c_null_char);
-        kinCO2Pos = modena_model_inputs_argPos(kinModena, &
-            c_char_"'CO2'"//c_null_char);
-        kinPentanePos = modena_model_inputs_argPos(kinModena, &
-            c_char_"'PENTANE'"//c_null_char);
-        kinPolymerPos = modena_model_inputs_argPos(kinModena, &
-            c_char_"'POLYMER'"//c_null_char);
-        kinPolymerBlowPos = modena_model_inputs_argPos(kinModena, &
-            c_char_"'POLMERBLOW'"//c_null_char);
-        kinUreaPos = modena_model_inputs_argPos(kinModena, &
-            c_char_"'UREA'"//c_null_char);
-        kinR1Pos = modena_model_inputs_argPos(kinModena, &
-            c_char_"'R_1'"//c_null_char);
-        kinRmassPos = modena_model_inputs_argPos(kinModena, &
-            c_char_"'R_1_mass'"//c_null_char);
-        kinRvolPos = modena_model_inputs_argPos(kinModena, &
-            c_char_"'R_1_vol'"//c_null_char);
-        kinRtempPos = modena_model_inputs_argPos(kinModena, &
-            c_char_"'R_1_temp'"//c_null_char);
-
-        kinSourceNCOPos = modena_model_outputs_argPos(kinModena, &
-            c_char_"source_EG_NCO"//c_null_char);
-        kinSourceOHPos = modena_model_outputs_argPos(kinModena, &
-            c_char_"source_EG_OH"//c_null_char);
-        kinSourceH2OPos = modena_model_outputs_argPos(kinModena, &
-            c_char_"source_H2O"//c_null_char);
-        kinSourceCO2Pos = modena_model_outputs_argPos(kinModena, &
-            c_char_"source_CO2"//c_null_char);
-        kinSourcePentanePos = modena_model_outputs_argPos(kinModena, &
-            c_char_"source_PENTANE"//c_null_char);
-        kinSourcePolymerPos = modena_model_outputs_argPos(kinModena, &
-            c_char_"source_POLYMER"//c_null_char);
-        kinSourcePolymerBlowPos = modena_model_outputs_argPos(kinModena, &
-            c_char_"source_POLMERBLOW"//c_null_char);
-        kinSourceUreaPos = modena_model_outputs_argPos(kinModena, &
-            c_char_"source_UREA"//c_null_char);
-        kinSourceR1Pos = modena_model_outputs_argPos(kinModena, &
-            c_char_"source_R_1"//c_null_char);
-        kinSourceRmassPos = modena_model_outputs_argPos(kinModena, &
-            c_char_"source_R_1_mass"//c_null_char);
-        kinSourceRvolPos = modena_model_outputs_argPos(kinModena, &
-            c_char_"source_R_1_vol"//c_null_char);
-        kinSourceRtempPos = modena_model_outputs_argPos(kinModena, &
-            c_char_"source_R_1_temp"//c_null_char);
-        call modena_model_argPos_check(kinModena)
-    elseif (kin_model==4) then
+    if (kin_model==4) then
         kinModena = modena_model_new (c_char_"RF-1-public"//c_null_char);
         kinInputs = modena_inputs_new (kinModena);
         kinOutputs = modena_outputs_new (kinModena);
