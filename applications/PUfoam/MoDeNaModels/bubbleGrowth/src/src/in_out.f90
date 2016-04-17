@@ -10,7 +10,8 @@ module in_out
     implicit none
     private
     public set_paths,read_inputs,save_integration_header,&
-        save_integration_step,save_integration_close,load_old_results
+        save_integration_step,save_integration_close,load_old_results,&
+        read_inputs_json
 contains
 !********************************BEGINNING*************************************
 !> set paths to all files
@@ -28,6 +29,100 @@ subroutine set_paths
     outputs_c=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_c))
     outputs_kin=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_kin))
 end subroutine set_paths
+!***********************************END****************************************
+!> reads input values from a file
+!! save them to global variables
+subroutine read_inputs_json
+    use fson
+    use fson_value_m, only: fson_value_get
+    character(len=1024) :: strval
+    type(fson_value), pointer :: json_data, array, item
+    integer :: fi
+    json_data => fson_parse('../unifiedInput.json')
+    call fson_get(json_data, "bubbleGrowth.integrator", integrator)
+    call fson_get(json_data, "bubbleGrowth.method", int_meth)
+    call fson_get(json_data, "bubbleGrowth.inertialTerm", inertial_term)
+    call fson_get(json_data, "bubbleGrowth.solubilityCorrection", solcorr)
+    call fson_get(json_data, "bubbleGrowth.meshCoarseningParameter", mshco)
+    call fson_get(json_data, "bubbleGrowth.internalNodes", p)
+    call fson_get(json_data, "bubbleGrowth.initialTime", tstart)
+    if (firstrun) call fson_get(json_data, "bubbleGrowth.finalTime", tend)
+    call fson_get(json_data, "bubbleGrowth.outerTimeSteps", its)
+    call fson_get(json_data, "bubbleGrowth.maxInnerTimeSteps", maxts)
+    call fson_get(json_data, "bubbleGrowth.relativeTolerance", rel_tol)
+    call fson_get(json_data, "bubbleGrowth.absoluteTolerance", abs_tol)
+    call fson_get(json_data, "bubbleGrowth.numberOfDissolvedGases", ngas)
+    allocate(D(ngas),cbl(ngas),xgas(ngas+1),KH(ngas),Mbl(ngas),&
+        dHv(ngas),mb(ngas),mb2(ngas),mb3(ngas),avconc(ngas),pressure(ngas),&
+        diff_model(ngas),sol_model(ngas),cpblg(ngas),cpbll(ngas),&
+        wblpol(ngas),D0(ngas))
+    call fson_get(json_data, "bubbleGrowth.carbonDioxidePosition", co2_pos)
+    call fson_get(json_data, "physicalProperties.pressure", pamb)
+    call fson_get(json_data, "physicalProperties.blowingAgents.PBL.molarMass", Mbl(1))
+    call fson_get(json_data, "physicalProperties.blowingAgents.CO2.molarMass", Mbl(2))
+    call fson_get(json_data, "physicalProperties.polymer.heatCapacity", cppol)
+    call fson_get(json_data, "physicalProperties.blowingAgents.PBL.heatCapacityInLiquidPhase", cpbll(1))
+    call fson_get(json_data, "physicalProperties.blowingAgents.CO2.heatCapacityInLiquidPhase", cpbll(2))
+    call fson_get(json_data, "physicalProperties.blowingAgents.PBL.heatCapacityInGaseousPhase", cpblg(1))
+    call fson_get(json_data, "physicalProperties.blowingAgents.CO2.heatCapacityInGaseousPhase", cpblg(2))
+    call fson_get(json_data, "physicalProperties.blowingAgents.PBL.evaporationHeat", dHv(1))
+    call fson_get(json_data, "physicalProperties.blowingAgents.CO2.evaporationHeat", dHv(2))
+    call fson_get(json_data, "physicalProperties.blowingAgents.PBL.density", rhobl)
+    call fson_get(json_data, "initialConditions.temperature", temp0)
+    print*,temp0
+    stop
+    write(*,*) 'loading input file ',TRIM(inputs)
+    open(newunit(fi),file=inputs)
+        read(fi,*) R0    !initial radius
+        read(fi,*) Sn    !how many times is initial shell larger than initial
+            ! bubble radius
+        read(fi,*) OH0    !initial concentration of polyol (don't set to zero -
+            ! division by zero; if you don't want reaction, set water to zero)
+        read(fi,*) W0    !initial concentration of water (if you set this to
+            ! zero, water conversion results are meanigless)
+        read(fi,*) NCO0    !initial concentration of isocyanate
+        read(fi,*) cbl    !initial concentration of disolved blowing agent
+            ! (for each dissolved gas)
+        read(fi,*) xgas    !initial molar fraction of gases in the bubble (for
+            ! air and each dissolved gas)
+        read(fi,*)
+        read(fi,*) kin_model   !reaction kinetics model. 1=Baser,
+            ! 3=Baser with R(x), 4=modena RF-1-private
+        read(fi,*) dilution   !use dilution effect for kinetics
+        read(fi,*) AOH    !frequential factor of gelling reaction
+        read(fi,*) EOH    !activation energy of gelling reaction
+        read(fi,*) AW    !frequential factor of blowing reaction
+        read(fi,*) EW    !activation energy of blowing reaction
+        read(fi,*) dHOH    !gelling reaction enthalpy
+        read(fi,*) dHW    !blowing reaction enthalpy
+        read(fi,*)
+        read(fi,*) rhop_model   !polymer density model. 1=constant,2=modena
+        read(fi,*) rhop    !polymer density
+        read(fi,*)
+        read(fi,*) itens_model  !interfacial tension model. 1=constant,2=modena
+        read(fi,*) sigma    !interfacial tension
+        read(fi,*)
+        read(fi,*) diff_model  !diffusivity model (for each dissolved gas).
+            ! 1=constant,2=modena
+        read(fi,*) D    !diffusion coefficients (for each dissolved gas)
+        read(fi,*)
+        read(fi,*) sol_model   !solubility model (for each dissolved gas).
+            ! 1=constant,2=modena
+        read(fi,*) KH    !Henry constants (for each dissolved gas)
+        read(fi,*)
+        read(fi,*) visc_model    !viscosity model. 1=constant,2=Castro and
+            ! Macosko,3=modena
+        read(fi,*) eta    !viscosity (if constant viscosity is used)
+        read(fi,*) maxeta    !maximum viscosity
+        read(fi,*) Aeta    !viscosity constant Aeta
+        read(fi,*) Eeta    !viscosity constant Eeta
+        read(fi,*) Cg    !viscosity constant Cg
+        read(fi,*) AA    !viscosity constant AA
+        read(fi,*) B    !viscosity constant B
+    close(fi)
+    write(*,*) 'done: inputs loaded'
+    write(*,*)
+end subroutine read_inputs_json
 !***********************************END****************************************
 
 
