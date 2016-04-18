@@ -21,9 +21,8 @@ contains
 !> determine physical properties
 subroutine set_initial_physical_properties
     time=tstart
-    ! if (.not. firstrun) R0=Rb(time)
+    if (.not. firstrun) R0=Rb(time)
     radius=R0
-    print*,radius,Rb(1.e-3_dp)
     temp=temp0
     conv=0.0_dp
     ! initial bubble contains only air
