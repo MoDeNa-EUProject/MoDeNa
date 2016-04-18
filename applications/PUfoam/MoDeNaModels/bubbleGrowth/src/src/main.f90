@@ -8,8 +8,6 @@
 !! @section dep_bblgr  Dependencies of Bubble growth model
 !! - LAPACK 3.4.2 or higher
 !! - BLAS 3.4.2 or higher
-
-!! TODO: read inputs from unifiedinputs directly  
 program singlebubblegrowth
     use tests, only:onegrowth,secondgrowth
     use foaming_globals_m

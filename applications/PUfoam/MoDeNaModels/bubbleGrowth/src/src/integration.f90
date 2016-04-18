@@ -246,6 +246,7 @@ subroutine bblinteg
         call dim_var(t,y)
         call molar_balance(y)
         call growth_rate
+        call save_integration_step(0)
     endif
     do iout = 1,its
         select case (integrator)

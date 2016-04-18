@@ -45,6 +45,7 @@ module globals
         mshco,& !mesh coarsening parameter
         temp0,& !initial temperature
         R0,& !initial radius
+        nb0,& !initial bubble number density
         Sn,& !how many times is initial shell larger than initial bubble radius
         OH0,& !initial concentration of polyol (don't set to zero -
             ! division by zero; if you don't want reaction, set water to zero)
@@ -67,7 +68,6 @@ module globals
         abs_tol,& !absolute tolerance
         eta,& !viscosity
         maxeta,& !maximum viscosity (for detection of the gel point)
-        Aeta,Eeta,Cg,AA,B,& !viscosity model constants
         pamb,& !ambient pressure (in the liquid)
         sigma,& !interfacial tension
         rhop,& !polymer density

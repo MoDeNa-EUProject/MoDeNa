@@ -10,15 +10,12 @@ module model
     use modenastuff
     implicit none
     private
-    ! interpolation variables
-    logical :: Rb_initialized
-    integer :: Rb_kx=5,Rb_iknot=0,Rb_inbvx
-    real(dp), dimension(:), allocatable :: Rb_tx,Rb_coef
-    public molar_balance,kinModel,Rb,Rderiv,odesystem,dim_var
+    public molar_balance,kinModel,odesystem,dim_var
 contains
 !********************************BEGINNING*************************************
 !> model supplied to integrator, FVM, nonequidistant mesh
 subroutine  odesystem (neq, t, y, ydot)
+    use phys_prop, only:Rderiv
     integer :: neq,i,j
     real(dp) :: t,y(neq),ydot(neq),z,zw,ze,zww,zee,lamw,lame,cw,ce,cww,cee,&
         c,dcw,dce,dil,bll
@@ -164,7 +161,7 @@ end subroutine molar_balance
 !********************************BEGINNING*************************************
 !> calculate dimensional variables
 subroutine dim_var(t,y)
-    use phys_prop, only:physical_properties
+    use phys_prop, only:physical_properties,Rb
 	integer :: i
     real(dp) :: t,y(:)
     time=t
@@ -217,45 +214,5 @@ subroutine kinModel(y)
         enddo
     endif
 end subroutine kinModel
-!***********************************END****************************************
-
-
-!********************************BEGINNING*************************************
-!> time derivation of bubble radius as function of time
-real(dp) function Rderiv(t)
-    use bspline_module
-    real(dp) :: t
-    integer :: nx,idx,iflag
-    nx=size(bub_rad(:,1))
-    if (.not. Rb_initialized) then
-        allocate(Rb_tx(nx+Rb_kx),Rb_coef(nx))
-        call db1ink(bub_rad(:,1),nx,bub_rad(:,bub_inx+1),&
-            Rb_kx,Rb_iknot,Rb_tx,Rb_coef,iflag)
-        Rb_inbvx=1
-        Rb_initialized=.true.
-    endif
-    idx=1
-    call db1val(t,idx,Rb_tx,nx,Rb_kx,Rb_coef,Rderiv,iflag,Rb_inbvx)
-endfunction Rderiv
-!***********************************END****************************************
-
-
-!********************************BEGINNING*************************************
-!> bubble radius as function of time
-real(dp) function Rb(t)
-    use bspline_module
-    real(dp) :: t
-    integer :: nx,idx,iflag
-    nx=size(bub_rad(:,1))
-    if (.not. Rb_initialized) then
-        allocate(Rb_tx(nx+Rb_kx),Rb_coef(nx))
-        call db1ink(bub_rad(:,1),nx,bub_rad(:,bub_inx+1),&
-            Rb_kx,Rb_iknot,Rb_tx,Rb_coef,iflag)
-        Rb_inbvx=1
-        Rb_initialized=.true.
-    endif
-    idx=0
-    call db1val(t,idx,Rb_tx,nx,Rb_kx,Rb_coef,Rb,iflag,Rb_inbvx)
-endfunction Rb
 !***********************************END****************************************
 end module model

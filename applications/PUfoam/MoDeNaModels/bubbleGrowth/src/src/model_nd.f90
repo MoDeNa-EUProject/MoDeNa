@@ -12,7 +12,7 @@ module model_nd
     use fmodena
     use modenastuff
     use model
-    use phys_prop, only:physical_properties
+    use phys_prop, only:physical_properties,Rb,Rderiv
     implicit none
     private
     !time integration variables for lsode

@@ -11,17 +11,24 @@ module phys_prop
     use modenastuff
     implicit none
     private
-    public set_initial_physical_properties,physical_properties
+    ! interpolation variables
+    logical :: Rb_initialized
+    integer :: Rb_kx=5,Rb_iknot=0,Rb_inbvx
+    real(dp), dimension(:), allocatable :: Rb_tx,Rb_coef
+    public set_initial_physical_properties,physical_properties,Rb,Rderiv
 contains
 !********************************BEGINNING*************************************
 !> determine physical properties
 subroutine set_initial_physical_properties
-    use model, only:Rb
     time=tstart
-    if (.not. firstrun) R0=Rb(time)
+    ! if (.not. firstrun) R0=Rb(time)
     radius=R0
+    print*,radius,Rb(1.e-3_dp)
     temp=temp0
     conv=0.0_dp
+    ! initial bubble contains only air
+    xgas=0
+    xgas(1)=1
     if (sum(xgas) /= 1) then
         write(*,*) 'Sum of initial molar fractions of gases in the bubble is &
             not equal to one. Normalizing...'
@@ -53,12 +60,13 @@ subroutine set_initial_physical_properties
     D0=D
     surface_tension=sigma
     pair0=(pamb+2*sigma/radius)*xgas(1)
+    Sn=(1._dp/(nb0*exp(log(4._dp/3*pi*R0**3)))+1)**(1._dp/3)
+    ! write(*,'(2x,A,2x,e12.6)') 'NN',Sn**(-3)/(1-Sn**(-3))/&
+    !     exp(log(4._dp/3*pi*R0**3))
     S0=Sn*radius
     Vsh=4*pi/3*(S0**3-R0**3)
     gelpoint=.false.
     timestep=(tend-tstart)/its
-    ! write(*,'(2x,A,2x,e12.6)') 'NN',Sn**(-3)/(1-Sn**(-3))/&
-    !     exp(log(4._dp/3*pi*R0**3))
     if (firstrun) then
         allocate(etat(0:its,2),port(0:its,2),init_bub_rad(0:its,2))
     endif
@@ -71,10 +79,16 @@ end subroutine set_initial_physical_properties
 subroutine physical_properties(temp,conv,radius)
     real(dp), intent(in) :: temp,conv,radius
     integer :: i
+    real(dp) :: Aeta,Eeta,Cg,AA,B !viscosity model constants
     if (.not. gelpoint .and. temp<500) then
         select case(visc_model)
         case(1)
         case(2)
+            Aeta=4.1e-8_dp
+            Eeta=38.3e3_dp
+            Cg=0.85_dp
+            AA=4.e0_dp
+            B=-2.e0_dp
             eta=Aeta*exp(Eeta/(Rg*temp))*(Cg/(Cg-conv))**(AA+B*conv)
         case(3)
             !set input vector
@@ -151,5 +165,45 @@ subroutine physical_properties(temp,conv,radius)
     if (solcorr) KH=KH*exp(2*sigma*Mbl/(rhop*Rg*temp*radius))
     cp=cppol+sum(cbl*Mbl*cpbll)/rhop
 end subroutine physical_properties
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> time derivation of bubble radius as function of time
+real(dp) function Rderiv(t)
+    use bspline_module
+    real(dp) :: t
+    integer :: nx,idx,iflag
+    nx=size(bub_rad(:,1))
+    if (.not. Rb_initialized) then
+        allocate(Rb_tx(nx+Rb_kx),Rb_coef(nx))
+        call db1ink(bub_rad(:,1),nx,bub_rad(:,bub_inx+1),&
+            Rb_kx,Rb_iknot,Rb_tx,Rb_coef,iflag)
+        Rb_inbvx=1
+        Rb_initialized=.true.
+    endif
+    idx=1
+    call db1val(t,idx,Rb_tx,nx,Rb_kx,Rb_coef,Rderiv,iflag,Rb_inbvx)
+endfunction Rderiv
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> bubble radius as function of time
+real(dp) function Rb(t)
+    use bspline_module
+    real(dp) :: t
+    integer :: nx,idx,iflag
+    nx=size(bub_rad(:,1))
+    if (.not. Rb_initialized) then
+        allocate(Rb_tx(nx+Rb_kx),Rb_coef(nx))
+        call db1ink(bub_rad(:,1),nx,bub_rad(:,bub_inx+1),&
+            Rb_kx,Rb_iknot,Rb_tx,Rb_coef,iflag)
+        Rb_inbvx=1
+        Rb_initialized=.true.
+    endif
+    idx=0
+    call db1val(t,idx,Rb_tx,nx,Rb_kx,Rb_coef,Rb,iflag,Rb_inbvx)
+endfunction Rb
 !***********************************END****************************************
 end module phys_prop

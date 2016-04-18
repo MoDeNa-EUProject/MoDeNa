@@ -5,8 +5,7 @@
 module tests
     use foaming_globals_m
     use constants
-    use in_out, only:set_paths,read_inputs,load_old_results,&
-        read_inputs_json
+    use in_out, only:set_paths,read_inputs,load_old_results
     use integration, only:bblpreproc,bblinteg
     implicit none
     private
@@ -39,7 +38,7 @@ subroutine secondgrowth
     call set_paths
     ! obtain tend and clean after yourself
     firstrun=.true.
-    call read_inputs_json
+    call read_inputs
     deallocate(D,cbl,xgas,KH,Mbl,&
         dHv,mb,mb2,mb3,avconc,pressure,&
         diff_model,sol_model,cpblg,cpbll,&

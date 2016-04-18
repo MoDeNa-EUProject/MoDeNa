@@ -10,15 +10,14 @@ module in_out
     implicit none
     private
     public set_paths,read_inputs,save_integration_header,&
-        save_integration_step,save_integration_close,load_old_results,&
-        read_inputs_json
+        save_integration_step,save_integration_close,load_old_results
 contains
 !********************************BEGINNING*************************************
 !> set paths to all files
 subroutine set_paths
     fileplacein='../'
     fileplaceout='../results/'
-    inputs='inputs.in'
+    inputs='unifiedInput.json'
     outputs_1d='outputs_1d.out'
     outputs_GR='outputs_GR.out'
     outputs_c='outputs_c.out'
@@ -32,12 +31,12 @@ end subroutine set_paths
 !***********************************END****************************************
 !> reads input values from a file
 !! save them to global variables
-subroutine read_inputs_json
+subroutine read_inputs
     use fson
     use fson_value_m, only: fson_value_get
     character(len=1024) :: strval
-    type(fson_value), pointer :: json_data, array, item
-    integer :: fi
+    type(fson_value), pointer :: json_data
+    write(*,*) 'loading input file ',TRIM(inputs)
     json_data => fson_parse('../unifiedInput.json')
     call fson_get(json_data, "bubbleGrowth.integrator", integrator)
     call fson_get(json_data, "bubbleGrowth.method", int_meth)
@@ -69,156 +68,87 @@ subroutine read_inputs_json
     call fson_get(json_data, "physicalProperties.blowingAgents.CO2.evaporationHeat", dHv(2))
     call fson_get(json_data, "physicalProperties.blowingAgents.PBL.density", rhobl)
     call fson_get(json_data, "initialConditions.temperature", temp0)
-    print*,temp0
-    stop
-    write(*,*) 'loading input file ',TRIM(inputs)
-    open(newunit(fi),file=inputs)
-        read(fi,*) R0    !initial radius
-        read(fi,*) Sn    !how many times is initial shell larger than initial
-            ! bubble radius
-        read(fi,*) OH0    !initial concentration of polyol (don't set to zero -
-            ! division by zero; if you don't want reaction, set water to zero)
-        read(fi,*) W0    !initial concentration of water (if you set this to
-            ! zero, water conversion results are meanigless)
-        read(fi,*) NCO0    !initial concentration of isocyanate
-        read(fi,*) cbl    !initial concentration of disolved blowing agent
-            ! (for each dissolved gas)
-        read(fi,*) xgas    !initial molar fraction of gases in the bubble (for
-            ! air and each dissolved gas)
-        read(fi,*)
-        read(fi,*) kin_model   !reaction kinetics model. 1=Baser,
-            ! 3=Baser with R(x), 4=modena RF-1-private
-        read(fi,*) dilution   !use dilution effect for kinetics
-        read(fi,*) AOH    !frequential factor of gelling reaction
-        read(fi,*) EOH    !activation energy of gelling reaction
-        read(fi,*) AW    !frequential factor of blowing reaction
-        read(fi,*) EW    !activation energy of blowing reaction
-        read(fi,*) dHOH    !gelling reaction enthalpy
-        read(fi,*) dHW    !blowing reaction enthalpy
-        read(fi,*)
-        read(fi,*) rhop_model   !polymer density model. 1=constant,2=modena
-        read(fi,*) rhop    !polymer density
-        read(fi,*)
-        read(fi,*) itens_model  !interfacial tension model. 1=constant,2=modena
-        read(fi,*) sigma    !interfacial tension
-        read(fi,*)
-        read(fi,*) diff_model  !diffusivity model (for each dissolved gas).
-            ! 1=constant,2=modena
-        read(fi,*) D    !diffusion coefficients (for each dissolved gas)
-        read(fi,*)
-        read(fi,*) sol_model   !solubility model (for each dissolved gas).
-            ! 1=constant,2=modena
-        read(fi,*) KH    !Henry constants (for each dissolved gas)
-        read(fi,*)
-        read(fi,*) visc_model    !viscosity model. 1=constant,2=Castro and
-            ! Macosko,3=modena
-        read(fi,*) eta    !viscosity (if constant viscosity is used)
-        read(fi,*) maxeta    !maximum viscosity
-        read(fi,*) Aeta    !viscosity constant Aeta
-        read(fi,*) Eeta    !viscosity constant Eeta
-        read(fi,*) Cg    !viscosity constant Cg
-        read(fi,*) AA    !viscosity constant AA
-        read(fi,*) B    !viscosity constant B
-    close(fi)
-    write(*,*) 'done: inputs loaded'
-    write(*,*)
-end subroutine read_inputs_json
-!***********************************END****************************************
-
-
-!********************************BEGINNING*************************************
-!> reads input values from a file
-!! save them to global variables
-subroutine read_inputs
-    integer :: fi
-    write(*,*) 'loading input file ',TRIM(inputs)
-    open(newunit(fi),file=inputs)
-        read(fi,*) integrator !integrator. 1=dlsode,2=dlsodes
-        read(fi,*) int_meth   !10=nonstiff,22=stiff,automatic Jacobian(dlsode),
-            ! 222=stiff,automatic Jacobian(dlsodes)
-        read(fi,*)
-        read(fi,*) inertial_term    !include inertial term in equations (t/f)
-        read(fi,*) solcorr  !use solubility correction on bubble radius (t/f)
-        read(fi,*) mshco    !mesh coarsening parameter
-        read(fi,*)
-        read(fi,*) p    !number of internal nodes
-        read(fi,*) tstart    !initial time
-        if (firstrun) then
-            read(fi,*) tend    !final time
-        else
-            read(fi,*) ! final time is already set
-        endif
-        read(fi,*) its    !number of outer integration time steps (how many
-            ! times are values written)
-        read(fi,*) maxts    !maximum inner time steps between t and t+h
-            ! (default 500)
-        read(fi,*) rel_tol    !relative tolerance
-        read(fi,*) abs_tol    !absolute tolerance
-        read(fi,*)
-        read(fi,*) ngas     !number of dissolved gases
-        allocate(D(ngas),cbl(ngas),xgas(ngas+1),KH(ngas),Mbl(ngas),&
-            dHv(ngas),mb(ngas),mb2(ngas),mb3(ngas),avconc(ngas),pressure(ngas),&
-            diff_model(ngas),sol_model(ngas),cpblg(ngas),cpbll(ngas),&
-            wblpol(ngas),D0(ngas))
-        read(fi,*) co2_pos     !carbon dioxide position
-        read(fi,*) pamb    !ambient pressure
-        read(fi,*) Mbl    !blowing agent molar mass (for each dissolved gas)
-        read(fi,*) cppol    !heat capacity of polymer
-        read(fi,*) cpbll    !heat capacity of blowing agent in liquid phase
-            ! (for each gas)
-        read(fi,*) cpblg    !heat capacity of blowing agent in gas phase
-            ! (for each gas)
-        read(fi,*) dHv    !evaporation heat of blowing agent (for each gas)
-        read(fi,*) rhobl    !density of liquid physical blowing agent
-        read(fi,*)
-        read(fi,*) temp0    !initial temperature
-        read(fi,*) R0    !initial radius
-        read(fi,*) Sn    !how many times is initial shell larger than initial
-            ! bubble radius
-        read(fi,*) OH0    !initial concentration of polyol (don't set to zero -
-            ! division by zero; if you don't want reaction, set water to zero)
-        read(fi,*) W0    !initial concentration of water (if you set this to
-            ! zero, water conversion results are meanigless)
-        read(fi,*) NCO0    !initial concentration of isocyanate
-        read(fi,*) cbl    !initial concentration of disolved blowing agent
-            ! (for each dissolved gas)
-        read(fi,*) xgas    !initial molar fraction of gases in the bubble (for
-            ! air and each dissolved gas)
-        read(fi,*)
-        read(fi,*) kin_model   !reaction kinetics model. 1=Baser,
-            ! 3=Baser with R(x), 4=modena RF-1-private
-        read(fi,*) dilution   !use dilution effect for kinetics
-        read(fi,*) AOH    !frequential factor of gelling reaction
-        read(fi,*) EOH    !activation energy of gelling reaction
-        read(fi,*) AW    !frequential factor of blowing reaction
-        read(fi,*) EW    !activation energy of blowing reaction
-        read(fi,*) dHOH    !gelling reaction enthalpy
-        read(fi,*) dHW    !blowing reaction enthalpy
-        read(fi,*)
-        read(fi,*) rhop_model   !polymer density model. 1=constant,2=modena
-        read(fi,*) rhop    !polymer density
-        read(fi,*)
-        read(fi,*) itens_model  !interfacial tension model. 1=constant,2=modena
-        read(fi,*) sigma    !interfacial tension
-        read(fi,*)
-        read(fi,*) diff_model  !diffusivity model (for each dissolved gas).
-            ! 1=constant,2=modena
-        read(fi,*) D    !diffusion coefficients (for each dissolved gas)
-        read(fi,*)
-        read(fi,*) sol_model   !solubility model (for each dissolved gas).
-            ! 1=constant,2=modena
-        read(fi,*) KH    !Henry constants (for each dissolved gas)
-        read(fi,*)
-        read(fi,*) visc_model    !viscosity model. 1=constant,2=Castro and
-            ! Macosko,3=modena
-        read(fi,*) eta    !viscosity (if constant viscosity is used)
-        read(fi,*) maxeta    !maximum viscosity
-        read(fi,*) Aeta    !viscosity constant Aeta
-        read(fi,*) Eeta    !viscosity constant Eeta
-        read(fi,*) Cg    !viscosity constant Cg
-        read(fi,*) AA    !viscosity constant AA
-        read(fi,*) B    !viscosity constant B
-    close(fi)
+    call fson_get(json_data, "initialConditions.bubbleRadius", R0)
+    call fson_get(json_data, "initialConditions.numberBubbleDensity", nb0)
+    call fson_get(json_data, "initialConditions.concentrations.polyol", OH0)
+    call fson_get(json_data, "initialConditions.concentrations.water", W0)
+    call fson_get(json_data, "initialConditions.concentrations.isocyanate", NCO0)
+    call fson_get(json_data, "initialConditions.concentrations.blowingAgents.PBL", cbl(1))
+    call fson_get(json_data, "initialConditions.concentrations.blowingAgents.CO2", cbl(2))
+    call fson_get(json_data, "kinetics.kineticModel", strval)
+    if (strval=='Baser') then
+        kin_model=1
+    elseif (strval=='BaserRx') then
+        kin_model=3
+    elseif (strval=='modena') then
+        kin_model=4
+    else
+        stop 'unknown kinetic model'
+    endif
+    call fson_get(json_data, "kinetics.useDilution", dilution)
+    if (kin_model==1 .or. kin_model==3) then
+        call fson_get(json_data, "kinetics.gellingReaction.frequentialFactor", AOH)
+        call fson_get(json_data, "kinetics.gellingReaction.activationEnergy", EOH)
+        call fson_get(json_data, "kinetics.blowingReaction.frequentialFactor", AW)
+        call fson_get(json_data, "kinetics.blowingReaction.activationEnergy", EW)
+        call fson_get(json_data, "kinetics.gellingReaction.reactionEnthalpy", dHOH)
+        call fson_get(json_data, "kinetics.blowingReaction.reactionEnthalpy", dHW)
+    endif
+    call fson_get(json_data, "physicalProperties.polymer.polymerDensityModel", rhop_model)
+    if (rhop_model==1) then
+        call fson_get(json_data, "physicalProperties.polymer.density", rhop)
+    elseif (rhop_model==2) then
+    else
+        stop 'unknown polymer density model'
+    endif
+    call fson_get(json_data, "physicalProperties.surfaceTensionModel", itens_model)
+    if (itens_model==1) then
+        call fson_get(json_data, "physicalProperties.surfaceTension", sigma)
+    elseif (itens_model==2) then
+    else
+        stop 'unknown interfacial tension model'
+    endif
+    call fson_get(json_data, "physicalProperties.blowingAgents.PBL.diffusivityModel", diff_model(1))
+    if (diff_model(1)==1) then
+        call fson_get(json_data, "physicalProperties.blowingAgents.PBL.diffusivity", D(1))
+    elseif (diff_model(1)==2) then
+    else
+        stop 'unknown diffusivity model'
+    endif
+    call fson_get(json_data, "physicalProperties.blowingAgents.CO2.diffusivityModel", diff_model(2))
+    if (diff_model(2)==1) then
+        call fson_get(json_data, "physicalProperties.blowingAgents.CO2.diffusivity", D(2))
+    elseif (diff_model(2)==2) then
+    else
+        stop 'unknown diffusivity model'
+    endif
+    call fson_get(json_data, "physicalProperties.blowingAgents.PBL.solubilityModel", sol_model(1))
+    if (sol_model(1)==1) then
+        call fson_get(json_data, "physicalProperties.blowingAgents.PBL.solubility", KH(1))
+    elseif (sol_model(1)==2) then
+    elseif (sol_model(1)==3) then
+    elseif (sol_model(1)==4) then
+    elseif (sol_model(1)==5) then
+    elseif (sol_model(1)==6) then
+    else
+        stop 'unknown solubility model'
+    endif
+    call fson_get(json_data, "physicalProperties.blowingAgents.CO2.solubilityModel", sol_model(2))
+    if (sol_model(2)==1) then
+        call fson_get(json_data, "physicalProperties.blowingAgents.CO2.solubility", KH(2))
+    elseif (sol_model(2)==2) then
+    else
+        stop 'unknown solubility model'
+    endif
+    call fson_get(json_data, "physicalProperties.polymer.viscosityModel", visc_model)
+    if (visc_model==1) then
+        call fson_get(json_data, "physicalProperties.polymer.viscosity", eta)
+    elseif (visc_model==2) then
+    elseif (visc_model==3) then
+    else
+        stop 'unknown viscosity model'
+    endif
+    call fson_get(json_data, "physicalProperties.polymer.maxViscosity", maxeta)
     write(*,*) 'done: inputs loaded'
     write(*,*)
 end subroutine read_inputs
@@ -228,7 +158,6 @@ end subroutine read_inputs
 !********************************BEGINNING*************************************
 !> opens output files and writes a header
 subroutine save_integration_header
-    integer :: i
     open (unit=newunit(fi1), file = outputs_1d)
     write(fi1,'(1000A23)') '#time', 'radius','pressure1', 'pressure2',&
         'conversion_of_polyol',&
