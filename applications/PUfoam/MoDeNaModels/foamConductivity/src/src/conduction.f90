@@ -81,19 +81,16 @@ end subroutine effcond
 subroutine loadStructure_vtk(filename)
     implicit none
     character(len=80), intent(in) :: filename
-    character(len=80) :: dummy_char
-    integer :: i,j,k,fi
+    character(len=80) :: dummy_char,datatype
+    real(dp) :: a,b,c
+    integer, dimension(:), allocatable :: bmat
+    integer :: i,j,k,l,fi
     open(newunit(fi),file=filename)
     read(fi,*)
     read(fi,*)
     read(fi,*)
     read(fi,*)
-    read(fi,'(A10,I6,I6,I6)') dummy_char,dimz,dimy,dimx
-    read(fi,*)
-    read(fi,*)
-    read(fi,*)
-    read(fi,*)
-    read(fi,*)
+    read(fi,*) dummy_char,dimz,dimy,dimx
     tnode=dimz*dimy*dimx
     allocate(sfiel(dimz+1,0:dimy+1,0:dimx+1),dx(dimz,0:dimy+1,0:dimx+1),&
         dy(dimz,0:dimy+1,0:dimx+1),dz(dimz,0:dimy+1,0:dimx+1))
@@ -101,12 +98,47 @@ subroutine loadStructure_vtk(filename)
     dy=dz
     dx=dz
     sfiel=1
-    do i=1,dimz
-        do j=1,dimy
-            read(fi,*) (sfiel(i,j,k),k=1,dimx)
-        enddo
+    read(fi,*)
+    read(fi,*)
+    read(fi,*)
+    read(fi,*) datatype
+    if (datatype=='SCALARS') then
         read(fi,*)
-    enddo
+        do i=1,dimz
+            do j=1,dimy
+                read(fi,*) (sfiel(i,j,k),k=1,dimx)
+            enddo
+            read(fi,*)
+        enddo
+    elseif (datatype=='COLOR_SCALARS') then
+        allocate(bmat(tnode))
+        ! 3 values on first data line
+        read(fi,*) a,b,c
+        bmat(1)=int(a+0.5)
+        bmat(2)=int(b+0.5)
+        bmat(3)=int(c+0.5)
+        do i=1,tnode/2-2
+            ! 2 values on next lines\
+            read(fi,*) a,b
+            bmat(2*i)=int(a+0.5)
+            bmat(2*i+1)=int(b+0.5)
+        enddo
+        ! 1 value on last line
+        read(fi,*) a
+        bmat(tnode)=int(a+0.5)
+        l=1
+        do i=1,dimz
+            do j=1,dimy
+                do k=1,dimx
+                    sfiel(i,j,k)=bmat(l)
+                    l=l+1
+                enddo
+            enddo
+        enddo
+        deallocate(bmat)
+    else
+        stop 'unknown VTK format'
+    endif
     close(fi)
     do i=1,dimz
         do j=1,dimy
@@ -133,6 +165,63 @@ subroutine loadStructure_vtk(filename)
         enddo
     enddo
 end subroutine loadStructure_vtk
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> saves structure to text file (vtk)
+subroutine saveStructure_vtk(filename)
+    implicit none
+    character(len=80), intent(in) :: filename
+    integer :: i,j,k,fi
+    open(newunit(fi),file=filename)
+    write(fi,'(A26)') '# vtk DataFile Version 3.0'
+    write(fi,'(A7)') 'vtkfile'
+    write(fi,'(A5)') 'ASCII'
+    write(fi,'(A25)') 'DATASET STRUCTURED_POINTS'
+    write(fi,'(A10,2x,I8,2x,I4,2x,I4)') 'DIMENSIONS',dimz,dimy,dimx
+    write(fi,'(A12)') 'ORIGIN 0 0 0'
+    write(fi,'(A13)') 'SPACING 1 1 1'
+    write(fi,'(A10,2x,I8)') 'POINT_DATA',tnode
+    write(fi,'(A18)') 'SCALARS values int'
+    write(fi,'(A20)') 'LOOKUP_TABLE default'
+    do i=1,dimz
+        do j=1,dimy
+            write(fi,'(1000I2)') (sfiel(i,j,k),k=1,dimx)
+        enddo
+        write(fi,*)
+    enddo
+    close(fi)
+end subroutine saveStructure_vtk
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> saves structure to text file (vtk)
+subroutine save3DField_vtk(filename,field)
+    implicit none
+    character(len=80), intent(in) :: filename
+    real(dp), dimension(:,:,:), intent(in) :: field
+    integer :: i,j,k,fi
+    open(newunit(fi),file=filename)
+    write(fi,'(A26)') '# vtk DataFile Version 3.0'
+    write(fi,'(A7)') 'vtkfile'
+    write(fi,'(A5)') 'ASCII'
+    write(fi,'(A25)') 'DATASET STRUCTURED_POINTS'
+    write(fi,'(A10,2x,I8,2x,I4,2x,I4)') 'DIMENSIONS',dimz,dimy,dimx
+    write(fi,'(A12)') 'ORIGIN 0 0 0'
+    write(fi,'(A13)') 'SPACING 1 1 1'
+    write(fi,'(A10,2x,I8)') 'POINT_DATA',tnode
+    write(fi,'(A20)') 'SCALARS values float'
+    write(fi,'(A20)') 'LOOKUP_TABLE default'
+    do i=1,dimz
+        do j=1,dimy
+            write(fi,'(1000E12.5)') (field(i,j,k),k=1,dimx)
+        enddo
+        write(fi,*)
+    enddo
+    close(fi)
+end subroutine save3DField_vtk
 !***********************************END****************************************
 
 
@@ -348,6 +437,7 @@ end subroutine make_trhs_oc_ss
 subroutine heatFlux_oc_ss
     integer :: i,j,k,l
     real(dp) :: xxx,area
+    character(len=80) :: filename
     allocate(chfz(dimz,dimy,dimx))
     l=1
     do i=1,dimz
@@ -392,6 +482,8 @@ subroutine heatFlux_oc_ss
         xxx=xxx+effc_num/area/(t1-t2)*dfoam
     enddo
     effc_num=xxx/dimz
+    filename='../results/Temp.vtk'
+    ! call save3DField_vtk(filename,tfiel)
     deallocate(chfz,tfiel,tvec,cfiel,sfiel,dx,dy,dz)
 end subroutine heatFlux_oc_ss
 !***********************************END****************************************

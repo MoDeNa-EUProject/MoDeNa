@@ -129,14 +129,15 @@ void tcfoam_SM
     double fs,Xs,Xw,X,kappa,kr;
     double kfoam;
     double kgas=gasMixtureConductivity;
+    double kpol=polymer_thermal_conductivity;
 
     fs=alpha*fstrut;
-    Xs=(1+4*kgas/(kgas+polymer_thermal_conductivity))/3.0;
-    Xw=2*(1+kgas/(2*polymer_thermal_conductivity))/3.0;
+    Xs=(1+4*kgas/(kgas+kpol))/3.0;
+    Xw=2*(1+kgas/(2*kpol))/3.0;
     X=(1-fs)*Xw+fs*Xs;
     kappa=4.09*sqrt(1-eps)/dcell;
     kr=16*sigma*pow(T,3)/(3*kappa);
-    kfoam = (kgas*eps+polymer_thermal_conductivity*X*(1-eps))/(eps+(1-eps)*X)+beta*kr;
+    kfoam = (kgas*eps+kpol*X*(1-eps))/(eps+(1-eps)*X)+beta*kr;
 
     outputs[0] = kfoam;
 }
