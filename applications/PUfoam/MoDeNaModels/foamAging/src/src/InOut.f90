@@ -207,18 +207,27 @@ subroutine output(iprof, time, ystate, neq)
 
     continue
 	open(unit=11,file='../results/H2perm_'//trim(name_f)//'.dat')
+	open(unit=12,file='../results/ppar_'//trim(name_f)//'.dat')
 
    ! BC
 	write (11,100) time/(3600.0d0*24.0d0),length(0), pBCair/RT,pBCCO2/RT,&
 		pBCpent/RT
+	write (12,101) time/(3600.0d0*24.0d0),length(0), pBCair,pBCCO2,&
+		pBCpent
 	! profiles
 	do i = 1, nFV
 		write (11,100) time/(3600.0d0*24.0d0),length(i),ystate(i),&
 			ystate(nFV+i),ystate(2*nFV+i)
 	enddo
+	do i = onecell, nFV, onecell
+		write (12,101) time/(3600.0d0*24.0d0),length(i),ystate(i)*RT,&
+			ystate(nFV+i)*RT,ystate(2*nFV+i)*RT
+	enddo
     continue
-    close (11)
+    close(11)
+	close(12)
 	return
-100   format (f8.2,F12.8,F12.6,F12.6,F12.6)
+100   format (f8.2,F12.3,F12.3,F12.3,F12.3)
+101   format (f8.2,E12.3,E12.3,E12.3,E12.3)
 end subroutine output
 !c

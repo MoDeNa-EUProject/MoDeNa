@@ -149,8 +149,8 @@ program foam_diffusion
     tend = rpar(3)
     counter = 1
     itol = 1
-    rtol = 1.0d-1
-    atol = 1.0d-1
+    rtol = 0
+    atol = 1.0d-6
 
     itask = 1
     istate = 1
@@ -164,7 +164,7 @@ program foam_diffusion
     continue
     open (newunit(fi),file='../results/keq_time.out')
     write(fi,'(10A23)') '#time', 'eq.conductivity'
-!    call output(0, 0.0_dp, ystate, neq)
+    call output(0, 0.0_dp, ystate, neq)
     call equcond(keq,ystate,neq,eps,fstrut,temp_cond)
     write(fi,'(10es23.15)') tbeg/(3600.0d0*24.0d0),keq*1e3
     do i = 1, nroutputs*multiplicator       ! stabilizing multiplicator
