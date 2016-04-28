@@ -410,7 +410,7 @@ subroutine make_trhs_oc_ss
     l=1
     do i=1,dimy
         do j=1,dimx
-            trhs(l)=t2
+            trhs(l)=temp2
             l=l+1
         enddo
     enddo
@@ -424,7 +424,7 @@ subroutine make_trhs_oc_ss
     enddo
     do i=1,dimy
         do j=1,dimx
-            trhs(l)=t1
+            trhs(l)=temp1
             l=l+1
         enddo
     enddo
@@ -479,7 +479,7 @@ subroutine heatFlux_oc_ss
                 area=area+dx(i,j,k)*dy(i,j,k)
             enddo
         enddo
-        xxx=xxx+effc_num/area/(t1-t2)*dfoam
+        xxx=xxx+effc_num/area/(temp1-temp2)*dfoam
     enddo
     effc_num=xxx/dimz
     filename='../results/Temp.vtk'

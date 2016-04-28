@@ -115,13 +115,13 @@ subroutine foam_morpholgy
         stop
     end select
     write(*,'(2x,A,1x,e9.3)') 'porosity:', por
-    write(*,'(2x,A,1x,e9.3,1x,A)') 'foam density:', (1-por)*rho2, 'kg/m^3'
+    write(*,'(2x,A,1x,e9.3,1x,A)') 'foam density:', (1-por)*rhos, 'kg/m^3'
     write(*,'(2x,A,1x,e9.3,1x,A)') 'cell size:', dcell*1e6, 'um'
     write(*,'(2x,A,1x,e9.3,1x,A)') 'wall thickness:', dwall*1e6, 'um'
     write(*,'(2x,A,1x,e9.3)') 'strut content:', fs
     write(*,'(2x,A,1x,e9.3,1x,A)') 'strut diameter:', dstrut*1e6, 'um'
     write(mfi,'(2x,A,1x,e9.3)') 'porosity:', por
-    write(mfi,'(2x,A,1x,e9.3,1x,A)') 'foam density:', (1-por)*rho2, 'kg/m^3'
+    write(mfi,'(2x,A,1x,e9.3,1x,A)') 'foam density:', (1-por)*rhos, 'kg/m^3'
     write(mfi,'(2x,A,1x,e9.3,1x,A)') 'cell size:', dcell*1e6, 'um'
     write(mfi,'(2x,A,1x,e9.3,1x,A)') 'wall thickness:', dwall*1e6, 'um'
     write(mfi,'(2x,A,1x,e9.3)') 'strut content:', fs
