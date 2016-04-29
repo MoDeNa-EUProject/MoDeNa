@@ -140,7 +140,13 @@ subroutine loadParameters
     integer :: fi,ios,i,j
     logical :: file_exists
     real(dp) :: xCO2,xAir,xCyP
-    inputs='../'//TRIM(ADJUSTL(fileplacein_par))//TRIM(ADJUSTL(inputs))
+    inputs=TRIM(ADJUSTL(fileplacein_par))//TRIM(ADJUSTL(inputs))
+    inquire(file=inputs,exist=file_exists) !first try current folder
+    if (.not. file_exists) then
+        inputs='../'//inputs !then try one folder up
+        inquire(file=inputs,exist=file_exists)
+        if (.not. file_exists) stop 'input file not found'
+    endif
     spectra=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(spectra))
     json_data => fson_parse(inputs)
     call fson_get(json_data, "upperBoundary.temperature", temp1)
@@ -170,38 +176,11 @@ subroutine loadParameters
         call fson_get(json_data, "structureName", structureName)
     endif
     call fson_get(json_data, "testMode", testMode)
-!     inquire(file=inputs,exist=file_exists)
-!     if (file_exists) then
-!         open(newunit(fi),file=inputs)
-!     else
-!         open(newunit(fi),file='../'//inputs)
-!     endif
-!         read(fi,*) T1           !higher temperature
-!         read(fi,*) T2           !lower temperature
-!         read(fi,*) xCO2,xAir,xCyP
-!         ! read(fi,*) cond1        !gas conductivity
-! !        read(fi,*) cond2        !solid conductivity
-!         read(fi,*) emi1         !emittance 1
-!         read(fi,*) emi2         !emittance 2
-!         read(fi,*) rho1         !gas density
-!         read(fi,*) rho2         !solid density
-!         read(fi,*) por          !porosity
-!         read(fi,*) dcell        !cell size
-!         read(fi,*) morph_input  !morphology input 1=wall thickness,
-!         ! 2=strut content, 3=strut diameter (3 is recommended others can have
-!         ! multiple solutions)
-!         read(fi,*) dwall        !wall thickness
-!         read(fi,*) fs           !strut content
-!         read(fi,*) dstrut       !strut diameter
-!         read(fi,*) dfoam        !foam thickness
-!         read(fi,*) nz           !spatial discretization
-!         read(fi,*) nrays        !number of testing rays
-!         read(fi,*) wdist        !use wall thickness distribution
-!         read(fi,*) wsdev        !wall thickness standard deviation
-!         read(fi,*) nbox         !number of gray boxes
-!         read(fi,*) numcond      !calcualte effective conductivity numerically
-!         read(fi,*) structureName!name of the file with morphology
-!     close(fi)
+    if (temp1<temp2) then
+        tmean=temp1
+        temp1=temp2
+        temp2=tmean
+    endif
     tmean=(temp1+temp1)/2
     call gasConductivity(cond1,tmean,xCO2,xAir,xCyP)
     call polymerConductivity(cond2,tmean)

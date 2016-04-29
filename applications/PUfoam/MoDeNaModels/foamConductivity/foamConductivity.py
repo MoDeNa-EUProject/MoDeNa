@@ -43,6 +43,7 @@ from modena import *
 import modena.Strategy as Strategy
 from fireworks.utilities.fw_utilities import explicit_serialize
 from jinja2 import Template
+import json
 import polymerConductivity
 import gasConductivity
 import gasMixtureConductivity
@@ -64,29 +65,27 @@ class FoamConductivityExactTask(ModenaFireTask):
         xN2 = self['point']['x[N2]']
         xAir = xN2+xO2
         # Write input
-        f = open('foamConductivity.in', 'w')
-        f.write('{0:.6e}\n'.format(temp+1))
-        f.write('{0:.6e}\n'.format(temp-1))
-        f.write('{0:.6e}\t{1:.6e}\t{2:.6e}\n'.format(xCO2,xAir,xCyP))
-        f.write('0.9\n')
-        f.write('0.9\n')
-        f.write('1.2\n')
-        f.write('1.1e3\n')
-        f.write('{0:.6e}\n'.format(eps))
-        f.write('{0:.6e}\n'.format(dcell))
-        f.write('2\n')
-        f.write('0.5e-6\n')
-        f.write('{0:.6e}\n'.format(fstrut))
-        f.write('1e-6\n')
-        f.write('3e-2\n')
-        f.write('200\n')
-        f.write('10000\n')
-        f.write('t\n')
-        f.write('0.2\n')
-        f.write('10\n')
-        f.write('f\n')
-        f.write('PeriodicRVEBoxStruts.vtk\n')
-        f.close()
+        inputs={"upperBoundary": {"temperature": temp+1,"emittance": 0.9}}
+        inputs["lowerBoundary"]={"temperature": temp-1,"emittance": 0.9}
+        inputs["gasComposition"]={"CO2": xCO2,"Air": xAir,"Cyclopentane": xCyP}
+        inputs["gasDensity"]=1.2
+        inputs["solidDensity"]=1.1e3
+        inputs["porosity"]=eps
+        inputs["cellSize"]=dcell
+        inputs["morphologyInput"]=2
+        inputs["wallThickness"]=0.5e-6
+        inputs["strutContent"]=fstrut
+        inputs["strutSize"]=1e-6
+        inputs["foamThickness"]=3e-2
+        inputs["spatialDiscretization"]=200
+        inputs["useWallThicknessDistribution"]=True
+        inputs["wallThicknessStandardDeviation"]=0.2
+        inputs["numberOfGrayBoxes"]=10
+        inputs["numericalEffectiveConductivity"]=False
+        # inputs["structureName"]=
+        inputs["testMode"]=False
+        with open('foamConductivity.json','w') as f:
+            json.dump(inputs, f, indent=4)
         # Execute the detailed model
         # path to **this** file + /src/...
         # will break if distributed computing
@@ -100,7 +99,7 @@ class FoamConductivityExactTask(ModenaFireTask):
 
         self['point']['kfoam'] = float(FILE.readline())
 
-        os.remove('foamConductivity.in')
+        os.remove('foamConductivity.json')
         os.remove('foamConductivity.out')
 
 ## Surrogate function for thermal conductivity of the foam.
