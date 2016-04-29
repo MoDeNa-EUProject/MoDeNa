@@ -99,8 +99,8 @@ class FoamConductivityExactTask(ModenaFireTask):
 
         self['point']['kfoam'] = float(FILE.readline())
 
-        os.remove('foamConductivity.json')
-        os.remove('foamConductivity.out')
+        # os.remove('foamConductivity.json')
+        # os.remove('foamConductivity.out')
 
 ## Surrogate function for thermal conductivity of the foam.
 #
@@ -161,7 +161,7 @@ void tcfoam_SM
 )
 
 # use input file to Foam aging application to initialize with reasonable data.
-fname='foamAging.in'
+fname='foamAging.json'
 try:
     f = open(os.getcwd()+'/../'+fname,'r')
 except IOError:
@@ -170,30 +170,15 @@ except IOError:
     except IOError:
         f = open(os.getcwd()+'/example_inputs/'+fname,'r')
 
-a=f.readline()
-a=f.readline()
-a=f.readline()
-a=f.readline()
-a=f.readline()
-a=f.readline()
-T0=float(a.split()[0])
-a=f.readline()
-rhop=float(a.split()[0])
-a=f.readline()
-a=f.readline()
-a=f.readline()
-xAir0=float(a.split()[0])
-xCO20=float(a.split()[1])
-xCyP0=float(a.split()[2])
-a=f.readline()
-a=f.readline()
-a=f.readline()
-dcell0=float(a.split()[0])
-a=f.readline()
-fstrut0=float(a.split()[0])
-a=f.readline()
-rho0=float(a.split()[0])
-f.close()
+inputs=json.load(f)
+T0=inputs['conductivityTemperature']
+rhop=inputs['polymerDensity']
+xAir0=inputs['initialComposition']['Air']
+xCO20=inputs['initialComposition']['CO2']
+xCyP0=inputs['initialComposition']['Cyclopentane']
+dcell0=inputs['cellSize']
+fstrut0=inputs['strutContent']
+rho0=inputs['foamDensity']
 eps0=1-rho0/rhop
 
 def setIP(a0):

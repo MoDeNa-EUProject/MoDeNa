@@ -207,6 +207,7 @@ program foam_diffusion
             write(fi,'(10es23.15)') tout/(3600.0d0*24.0d0),keq*1e3
         endif
         continue
+        stop
     enddo
 !c ----------------------------------
     close(10)
