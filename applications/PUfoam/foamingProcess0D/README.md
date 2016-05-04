@@ -8,6 +8,10 @@ kinetics, temperature, foam density, bubble size distribution, etc.
 ## Installation
 Several models need to be compiled. C++ and Fortran compilers are required.
 
+Install boost library
+```
+sudo apt-get install libboost-dev
+```
 Install PETSc globally:
 ```
 sudo mkdir /opt/petsc
