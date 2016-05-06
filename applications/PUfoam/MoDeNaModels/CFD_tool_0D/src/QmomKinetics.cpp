@@ -28,11 +28,11 @@ License
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
 @endcond
 @file
-    This is a macro-scale modeling tool for the foaming process. The code utilizes 
-    the MoDeNa interface library to connect different models including nano, and 
+    This is a macro-scale modeling tool for the foaming process. The code utilizes
+    the MoDeNa interface library to connect different models including nano, and
     meso scale models. The code returns the evolution of foam properties such as
     density, temperature and bubble/cell size distribution.
-@brief macor-scale tool for the foaming process.   
+@brief macor-scale tool for the foaming process.
 @authors    Mohsen Karimi, Daniele Marchisio, Pavel Ferkl
 @copyright  2014-2015, MoDeNa Project. GNU Public License.
 @ingroup    app_foaming
@@ -62,8 +62,8 @@ extern "C"{void dsteqr_(char &, int *, double *, double *, double *, int *, doub
 using namespace std;
 using namespace boost::numeric::odeint;
 /**
-@typedef 
-typedef vector<double> to state_type 
+@typedef
+typedef vector<double> to state_type
 typedef runge_kutta_cash_karp54< state_type > error_stepper_type
 typedef controlled_runge_kutta< error_stepper_type > controlled_stepper_type
 */
@@ -72,16 +72,16 @@ typedef runge_kutta_cash_karp54< state_type > error_stepper_type;
 typedef controlled_runge_kutta< error_stepper_type > controlled_stepper_type;
 /**
 @var controlled_stepper
-@sa http://headmyshoulder.github.io/odeint-v2/doc/boost_numeric_odeint/concepts/controlled_stepper.html 
+@sa http://headmyshoulder.github.io/odeint-v2/doc/boost_numeric_odeint/concepts/controlled_stepper.html
 */
 controlled_stepper_type controlled_stepper;
 // #include "bubbleRadius.h"
 #include "partialPressure.h"
 /**
-@var dpdt[2]: global double array 
+@var dpdt[2]: global double array
 @brief This is used to compute the partial pressures.
 
-@var pOld[2]: global double array variable 
+@var pOld[2]: global double array variable
 @brief This is to hold the old pressure values during the partial pressure calculations.
 */
 double dpdt[2] = {};
@@ -146,11 +146,11 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
 	double beta0 	= 0.0;
     double XW, XOH;
     // RF-1-private variables
-    double Catalyst_1, CE_A0, CE_A1, CE_B, CE_B2, 
-           CE_I0, CE_I1, CE_I2, CE_PBA, CE_Breac, 
-           CE_Areac0, CE_Areac1, CE_Ireac0, CE_Ireac1, 
+    double Catalyst_1, CE_A0, CE_A1, CE_B, CE_B2,
+           CE_I0, CE_I1, CE_I2, CE_PBA, CE_Breac,
+           CE_Areac0, CE_Areac1, CE_Ireac0, CE_Ireac1,
            CE_Ireac2, Bulk, R_1, R_1_mass, R_1_temp, R_1_vol;
-    
+
     XW      	= y[0];
     XOH     	= y[1];
     T       	= y[2];
@@ -188,7 +188,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
     // XH2O        = 1.0 - (y[13]/init_H2O);
 
     // Calling the RF-1-private model
-    if (kinetics_basf) 
+    if (kinetics_basf)
     {
         // inputs argPos
         size_t Catalyst_1_Pos   = modena_model_inputs_argPos(kinetics, "'Catalyst_1'");
@@ -221,7 +221,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
         size_t source_CE_I0_Pos        = modena_model_outputs_argPos(kinetics, "source_CE_I0");
         size_t source_CE_I1_Pos        = modena_model_outputs_argPos(kinetics, "source_CE_I1");
         size_t source_CE_I2_Pos        = modena_model_outputs_argPos(kinetics, "source_CE_I2");
-        size_t source_CE_PBA_Pos       = modena_model_outputs_argPos(kinetics, "source_CE_PBA");        
+        size_t source_CE_PBA_Pos       = modena_model_outputs_argPos(kinetics, "source_CE_PBA");
         size_t source_CE_Breac_Pos     = modena_model_outputs_argPos(kinetics, "source_CE_Breac");
         size_t source_CE_Areac0_Pos    = modena_model_outputs_argPos(kinetics, "source_CE_Areac0");
         size_t source_CE_Areac1_Pos    = modena_model_outputs_argPos(kinetics, "source_CE_Areac1");
@@ -258,7 +258,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
         modena_inputs_set(inputs_kinetics, R_1_mass_Pos, R_1_mass);
         modena_inputs_set(inputs_kinetics, R_1_temp_Pos, R_1_temp);
         modena_inputs_set(inputs_kinetics, R_1_vol_Pos, R_1_vol);
-      
+
         // call the model
         int ret_kinetics = modena_model_call(kinetics, inputs_kinetics, outputs_kinetics);
 
@@ -292,11 +292,11 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
         dydt[28] = modena_outputs_get(outputs_kinetics, source_R_1_mass_Pos);
         dydt[29] = modena_outputs_get(outputs_kinetics, source_R_1_temp_Pos);
         dydt[30] = modena_outputs_get(outputs_kinetics, source_R_1_vol_Pos);
-        
+
         // for (int i = 11; i<31; i++)
         // {
         //     cout << "source for dydt[ " << i << "] = " << dydt[i] << endl;
-        // }     
+        // }
     }
 
     // Check for negative sources
@@ -323,7 +323,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
 
             // // call the model
             int ret_den = modena_model_call (density_reaction_mixturemodel, inputs_den, outputs_den);
-            
+
             if (ret_den != 0)
             {
                 modena_inputs_destroy (inputs_den);
@@ -409,7 +409,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
     //     }
 
     //     double mu_app = modena_outputs_get(outputs_rheo, 0);
-    //     cout << "apparent viscosity: " << mu_app << endl;  
+    //     cout << "apparent viscosity: " << mu_app << endl;
     // }
 
 
@@ -428,7 +428,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
         cout << "----Step 1----" << endl;
         cout << "moments before check realizability: " << endl;
         printMoms(mom,nNodes);
-    
+
         // Check realizability
         cout << "----Step 2----" << endl;
         cout << "check positivity" << endl;
@@ -448,12 +448,12 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
         }
         printMoms(mom,nNodes);
 
-        
+
         int realizable = 0;
         cout << "----Step 3----" << endl;
         cout << "first Hankel-Hadamard check" << endl;
         realizable = HankelHadamard(mom, nNodes);
-        cout << "Hankel-Hadamard check (0:realizable, 1:unrealizable) --> " << realizable <<  endl;     
+        cout << "Hankel-Hadamard check (0:realizable, 1:unrealizable) --> " << realizable <<  endl;
 
         if (realizable == 1)
         {
@@ -469,7 +469,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
         cout << "----Step 5----" << endl;
         cout << "second Hankel-Hadamard check" << endl;
         realizable = HankelHadamard(mom, nNodes);
-        cout << "Hankel-Hadamard check (0:realizable, 1:unrealizable) --> " << realizable <<  endl;     
+        cout << "Hankel-Hadamard check (0:realizable, 1:unrealizable) --> " << realizable <<  endl;
 
         if (realizable == 1)
         {
@@ -481,7 +481,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
         }
         // cout << "moments after check realizability: " << endl;
         // printMoms(mom,nNodes);
-    }  
+    }
 
     PDA(we, vi, mom, nNodes);
 
@@ -499,6 +499,11 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
     size_t c_2bblgr2pos             = modena_model_inputs_argPos(bblgr2, "c");
     size_t p_2bblgr2pos             = modena_model_inputs_argPos(bblgr2, "p");
     modena_model_argPos_check(bblgr2);
+    size_t Tbblgr3pos               = modena_model_inputs_argPos(bblgr3, "T");
+    size_t Rbblgr3pos               = modena_model_inputs_argPos(bblgr3, "R");
+    size_t c_2bblgr3pos             = modena_model_inputs_argPos(bblgr3, "c");
+    size_t p_2bblgr3pos             = modena_model_inputs_argPos(bblgr3, "p");
+    modena_model_argPos_check(bblgr3);
 
     // partial pressure within bubbles due to the evaporation of physical blowing agent
     double p_1  = partialPressureBA(y);
@@ -508,7 +513,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
     double c_2  = CO2_l*rhoPolySurrgate*1000.0/M_CO2;
     double KH1  = (rhoPolySurrgate*Lm)/((M_B/1000.0)*Pr);
     double KH2  = (rhoPolySurrgate*CO2_D)/((M_CO2/1000.0)*Pr);
-    
+
     if (bubbleMode == "two nodes")
     {
         double radiusGrowthBA[nNodes],
@@ -545,7 +550,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
             // cout << "radiusGrowthCO2[" << i << "] = " << radiusGrowthCO2[i] << endl;
             volumeGrowthBA[i]   = (radiusGrowthBA[i]*RR*T)/(p_1);
             volumeGrowthCO2[i]  = (radiusGrowthCO2[i]*RR*T)/(p_2);
-            
+
             if (volumeGrowthBA[i] < 0.0 || radiusGrowthBA[i] < 0.0 || L0 < 1.0e-8 || y[1] > 0.5)
             {
                 volumeGrowthBA[i]   = 0.0;
@@ -556,13 +561,13 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
             }
             // cout << "volumeGrowthBA[" << i << "] = " << volumeGrowthBA[i] << endl;
             // cout << "volumeGrowthCO2[" << i << "] = " << volumeGrowthCO2[i] << endl;
-        
+
             // cout << "Going into growthSource function***" << endl;
             // double volumeGrowthBA = 1.0e-13;
-            // double volumeGrowthCO2 = 1.0e-30;    
+            // double volumeGrowthCO2 = 1.0e-30;
         }
 
-        growthSource(sgBA, sgCO2, we, vi, nNodes, mOrder, CO2_l, L_l, T, volumeGrowthBA, volumeGrowthCO2);    
+        growthSource(sgBA, sgCO2, we, vi, nNodes, mOrder, CO2_l, L_l, T, volumeGrowthBA, volumeGrowthCO2);
     }
     else if (bubbleMode == "mean radius")
     {
@@ -580,14 +585,21 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
         modena_inputs_set(inputs_bblgr2, KH2bblgr2pos, KH2);
         modena_inputs_set(inputs_bblgr2, c_2bblgr2pos, c_2);
         modena_inputs_set(inputs_bblgr2, p_2bblgr2pos, p_2);
+        // set input vector
+        modena_inputs_set(inputs_bblgr3, Tbblgr3pos, T);
+        modena_inputs_set(inputs_bblgr3, Rbblgr3pos, R);
+        modena_inputs_set(inputs_bblgr3, c_2bblgr3pos, c_1);
+        modena_inputs_set(inputs_bblgr3, p_2bblgr3pos, p_1);
 
         // call the bblgr1 model
         int ret_bblgr_1 = modena_model_call (bblgr1, inputs_bblgr1, outputs_bblgr1);
         // call the bblgr2 model
         int ret_bblgr_2 = modena_model_call (bblgr2, inputs_bblgr2, outputs_bblgr2);
+		// call the bblgr3 model
+        int ret_bblgr_3 = modena_model_call (bblgr3, inputs_bblgr3, outputs_bblgr3);
 
-        double G1, G2;
-        double dVdt_1[nNodes], dVdt_2[nNodes]; 
+        double G1, G2, G3;
+        double dVdt_1[nNodes], dVdt_2[nNodes];
         for (int i = 0; i < nNodes; i++)
         {
             dVdt_1[i] = 0.0;
@@ -595,6 +607,10 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
         }
         G1 = modena_outputs_get(outputs_bblgr1, 0);
         G2 = modena_outputs_get(outputs_bblgr2, 0);
+		G3 = modena_outputs_get(outputs_bblgr3, 0);
+		// printf("%g, %g, %g, %g, %g\n", KH1, c_1, R, T, p_1);
+		printf("%g, %g\n", G1,G3);
+		// exit(0);
         // double mpar=0.0;
         // double mpar2=1.0;
         // G1=G1*pow(R,mpar)*mpar2; //for testing
@@ -612,14 +628,14 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
             dVdt_2[0] = 0.0;
         }
 
-        growthSource(sgBA, sgCO2, we, vi, nNodes, mOrder, CO2_l, L_l, T, dVdt_1, dVdt_2);    
+        growthSource(sgBA, sgCO2, we, vi, nNodes, mOrder, CO2_l, L_l, T, dVdt_1, dVdt_2);
     }
     else
     {
         cerr << "Invalide choice of bubbleMode!" << endl;
         exit(1);
     }
-	
+
     coalescenceSource(sc, we, vi, nNodes, mOrder, beta0);
 
     dydt[3] = -sgBA[1]*(p_1/(RR*y[2]))*(M_B/1000.0)*(1.0/rhoPolySurrgate);
@@ -640,8 +656,8 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
 int main(int argc, char **argv)
 {
     #include "modenaCalls.h"
-    
-    
+
+
 	readParams();
 	// initial conditions
     state_type y(31);
@@ -649,7 +665,7 @@ int main(int argc, char **argv)
     y[1]			= 0.0;
     y[2]			= Temp0;
     y[3]			= L0;
-    y[4]			= 1.0e-14; 
+    y[4]			= 1.0e-14;
     y[5]			= 0.0;
     y[6]			= 1.0e-14;
 
@@ -689,7 +705,7 @@ int main(int argc, char **argv)
     y[27]           = 0.0;
     y[28]           = 1.0;
     y[29]           = 2.27e1;
-    y[30]           = 8.46382e-1; 
+    y[30]           = 8.46382e-1;
 
 
     runge_kutta4< state_type > stepper;
@@ -726,7 +742,7 @@ int main(int argc, char **argv)
              << setw(12) << y[14] << " " << setw(12) << y[15] << " " << setw(12) << y[16] << " "
              << setw(12) << y[17] << " " << setw(12) << y[18] << " " << setw(12) << y[19] << " "
              << setw(12) << y[20] << " " << setw(12) << y[21] << " " << setw(12) << y[22] << " "
-             << setw(12) << y[23] << " " << setw(12) << y[24] << " " << setw(12) << y[25] << " "               
+             << setw(12) << y[23] << " " << setw(12) << y[24] << " " << setw(12) << y[25] << " "
              << endl;
         write_kinetics(y, t);
 
@@ -737,7 +753,7 @@ int main(int argc, char **argv)
     }
 }
 
-/* 
+/*
 
 Different methods of integrations:
 

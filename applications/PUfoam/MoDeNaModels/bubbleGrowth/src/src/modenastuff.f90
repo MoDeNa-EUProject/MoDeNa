@@ -117,6 +117,18 @@ subroutine createModenaModels
                 c_char_"T"//c_null_char);
             call modena_model_argPos_check(diffModena(i))
         endif
+        if (sol_model(i)==1) then
+            solModena(i) = modena_model_new (&
+                c_char_"SolubilityCO2Baser"//c_null_char);
+            if (modena_error_occurred()) then
+                call exit(modena_error())
+            endif
+            solInputs(i) = modena_inputs_new (solModena(i));
+            solOutputs(i) = modena_outputs_new (solModena(i));
+            solTpos(i) = modena_model_inputs_argPos(solModena(i), &
+                c_char_"T"//c_null_char);
+            call modena_model_argPos_check(solModena(i))
+        endif
         if (sol_model(i)==2) then
             solModena(i) = modena_model_new (&
                 c_char_"Solubility[A="//gasname(i)//",B=3]"//c_null_char);
@@ -133,6 +145,42 @@ subroutine createModenaModels
                 c_char_"xl[mdi]"//c_null_char);
             solXpolyolPos(i) = modena_model_inputs_argPos(solModena(i), &
                 c_char_"xl[polyol]"//c_null_char);
+            call modena_model_argPos_check(solModena(i))
+        endif
+        if (sol_model(i)==3) then
+            solModena(i) = modena_model_new (&
+                c_char_"SolubilityPentGupta"//c_null_char);
+            if (modena_error_occurred()) then
+                call exit(modena_error())
+            endif
+            solInputs(i) = modena_inputs_new (solModena(i));
+            solOutputs(i) = modena_outputs_new (solModena(i));
+            solTpos(i) = modena_model_inputs_argPos(solModena(i), &
+                c_char_"T"//c_null_char);
+            call modena_model_argPos_check(solModena(i))
+        endif
+        if (sol_model(i)==4) then
+            solModena(i) = modena_model_new (&
+                c_char_"SolubilityPentWinkler"//c_null_char);
+            if (modena_error_occurred()) then
+                call exit(modena_error())
+            endif
+            solInputs(i) = modena_inputs_new (solModena(i));
+            solOutputs(i) = modena_outputs_new (solModena(i));
+            solTpos(i) = modena_model_inputs_argPos(solModena(i), &
+                c_char_"T"//c_null_char);
+            call modena_model_argPos_check(solModena(i))
+        endif
+        if (sol_model(i)==6) then
+            solModena(i) = modena_model_new (&
+                c_char_"SolubilityR11Baser"//c_null_char);
+            if (modena_error_occurred()) then
+                call exit(modena_error())
+            endif
+            solInputs(i) = modena_inputs_new (solModena(i));
+            solOutputs(i) = modena_outputs_new (solModena(i));
+            solTpos(i) = modena_model_inputs_argPos(solModena(i), &
+                c_char_"T"//c_null_char);
             call modena_model_argPos_check(solModena(i))
         endif
     enddo
@@ -256,7 +304,7 @@ subroutine destroyModenaModels
         endif
     enddo
     do i=1,ngas
-        if (sol_model(i)==2) then
+        if (sol_model(i)==2 .or. sol_model(i) == 6) then
             call modena_inputs_destroy (solInputs(i));
             call modena_outputs_destroy (solOutputs(i));
             call modena_model_destroy (solModena(i));

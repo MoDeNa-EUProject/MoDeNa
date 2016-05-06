@@ -134,6 +134,12 @@ subroutine physical_properties(temp,conv,radius)
         end select
         select case(sol_model(i))
         case(1)
+            call modena_inputs_set(solInputs(i), solTpos(i), temp)
+            ret = modena_model_call(solModena(i), solInputs(i), solOutputs(i))
+            if(ret /= 0) then
+                call exit(ret)
+            endif
+            KH(i) = modena_outputs_get(solOutputs(i), 0_c_size_t)
         case(2)
             ! TODO: implement properly
             call modena_inputs_set(solInputs(i), solTpos(i), temp)
@@ -145,20 +151,39 @@ subroutine physical_properties(temp,conv,radius)
                 call exit(ret)
             endif
             KH(i) = modena_outputs_get(solOutputs(i), 0_c_size_t)
-            KH(i)=rhop/Mbl(i)/KH(i)
-        case(3)
-            KH(i)=-rhop/Mbl(i)/pamb*3.3e-4_dp*(exp((2.09e4_dp-67.5_dp*(temp-&
-                35.8_dp*log(pamb/1e5_dp)))/(8.68e4_dp-(temp-35.8_dp*&
-                log(pamb/1e5_dp))))-1.01_dp)**(-1)
-        case(4)
-            KH(i)=rhop/Mbl(i)/pamb*(0.0064_dp+0.0551_dp*exp(-(temp-298)**2/&
-                (2*17.8_dp**2)))
-        case(5)
-            KH(i)=rhop/Mbl(i)/pamb*(0.00001235_dp*temp**2-0.00912_dp*temp+&
-                1.686_dp)
-        case(6)
-            KH(i)=rhop/Mbl(i)/pamb*(1e-7_dp+4.2934_dp*&
-                exp(-(temp-203.3556_dp)**2/(2*40.016_dp**2)))
+            ! KH(i)=rhop/Mbl(i)/KH(i)
+        case(3) !n-pentane, Gupta, 10.1002/pen.11405
+            ! KH(i)=rhop/Mbl(i)/pamb*3.3e-4_dp*(exp((2.09e4_dp-67.5_dp*(temp-&
+            !     35.8_dp*log(pamb/1e5_dp)))/(8.68e4_dp-(temp-35.8_dp*&
+            !     log(pamb/1e5_dp))))-1.01_dp)**(-1)
+            ! KH(i)=-rhop/Mbl(i)/pamb*3.3e-4_dp/(exp((2.09e4_dp-67.5_dp*temp)/&
+            !     (8.69e4_dp-temp))-1.01_dp)
+            call modena_inputs_set(solInputs(i), solTpos(i), temp)
+            ret = modena_model_call(solModena(i), solInputs(i), solOutputs(i))
+            if(ret /= 0) then
+                call exit(ret)
+            endif
+            KH(i) = modena_outputs_get(solOutputs(i), 0_c_size_t)
+        case(4) !n-pentane, Winkler Ph.D.
+            ! KH(i)=rhop/Mbl(i)/pamb*(0.0064_dp+0.0551_dp*exp(-(temp-298)**2/&
+            !     (2*17.8_dp**2)))
+            call modena_inputs_set(solInputs(i), solTpos(i), temp)
+            ret = modena_model_call(solModena(i), solInputs(i), solOutputs(i))
+            if(ret /= 0) then
+                call exit(ret)
+            endif
+        case(6) !R11, Baser, 10.1002/pen.760340804
+            call modena_inputs_set(solInputs(i), solTpos(i), temp)
+            ret = modena_model_call(solModena(i), solInputs(i), solOutputs(i))
+            if(ret /= 0) then
+                call exit(ret)
+            endif
+            KH(i) = modena_outputs_get(solOutputs(i), 0_c_size_t)
+            ! print*, KH(i),rhop,Mbl(i),pamb
+            ! KH(i)=rhop/Mbl(i)/pamb*(1e-7_dp+4.2934_dp*&
+            !     exp(-(temp-203.3556_dp)**2/(2*40.016_dp**2)))
+            ! print*, KH(i)
+            ! stop
         end select
     enddo
     if (solcorr) KH=KH*exp(2*sigma*Mbl/(rhop*Rg*temp*radius))

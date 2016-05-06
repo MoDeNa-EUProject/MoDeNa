@@ -35,7 +35,7 @@ Module BubblePoint
   Call READ_INPUT
   nphas = 2
   iterate_t = 0 !iterate pressure to reach the given liquid composition
-  !initial values of liaquid and gas packing fraction 
+  !initial values of liaquid and gas packing fraction
   dense(1) = 0.4
   dense(2) = 1.E-05
   !set initial mole fractions for gas and liquid phase
@@ -50,7 +50,7 @@ Module BubblePoint
 !   write(*,*)'xl',xi(1,1:ncomp)
 !   write(*,*)'xv',xi(2,1:ncomp)
 
-  !Calculate solubility coefficient H of component 1 
+  !Calculate solubility coefficient H of component 1
   !according to x1*H = y1*p
   H = xi(2,1) * p / xi(1,1)
   filename = './out.txt'
@@ -59,14 +59,16 @@ Module BubblePoint
   ! write(*,*)'Solubility Coefficient /bar', H/100000.0
   if (ncomp == 2) then
       H=xi(1,1)*mm(1)/(xi(1,2)*mm(2))/p*1e5
+      write(*,*)'Solubility Coefficient g/g/bar', H
   elseif (ncomp == 3) then
       H=xi(1,1)*mm(1)/(xi(1,2)*mm(2)+xi(1,3)*mm(3))/p*1e5
+      H=1100*mm(1)/H
+      write(*,*)'Solubility Coefficient mol/m3/Pa', H
   endif
   write(78,*) H
-  write(*,*)'Solubility Coefficient g/g/bar', H
 
 
  End Subroutine BubblePointCalculation
 
 
-End Module BubblePoint 
+End Module BubblePoint

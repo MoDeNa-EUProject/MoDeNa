@@ -6,6 +6,7 @@
 
 modena_model_t *bblgr1;
 modena_model_t *bblgr2;
+modena_model_t *bblgr3;
 
 modena_model_t *kinetics;
 
@@ -16,6 +17,9 @@ modena_outputs_t *outputs_bblgr1;
 
 modena_inputs_t *inputs_bblgr2;
 modena_outputs_t *outputs_bblgr2;
+
+modena_inputs_t *inputs_bblgr3;
+modena_outputs_t *outputs_bblgr3;
 
 modena_inputs_t *inputs_kinetics;
 modena_outputs_t *outputs_kinetics;

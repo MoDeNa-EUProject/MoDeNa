@@ -347,3 +347,172 @@ m_solubilityCyclopentane = BackwardMappingModel(
     outOfBoundsStrategy=outOfBoundsStrategy,
     parameterFittingStrategy=parameterFittingStrategy
 )
+# below are experimental solubility models
+# they are needed, because we want substitute model for bubble growth model
+inputsExp={
+    'T': { 'min': 200.0, 'max': 500.0}
+}
+CcodeR11Baser='''
+#include "modena.h"
+#include "math.h"
+
+void surroSolubilityR11Baser
+(
+const modena_model_t* model,
+const double* inputs,
+double *outputs
+)
+{
+{% block variables %}{% endblock %}
+
+const double P0 = parameters[0];
+const double P1 = parameters[1];
+const double P2 = parameters[2];
+const double P3 = parameters[3];
+
+outputs[0] = (P0 + P1*exp(-pow(T-P2,2)/(2*P3*P3)))*1100.0/137.37e-3/101e3;
+}
+'''
+parameters4={
+    'param0': { 'min': 1e-12, 'max': 1E1, 'argPos': 0 },
+    'param1': { 'min': -1e-1, 'max': 1e-1, 'argPos': 1 },
+    'param2': { 'min': -1e-1, 'max': 1e-1, 'argPos': 2 },
+    'param3': { 'min': -1e-1, 'max': 1e-1, 'argPos': 3 },
+}
+fR11Baser = CFunction(Ccode=CcodeR11Baser,
+    inputs=inputsExp,
+    outputs=outputs,
+    parameters=parameters4
+)
+## [R11, Baser](http://dx.doi.org/10.1002/pen.760340804)
+parR11Baser = [1e-7, 4.2934, 203.3556, 40.016]
+m_solubilityR11Baser = ForwardMappingModel(
+    _id='SolubilityR11Baser',
+    surrogateFunction=fR11Baser,
+    substituteModels=[],
+    parameters=parR11Baser,
+    inputs=inputsExp,
+    outputs=outputs,
+)
+CcodeCO2Baser='''
+#include "modena.h"
+#include "math.h"
+
+void surroSolubilityCO2Baser
+(
+const modena_model_t* model,
+const double* inputs,
+double *outputs
+)
+{
+{% block variables %}{% endblock %}
+
+const double P0 = parameters[0];
+
+outputs[0] = P0;
+}
+'''
+parameters1={
+    'param0': { 'min': 1e-12, 'max': 1E1, 'argPos': 0 },
+}
+if 'argPos' in inputsExp['T']: #added by previous CFunction
+    inputsExp['T'].pop('argPos')
+fCO2Baser = CFunction(Ccode=CcodeCO2Baser,
+    inputs=inputsExp,
+    outputs=outputs,
+    parameters=parameters1
+)
+## [CO2, Baser](http://dx.doi.org/10.1002/pen.760340804)
+parCO2Baser = [1.1e-4]
+m_solubilityCO2Baser = ForwardMappingModel(
+    _id='SolubilityCO2Baser',
+    surrogateFunction=fCO2Baser,
+    substituteModels=[],
+    parameters=parCO2Baser,
+    inputs=inputsExp,
+    outputs=outputs,
+)
+CcodePentGupta='''
+#include "modena.h"
+#include "math.h"
+
+void surroSolubilityPentGupta
+(
+const modena_model_t* model,
+const double* inputs,
+double *outputs
+)
+{
+{% block variables %}{% endblock %}
+
+const double P0 = parameters[0];
+const double P1 = parameters[1];
+const double P2 = parameters[2];
+const double P3 = parameters[3];
+const double P4 = parameters[4];
+
+outputs[0] = P0/(exp((P1-P2*T)/(P3-T))-P4)*1100.0/72.15e-3/101e3;
+}
+'''
+parameters5={
+    'param0': { 'min': 1e-12, 'max': 1E1, 'argPos': 0 },
+    'param1': { 'min': -1e-1, 'max': 1e-1, 'argPos': 1 },
+    'param2': { 'min': -1e-1, 'max': 1e-1, 'argPos': 2 },
+    'param3': { 'min': -1e-1, 'max': 1e-1, 'argPos': 3 },
+    'param4': { 'min': -1e-1, 'max': 1e-1, 'argPos': 4 },
+}
+if 'argPos' in inputsExp['T']: #added by previous CFunction
+    inputsExp['T'].pop('argPos')
+fPentGupta = CFunction(Ccode=CcodePentGupta,
+    inputs=inputsExp,
+    outputs=outputs,
+    parameters=parameters5
+)
+## [n-pentane, Gupta](http://dx.doi.org/10.1002/pen.11405)
+parPentGupta = [-3.3e-4, 2.09e4, 67.5, 8.69e4, 1.01]
+m_solubilityPentGupta = ForwardMappingModel(
+    _id='SolubilityPentGupta',
+    surrogateFunction=fPentGupta,
+    substituteModels=[],
+    parameters=parPentGupta,
+    inputs=inputsExp,
+    outputs=outputs,
+)
+CcodePentWinkler='''
+#include "modena.h"
+#include "math.h"
+
+void surroSolubilityPentWinkler
+(
+const modena_model_t* model,
+const double* inputs,
+double *outputs
+)
+{
+{% block variables %}{% endblock %}
+
+const double P0 = parameters[0];
+const double P1 = parameters[1];
+const double P2 = parameters[2];
+const double P3 = parameters[3];
+
+outputs[0] = (P0 + P1*exp(-pow(T-P2,2)/(2*P3*P3)))*1100.0/72.15e-3/101e3;
+}
+'''
+if 'argPos' in inputsExp['T']: #added by previous CFunction
+    inputsExp['T'].pop('argPos')
+fPentWinkler = CFunction(Ccode=CcodePentWinkler,
+    inputs=inputsExp,
+    outputs=outputs,
+    parameters=parameters5
+)
+## n-pentane, Winkler
+parPentWinkler = [0.0064,0.0551,298.0,17.8]
+m_solubilityPentWinkler = ForwardMappingModel(
+    _id='SolubilityPentWinkler',
+    surrogateFunction=fPentWinkler,
+    substituteModels=[],
+    parameters=parPentWinkler,
+    inputs=inputsExp,
+    outputs=outputs,
+)

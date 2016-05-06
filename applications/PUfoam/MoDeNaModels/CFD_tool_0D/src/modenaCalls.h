@@ -24,6 +24,12 @@ if (modena_error_occurred())
     return modena_error();
 }
 
+bblgr3 = modena_model_new("bubbleGrowth3");
+if (modena_error_occurred())
+{
+    return modena_error();
+}
+
 kinetics = modena_model_new("RF-1-public");
 if (modena_error_occurred())
 {
@@ -41,6 +47,9 @@ outputs_bblgr1 = modena_outputs_new(bblgr1);
 
 inputs_bblgr2 = modena_inputs_new(bblgr2);
 outputs_bblgr2 = modena_outputs_new(bblgr2);
+
+inputs_bblgr3 = modena_inputs_new(bblgr3);
+outputs_bblgr3 = modena_outputs_new(bblgr3);
 
 inputs_kinetics = modena_inputs_new(kinetics);
 outputs_kinetics = modena_outputs_new(kinetics);

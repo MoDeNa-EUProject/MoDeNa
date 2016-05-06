@@ -46,6 +46,7 @@ import polymerViscosity
 # import SurfaceTension
 import PolymerDensity_units
 import Kinetics
+import Solubility
 
 # set up the LaunchPad and reset it
 launchpad = LaunchPad(**MODENA_PARSED_URI)
