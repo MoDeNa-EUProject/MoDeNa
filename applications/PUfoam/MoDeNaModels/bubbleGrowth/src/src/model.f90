@@ -151,7 +151,7 @@ subroutine molar_balance(y)
     enddo
     mb=mb*4*pi/3 !moles in polymer
     do i=1,ngas
-    	mb2(i)=pressure(1)*radius**3*4*pi/(3*Rg*temp) !moles in bubble
+    	mb2(i)=pressure(i)*radius**3*4*pi/(3*Rg*temp) !moles in bubble
     enddo
     mb3=mb+mb2 !total moles
 end subroutine molar_balance

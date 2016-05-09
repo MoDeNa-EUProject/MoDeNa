@@ -299,54 +299,54 @@ m_solubilityCyclopentanePU = BackwardMappingModel(
     outOfBoundsStrategy=outOfBoundsStrategy,
     parameterFittingStrategy=parameterFittingStrategy
 )
-m_solubilityCO2 = BackwardMappingModel(
-    _id='Solubility[A=CO2,B=3]',
-    surrogateFunction=f3,
-    exactTask=SolubilityExactSim(),
-    substituteModels=[],
-    initialisationStrategy=Strategy.InitialPoints(
-        initialPoints={
-            'T': [290, 320, 350, 380],
-            'xl1': [0.43, 0.42, 0.40, 0.38],
-            'xl2': [0.53, 0.52, 0.50, 0.48],
-            'xl3': [0.04, 0.06, 0.10, 0.14],
-        },
-    ),
-    outOfBoundsStrategy=outOfBoundsStrategy,
-    parameterFittingStrategy=parameterFittingStrategy
-)
-m_solubilityAir = BackwardMappingModel(
-    _id='Solubility[A=Air,B=3]',
-    surrogateFunction=f3,
-    exactTask=SolubilityExactSim(),
-    substituteModels=[],
-    initialisationStrategy=Strategy.InitialPoints(
-        initialPoints={
-            'T': [280, 300, 320, 350],
-            'xl1': [0.08, 0.078, 0.074, 0.068],
-            'xl2': [0.85, 0.82, 0.79, 0.72],
-            'xl3': [0.07, 0.102, 0.136, 0.212],
-        },
-    ),
-    outOfBoundsStrategy=outOfBoundsStrategy,
-    parameterFittingStrategy=parameterFittingStrategy
-)
-m_solubilityCyclopentane = BackwardMappingModel(
-    _id='Solubility[A=CyP,B=3]',
-    surrogateFunction=f3,
-    exactTask=SolubilityExactSim(),
-    substituteModels=[],
-    initialisationStrategy=Strategy.InitialPoints(
-        initialPoints={
-            'T': [280, 300, 320, 350],
-            'xl1': [0.021, 0.023, 0.025, 0.027],
-            'xl2': [0.12e-4, 0.71e-4, 0.31e-3, 0.19e-2],
-            'xl3': [0.97886, 0.97629, 0.9719, 0.954],
-        },
-    ),
-    outOfBoundsStrategy=outOfBoundsStrategy,
-    parameterFittingStrategy=parameterFittingStrategy
-)
+# m_solubilityCO2 = BackwardMappingModel(
+#     _id='Solubility[A=CO2,B=3]',
+#     surrogateFunction=f3,
+#     exactTask=SolubilityExactSim(),
+#     substituteModels=[],
+#     initialisationStrategy=Strategy.InitialPoints(
+#         initialPoints={
+#             'T': [290, 320, 350, 380],
+#             'xl1': [0.43, 0.42, 0.40, 0.38],
+#             'xl2': [0.53, 0.52, 0.50, 0.48],
+#             'xl3': [0.04, 0.06, 0.10, 0.14],
+#         },
+#     ),
+#     outOfBoundsStrategy=outOfBoundsStrategy,
+#     parameterFittingStrategy=parameterFittingStrategy
+# )
+# m_solubilityAir = BackwardMappingModel(
+#     _id='Solubility[A=Air,B=3]',
+#     surrogateFunction=f3,
+#     exactTask=SolubilityExactSim(),
+#     substituteModels=[],
+#     initialisationStrategy=Strategy.InitialPoints(
+#         initialPoints={
+#             'T': [280, 300, 320, 350],
+#             'xl1': [0.08, 0.078, 0.074, 0.068],
+#             'xl2': [0.85, 0.82, 0.79, 0.72],
+#             'xl3': [0.07, 0.102, 0.136, 0.212],
+#         },
+#     ),
+#     outOfBoundsStrategy=outOfBoundsStrategy,
+#     parameterFittingStrategy=parameterFittingStrategy
+# )
+# m_solubilityCyclopentane = BackwardMappingModel(
+#     _id='Solubility[A=CyP,B=3]',
+#     surrogateFunction=f3,
+#     exactTask=SolubilityExactSim(),
+#     substituteModels=[],
+#     initialisationStrategy=Strategy.InitialPoints(
+#         initialPoints={
+#             'T': [280, 300, 320, 350],
+#             'xl1': [0.021, 0.023, 0.025, 0.027],
+#             'xl2': [0.12e-4, 0.71e-4, 0.31e-3, 0.19e-2],
+#             'xl3': [0.97886, 0.97629, 0.9719, 0.954],
+#         },
+#     ),
+#     outOfBoundsStrategy=outOfBoundsStrategy,
+#     parameterFittingStrategy=parameterFittingStrategy
+# )
 # below are experimental solubility models
 # they are needed, because we want substitute model for bubble growth model
 inputsExp={

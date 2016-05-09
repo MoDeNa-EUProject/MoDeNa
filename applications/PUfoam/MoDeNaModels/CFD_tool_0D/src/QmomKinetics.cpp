@@ -374,12 +374,6 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
 		dydt[0]=dydt[0]/(1+y[3]*rhoPolySurrgate/rhoBL);
 		dydt[1]=dydt[1]/(1+y[3]*rhoPolySurrgate/rhoBL);
 	}
-	double dT=1e-4;
-	double dLdT=(min(LMax(T),L0)-min(LMax(T+dT),L0))/dT;
-    C_TOT 		= C_Poly + CO2_g*C_CO2 + L_g*C_BG + L_l*C_BL + dLdT*lambda;
-		// this implementation of evaporation heat assumes that concentration of
-		// physical blowing agent in liquid is always in equilibrium
-    dydt[2] 	= (-DH_OH*OH_0)/(rhoPolySurrgate*C_TOT)*dydt[1]+(-DH_W*W_0)/(rhoPolySurrgate*C_TOT)*dydt[0];
 
     // call the surrogate model for rheology
     // if (apparentViscosity)
@@ -489,21 +483,16 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
     // calling the surogate models for bubble growth rates.
     size_t Tbblgr1pos               = modena_model_inputs_argPos(bblgr1, "T");
     size_t Rbblgr1pos               = modena_model_inputs_argPos(bblgr1, "R");
-    size_t KH1bblgr1pos             = modena_model_inputs_argPos(bblgr1, "kH");
+    // size_t KH1bblgr1pos             = modena_model_inputs_argPos(bblgr1, "kH");
     size_t c_1bblgr1pos             = modena_model_inputs_argPos(bblgr1, "c");
     size_t p_1bblgr1pos             = modena_model_inputs_argPos(bblgr1, "p");
     modena_model_argPos_check(bblgr1);
     size_t Tbblgr2pos               = modena_model_inputs_argPos(bblgr2, "T");
     size_t Rbblgr2pos               = modena_model_inputs_argPos(bblgr2, "R");
-    size_t KH2bblgr2pos             = modena_model_inputs_argPos(bblgr2, "kH");
+    // size_t KH2bblgr2pos             = modena_model_inputs_argPos(bblgr2, "kH");
     size_t c_2bblgr2pos             = modena_model_inputs_argPos(bblgr2, "c");
     size_t p_2bblgr2pos             = modena_model_inputs_argPos(bblgr2, "p");
     modena_model_argPos_check(bblgr2);
-    size_t Tbblgr3pos               = modena_model_inputs_argPos(bblgr3, "T");
-    size_t Rbblgr3pos               = modena_model_inputs_argPos(bblgr3, "R");
-    size_t c_2bblgr3pos             = modena_model_inputs_argPos(bblgr3, "c");
-    size_t p_2bblgr3pos             = modena_model_inputs_argPos(bblgr3, "p");
-    modena_model_argPos_check(bblgr3);
 
     // partial pressure within bubbles due to the evaporation of physical blowing agent
     double p_1  = partialPressureBA(y);
@@ -531,7 +520,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
             // set input vector
             modena_inputs_set(inputs_bblgr1, Tbblgr1pos, T);
             modena_inputs_set(inputs_bblgr1, Rbblgr1pos, nodeRadii[i]);
-            modena_inputs_set(inputs_bblgr1, KH1bblgr1pos, KH1);
+            // modena_inputs_set(inputs_bblgr1, KH1bblgr1pos, KH1);
             modena_inputs_set(inputs_bblgr1, c_1bblgr1pos, c_1);
             modena_inputs_set(inputs_bblgr1, p_1bblgr1pos, p_1);
             // call the bblgr1 model
@@ -541,7 +530,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
             // set input vector
             modena_inputs_set(inputs_bblgr2, Tbblgr2pos, T);
             modena_inputs_set(inputs_bblgr2, Rbblgr2pos, nodeRadii[i]);
-            modena_inputs_set(inputs_bblgr2, KH2bblgr2pos, KH2);
+            // modena_inputs_set(inputs_bblgr2, KH2bblgr2pos, KH2);
             modena_inputs_set(inputs_bblgr2, c_2bblgr2pos, c_2);
             modena_inputs_set(inputs_bblgr2, p_2bblgr2pos, p_2);
             // call the bblgr2 model
@@ -576,29 +565,22 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
         // set input vector
         modena_inputs_set(inputs_bblgr1, Tbblgr1pos, T);
         modena_inputs_set(inputs_bblgr1, Rbblgr1pos, R);
-        modena_inputs_set(inputs_bblgr1, KH1bblgr1pos, KH1);
+        // modena_inputs_set(inputs_bblgr1, KH1bblgr1pos, KH1);
         modena_inputs_set(inputs_bblgr1, c_1bblgr1pos, c_1);
         modena_inputs_set(inputs_bblgr1, p_1bblgr1pos, p_1);
         // set input vector
         modena_inputs_set(inputs_bblgr2, Tbblgr2pos, T);
         modena_inputs_set(inputs_bblgr2, Rbblgr2pos, R);
-        modena_inputs_set(inputs_bblgr2, KH2bblgr2pos, KH2);
+        // modena_inputs_set(inputs_bblgr2, KH2bblgr2pos, KH2);
         modena_inputs_set(inputs_bblgr2, c_2bblgr2pos, c_2);
         modena_inputs_set(inputs_bblgr2, p_2bblgr2pos, p_2);
-        // set input vector
-        modena_inputs_set(inputs_bblgr3, Tbblgr3pos, T);
-        modena_inputs_set(inputs_bblgr3, Rbblgr3pos, R);
-        modena_inputs_set(inputs_bblgr3, c_2bblgr3pos, c_1);
-        modena_inputs_set(inputs_bblgr3, p_2bblgr3pos, p_1);
 
         // call the bblgr1 model
         int ret_bblgr_1 = modena_model_call (bblgr1, inputs_bblgr1, outputs_bblgr1);
         // call the bblgr2 model
         int ret_bblgr_2 = modena_model_call (bblgr2, inputs_bblgr2, outputs_bblgr2);
-		// call the bblgr3 model
-        int ret_bblgr_3 = modena_model_call (bblgr3, inputs_bblgr3, outputs_bblgr3);
 
-        double G1, G2, G3;
+        double G1, G2;
         double dVdt_1[nNodes], dVdt_2[nNodes];
         for (int i = 0; i < nNodes; i++)
         {
@@ -607,28 +589,29 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
         }
         G1 = modena_outputs_get(outputs_bblgr1, 0);
         G2 = modena_outputs_get(outputs_bblgr2, 0);
-		G3 = modena_outputs_get(outputs_bblgr3, 0);
-		// printf("%g, %g, %g, %g, %g\n", KH1, c_1, R, T, p_1);
-		printf("%g, %g\n", G1,G3);
-		// exit(0);
         // double mpar=0.0;
         // double mpar2=1.0;
         // G1=G1*pow(R,mpar)*mpar2; //for testing
         // G2=G2*pow(R,mpar)*mpar2;
         dVdt_1[0] = (G1*RR*T)/(p_1);
+		// dVdt_1[1] = (G1*RR*T)/(p_1);
         // dVdt_1 = (G1*RR*T)/(p_1) - ((4.0*M_PI*pow(R,3.0))/(3.0*p_1))*(dpdt[0]+dpdt[1]) + ((4.0*M_PI*pow(R,3))/(max((3.0*T),1.0e-6)))*dydt[2];
         if (dVdt_1[0] < 0.0 || G1 < 0.0 || L0<1e-8 || y[1]>0.5) //hardcoded gel point
         {
             dVdt_1[0] = 0.0;
         }
         dVdt_2[0] = (G2*RR*T)/(p_2);
+		// dVdt_2[1] = (G2*RR*T)/(p_2);
         // dVdt_2 = (G2*RR*T)/(p_2) - ((4.0*M_PI*pow(R,3.0))/(3.0*p_2))*(dpdt[0]+dpdt[1]) + ((4.0*M_PI*pow(R,3))/(max((3.0*T),1.0e-6)))*dydt[2];
         if (dVdt_2[0] < 0.0 || G2 < 0.0 || W_0<1e-8 || y[1]>0.5) //hardcoded gel point
         {
             dVdt_2[0] = 0.0;
         }
-
+		// printf("%g %g\n", dVdt_1[0],dVdt_2[0]);
+		// printf("%i\n", nNodes);
+		// printf("%g %g\n", vi[0],vi[1]);
         growthSource(sgBA, sgCO2, we, vi, nNodes, mOrder, CO2_l, L_l, T, dVdt_1, dVdt_2);
+		// printf("%g %g\n", sgBA[1],sgCO2[1]);
     }
     else
     {
@@ -641,12 +624,18 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
     dydt[3] = -sgBA[1]*(p_1/(RR*y[2]))*(M_B/1000.0)*(1.0/rhoPolySurrgate);
 	dydt[4]	=  sgBA[1]*(p_1/(RR*y[2]))*(M_B/1000.0)*(1.0/rhoPolySurrgate);
 	dydt[6]	=  sgCO2[1]*(p_2/(RR*y[2]))*(M_CO2/1000.0)*(1.0/rhoPolySurrgate);
-    dydt[5]	= -sgCO2[1]*(p_2/(RR*y[2]))*(M_CO2/1000.0)*(1.0/rhoPolySurrgate) + W_0*dydt[0]*(M_CO2/1000.0)*(1.0/rhoPolySurrgate);
+    dydt[5]	= -sgCO2[1]*(p_2/(RR*y[2]))*(M_CO2/1000.0)*(1.0/rhoPolySurrgate) +\
+	 			W_0*dydt[0]*(M_CO2/1000.0)*(1.0/rhoPolySurrgate);
 
 	dydt[7] 	= sgBA[0] + sgCO2[0] + sc[0];
 	dydt[8]  	= sgBA[1] + sgCO2[1] + sc[1];
 	dydt[9]  	= sgBA[2] + sgCO2[2] + sc[2];
 	dydt[10] 	= sgBA[3] + sgCO2[3] + sc[3];
+	// temperature
+    C_TOT 		= C_Poly + CO2_g*C_CO2 + L_g*C_BG + L_l*C_BL;
+    dydt[2] 	= (-DH_OH*OH_0)/(rhoPolySurrgate*C_TOT)*dydt[1]+\
+				  (-DH_W*W_0)/(rhoPolySurrgate*C_TOT)*dydt[0]+\
+				  lambda/C_TOT*dydt[3];
 }
 /**
 @fn main(int argc, char **argv)
@@ -735,7 +724,7 @@ int main(int argc, char **argv)
 
     for( double t=0.0 ; t<tend ; t+= dt )
     {
-        cout << "\nTime = " << t << endl;
+        cout << "Time = " << t << endl;
         /// @sa http://headmyshoulder.github.io/odeint-v2/doc/boost_numeric_odeint/odeint_in_detail/steppers.html
 		integrate_adaptive( make_controlled( abs_err , rel_err , error_stepper_type() ), QmomKinetics , y , t, t+dt , 1e-9 );
         file << setw(12) << t << " " << setw(12) << y[11] << " " << setw(12) << y[12] << " " << setw(12) << y[13] << " "

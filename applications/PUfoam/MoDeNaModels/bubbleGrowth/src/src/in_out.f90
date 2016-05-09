@@ -167,7 +167,7 @@ subroutine save_integration_header
         'weight_fraction2','porosity'
     open (unit=newunit(fi2), file = outputs_GR)
     write(fi2,'(1000A23)') '#GrowthRate1', 'GrowthRate2', 'temperature', &
-        'bubbleRadius', 'KH1','KH2','c1','c2','p1','p2'
+        'bubbleRadius','c1','c2','p1','p2'
     if (kin_model==4) then
         open (unit=newunit(fi3), file = outputs_kin)
         write(fi3,'(1000A23)') "time","Catalyst_1","CE_A0","CE_A1","CE_B",&
@@ -187,7 +187,7 @@ subroutine save_integration_step(iout)
     write(fi1,"(1000es23.15)") time,radius,pressure,Y(xOHeq),Y(xWeq),&
         eqconc,Y(fceq),eta,mb(1),mb2(1),mb3(1),st,temp,rhofoam,&
         wblpol,porosity
-    write(fi2,"(1000es23.15)") grrate, temp, radius, KH, avconc, pressure
+    write(fi2,"(1000es23.15)") grrate, temp, radius, avconc, pressure
     if (kin_model==4) then
         write(fi3,"(1000es23.15)") time,Y(kineq(1)),Y(kineq(2)),Y(kineq(3)),&
             Y(kineq(4)),Y(kineq(5)),Y(kineq(6)),Y(kineq(7)),Y(kineq(8)),&

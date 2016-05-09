@@ -264,10 +264,10 @@ subroutine bblinteg
         call growth_rate
         if (firstrun) call save_integration_step(iout)
         if (printout) then
-            write(*,'(2x,A4,F8.3,A3,A13,F10.3,A4,A25,F8.3,A4,A9,EN12.3,A4)') &
+            write(*,'(2x,A4,F8.3,A3,A13,F10.3,A4,A19,F8.3,A4,A9,EN12.3,A4)') &
                 't = ', time, ' s,',&
                 'p_b - p_o = ', bub_pres, ' Pa,', &
-                'p_b - p_o - p_Laplace = ', bub_pres-2*sigma/radius, ' Pa,',&
+                'p_b - p_o - p_L = ', bub_pres-2*sigma/radius, ' Pa,',&
                 'dR/dt = ', (bub_pres-2*sigma/radius)*radius/4/eta, ' m/s'
         endif
         tout = time+timestep
