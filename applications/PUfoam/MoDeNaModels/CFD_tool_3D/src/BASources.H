@@ -65,6 +65,7 @@ if (PBESwitch)
                 {
                     dTdt  = dTdtFirstOrder(tmpt, tmptrOld, timeStep);
                     wBA_gSource[celli] = (-cc1_value*ddT_LliqMax(tmpt)*dTdt);
+
                     wBA_lSource[celli] = 
                         (
                             (M_B/1000.0)*(1.0/rhoPolyS)
@@ -130,14 +131,17 @@ if (PBESwitch)
                 );
             }
         } 
+
         henry_Coefficient = henryCoefficient(tmpt);
         bubble_radius = bubbleRadius(mZero_val, mOne_val);
+
         partialPressure_CO2 = 
             partialPressureCO2
             (
                 M_CO2, M_B, surfaceTension, 
                 wCO2_g_val, wBA_g_val, prsr, bubble_radius
             );
+
         wCO2_Max = wCO2Max(M_CO2, M_liq, partialPressure_CO2, henry_Coefficient);
         
         if (wCO2_l[celli] < wCO2_Max || CW_0 == 0.0 || XOH[celli] > XOH_Gel)

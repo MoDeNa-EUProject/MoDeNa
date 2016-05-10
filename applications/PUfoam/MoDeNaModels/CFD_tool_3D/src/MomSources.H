@@ -142,7 +142,7 @@ if (PBESwitch)
                     double c_2 = wCO2_l[celli]*rhoPolyS*1000.0/M_CO2;
                     double KH1 = (rhoPolyS*LMAX)/(M_B*prsr/1000.0);
                     double KH2 = (rhoPolyS*4.4e-4)/(M_CO2*prsr/1000.0);
-                    if (bubbleGrowthMode == "two-nodes")
+                    if (bubbleGrowthMode == "twoNodes")
                     {
                         Info<< "p_1: " << p_1 << endl;
                         Info<< "p_2: " << p_2 << endl;
@@ -222,7 +222,7 @@ if (PBESwitch)
                             }
                         }    
                     }
-                    else if (bubbleGrowthMode == "mean-radius")
+                    else if (bubbleGrowthMode == "meanRadius")
                     {
                         Info<< "p_1: " << p_1 << endl;
                         Info<< "p_2: " << p_2 << endl;
@@ -304,8 +304,8 @@ if (PBESwitch)
                         FatalErrorIn(args.executable())
                         << "Invalid bubble growth mode " << bubbleGrowthMode
                         << "\nValid modes are: "
-                        << "\ntwo-nodes,"
-                        << "\nmean-radius"
+                        << "\ntwoNodes,"
+                        << "\nmeanRadius"
                         << exit(FatalError);
                     }    
                 }
