@@ -6,14 +6,14 @@
 	@brief initial temperature, K
 	@var double A_OH
 	@brief pre-exponential factor for the gelling reaction, 1/s
-	@var double E_OH 
+	@var double E_OH
 	@brief activation energy for the gelling reaction, J/mol
 	@var double OH_0
 	@brief Initial concentration of polyol OH groups in the mixutre, mol/m3
-	@var double NCO_0 
+	@var double NCO_0
 	@brief Initial concentration of isocianate NCO groups in the mixutre, mol/m3
-	@var double W_0		
-	@brief Initial concentration of water in the mixture, mol/m3 
+	@var double W_0
+	@brief Initial concentration of water in the mixture, mol/m3
 	@var double A_W
 	@brief pre-exponential factor for the blowing reaction, 1/s
 	@var double E_W
@@ -51,7 +51,7 @@
 	@brief use dilution effect
 	@var double M_CO2
 	@brief Molecular mass of carbon dioxide, kg/kmol
-	@var double M_B 
+	@var double M_B
 	@brief Molecular mass of blowing agent, kg/kmol
 	@var double M_NCO
 	@brief Molecular weight of NCO, kg/kmol
@@ -82,60 +82,60 @@
 	@var double tend
 	@brief  end time, s
 */
-	double Pr		= 101325.0; 
+	double Pr		= 101325.0;
 	double Temp0	= 297;
 /* Inputs for gelling reaction, XOH */
-	double A_OH     = 1965.0;		
-	double E_OH     = 5.487e4; 	
-	double OH_0   = 3765.0;		 
-	double NCO_0  = 3765.0;		
-	double W_0    = -1.0;		
+	double A_OH     = 1965.0;
+	double E_OH     = 5.487e4;
+	double OH_0   = 3765.0;
+	double NCO_0  = 3765.0;
+	double W_0    = -1.0;
 /* Inputs for blowing reaction, XW */
-	double A_W      = 1.385e3;	
-	double E_W      = 3.266e4;	
+	double A_W      = 1.385e3;
+	double E_W      = 3.266e4;
 /* Constants */
-	double RR      = 8.3145;	
-	double rhoPoly = 1100.0;	
-	double rhoBL   = 1467.0;	
+	double RR      = 8.3145;
+	double rhoPoly = 1100.0;
+	double rhoBL   = 1467.0;
 /* Inputs for enthalpy */
-	double DH_OH   = -7.49e4;	 
-	double DH_W    = -8.6e4;	
-	double C_Poly  = 1800.0;	 
-	double C_CO2   = 836.6;		
-	double C_BG    = 593.0;		
-	double C_BL    = 870.0;		 
-	double lambda  = 2.0e5;		
-	double C_TOT;				
+	double DH_OH   = -7.49e4;
+	double DH_W    = -8.6e4;
+	double C_Poly  = 1800.0;
+	double C_CO2   = 836.6;
+	double C_BG    = 593.0;
+	double C_BL    = 870.0;
+	double lambda  = 2.0e5;
+	double C_TOT;
 // physical blowing agent (used for solubility model)
-	int    phBL    = 1;		// 1=pentane, 2=R-11	 
+	int    phBL    = 1;		// 1=pentane, 2=R-11
 // density model used
-	int    denMod  = 2;			
+	int    denMod  = 2;
 // kinetics model used
-	int    kinMod  = 2;			
-	bool   dilution= true;		
+	int    kinMod  = 2;
+	bool   dilution= true;
 /* Inputs for weight fraction of gaseous CO2 in the mixture */
-	double M_CO2   = 44.0;		 
-	double M_B     = 137.37;	 
-	double M_NCO   = 615.0;		 
-	double M_air   = 29.0;		 
-	double CO2_D   = 4.4e-4;	 
-	double L0      = 0.155;	 
-	double CO2_0   = 0.0; 
+	double M_CO2   = 44.0;
+	double M_B     = 137.37;
+	double M_NCO   = 615.0;
+	double M_air   = 29.0;
+	double CO2_D   = 4.4e-4;
+	double L0      = 0.155;
+	double CO2_0   = 0.0;
 // Other physical properties
-	double surfaceTension = 25e-3;  
+	double surfaceTension = 25e-3;
 // initial bubble size distribution
-	double sig 		= 1e-1;		 
-	double init_size= 2.0e-6;	 
-	double NN 		= 0.138e12;	 
-	double air_g;				 
+	double sig 		= 1e-1;
+	double init_size= 2.0e-6;
+	double NN 		= 0.138e12;
+	double air_g;
 // integration parameters
-	double abs_err = 1e-6; 
-	double rel_err = 1e-6; 
-	double dt = 1e0;	 
+	double abs_err = 1e-6;
+	double rel_err = 1e-6;
+	double dt = 1e0;
 	double tend = 200.0;
 // Realizability
 	bool realizabilityCheck = false; 	// switch for realizability
 // 2nodes vs meanDiameter
-	std::string bubbleMode = "mean radius"; 	// mean radius, two nodes 
+	std::string bubbleMode = "mean radius"; 	// mean radius, two nodes
 	bool apparentViscosity = false;
 	bool kinetics_basf = true;

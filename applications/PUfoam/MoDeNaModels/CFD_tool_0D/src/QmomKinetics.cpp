@@ -600,6 +600,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
         {
             dVdt_1[0] = 0.0;
         }
+        dVdt_1[1] = dVdt_1[0];
         dVdt_2[0] = (G2*RR*T)/(p_2);
 		// dVdt_2[1] = (G2*RR*T)/(p_2);
         // dVdt_2 = (G2*RR*T)/(p_2) - ((4.0*M_PI*pow(R,3.0))/(3.0*p_2))*(dpdt[0]+dpdt[1]) + ((4.0*M_PI*pow(R,3))/(max((3.0*T),1.0e-6)))*dydt[2];
@@ -607,6 +608,8 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
         {
             dVdt_2[0] = 0.0;
         }
+        dVdt_2[1] = dVdt_2[0];
+
 		// printf("%g %g\n", dVdt_1[0],dVdt_2[0]);
 		// printf("%i\n", nNodes);
 		// printf("%g %g\n", vi[0],vi[1]);
@@ -702,7 +705,7 @@ int main(int argc, char **argv)
     ofstream file;
     file.open("resultsKinetics.txt");
     file.setf(ios::scientific | ios::showpoint);
-    cout.precision(6);
+    cout.precision(8);
     cout.setf(ios::fixed | ios::showpoint);
 
     file << setw(12) << "t" << setw(12) << "Catalyst_1"
