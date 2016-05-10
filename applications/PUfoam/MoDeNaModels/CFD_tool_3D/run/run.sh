@@ -11,6 +11,6 @@ cp ../case.foam ./
 blockMesh
 setFields
 rm -fv log
-echo "PUFoam is running..."
-${FOAM_USER_APPBIN}/PUFoam >& log
+echo "MODENAFoam is running..."
+${FOAM_USER_APPBIN}/MODENAFoam >& log
 echo "Done."

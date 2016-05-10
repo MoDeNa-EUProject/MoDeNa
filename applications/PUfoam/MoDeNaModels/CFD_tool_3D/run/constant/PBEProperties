@@ -19,5 +19,5 @@ PBESwitch   on;
 PBEMethod   QMOM;
 nNodes      2;
 bubbleGrowthSurrogateSwitch on;
-bubbleGrowthMode "mean radius"
+bubbleGrowthMode "meanRadius";
 // ************************************************************************* //
