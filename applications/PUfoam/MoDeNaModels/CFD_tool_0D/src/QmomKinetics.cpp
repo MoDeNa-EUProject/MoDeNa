@@ -478,7 +478,9 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
     }
 
     PDA(we, vi, mom, nNodes);
-
+    // for (int j = 0; j < 2*nNodes; j++){
+    //     cout << "mom[" << j << "] = " << mom[j] << endl;
+    // }
 	Lm 			= LMax(T);
     // calling the surogate models for bubble growth rates.
     size_t Tbblgr1pos               = modena_model_inputs_argPos(bblgr1, "T");
@@ -513,6 +515,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
         int     ret_bblgr1[nNodes], ret_bblgr2[nNodes];
         for (int i = 0; i < nNodes; i++)
         {
+            // cout << endl;
             // cout << "v[" << i << "] = " << vi[i] << endl;
             // cout << "we[" << i << "] = " << we[i] << endl;
             nodeRadii[i] = nodeRadius(vi[i]);
@@ -525,6 +528,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
             modena_inputs_set(inputs_bblgr1, p_1bblgr1pos, p_1);
             // call the bblgr1 model
             ret_bblgr1[i]       = modena_model_call (bblgr1, inputs_bblgr1, outputs_bblgr1);
+            // cout << "ret_bblgr1[" << i << "] = " << ret_bblgr1[i] << endl;
             radiusGrowthBA[i]   = modena_outputs_get(outputs_bblgr1, 0);
             // cout << "radiusGrowthBA[" << i << "] = " << radiusGrowthBA[i] << endl;
             // set input vector
@@ -535,7 +539,14 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
             modena_inputs_set(inputs_bblgr2, p_2bblgr2pos, p_2);
             // call the bblgr2 model
             ret_bblgr2[i]       = modena_model_call (bblgr2, inputs_bblgr2, outputs_bblgr2);
+            // cout << "ret_bblgr2[" << i << "] = " << ret_bblgr2[i] << endl;
             radiusGrowthCO2[i]  = modena_model_call (bblgr2, inputs_bblgr2, outputs_bblgr2);
+            // cout << "radiusGrowthCO2[" << i << "] = " << radiusGrowthCO2[i] << endl;
+
+            if(modena_error_occurred())
+            {
+                cout << modena_error() << endl;
+            }
             // cout << "radiusGrowthCO2[" << i << "] = " << radiusGrowthCO2[i] << endl;
             volumeGrowthBA[i]   = (radiusGrowthBA[i]*RR*T)/(p_1);
             volumeGrowthCO2[i]  = (radiusGrowthCO2[i]*RR*T)/(p_2);
@@ -705,7 +716,7 @@ int main(int argc, char **argv)
     ofstream file;
     file.open("resultsKinetics.txt");
     file.setf(ios::scientific | ios::showpoint);
-    cout.precision(8);
+    cout.precision(20);
     cout.setf(ios::fixed | ios::showpoint);
 
     file << setw(12) << "t" << setw(12) << "Catalyst_1"

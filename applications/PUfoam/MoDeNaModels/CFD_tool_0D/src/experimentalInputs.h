@@ -132,10 +132,10 @@
 	double abs_err = 1e-6;
 	double rel_err = 1e-6;
 	double dt = 1e0;
-	double tend = 200.0;
+	double tend = 200;
 // Realizability
 	bool realizabilityCheck = false; 	// switch for realizability
 // 2nodes vs meanDiameter
-	std::string bubbleMode = "mean radius"; 	// mean radius, two nodes
+	std::string bubbleMode = "two nodes"; 	// mean radius, two nodes
 	bool apparentViscosity = false;
-	bool kinetics_basf = true;
+	bool kinetics_basf = false;

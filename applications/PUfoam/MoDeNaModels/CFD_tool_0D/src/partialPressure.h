@@ -53,7 +53,7 @@ double bubbleRadius (const double m0, const double m1)
 
 double nodeRadius(const double &v)
 {
-    return (pow((6.0*v/M_PI),1/3));
+    return (pow((6.0*v/M_PI),1.0/3));
 }
 double partialPressureBA(const state_type &y)
 {
