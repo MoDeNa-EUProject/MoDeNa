@@ -3,38 +3,83 @@
 !! @author    Pavel Ferkl
 !! @ingroup   bblgr
 module tests
-    use model
+    use foaming_globals_m
+    use constants
+    use in_out, only:set_paths,read_inputs,load_old_results
+    use integration, only:bblpreproc,bblinteg
     implicit none
     private
-    public onegrowth
+    public onegrowth,eta_rm,bub_vf,secondgrowth
 contains
 !********************************BEGINNING*************************************
-!> simulates one growth of a bubble
+!> simulates growth of a single bubble
+!! you must set firstrun variable before calling this subroutine
+!! if firstrun==.true.:
+!!     no need to set anything
+!! if firstrun==.false.:
+!!     set tend
+!!     set bub_rad
+!!     set bub_inx
 subroutine onegrowth
-    !HORNET windows
-!    character(len=99) :: fileplacein='C:\Pavel\Dropbox\src\bubblegrowth_src\'
-    !HORNET linux
-!    character(len=99) :: fileplacein='/home/me/Dropbox/src/bubblegrowth_src/'
-    !laptop windows
-   ! character(len=99) :: fileplacein=&
-   !      'C:\Users\pavel\Dropbox\src\bubblegrowth_src\'
-!    character(len=99) :: fileplacein='./' !current folder
-    character(len=99) :: fileplacein='../',& !modena
-        fileplaceout='../results/',& !modena
-        inputs='inputs.in',outputs_1d='outputs_1d.out',&
-        outputs_GR='outputs_GR.out',outputs_GR_c='outputs_GR_c.out',&
-        outputs_GR_p='outputs_GR_p.out',spar='GR_par.dat',concloc
-    concloc=fileplaceout
-    inputs=TRIM(ADJUSTL(fileplacein))//TRIM(ADJUSTL(inputs))
-    outputs_1d=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_1d))
-    outputs_GR=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_GR))
-    outputs_GR_c=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_GR_c))
-    outputs_GR_p=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_GR_p))
-    spar=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(spar))
-    call read_inputs(inputs)
-!    call save_surrogate_parameters(spar)
+    call set_paths
+    call read_inputs
     call bblpreproc
-    call bblinteg(outputs_1d,outputs_GR,outputs_GR_c,outputs_GR_p,concloc)
+    call bblinteg
 end subroutine onegrowth
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> simulates growth of a single bubble
+!! uses precalculated evolution of bubble radius to calculate bubble pressure
+subroutine secondgrowth
+    use globals
+    ! prepare to work with files
+    call set_paths
+    ! obtain tend and clean after yourself
+    firstrun=.true.
+    call read_inputs
+    deallocate(D,cbl,xgas,KH,Mbl,&
+        dHv,mb,mb2,mb3,avconc,pressure,&
+        diff_model,sol_model,cpblg,cpbll,&
+        wblpol,D0)
+    ! feed results to function Rb(t)
+    call load_old_results
+    bub_inx=1
+    ! simulation
+    firstrun=.false.
+    call onegrowth
+end subroutine secondgrowth
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> viscosity of reaction mixture as function of time
+real(dp) function eta_rm(t)
+    use interpolation
+    real(dp) :: t
+    integer :: n
+    integer :: ni=1   !number of points, where we want to interpolate
+    real(dp) :: xi(1)   !x-values of points, where we want to interpolate
+    real(dp) :: yi(1)   !interpolated y-values
+    xi(1)=t
+    call pwl_interp_1d ( size(etat(:,1)), etat(:,1), etat(:,2), ni, xi, yi )
+    eta_rm=yi(1)
+endfunction eta_rm
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> volume fraction of bubbles as function of time
+real(dp) function bub_vf(t)
+    use interpolation
+    real(dp) :: t
+    integer :: ni=1   !number of points, where we want to interpolate
+    real(dp) :: xi(1)   !x-values of points, where we want to interpolate
+    real(dp) :: yi(1)   !interpolated y-values
+    xi(1)=t
+    call pwl_interp_1d ( size(port(:,1)), port(:,1), port(:,2), ni, xi, yi )
+    bub_vf=yi(1)
+endfunction bub_vf
 !***********************************END****************************************
 end module tests

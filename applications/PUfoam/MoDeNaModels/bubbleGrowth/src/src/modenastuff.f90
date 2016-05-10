@@ -4,73 +4,63 @@
 !! @author    Pavel Ferkl
 !! @ingroup   bblgr
 module modenastuff
-    use in_out
+    use globals
     use iso_c_binding
     use fmodena
     implicit none
+    private
     integer(c_int) :: ret
-    integer(c_size_t) :: viscTpos
-    integer(c_size_t) :: viscXPos
-    integer(c_size_t) :: rhopTPos
-    integer(c_size_t) :: rhopXOHPos
-    integer(c_size_t) :: itensTPos
-    integer(c_size_t) :: diffTPos(2)
-    integer(c_size_t) :: solTPos(2)
-    integer(c_size_t) :: solXgasPos(2)
-    integer(c_size_t) :: solXmdiPos(2)
-    integer(c_size_t) :: solXpolyolPos(2)
-    integer(c_size_t) :: kinNCOPos
-    integer(c_size_t) :: kinOHPos
-    integer(c_size_t) :: kinH2OPos
-    integer(c_size_t) :: kinCO2Pos
-    integer(c_size_t) :: kinPentanePos
-    integer(c_size_t) :: kinPolymerPos
-    integer(c_size_t) :: kinPolymerBlowPos
-    integer(c_size_t) :: kinUreaPos
-    integer(c_size_t) :: kinR1Pos
-    integer(c_size_t) :: kinRmassPos
-    integer(c_size_t) :: kinRvolPos
-    integer(c_size_t) :: kinRtempPos
-    integer(c_size_t) :: kinSourceNCOPos
-    integer(c_size_t) :: kinSourceOHPos
-    integer(c_size_t) :: kinSourceH2OPos
-    integer(c_size_t) :: kinSourceCO2Pos
-    integer(c_size_t) :: kinSourcePentanePos
-    integer(c_size_t) :: kinSourcePolymerPos
-    integer(c_size_t) :: kinSourcePolymerBlowPos
-    integer(c_size_t) :: kinSourceUreaPos
-    integer(c_size_t) :: kinSourceR1Pos
-    integer(c_size_t) :: kinSourceRmassPos
-    integer(c_size_t) :: kinSourceRvolPos
-    integer(c_size_t) :: kinSourceRtempPos
-    integer(c_size_t) :: kinInputsPos(20)
-    integer(c_size_t) :: kinOutputsPos(20)
-    type(c_ptr) :: viscModena = c_null_ptr
-    type(c_ptr) :: viscInputs = c_null_ptr
-    type(c_ptr) :: viscOutputs = c_null_ptr
-    type(c_ptr) :: rhopModena = c_null_ptr
-    type(c_ptr) :: rhopInputs = c_null_ptr
-    type(c_ptr) :: rhopOutputs = c_null_ptr
-    type(c_ptr) :: itensModena = c_null_ptr
-    type(c_ptr) :: itensInputs = c_null_ptr
-    type(c_ptr) :: itensOutputs = c_null_ptr
-    type(c_ptr) :: diffModena(2) = c_null_ptr
-    type(c_ptr) :: diffInputs(2) = c_null_ptr
-    type(c_ptr) :: diffOutputs(2) = c_null_ptr
-    type(c_ptr) :: solModena(2) = c_null_ptr
-    type(c_ptr) :: solInputs(2) = c_null_ptr
-    type(c_ptr) :: solOutputs(2) = c_null_ptr
-    type(c_ptr) :: kinModena = c_null_ptr
-    type(c_ptr) :: kinInputs = c_null_ptr
-    type(c_ptr) :: kinOutputs = c_null_ptr
-    character(len=3) gasname(2)
+    integer(c_size_t) :: &
+        viscTpos,viscXPos,&
+        rhopTPos,rhopXOHPos,&
+        itensTPos,&
+        diffTPos(2),&
+        solTPos(2),solXgasPos(2),solXmdiPos(2),solXpolyolPos(2),&
+        kinInputsPos(20),kinOutputsPos(20)
+    type(c_ptr) :: &
+        viscModena = c_null_ptr,&
+        viscInputs = c_null_ptr,&
+        viscOutputs = c_null_ptr,&
+        rhopModena = c_null_ptr,&
+        rhopInputs = c_null_ptr,&
+        rhopOutputs = c_null_ptr,&
+        itensModena = c_null_ptr,&
+        itensInputs = c_null_ptr,&
+        itensOutputs = c_null_ptr,&
+        diffModena(2) = c_null_ptr,&
+        diffInputs(2) = c_null_ptr,&
+        diffOutputs(2) = c_null_ptr,&
+        solModena(2) = c_null_ptr,&
+        solInputs(2) = c_null_ptr,&
+        solOutputs(2) = c_null_ptr,&
+        kinModena = c_null_ptr,&
+        kinInputs = c_null_ptr,&
+        kinOutputs = c_null_ptr
+    public ret,&
+        createModenaModels,destroyModenaModels,&
+        viscTpos,viscXPos,&
+        rhopTPos,rhopXOHPos,&
+        itensTPos,&
+        diffTPos,&
+        solTPos,solXgasPos,solXmdiPos,solXpolyolPos,&
+        kinInputsPos,kinOutputsPos,&
+        viscModena,viscInputs,viscOutputs,&
+        rhopModena,rhopInputs,rhopOutputs,&
+        itensModena,itensInputs,itensOutputs,&
+        diffModena,diffInputs,diffOutputs,&
+        solModena,solInputs,solOutputs,&
+        kinModena,kinInputs,kinOutputs
 contains
 !********************************BEGINNING*************************************
 !> creates Modena models
 subroutine createModenaModels
     integer :: i
+    character(len=3) gasname(2)
     if (visc_model==3) then
         viscModena = modena_model_new (c_char_"polymerViscosity"//c_null_char);
+        if (modena_error_occurred()) then
+            call exit(modena_error())
+        endif
         viscInputs = modena_inputs_new (viscModena);
         viscOutputs = modena_outputs_new (viscModena);
         viscTpos = modena_model_inputs_argPos(viscModena, &
@@ -82,6 +72,9 @@ subroutine createModenaModels
     if (rhop_model==2) then
         rhopModena = modena_model_new (&
             c_char_"density_reaction_mixture"//c_null_char);
+        if (modena_error_occurred()) then
+            call exit(modena_error())
+        endif
         rhopInputs = modena_inputs_new (rhopModena);
         rhopOutputs = modena_outputs_new (rhopModena);
         rhopTpos = modena_model_inputs_argPos(rhopModena, &
@@ -93,103 +86,109 @@ subroutine createModenaModels
     if (itens_model==2) then
         itensModena = modena_model_new (&
             c_char_"SurfaceTension[A=CO2,B=PU]"//c_null_char);
+        if (modena_error_occurred()) then
+            call exit(modena_error())
+        endif
         itensInputs = modena_inputs_new (itensModena);
         itensOutputs = modena_outputs_new (itensModena);
         itensTpos = modena_model_inputs_argPos(&
             itensModena, c_char_"T"//c_null_char);
         call modena_model_argPos_check(itensModena)
     endif
-    if (diff_model(1)==2) diffModena(1) = modena_model_new (&
-        c_char_"gas_diffusivity[A=CyP]"//c_null_char);
-    if (diff_model(2)==2) diffModena(2) = modena_model_new (&
-        c_char_"gas_diffusivity[A=CO2]"//c_null_char);
+    if (co2_pos==2) then
+        gasname(1)="CyP"
+        gasname(2)="CO2"
+    elseif (co2_pos==1) then
+        gasname(2)="CyP"
+        gasname(1)="CO2"
+    else
+        stop 'CO2 position must be 1 or 2'
+    endif
     do i=1,ngas
         if (diff_model(i)==2) then
+            diffModena(i) = modena_model_new (&
+                c_char_"gas_diffusivity[A="//gasname(i)//"]"//c_null_char);
+            if (modena_error_occurred()) then
+                call exit(modena_error())
+            endif
             diffInputs(i) = modena_inputs_new (diffModena(i));
             diffOutputs(i) = modena_outputs_new (diffModena(i));
             diffTpos(i) = modena_model_inputs_argPos(diffModena(i), &
                 c_char_"T"//c_null_char);
             call modena_model_argPos_check(diffModena(i))
         endif
-    enddo
-    gasname(1)="CyP"
-    gasname(2)="CO2"
-    if (sol_model(1)==2) solModena(1) = modena_model_new (&
-        c_char_"Solubility[A=CyP,B=3]"//c_null_char);
-    if (sol_model(2)==2) solModena(1) = modena_model_new (&
-        c_char_"Solubility[A=CO2,B=3]"//c_null_char);
-    do i=1,ngas
+        if (sol_model(i)==1) then
+            solModena(i) = modena_model_new (&
+                c_char_"SolubilityCO2Baser"//c_null_char);
+            if (modena_error_occurred()) then
+                call exit(modena_error())
+            endif
+            solInputs(i) = modena_inputs_new (solModena(i));
+            solOutputs(i) = modena_outputs_new (solModena(i));
+            solTpos(i) = modena_model_inputs_argPos(solModena(i), &
+                c_char_"T"//c_null_char);
+            call modena_model_argPos_check(solModena(i))
+        endif
         if (sol_model(i)==2) then
+            solModena(i) = modena_model_new (&
+                c_char_"Solubility[A="//gasname(i)//",B=3]"//c_null_char);
+            if (modena_error_occurred()) then
+                call exit(modena_error())
+            endif
             solInputs(i) = modena_inputs_new (solModena(i));
             solOutputs(i) = modena_outputs_new (solModena(i));
             solTpos(i) = modena_model_inputs_argPos(solModena(i), &
                 c_char_"T"//c_null_char);
             solXgasPos(i) = modena_model_inputs_argPos(solModena(i), &
-                c_char_"xl["//gasname//"]"//c_null_char);
+                c_char_"xl["//gasname(i)//"]"//c_null_char);
             solXmdiPos(i) = modena_model_inputs_argPos(solModena(i), &
                 c_char_"xl[mdi]"//c_null_char);
             solXpolyolPos(i) = modena_model_inputs_argPos(solModena(i), &
                 c_char_"xl[polyol]"//c_null_char);
             call modena_model_argPos_check(solModena(i))
         endif
+        if (sol_model(i)==3) then
+            solModena(i) = modena_model_new (&
+                c_char_"SolubilityPentGupta"//c_null_char);
+            if (modena_error_occurred()) then
+                call exit(modena_error())
+            endif
+            solInputs(i) = modena_inputs_new (solModena(i));
+            solOutputs(i) = modena_outputs_new (solModena(i));
+            solTpos(i) = modena_model_inputs_argPos(solModena(i), &
+                c_char_"T"//c_null_char);
+            call modena_model_argPos_check(solModena(i))
+        endif
+        if (sol_model(i)==4) then
+            solModena(i) = modena_model_new (&
+                c_char_"SolubilityPentWinkler"//c_null_char);
+            if (modena_error_occurred()) then
+                call exit(modena_error())
+            endif
+            solInputs(i) = modena_inputs_new (solModena(i));
+            solOutputs(i) = modena_outputs_new (solModena(i));
+            solTpos(i) = modena_model_inputs_argPos(solModena(i), &
+                c_char_"T"//c_null_char);
+            call modena_model_argPos_check(solModena(i))
+        endif
+        if (sol_model(i)==6) then
+            solModena(i) = modena_model_new (&
+                c_char_"SolubilityR11Baser"//c_null_char);
+            if (modena_error_occurred()) then
+                call exit(modena_error())
+            endif
+            solInputs(i) = modena_inputs_new (solModena(i));
+            solOutputs(i) = modena_outputs_new (solModena(i));
+            solTpos(i) = modena_model_inputs_argPos(solModena(i), &
+                c_char_"T"//c_null_char);
+            call modena_model_argPos_check(solModena(i))
+        endif
     enddo
-    if (kin_model==2) then
-        kinModena = modena_model_new (c_char_"simpleKinetics"//c_null_char);
-        kinInputs = modena_inputs_new (kinModena);
-        kinOutputs = modena_outputs_new (kinModena);
-
-        kinNCOPos = modena_model_inputs_argPos(kinModena, &
-            c_char_"'EG_NCO'"//c_null_char);
-        kinOHPos = modena_model_inputs_argPos(kinModena, &
-            c_char_"'EG_OH'"//c_null_char);
-        kinH2OPos = modena_model_inputs_argPos(kinModena, &
-            c_char_"'H2O'"//c_null_char);
-        kinCO2Pos = modena_model_inputs_argPos(kinModena, &
-            c_char_"'CO2'"//c_null_char);
-        kinPentanePos = modena_model_inputs_argPos(kinModena, &
-            c_char_"'PENTANE'"//c_null_char);
-        kinPolymerPos = modena_model_inputs_argPos(kinModena, &
-            c_char_"'POLYMER'"//c_null_char);
-        kinPolymerBlowPos = modena_model_inputs_argPos(kinModena, &
-            c_char_"'POLMERBLOW'"//c_null_char);
-        kinUreaPos = modena_model_inputs_argPos(kinModena, &
-            c_char_"'UREA'"//c_null_char);
-        kinR1Pos = modena_model_inputs_argPos(kinModena, &
-            c_char_"'R_1'"//c_null_char);
-        kinRmassPos = modena_model_inputs_argPos(kinModena, &
-            c_char_"'R_1_mass'"//c_null_char);
-        kinRvolPos = modena_model_inputs_argPos(kinModena, &
-            c_char_"'R_1_vol'"//c_null_char);
-        kinRtempPos = modena_model_inputs_argPos(kinModena, &
-            c_char_"'R_1_temp'"//c_null_char);
-
-        kinSourceNCOPos = modena_model_outputs_argPos(kinModena, &
-            c_char_"source_EG_NCO"//c_null_char);
-        kinSourceOHPos = modena_model_outputs_argPos(kinModena, &
-            c_char_"source_EG_OH"//c_null_char);
-        kinSourceH2OPos = modena_model_outputs_argPos(kinModena, &
-            c_char_"source_H2O"//c_null_char);
-        kinSourceCO2Pos = modena_model_outputs_argPos(kinModena, &
-            c_char_"source_CO2"//c_null_char);
-        kinSourcePentanePos = modena_model_outputs_argPos(kinModena, &
-            c_char_"source_PENTANE"//c_null_char);
-        kinSourcePolymerPos = modena_model_outputs_argPos(kinModena, &
-            c_char_"source_POLYMER"//c_null_char);
-        kinSourcePolymerBlowPos = modena_model_outputs_argPos(kinModena, &
-            c_char_"source_POLMERBLOW"//c_null_char);
-        kinSourceUreaPos = modena_model_outputs_argPos(kinModena, &
-            c_char_"source_UREA"//c_null_char);
-        kinSourceR1Pos = modena_model_outputs_argPos(kinModena, &
-            c_char_"source_R_1"//c_null_char);
-        kinSourceRmassPos = modena_model_outputs_argPos(kinModena, &
-            c_char_"source_R_1_mass"//c_null_char);
-        kinSourceRvolPos = modena_model_outputs_argPos(kinModena, &
-            c_char_"source_R_1_vol"//c_null_char);
-        kinSourceRtempPos = modena_model_outputs_argPos(kinModena, &
-            c_char_"source_R_1_temp"//c_null_char);
-        call modena_model_argPos_check(kinModena)
-    elseif (kin_model==4) then
+    if (kin_model==4) then
         kinModena = modena_model_new (c_char_"RF-1-public"//c_null_char);
+        if (modena_error_occurred()) then
+            call exit(modena_error())
+        endif
         kinInputs = modena_inputs_new (kinModena);
         kinOutputs = modena_outputs_new (kinModena);
         kinInputsPos(1) = modena_model_inputs_argPos(kinModena, &
@@ -305,7 +304,7 @@ subroutine destroyModenaModels
         endif
     enddo
     do i=1,ngas
-        if (sol_model(i)==2) then
+        if (sol_model(i)==2 .or. sol_model(i) == 6) then
             call modena_inputs_destroy (solInputs(i));
             call modena_outputs_destroy (solOutputs(i));
             call modena_model_destroy (solModena(i));

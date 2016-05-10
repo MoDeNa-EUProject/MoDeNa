@@ -1,5 +1,5 @@
 !> @file
-!! stores parameters and commonly used variables as globals
+!! stores physical constants and floating point precision
 !! @author    Pavel Ferkl
 !! @ingroup   bblgr
 module constants

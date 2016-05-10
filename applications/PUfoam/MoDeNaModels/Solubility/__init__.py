@@ -35,7 +35,4 @@ Authors
 
 Contributors
 '''
-import Solubility
-# from Solubility import m_solubilityCO2
-# from Solubility import m_solubilityAir
-# from Solubility import m_solubilityCyclopentane
+from Solubility import *

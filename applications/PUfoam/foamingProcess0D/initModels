@@ -43,8 +43,10 @@ from fireworks import LaunchPad
 from fireworks.core.rocket_launcher import rapidfire
 
 import polymerViscosity
-import SurfaceTension
+# import SurfaceTension
 import PolymerDensity_units
+import Kinetics
+import Solubility
 
 # set up the LaunchPad and reset it
 launchpad = LaunchPad(**MODENA_PARSED_URI)

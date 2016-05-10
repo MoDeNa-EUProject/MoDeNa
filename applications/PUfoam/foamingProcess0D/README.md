@@ -7,7 +7,28 @@ kinetics, temperature, foam density, bubble size distribution, etc.
 
 ## Installation
 Several models need to be compiled. C++ and Fortran compilers are required.
-Execute following command:
+
+Install boost library
+```
+sudo apt-get install libboost-dev
+```
+Install PETSc globally:
+```
+sudo mkdir /opt/petsc
+sudo chown user:group /opt/petsc
+cd /opt/petsc
+wget http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-3.4.5.tar.gz
+tar -xzf petsc-3.4.5.tar.gz
+cd petsc-3.4.5
+./configure --with-cc=gcc --with-fc=gfortran --download-f-blas-lapack --download-mpich --download-scalapak=yes
+make
+```
+Export variables in `.bashrc`
+```
+export PETSC_DIR=/opt/petsc/petsc-3.4.5
+export PETSC_ARCH=arch-linux2-c-debug
+```
+Compile the models using:
 ```
 ./build
 ```
@@ -16,8 +37,6 @@ Execute following command:
 Some results can be easily visualized using [VEUSZ](http://home.gna.org/veusz/)
 program. It can be installed in Ubuntu using:
 ```
-sudo add-apt-repository ppa:jeremysanders/ppa
-sudo apt-get update
 sudo apt-get install veusz
 ```
 
