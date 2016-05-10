@@ -3,13 +3,19 @@
 set -x
 
 # Go to eigen directory and make dynamic libraries, then move them to $FOAM_USER_LIBBIN
-cd eigen	
+cd eigen
+if [ ! -d "obj" ]; then
 mkdir obj
+fi
 cd obj
+if [ ! -d "dyn" ]; then
 mkdir dyn
-mkdir sta 
+fi
+if [ ! -d "sta" ]; then
+mkdir sta
+fi
 cd ..
-make dynamic 
+make dynamic
 mkdir -p $FOAM_USER_LIBBIN
 mv libeigen.so $FOAM_USER_LIBBIN
 

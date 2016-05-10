@@ -11,13 +11,10 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      PBEProperties;
+    object      simulationMode;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-PBESwitch   on;
-PBEMethod   QMOM;
-nNodes      2;
-bubbleGrowthSurrogateSwitch on;
-bubbleGrowthMode "meanRadius";
+simulationTarget   mold-filling;
+
 // ************************************************************************* //

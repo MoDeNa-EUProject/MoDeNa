@@ -11,13 +11,13 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      PBEProperties;
+    object      speciesProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-PBESwitch   on;
-PBEMethod   QMOM;
-nNodes      2;
-bubbleGrowthSurrogateSwitch on;
-bubbleGrowthMode "meanRadius";
-// ************************************************************************* //
+speciesSwitch    off; 
+speciesNumbers    0;
+
+speciesLabels
+{
+}

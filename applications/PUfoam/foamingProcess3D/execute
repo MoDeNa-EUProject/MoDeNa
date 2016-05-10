@@ -1,0 +1,5 @@
+#!/bin/sh
+./initModels
+./workflow1
+./initBubbleGrowth
+./workflow2

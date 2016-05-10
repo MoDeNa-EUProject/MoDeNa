@@ -11,13 +11,10 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      PBEProperties;
+    object      rheologyProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-PBESwitch   on;
-PBEMethod   QMOM;
-nNodes      2;
-bubbleGrowthSurrogateSwitch on;
-bubbleGrowthMode "meanRadius";
+viscosityModel   constant;
+
 // ************************************************************************* //

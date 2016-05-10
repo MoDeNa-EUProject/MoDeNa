@@ -1,23 +1,49 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  2.1.0                                 |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|  \\    /   O peration     | Version:  2.1.x                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
-    version     2.2;
+    version     2.0;
     format      ascii;
-    class       dictionary;
-    location    "constant";
-    object      PBEProperties;
+    class       volScalarField;
+    object      mFour;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-PBESwitch   on;
-PBEMethod   QMOM;
-nNodes      2;
-bubbleGrowthSurrogateSwitch on;
-bubbleGrowthMode "meanRadius";
+
+dimensions      [0 0 0 0 0 0 0];
+
+internalField   uniform 0; 
+
+boundaryField
+{
+   Wall       
+    {
+        type            zeroGradient;
+    }
+
+    atmosphere      
+    {
+	type		zeroGradient;
+    }
+
+axis1
+	{
+		type    symmetryPlane;
+	}
+axis2
+	{
+		type    symmetryPlane;
+	}
+    frontAndBack    
+    {
+        type            empty;
+    }
+}
+
+
 // ************************************************************************* //
