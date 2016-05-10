@@ -1,0 +1,31 @@
+{
+    "upperBoundary": {
+        "temperature": 2.840000e+02,
+        "emittance": 0.9
+    },
+    "lowerBoundary": {
+        "temperature": 2.820000e+02,
+        "emittance": 0.9
+    },
+    "gasComposition": {
+        "CO2": 0.3,
+        "Air": 0.3,
+        "Cyclopentane": 0.4
+    },
+    "gasDensity": 1.2,
+    "solidDensity": 1.1e3,
+    "porosity": 9.678182e-01,
+    "cellSize": 5.100000e-04,
+    "morphologyInput": 2,
+    "wallThickness": 0.5e-6,
+    "strutContent": 6.258000e-01,
+    "strutSize": 1e-6,
+    "foamThickness": 3e-2,
+    "spatialDiscretization": 200,
+    "useWallThicknessDistribution": true,
+    "wallThicknessStandardDeviation": 0.2,
+    "numberOfGrayBoxes": 10,
+    "numericalEffectiveConductivity": false,
+    "structureName": "PeriodicRVEBox-ascii.vtk",
+    "testMode": false
+}

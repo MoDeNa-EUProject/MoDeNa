@@ -1,3 +1,4 @@
 *.out
 *.in
 *.vtk
+*.json

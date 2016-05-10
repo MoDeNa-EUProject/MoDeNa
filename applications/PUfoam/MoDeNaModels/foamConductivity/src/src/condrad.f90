@@ -34,7 +34,7 @@ subroutine equcond
     allocate(tmatrix(ldab,nz),gmatrix(ldab,nbox*nz),tipiv(nz),gipiv(nbox*nz),&
         trhs(nz),grhs(nbox*nz),tvec(nz),qcon(nz),qrad(nz),qtot(nz),gqrad(nz))
     forall (i=1:nz)
-        tvec(i)=t1+(i-1)*(t2-t1)/(nz-1) !initial temperature profile
+        tvec(i)=temp1+(i-1)*(temp2-temp1)/(nz-1) !initial temperature profile
     end forall
     call make_tmatrix
     call dgbtrf(nz,nz,kl,ku,tmatrix,ldab,tipiv,info)
@@ -50,7 +50,7 @@ subroutine equcond
         if (res<tol) exit
     enddo
     call heatflux
-    eqc=sum(qtot)/nz*dfoam/(t1-t2)
+    eqc=sum(qtot)/nz*dfoam/(temp1-temp2)
     rcontr=sum(qrad)/sum(qtot)
     gcontr=(1-rcontr)*kgas/(kgas+ksol)
     scontr=(1-rcontr)*ksol/(kgas+ksol)
@@ -122,10 +122,10 @@ subroutine make_grhs
             grhs(k)=12*effn**2*sigmab*alpha(j,i)*tvec(j)**4*dz*fbepbox(i)
         enddo
         j=(i-1)*nz+1
-        grhs(j)=grhs(j) + 6*emi1/(2-emi1)*alpha(1,i)*effn**2*sigmab*t1**4/&
+        grhs(j)=grhs(j) + 6*emi1/(2-emi1)*alpha(1,i)*effn**2*sigmab*temp1**4/&
             (alpha(1,i)+sigma(1,i))*fbepbox(i)
         j=nz*i
-        grhs(j)=grhs(j) + 6*emi2/(2-emi2)*alpha(nz,i)*effn**2*sigmab*t2**4/&
+        grhs(j)=grhs(j) + 6*emi2/(2-emi2)*alpha(nz,i)*effn**2*sigmab*temp2**4/&
             (alpha(nz,i)+sigma(nz,i))*fbepbox(i)
     enddo
 end subroutine make_grhs
@@ -168,8 +168,8 @@ end subroutine make_tmatrix
 subroutine make_trhs
     call make_gqrad
     trhs=gqrad
-    trhs(1)=trhs(1)+2*cond(1)*t1/dz
-    trhs(nz)=trhs(nz)+2*cond(nz)*t2/dz
+    trhs(1)=trhs(1)+2*cond(1)*temp1/dz
+    trhs(nz)=trhs(nz)+2*cond(nz)*temp2/dz
 end subroutine make_trhs
 !***********************************END****************************************
 

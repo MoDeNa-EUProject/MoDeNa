@@ -1,0 +1,45 @@
+{
+    "numberOfOutputs": 100,
+    "wallDiscretization": 5,
+    "timeStart": 8.64e4,
+    "timeEnd": 5.184e6,
+    "agingTemperature": 343.0,
+    "conductivityTemperature": 283.0,
+    "polymerDensity": 1.1e3,
+    "initialPressure": 101325.0,
+    "boundaryPressure": {
+        "Air": 101325.0,
+        "CO2": 0.0,
+        "Cyclopentane": 0.0
+    },
+    "initialComposition": {
+        "Air": 0.0,
+        "CO2": 0.99,
+        "Cyclopentane": 0.0
+    },
+    "foamHalfThickness": 1.5e-2,
+    "wallThickness": 2.04e-6,
+    "cellSize": 380e-6,
+    "strutContent": 0.62,
+    "foamDensity": 37.2,
+    "solubilityModel": {
+        "Air": 0,
+        "CO2": 0,
+        "Cyclopentane": 0
+    },
+    "solubility": {
+        "Air": 4.75460825687e-07,
+        "CO2": 7.77088795e-06,
+        "Cyclopentane": 6.4163295e-05
+    },
+    "diffusivityModel": {
+        "Air": 1,
+        "CO2": 1,
+        "Cyclopentane": 1
+    },
+    "diffusivity": {
+        "Air": 2.86627521885e-13,
+        "CO2": 1.31384643981e-12,
+        "Cyclopentane": 1.14039387641e-13
+    }
+}

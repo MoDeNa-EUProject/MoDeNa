@@ -23,7 +23,7 @@ module constants
     complex(dp), parameter :: iu=(0.0e0_dp,1.0e0_dp)       !<imaginary constant
     logical  :: &
         wdist,&               !<use wall thickness distribution
-        testing=.false.,&      !<true disables calculation of radiation
+        testMode,&            !<true disables calculation of radiation
         numcond               !<calcualte effective conductivity numerically
     character(len=80) :: &
         structureName         !<name of the file with morphology
@@ -38,12 +38,12 @@ module constants
                               !<(3 is recommended others can
                               !<have multiple solutions)
     real(dp) :: lambda,&      !<wavelength
-        t1,t2,&               !<temperatures at boundaries
+        temp1,temp2,&         !<temperatures at boundaries
         kappa2,&              !<absorption coefficient of solid
         cond1,cond2,&         !<conductivities
         n1,n2,&               !<real part of refractive indices
         k1,k2,&               !<imaginary part of refractive indices
-        rho1,rho2,&           !<densities
+        rhog,rhos,&           !<densities of gas and solid
         emi1,emi2,&           !<wall emittances
         tmean,&               !<mean temperature
         eqc,&                 !<equivalent conductivity
