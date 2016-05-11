@@ -40,9 +40,10 @@ Contributors
 import modena
 from fireworks import Firework, Workflow, LaunchPad
 from fireworks.core.rocket_launcher import rapidfire
-import CFD_tool_3D
+# import CFD_tool_3D
 from modulefinder import ModuleFinder
 from os import system
+from CFD_tool_3D import SIMULATION
 # delete old results
 system('touch results/aaa.txt') # prevents error message if there are no results
 system('rm results/*.txt')
@@ -53,7 +54,7 @@ launchpad.reset('', require_password=False)
 
 # create the individual FireWorks and Workflow
 # Source code in src/twoTanksMacroscopicProblem.C
-wf = Workflow([Firework(CFD_tool_3D.m)], {}, name="simulation")
+wf = Workflow([Firework(SIMULATION)], {}, name="simulation")
 
 # store workflow and launch it locally
 launchpad.add_wf(wf)

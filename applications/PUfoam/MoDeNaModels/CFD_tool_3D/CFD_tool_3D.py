@@ -49,17 +49,3 @@ import os
 SIMULATION = BackwardMappingScriptTask(
     script='../run/run.sh'
 )
-
-
-# set up the LaunchPad and reset it
-launchpad = LaunchPad()
-launchpad.reset('', require_password=False)
-
-# create the individual FireWorks and Workflow
-# Source code in src/twoTanksMacroscopicProblem.C
-wf = Workflow([Firework(SIMULATION)], {}, name="simulation")
-
-# store workflow and launch it locally
-launchpad.add_wf(wf)
-rapidfire(launchpad)
-

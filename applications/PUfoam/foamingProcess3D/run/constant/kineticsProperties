@@ -20,12 +20,12 @@ blowingAgent    	n-pentane;
 KineticsModel    generic;
 GellingConstants
 {
-	A_OH            1;				// m3/mol s 		
+	A_OH            1;				// m3/mol s
 	E_OH            3.514e4;		// J/mol
-	initCOH         5140;			// Initial concentration of polyol OH groups in the mixutre, mol/m3	
+	initCOH         5140;			// Initial concentration of polyol OH groups in the mixutre, mol/m3
 	initCNCO        4455;			// Initial concentration of isocianate NCO groups in the mixutre, mol/m3
 	initCW    	    671;			// Initial concentration of water in the mixture, mol/m3
-	gellingPoint    0.606; 			// the assumed gelling point, - 
+	gellingPoint    0.606; 			// the assumed gelling point, -
 
 }
 
@@ -37,8 +37,8 @@ BlowingConstants
 
 GenericConstants
 {
-	idealGasCons        		8.3145;	// J/mol K 
-	rhoPolymer          		1100.0;	// kg/m3 Density of the liquid polymer	 
+	idealGasCons        		8.3145;	// J/mol K
+	rhoPolymer          		1100.0;	// kg/m3 Density of the liquid polymer
 	rhoBlowingAgent     		751.0;	// kg.m3 Density of the blowing agent
 	molecularMassCO2   	 		44.0;	// Molecular mass of carbon dioxide, kg/kmol
 	molecularMassBlowingAgent   72.15;	// Molecular mass of blowing agent, kg/kmol
@@ -55,10 +55,10 @@ EnthalpyConstants
 {
 	deltaOH            -6.85e4;		// Reaction heat for the gelling reaction, J/mol
 	deltaW             -8.15e4;		// Reaction heat for the blowing reaction, J/mol
-	PUspecificHeat     1800.0;		// Polyurethane specific heat, J/kg K     
-	CO2specificHeat    836.6;		// CO2 specific heat, J/kg K  
+	PUspecificHeat     1800.0;		// Polyurethane specific heat, J/kg K
+	CO2specificHeat    836.6;		// CO2 specific heat, J/kg K
 	BGspecificHeat     593.0;		// Physical blowing agent in gas phase specific heat, J/kg K
 	BLspecificHeat     870.0;		// Physical blowing agent in liquid phase specific heat, J/kg K
-	latentHeat         2.0e5;		// Latent heat of blowing agent, J/kg 
+	latentHeat         2.0e5;		// Latent heat of blowing agent, J/kg
 }
 

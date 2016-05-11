@@ -13,4 +13,16 @@ setFields
 rm -fv log
 echo "MODENAFoam is running..."
 ${FOAM_USER_APPBIN}/MODENAFoam >& log
+echo "Post-processing..."
+probeLocations
+cd postProcessing/probes/0/
+for file in $(ls *);
+        do
+                sed '/^#/d' $file > $file.txt;
+        done
+ls > list
+egrep -v '*txt' list > list2
+mv list2 list
+rm -rf $(<list)
+cp *.txt ../../../../results/
 echo "Done."
