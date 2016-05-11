@@ -65,12 +65,12 @@ regions
 (
     boxToCell
     {
-        box (0 0 0) (0.01 0.01 0.01);
+        box (0 0 0) (0.1 0.02 0.01);
 
         fieldValues
         (
         volScalarFieldValue alpha.gas 0
-	    volScalarFieldValue wBA_l 0.0
+	    volScalarFieldValue wBA_l 0.057
 	    volScalarFieldValue mZero 1.0e+13	
 	    volScalarFieldValue mOne 5.2622e-6
 	    volScalarFieldValue mTwo 2.7969e-24
