@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     QmomKinetics;
+application     MODENAFoam;
 
 startFrom       startTime;
 
