@@ -315,10 +315,8 @@ if (PBESwitch)
                 {
                     for (int i = 0; i < nodes; i++)
                     {
-                        volumeGrowthBA[i] = SMALL;
-                        // growthRateBA(L_l_val,LMAX); // growth rate constant due to blowing agent
-                        volumeGrowthCO2[i]= SMALL;
-                        // growthRateCO2(CO2_l_val, wCO2_Max); // growth rate constant due to CO2
+                        volumeGrowthBA[i] = growthRateBA(L_l_val,LMAX); // growth rate constant due to blowing agent
+                        volumeGrowthCO2[i]= growthRateCO2(CO2_l_val, wCO2_Max); // growth rate constant due to CO2
                     }
                 }
 
