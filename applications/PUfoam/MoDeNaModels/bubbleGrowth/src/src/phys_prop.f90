@@ -172,6 +172,7 @@ subroutine physical_properties(temp,conv,radius)
             if(ret /= 0) then
                 call exit(ret)
             endif
+            KH(i) = modena_outputs_get(solOutputs(i), 0_c_size_t)
         case(6) !R11, Baser, 10.1002/pen.760340804
             call modena_inputs_set(solInputs(i), solTpos(i), temp)
             ret = modena_model_call(solModena(i), solInputs(i), solOutputs(i))
