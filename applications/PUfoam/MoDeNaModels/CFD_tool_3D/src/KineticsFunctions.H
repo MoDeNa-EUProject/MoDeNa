@@ -182,7 +182,7 @@ double partialPressureCO2
     double pCO2;
     if (wCO2_g == 0.0)
     {
-        pCO2 = ROOTVSMALL;
+        pCO2 = SMALL;
     }
     else
     {
@@ -206,7 +206,7 @@ double partialPressureBA
     double pBA;
     if (wBA_g == 0.0)
     {
-        pBA = ROOTVSMALL;
+        pBA = SMALL;
     }
     else
     {
