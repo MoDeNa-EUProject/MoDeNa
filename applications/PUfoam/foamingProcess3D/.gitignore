@@ -5,9 +5,7 @@
 # Various intermediate files and directories generated CMAKE
 CMakeFiles/
 build/
-run/0/
-run/constant/
-run/system/
+run/
 Makefile
 CMakeCache.txt
 cmake_install.cmake
