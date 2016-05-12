@@ -6,6 +6,8 @@
 CMakeFiles/
 build/
 run/0/
+run/constant/
+run/system/
 Makefile
 CMakeCache.txt
 cmake_install.cmake
