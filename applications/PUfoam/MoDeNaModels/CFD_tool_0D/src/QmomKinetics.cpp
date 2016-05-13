@@ -145,7 +145,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
 	double rhoPolySurrgate;
 	double beta0 	= 0.0;
     double XW, XOH;
-    
+
     // RF-1 variables
     double Catalyst_1, CE_A0, CE_A1, CE_B, CE_B2,
            CE_I0, CE_I1, CE_I2, CE_PBA, CE_Breac,
@@ -189,7 +189,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
     // XH2O        = 1.0 - (y[13]/init_H2O);
     double Rx;
     // Calling the RF-1 model
-    switch (kinMod) 
+    switch (kinMod)
     {
         case 1:
             Rx=1;
@@ -204,52 +204,6 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
             }
             break;
         case 3:
-            // inputs argPos
-            size_t Catalyst_1_Pos   = modena_model_inputs_argPos(kinetics, "'Catalyst_1'");
-            size_t CE_A0_Pos        = modena_model_inputs_argPos(kinetics, "'CE_A0'");
-            size_t CE_A1_Pos        = modena_model_inputs_argPos(kinetics, "'CE_A1'");
-            size_t CE_B_Pos         = modena_model_inputs_argPos(kinetics, "'CE_B'");
-            size_t CE_B2_Pos        = modena_model_inputs_argPos(kinetics, "'CE_B2'");
-            size_t CE_I0_Pos        = modena_model_inputs_argPos(kinetics, "'CE_I0'");
-            size_t CE_I1_Pos        = modena_model_inputs_argPos(kinetics, "'CE_I1'");
-            size_t CE_I2_Pos        = modena_model_inputs_argPos(kinetics, "'CE_I2'");
-            size_t CE_PBA_Pos       = modena_model_inputs_argPos(kinetics, "'CE_PBA'");
-            size_t CE_Breac_Pos     = modena_model_inputs_argPos(kinetics, "'CE_Breac'");
-            size_t CE_Areac0_Pos    = modena_model_inputs_argPos(kinetics, "'CE_Areac0'");
-            size_t CE_Areac1_Pos    = modena_model_inputs_argPos(kinetics, "'CE_Areac1'");
-            size_t CE_Ireac0_Pos    = modena_model_inputs_argPos(kinetics, "'CE_Ireac0'");
-            size_t CE_Ireac1_Pos    = modena_model_inputs_argPos(kinetics, "'CE_Ireac1'");
-            size_t CE_Ireac2_Pos    = modena_model_inputs_argPos(kinetics, "'CE_Ireac2'");
-            size_t Bulk_Pos         = modena_model_inputs_argPos(kinetics, "'Bulk'");
-            size_t R_1_Pos          = modena_model_inputs_argPos(kinetics, "'R_1'");
-            size_t R_1_mass_Pos     = modena_model_inputs_argPos(kinetics, "'R_1_mass'");
-            size_t R_1_temp_Pos     = modena_model_inputs_argPos(kinetics, "'R_1_temp'");
-            size_t R_1_vol_Pos      = modena_model_inputs_argPos(kinetics, "'R_1_vol'");
-
-            // First 20 outputs (source terms)
-            size_t source_Catalyst_1_Pos   = modena_model_outputs_argPos(kinetics, "source_Catalyst_1");
-            size_t source_CE_A0_Pos        = modena_model_outputs_argPos(kinetics, "source_CE_A0");
-            size_t source_CE_A1_Pos        = modena_model_outputs_argPos(kinetics, "source_CE_A1");
-            size_t source_CE_B_Pos         = modena_model_outputs_argPos(kinetics, "source_CE_B");
-            size_t source_CE_B2_Pos        = modena_model_outputs_argPos(kinetics, "source_CE_B2");
-            size_t source_CE_I0_Pos        = modena_model_outputs_argPos(kinetics, "source_CE_I0");
-            size_t source_CE_I1_Pos        = modena_model_outputs_argPos(kinetics, "source_CE_I1");
-            size_t source_CE_I2_Pos        = modena_model_outputs_argPos(kinetics, "source_CE_I2");
-            size_t source_CE_PBA_Pos       = modena_model_outputs_argPos(kinetics, "source_CE_PBA");
-            size_t source_CE_Breac_Pos     = modena_model_outputs_argPos(kinetics, "source_CE_Breac");
-            size_t source_CE_Areac0_Pos    = modena_model_outputs_argPos(kinetics, "source_CE_Areac0");
-            size_t source_CE_Areac1_Pos    = modena_model_outputs_argPos(kinetics, "source_CE_Areac1");
-            size_t source_CE_Ireac0_Pos    = modena_model_outputs_argPos(kinetics, "source_CE_Ireac0");
-            size_t source_CE_Ireac1_Pos    = modena_model_outputs_argPos(kinetics, "source_CE_Ireac1");
-            size_t source_CE_Ireac2_Pos    = modena_model_outputs_argPos(kinetics, "source_CE_Ireac2");
-            size_t source_Bulk_Pos         = modena_model_outputs_argPos(kinetics, "source_Bulk");
-            size_t source_R_1_Pos          = modena_model_outputs_argPos(kinetics, "source_R_1");
-            size_t source_R_1_mass_Pos     = modena_model_outputs_argPos(kinetics, "source_R_1_mass");
-            size_t source_R_1_temp_Pos     = modena_model_outputs_argPos(kinetics, "source_R_1_temp");
-            size_t source_R_1_vol_Pos      = modena_model_outputs_argPos(kinetics, "source_R_1_vol");
-
-            modena_model_argPos_check(kinetics);
-
             // set input vector
             modena_inputs_set(inputs_kinetics, Catalyst_1_Pos, Catalyst_1);
             modena_inputs_set(inputs_kinetics, CE_A0_Pos, CE_A0);
@@ -285,21 +239,21 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
             }
 
          // get the source terms for simpleKinetics
-            dydt[11] = 1000*modena_outputs_get(outputs_kinetics, source_Catalyst_1_Pos);
-            dydt[12] = 1000*modena_outputs_get(outputs_kinetics, source_CE_A0_Pos);
-            dydt[13] = 1000*modena_outputs_get(outputs_kinetics, source_CE_A1_Pos);
-            dydt[14] = 1000*modena_outputs_get(outputs_kinetics, source_CE_B_Pos);
-            dydt[15] = 1000*modena_outputs_get(outputs_kinetics, source_CE_B2_Pos);
-            dydt[16] = 1000*modena_outputs_get(outputs_kinetics, source_CE_I0_Pos);
-            dydt[17] = 1000*modena_outputs_get(outputs_kinetics, source_CE_I1_Pos);
-            dydt[18] = 1000*modena_outputs_get(outputs_kinetics, source_CE_I2_Pos);
-            dydt[19] = 1000*modena_outputs_get(outputs_kinetics, source_CE_PBA_Pos);
-            dydt[20] = 1000*modena_outputs_get(outputs_kinetics, source_CE_Breac_Pos);
-            dydt[21] = 1000*modena_outputs_get(outputs_kinetics, source_CE_Areac0_Pos);
-            dydt[22] = 1000*modena_outputs_get(outputs_kinetics, source_CE_Areac1_Pos);
-            dydt[23] = 1000*modena_outputs_get(outputs_kinetics, source_CE_Ireac0_Pos);
-            dydt[24] = 1000*modena_outputs_get(outputs_kinetics, source_CE_Ireac1_Pos);
-            dydt[25] = 1000*modena_outputs_get(outputs_kinetics, source_CE_Ireac2_Pos);
+            dydt[11] = modena_outputs_get(outputs_kinetics, source_Catalyst_1_Pos);
+            dydt[12] = modena_outputs_get(outputs_kinetics, source_CE_A0_Pos);
+            dydt[13] = modena_outputs_get(outputs_kinetics, source_CE_A1_Pos);
+            dydt[14] = modena_outputs_get(outputs_kinetics, source_CE_B_Pos);
+            dydt[15] = modena_outputs_get(outputs_kinetics, source_CE_B2_Pos);
+            dydt[16] = modena_outputs_get(outputs_kinetics, source_CE_I0_Pos);
+            dydt[17] = modena_outputs_get(outputs_kinetics, source_CE_I1_Pos);
+            dydt[18] = modena_outputs_get(outputs_kinetics, source_CE_I2_Pos);
+            dydt[19] = modena_outputs_get(outputs_kinetics, source_CE_PBA_Pos);
+            dydt[20] = modena_outputs_get(outputs_kinetics, source_CE_Breac_Pos);
+            dydt[21] = modena_outputs_get(outputs_kinetics, source_CE_Areac0_Pos);
+            dydt[22] = modena_outputs_get(outputs_kinetics, source_CE_Areac1_Pos);
+            dydt[23] = modena_outputs_get(outputs_kinetics, source_CE_Ireac0_Pos);
+            dydt[24] = modena_outputs_get(outputs_kinetics, source_CE_Ireac1_Pos);
+            dydt[25] = modena_outputs_get(outputs_kinetics, source_CE_Ireac2_Pos);
             dydt[26] = modena_outputs_get(outputs_kinetics, source_Bulk_Pos);
             dydt[27] = modena_outputs_get(outputs_kinetics, source_R_1_Pos);
             dydt[28] = modena_outputs_get(outputs_kinetics, source_R_1_mass_Pos);
@@ -313,12 +267,12 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
             //         dydt[i] = 0.0;
             //     }
             // }
-            dydt[0] = -dydt[15]/W_0;
-            dydt[1] = -(dydt[12] + dydt[13])/(1.92250e3 + 2.2692e3);
+            dydt[0] = -dydt[15]/(W_0/1000);
+            dydt[1] = -(dydt[12] + dydt[13])/(1.92250e3 + 2.2692e3)*1000;
             OH_0 = 1.92250e3 + 2.2692e3;
             break;
     }
-    
+
     if (kinMod == 1 || kinMod == 2)
     {
         // ODEs
@@ -340,7 +294,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
         if (dilution) {
             dydt[0]=dydt[0]/(1+y[3]*rhoPolySurrgate/rhoBL);
             dydt[1]=dydt[1]/(1+y[3]*rhoPolySurrgate/rhoBL);
-        }    
+        }
     }
 
 	switch (denMod)
@@ -375,7 +329,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
             break;
 	}
 
-	
+
 
     // call the surrogate model for rheology
     // if (apparentViscosity)
@@ -542,7 +496,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
             // call the bblgr2 model
             ret_bblgr2[i]       = modena_model_call (bblgr2, inputs_bblgr2, outputs_bblgr2);
             // cout << "ret_bblgr2[" << i << "] = " << ret_bblgr2[i] << endl;
-            radiusGrowthCO2[i]  = modena_model_call (bblgr2, inputs_bblgr2, outputs_bblgr2);
+            radiusGrowthCO2[i]  = modena_outputs_get(outputs_bblgr2, 0);
             // cout << "radiusGrowthCO2[" << i << "] = " << radiusGrowthCO2[i] << endl;
 
             if(modena_error_occurred())
@@ -570,6 +524,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
         }
 
         growthSource(sgBA, sgCO2, we, vi, nNodes, mOrder, CO2_l, L_l, T, volumeGrowthBA, volumeGrowthCO2);
+		// printf("%g %g\n", G1,G2);
     }
     else if (bubbleMode == "mean radius")
     {
@@ -695,7 +650,8 @@ int main(int argc, char **argv)
     y[12]           = 1.9225;
     y[13]           = 2.2692;
     y[14]           = 0.0;
-    y[15]           = 5.462e-1;
+    // y[15]           = 5.462e-1;
+	y[15]           = W_0*1e-3;
     y[16]           = 2.1979;
     y[17]           = 1.64;
     y[18]           = 1.7103;
