@@ -1,46 +1,46 @@
 {
-    "physicalBlowingAgent": "R11",
+    "physicalBlowingAgent": "n-pentane",
     "initialConditions": {
         "concentrations": {
-            "isocyanate": 3765,
-            "polyol": 3765,
-            "water": 0,
+            "isocyanate": 4455,
+            "polyol": 5140,
+            "water": 671,
             "blowingAgents": {
-                "PBL": 1241,
-                "CO2": 0
+                "PBL": 0.0,
+                "CO2": 5.5
             }
         },
-        "bubbleRadius": 10e-7,
+        "bubbleRadius": 1e-6,
         "bubbleRadiusDeviation": 1e-1,
-        "numberBubbleDensity": 0.138e12,
-        "temperature": 297
+        "numberBubbleDensity": 0.10e12,
+        "temperature": 300
     },
     "kinetics": {
-        "kineticModel": "BaserRx",
+        "kineticModel": "modena",
         "useDilution": true,
         "gellingReaction": {
-            "frequentialFactor": 1965,
-            "activationEnergy": 5.487e4,
-            "reactionEnthalpy": -7.49e4
+            "frequentialFactor": 1,
+            "activationEnergy": 3.514e4,
+            "reactionEnthalpy": -6.85e4
         },
         "blowingReaction": {
-            "frequentialFactor": 1.385e3,
-            "activationEnergy": 3.266e4,
-            "reactionEnthalpy": -8.6e4
+            "frequentialFactor": 1.050e3,
+            "activationEnergy": 2.704e4,
+            "reactionEnthalpy": -8.15e4
         }
     },
     "physicalProperties": {
         "pressure": 1.01e5,
         "blowingAgents": {
             "PBL": {
-                "molarMass": 137.37e-3,
+                "molarMass": 72.15e-3,
                 "heatCapacityInLiquidPhase": 870,
                 "heatCapacityInGaseousPhase": 593,
                 "evaporationHeat": 2e5,
-                "density": 1467,
+                "density": 751.0,
                 "diffusivityModel": 1,
                 "diffusivity": 2.4e-12,
-                "solubilityModel": 6,
+                "solubilityModel": 4,
                 "solubility": 0
             },
             "CO2": {
@@ -50,7 +50,7 @@
                 "evaporationHeat": 0,
                 "density": 0,
                 "diffusivityModel": 1,
-                "diffusivity": 4.4e-12,
+                "diffusivity": 4.4e-10,
                 "solubilityModel": 1,
                 "solubility": 1.1e-4
             }
@@ -78,18 +78,12 @@
         "meshCoarseningParameter": 1.02,
         "internalNodes": 200,
         "initialTime": 0,
-        "finalTime": 200,
-        "outerTimeSteps": 2000,
+        "finalTime": 100,
+        "outerTimeSteps": 200,
         "maxInnerTimeSteps": 5000,
         "relativeTolerance": 0,
-        "absoluteTolerance": 1e-8,
+        "absoluteTolerance": 1e-5,
         "numberOfDissolvedGases": 2,
         "carbonDioxidePosition": 2
-    },
-    "QmomKinetics": {
-        "relativeTolerance": 1e-6,
-        "absoluteTolerance": 1e-6,
-        "timeStep": 1,
-        "endTime": 200
     }
 }

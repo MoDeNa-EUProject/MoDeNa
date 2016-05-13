@@ -188,11 +188,16 @@ subroutine set_initial_conditions
     y(xWeq) = 0        !xW
     if (kin_model==4) then
         y(kineq(1)) = 6.73000e-02_dp
-        y(kineq(2)) = 1.92250e+00_dp
-        y(kineq(3)) = 2.26920e+00_dp
+        ! y(kineq(2)) = 1.92250e+00_dp
+        ! y(kineq(3)) = 2.26920e+00_dp
+        CE_A00=1.92250e+00_dp
+        CE_A10=2.26920e+00_dp
+        OH0=(CE_A00+CE_A10)*1e3_dp
+        y(kineq(2)) = CE_A00
+        y(kineq(3)) = CE_A10
         y(kineq(4)) = 0.00000e+00_dp
-        y(kineq(5)) = 5.46200e-01_dp
-        ! y(kineq(5)) = 1.0924e+00_dp
+        ! y(kineq(5)) = 5.46200e-01_dp
+        y(kineq(5)) = W0*1e-3_dp
         y(kineq(6)) = 2.19790e+00_dp
         y(kineq(7)) = 1.64000e+00_dp
         y(kineq(8)) = 1.71030e+00_dp
