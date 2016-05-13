@@ -138,4 +138,4 @@
 // 2nodes vs meanDiameter
 	std::string bubbleMode = "two nodes"; 	// mean radius, two nodes
 	bool apparentViscosity = false;
-	bool kinetics_basf = false;
+	// bool kinetics_basf = false;
