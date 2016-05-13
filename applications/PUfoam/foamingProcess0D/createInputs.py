@@ -64,7 +64,7 @@ f.write('{0:.3g}\n'.format(inputs["physicalProperties"]["blowingAgents"]["CO2"][
 f.write('{0:.3g}\n'.format(inputs["physicalProperties"]["blowingAgents"]["PBL"]["heatCapacityInGaseousPhase"]))
 f.write('{0:.3g}\n'.format(inputs["physicalProperties"]["blowingAgents"]["PBL"]["heatCapacityInLiquidPhase"]))
 f.write('{0:.3g}\n'.format(inputs["physicalProperties"]["blowingAgents"]["PBL"]["evaporationHeat"]))
-if (inputs["physicalBlowingAgent"]=="pentane"):
+if (inputs["physicalBlowingAgent"]=="n-pentane"):
     f.write('1\n')
 elif (inputs["physicalBlowingAgent"]=="R11"):
     f.write('2\n')
@@ -76,6 +76,8 @@ if (inputs["kinetics"]["kineticModel"]=="Baser"):
     f.write('1\n')
 elif (inputs["kinetics"]["kineticModel"]=="BaserRx"):
     f.write('2\n')
+elif (inputs["kinetics"]["kineticModel"]=="modena"):
+    f.write('3\n')
 else:
     print 'kinetic model unknown in QmomKinetics'
     exit
