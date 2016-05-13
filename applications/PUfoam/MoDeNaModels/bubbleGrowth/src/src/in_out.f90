@@ -91,6 +91,8 @@ subroutine read_inputs
         call fson_get(json_data, "kinetics.gellingReaction.activationEnergy", EOH)
         call fson_get(json_data, "kinetics.blowingReaction.frequentialFactor", AW)
         call fson_get(json_data, "kinetics.blowingReaction.activationEnergy", EW)
+    endif
+    if (kin_model==1 .or. kin_model==3 .or. kin_model==4) then
         call fson_get(json_data, "kinetics.gellingReaction.reactionEnthalpy", dHOH)
         call fson_get(json_data, "kinetics.blowingReaction.reactionEnthalpy", dHW)
     endif

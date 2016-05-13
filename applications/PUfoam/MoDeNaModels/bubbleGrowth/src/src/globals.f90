@@ -52,6 +52,8 @@ module globals
         W0,& !initial concentration of water (if you set this to
             ! zero, water conversion results are meanigless)
         NCO0,& !initial concentration of isocyanate
+        CE_A00,& !initial concentration of polyol 1
+        CE_A10,& !initial concentration of polyol 2
         AOH,& !frequential factor of gelling reaction
         EOH,& !activation energy of gelling reaction
         AW,& !frequential factor of blowing reaction
