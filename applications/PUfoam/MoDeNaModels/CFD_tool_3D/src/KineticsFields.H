@@ -245,6 +245,18 @@ volScalarField::DimensionedInternalField XWSource
     dimensionedScalar("XWSource", dimensionSet(0,0,-1,0,0,0,0), 0.0)
 );
 
+volScalarField::DimensionedInternalField XOHSource
+(
+    IOobject
+    (
+        "XOHSource",
+        runTime.timeName(),
+        mesh
+    ),
+    mesh,
+    dimensionedScalar("XOHSource", dimensionSet(0,0,-1,0,0,0,0), 0.0)
+);
+
 Info<< "Reading field XOH \n" << endl;
 volScalarField XOH
 (
@@ -1020,7 +1032,7 @@ volScalarField::DimensionedInternalField source_Catalyst_1
          mesh
         ),
         mesh,
-        dimensionedScalar("source_Catalyst_1", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+        dimensionedScalar("source_Catalyst_1", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_CE_A0" << endl;
 volScalarField::DimensionedInternalField source_CE_A0
@@ -1032,7 +1044,7 @@ volScalarField::DimensionedInternalField source_CE_A0
          mesh
         ),
         mesh,
-        dimensionedScalar("source_CE_A0", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+        dimensionedScalar("source_CE_A0", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_CE_A1" << endl;
 volScalarField::DimensionedInternalField source_CE_A1
@@ -1044,7 +1056,7 @@ volScalarField::DimensionedInternalField source_CE_A1
          mesh
         ),
         mesh,
-        dimensionedScalar("source_CE_A1", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+        dimensionedScalar("source_CE_A1", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_CE_B" << endl;
 volScalarField::DimensionedInternalField source_CE_B
@@ -1056,7 +1068,7 @@ volScalarField::DimensionedInternalField source_CE_B
          mesh
         ),
         mesh,
-        dimensionedScalar("source_CE_B", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+        dimensionedScalar("source_CE_B", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_CE_B2" << endl;
 volScalarField::DimensionedInternalField source_CE_B2
@@ -1068,7 +1080,7 @@ volScalarField::DimensionedInternalField source_CE_B2
          mesh
         ),
         mesh,
-        dimensionedScalar("source_CE_B2", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+        dimensionedScalar("source_CE_B2", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_CE_I0" << endl;
 volScalarField::DimensionedInternalField source_CE_I0
@@ -1080,7 +1092,7 @@ volScalarField::DimensionedInternalField source_CE_I0
          mesh
         ),
         mesh,
-        dimensionedScalar("source_CE_I0", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+        dimensionedScalar("source_CE_I0", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_CE_I1" << endl;
 volScalarField::DimensionedInternalField source_CE_I1
@@ -1092,7 +1104,7 @@ volScalarField::DimensionedInternalField source_CE_I1
          mesh
         ),
         mesh,
-        dimensionedScalar("source_CE_I1", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+        dimensionedScalar("source_CE_I1", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_CE_I2" << endl;
 volScalarField::DimensionedInternalField source_CE_I2
@@ -1104,7 +1116,7 @@ volScalarField::DimensionedInternalField source_CE_I2
          mesh
         ),
         mesh,
-        dimensionedScalar("source_CE_I2", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+        dimensionedScalar("source_CE_I2", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_CE_PBA" << endl;
 volScalarField::DimensionedInternalField source_CE_PBA
@@ -1116,7 +1128,7 @@ volScalarField::DimensionedInternalField source_CE_PBA
          mesh
         ),
         mesh,
-        dimensionedScalar("source_CE_PBA", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+        dimensionedScalar("source_CE_PBA", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_CE_Breac" << endl;
 volScalarField::DimensionedInternalField source_CE_Breac
@@ -1128,7 +1140,7 @@ volScalarField::DimensionedInternalField source_CE_Breac
          mesh
         ),
         mesh,
-        dimensionedScalar("source_CE_Breac", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+        dimensionedScalar("source_CE_Breac", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_CE_Areac0" << endl;
 volScalarField::DimensionedInternalField source_CE_Areac0
@@ -1140,7 +1152,7 @@ volScalarField::DimensionedInternalField source_CE_Areac0
          mesh
         ),
         mesh,
-        dimensionedScalar("source_CE_Areac0", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+        dimensionedScalar("source_CE_Areac0", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_CE_Areac1" << endl;
 volScalarField::DimensionedInternalField source_CE_Areac1
@@ -1152,7 +1164,7 @@ volScalarField::DimensionedInternalField source_CE_Areac1
          mesh
         ),
         mesh,
-        dimensionedScalar("source_CE_Areac1", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+        dimensionedScalar("source_CE_Areac1", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_CE_Ireac0" << endl;
 volScalarField::DimensionedInternalField source_CE_Ireac0
@@ -1164,7 +1176,7 @@ volScalarField::DimensionedInternalField source_CE_Ireac0
          mesh
         ),
         mesh,
-        dimensionedScalar("source_CE_Ireac0", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+        dimensionedScalar("source_CE_Ireac0", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_CE_Ireac1" << endl;
 volScalarField::DimensionedInternalField source_CE_Ireac1
@@ -1176,7 +1188,7 @@ volScalarField::DimensionedInternalField source_CE_Ireac1
          mesh
         ),
         mesh,
-        dimensionedScalar("source_CE_Ireac1", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+        dimensionedScalar("source_CE_Ireac1", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_CE_Ireac2" << endl;
 volScalarField::DimensionedInternalField source_CE_Ireac2
@@ -1188,7 +1200,7 @@ volScalarField::DimensionedInternalField source_CE_Ireac2
          mesh
         ),
         mesh,
-        dimensionedScalar("source_CE_Ireac2", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+        dimensionedScalar("source_CE_Ireac2", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_Bulk" << endl;
 volScalarField::DimensionedInternalField source_Bulk
@@ -1200,7 +1212,7 @@ volScalarField::DimensionedInternalField source_Bulk
          mesh
         ),
         mesh,
-        dimensionedScalar("source_Bulk", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+        dimensionedScalar("source_Bulk", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_R_1" << endl;
 volScalarField::DimensionedInternalField source_R_1
@@ -1212,7 +1224,7 @@ volScalarField::DimensionedInternalField source_R_1
          mesh
         ),
         mesh,
-        dimensionedScalar("source_R_1", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+        dimensionedScalar("source_R_1", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_R_1_mass" << endl;
 volScalarField::DimensionedInternalField source_R_1_mass
@@ -1224,7 +1236,7 @@ volScalarField::DimensionedInternalField source_R_1_mass
          mesh
         ),
         mesh,
-        dimensionedScalar("source_R_1_mass", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+        dimensionedScalar("source_R_1_mass", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_R_1_temp_RF1" << endl;
 volScalarField::DimensionedInternalField source_R_1_temp_RF1
@@ -1236,7 +1248,7 @@ volScalarField::DimensionedInternalField source_R_1_temp_RF1
          mesh
         ),
         mesh,
-        dimensionedScalar("sourceR_1_temp_RF1", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+        dimensionedScalar("sourceR_1_temp_RF1", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_R_1_vol_RF1" << endl;
 volScalarField::DimensionedInternalField source_R_1_vol_RF1
@@ -1248,5 +1260,5 @@ volScalarField::DimensionedInternalField source_R_1_vol_RF1
          mesh
         ),
         mesh,
-        dimensionedScalar("sourceR_1_vol_RF1", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
+        dimensionedScalar("sourceR_1_vol_RF1", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );

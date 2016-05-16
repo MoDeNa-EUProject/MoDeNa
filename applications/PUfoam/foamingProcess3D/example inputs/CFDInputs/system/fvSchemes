@@ -130,6 +130,43 @@ divSchemes
     div((interpolate(rhoFoamAlpha2)*phi),Bulk) Gauss upwind;
     div((interpolate(rhoFoamAlpha2)*phi),R_1) Gauss upwind;
     div((interpolate(rhoFoamAlpha2)*phi),R_1_temp_RF1) Gauss upwind;
+    div((interpolate(alpha.gas)*(mag((phi|magSf))*nHatf)),Catalyst_1)   Gauss upwind;
+    div((interpolate(alpha.gas)*(mag((phi|magSf))*nHatf)),CE_A0)   Gauss upwind;
+    div((interpolate(alpha.gas)*(mag((phi|magSf))*nHatf)),CE_A1)   Gauss upwind;
+    div((interpolate(alpha.gas)*(mag((phi|magSf))*nHatf)),CE_B)   Gauss upwind;
+    div((interpolate(alpha.gas)*(mag((phi|magSf))*nHatf)),CE_B2)   Gauss upwind;
+    div((interpolate(alpha.gas)*(mag((phi|magSf))*nHatf)),CE_I0)   Gauss upwind;
+    div((interpolate(alpha.gas)*(mag((phi|magSf))*nHatf)),CE_I1)   Gauss upwind;
+    div((interpolate(alpha.gas)*(mag((phi|magSf))*nHatf)),CE_I2)   Gauss upwind;
+    div((interpolate(alpha.gas)*(mag((phi|magSf))*nHatf)),CE_PBA)   Gauss upwind;
+    div((interpolate(alpha.gas)*(mag((phi|magSf))*nHatf)),CE_Breac)   Gauss upwind;
+    div((interpolate(alpha.gas)*(mag((phi|magSf))*nHatf)),CE_Areac0)   Gauss upwind;
+    div((interpolate(alpha.gas)*(mag((phi|magSf))*nHatf)),CE_Areac1)   Gauss upwind;
+    div((interpolate(alpha.gas)*(mag((phi|magSf))*nHatf)),CE_Ireac0)   Gauss upwind;
+    div((interpolate(alpha.gas)*(mag((phi|magSf))*nHatf)),CE_Ireac1)   Gauss upwind;
+    div((interpolate(alpha.gas)*(mag((phi|magSf))*nHatf)),CE_Ireac2)   Gauss upwind;
+    div((interpolate(alpha.gas)*(mag((phi|magSf))*nHatf)),Bulk)   Gauss upwind;
+    div((interpolate(alpha.gas)*(mag((phi|magSf))*nHatf)),R_1)   Gauss upwind;
+    div((interpolate(alpha.gas)*(mag((phi|magSf))*nHatf)),R_1_temp_RF1)   Gauss upwind;
+    div(phi,Catalyst_1) Gauss upwind;
+    div(phi,CE_A0) Gauss upwind;
+    div(phi,CE_A1) Gauss upwind;
+    div(phi,CE_B) Gauss upwind;
+    div(phi,CE_B2) Gauss upwind;
+    div(phi,CE_I0) Gauss upwind;
+    div(phi,CE_I1) Gauss upwind;
+    div(phi,CE_I2) Gauss upwind;
+    div(phi,CE_PBA) Gauss upwind;
+    div(phi,CE_Breac) Gauss upwind;
+    div(phi,CE_Areac0) Gauss upwind;
+    div(phi,CE_Areac1) Gauss upwind;
+    div(phi,CE_Ireac0) Gauss upwind;
+    div(phi,CE_Ireac1) Gauss upwind;
+    div(phi,CE_Ireac2) Gauss upwind;
+    div(phi,Bulk) Gauss upwind;
+    div(phi,R_1) Gauss upwind;
+    div(phi,R_1_temp_RF1) Gauss upwind;
+
 }
 
 laplacianSchemes
