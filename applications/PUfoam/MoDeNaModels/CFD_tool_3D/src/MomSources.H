@@ -192,7 +192,7 @@ if (PBESwitch)
                                 exit(ret_bblgr2[i]);
                             }
                             radiusGrowthCO2[i] =
-                                modena_model_call (bblgr2, inputs_bblgr2, outputs_bblgr2);
+                                modena_outputs_get(outputs_bblgr2, 0);
 
                             volumeGrowthBA[i] =
                                 (radiusGrowthBA[i]*RR*TS[celli])/(p_1);

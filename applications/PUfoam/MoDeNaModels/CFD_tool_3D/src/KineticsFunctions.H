@@ -307,5 +307,5 @@ double thermalDiffusivityGas(double &T)
 }
 double nodeRadius(const double &v)
 {
-    return (pow((6.0*v/M_PI),1/3));
+    return (Foam::pow((6.0*v/M_PI),1/3.0));
 }
