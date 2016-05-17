@@ -28,6 +28,15 @@ Export variables in `.bashrc`
 export PETSC_DIR=/opt/petsc/petsc-3.4.5
 export PETSC_ARCH=arch-linux2-c-debug
 ```
+Install rapidjson library
+```
+cd where-you-want-source-files
+git clone https://github.com/miloyip/rapidjson.git
+cd rapidjson
+cmake .
+make
+sudo make install
+```
 Compile the models using:
 ```
 ./build
@@ -42,18 +51,14 @@ sudo apt-get install veusz
 
 ## Run
 First, you need to specify recipe. Copy/create/modify **unifiedInput.json**. An
-example recipies can be found in "example inputs" folder. Create inputs to
-models:
-```
-./createInputs.py
-```
+example recipies can be found in "examples" folder.
 Initialize surrogate nano-scale models:
 ```
 ./initModels
 ```
 Execute meso-scopic bubble growth simulation:
 ```
-./workflow1
+./workflow_bubbleGrowth
 ```
 Initialize surrogate bubble growth model:
 ```
@@ -61,12 +66,7 @@ Initialize surrogate bubble growth model:
 ```
 Run macroscopic simulation:
 ```
-./workflow2
-```
-
-The above sequence can be performed by executing
-```
-./run
+./workflow_0D
 ```
 
 ## Results

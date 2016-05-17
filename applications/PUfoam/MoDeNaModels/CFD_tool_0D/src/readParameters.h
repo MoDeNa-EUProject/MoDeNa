@@ -1,60 +1,78 @@
 /** @file readParameters.h
 	@brief reads the inputs from the input files.
 */
+#include <rapidjson/document.h>
+#include <rapidjson/filereadstream.h>>
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
 void readParams();
 void readParams() {
-    std::ifstream inputs;
-    inputs.open("../inputsQmom.in", std::ios::in);
-    inputs >> Pr;   // initial/final pressure of the mixture, Pa
-	inputs >> Temp0;		// initial temperature, K
-/* Inputs for gelling reaction, XOH */
-	inputs >> A_OH;		// m3/mol s
-	inputs >> E_OH; 	// J/mol
-	inputs >> OH_0;		// Initial concentration of polyol OH groups in the mixutre, mol/m3
-	inputs >> NCO_0;		// Initial concentration of isocianate NCO groups in the mixutre, mol/m3
-	inputs >> W_0;		// Initial concentration of water in the mixture, mol/m3
-/* Inputs for blowing reaction, XW */
-	inputs >> A_W;	// 1/s
-	inputs >> E_W;	// J/mol
-/* Constants */
-	inputs >> RR;	// J/mol K
-	inputs >> rhoPoly;	// kg/m3 Density of the liquid polymer
-	inputs >> rhoBL;	// kg/m3 Density of the blowing agent
-/* Inputs for enthalpy */
-	inputs >> DH_OH;	// Reaction heat for the gelling reaction, J/mol
-	inputs >> DH_W;	// Reaction heat for the blowing reaction, J/mol
-	inputs >> C_Poly;	// Polyurethane specific heat, J/kg K
-	inputs >> C_CO2;		// CO2 specific heat, J/kg K
-	inputs >> C_BG;		// Physical blowing agent in gas phase specific heat, J/kg K
-	inputs >> C_BL;		// Physical blowing agent in liquid phase specific heat, J/kg K
-	inputs >> lambda;		// Latent heat of blowing agent, J/kg
-// physical blowing agent (used for solubility model)
-	inputs >>    phBL;			// 1=pentane, 2=R-11
-// density model used
-	inputs >>    denMod;			// 1=modena, 2=rhoPoly
-// kinetics model used
-	inputs >>    kinMod;			// 1=Baser, 2=Baser with R(x)
-	inputs >>   dilution;		// use dilution effect
-/* Inputs for weight fraction of gaseous CO2 in the mixture */
-	inputs >> M_CO2;		// Molecular mass of carbon dioxide, kg/kmol
-	inputs >> M_B;		// Molecular mass of blowing agent, kg/kmol
-	inputs >> M_NCO;		// Molecular weight of NCO, kg/kmol
-	inputs >> M_air;		// Molecular weight of air, kg/kmol
-	inputs >> CO2_D;	// Weight fraction of dissolved CO2 in the mixture, -
-	inputs >> L0;	// Initial weight fraction of blowing agent in the liquid, -
-	inputs >> CO2_0;		// Initial weight fraction of CO2 in the liquid, -
-// Other physical properties
-	inputs >> surfaceTension; // required for partial pressure
-// initial bubble size distribution
-	inputs >> sig;		// correlated to variance of initial distribution
-	inputs >> init_size;	// initial mean bubble diameter, m
-	inputs >> NN;	// correlated to number of initial bubbles in m^3
-// integration parameters
-	inputs >> abs_err;// absolute error
-	inputs >> rel_err;// relative error
-	inputs >> dt;		// time step, s
-	inputs >> tend;		// end time, s
-    inputs.close();
+    FILE * pFile = fopen ("../unifiedInput.json" , "r");
+    char buffer[65536];
+    rapidjson::FileReadStream is(pFile, buffer, sizeof(buffer));
+    rapidjson::Document document;
+    document.ParseStream<0, rapidjson::UTF8<>, rapidjson::FileReadStream>(is);
+
+    Pr=document["physicalProperties"]["pressure"].GetDouble();
+    Temp0=document["initialConditions"]["temperature"].GetDouble();
+    A_OH=document["kinetics"]["gellingReaction"]["frequentialFactor"].GetDouble();
+    E_OH=document["kinetics"]["gellingReaction"]["activationEnergy"].GetDouble();
+    OH_0=document["initialConditions"]["concentrations"]["polyol"].GetDouble();
+    NCO_0=document["initialConditions"]["concentrations"]["isocyanate"].GetDouble();
+    W_0=document["initialConditions"]["concentrations"]["water"].GetDouble();
+    A_W=document["kinetics"]["blowingReaction"]["frequentialFactor"].GetDouble();
+    E_W=document["kinetics"]["blowingReaction"]["activationEnergy"].GetDouble();
+    rhoPoly=document["physicalProperties"]["polymer"]["density"].GetDouble();
+    rhoBL=document["physicalProperties"]["blowingAgents"]["PBL"]["density"].GetDouble();
+    DH_OH=document["kinetics"]["gellingReaction"]["reactionEnthalpy"].GetDouble();
+    DH_W=document["kinetics"]["blowingReaction"]["reactionEnthalpy"].GetDouble();
+    C_Poly=document["physicalProperties"]["polymer"]["heatCapacity"].GetDouble();
+    C_CO2=document["physicalProperties"]["blowingAgents"]["CO2"]["heatCapacityInLiquidPhase"].GetDouble();
+    C_BG=document["physicalProperties"]["blowingAgents"]["PBL"]["heatCapacityInGaseousPhase"].GetDouble();
+    C_BL=document["physicalProperties"]["blowingAgents"]["PBL"]["heatCapacityInLiquidPhase"].GetDouble();
+    lambda=document["physicalProperties"]["blowingAgents"]["PBL"]["evaporationHeat"].GetDouble();
+    if (document["physicalBlowingAgent"].GetString()==std::string("n-pentane")) {
+        phBL=1;
+    } else if (document["physicalBlowingAgent"].GetString()==std::string("R11")) {
+        phBL=2;
+    } else {
+        std::cout << "unknown blowing agent (solubility)" << std::endl;
+        exit(0);
+    }
+    denMod=2; //TODO implement
+    if (document["kinetics"]["kineticModel"].GetString()==std::string("Baser")) {
+        kinMod=1;
+    } else if (document["kinetics"]["kineticModel"].GetString()==std::string("BaserRx")) {
+        kinMod=2;
+    } else if (document["kinetics"]["kineticModel"].GetString()==std::string("modena")) {
+        kinMod=3;
+    } else {
+        std::cout << "kinetic model unknown in QmomKinetics" << std::endl;
+        exit(0);
+    }
+    if (document["kinetics"]["useDilution"].GetBool()){
+        dilution=1;
+    } else {
+        dilution=0;
+    }
+    M_CO2=document["physicalProperties"]["blowingAgents"]["CO2"]["molarMass"].GetDouble()*1e3;
+    M_B=document["physicalProperties"]["blowingAgents"]["PBL"]["molarMass"].GetDouble()*1e3;
+    M_NCO=document["physicalProperties"]["polymer"]["molarMassNCO"].GetDouble()*1e3;
+    M_air=document["physicalProperties"]["air"]["molarMass"].GetDouble()*1e3;
+    double H=document["physicalProperties"]["blowingAgents"]["CO2"]["solubility"].GetDouble();
+    CO2_D=H*Pr*M_CO2/rhoPoly;
+    double cb=document["initialConditions"]["concentrations"]["blowingAgents"]["PBL"].GetDouble();
+    L0=cb*M_B/rhoPoly;
+    double cc=document["initialConditions"]["concentrations"]["blowingAgents"]["CO2"].GetDouble();
+    CO2_0=cc*M_CO2/rhoPoly;
+    surfaceTension=document["physicalProperties"]["surfaceTension"].GetDouble();
+    sig=document["initialConditions"]["bubbleRadiusDeviation"].GetDouble();
+    init_size=document["initialConditions"]["bubbleRadius"].GetDouble()*2;
+    NN=document["initialConditions"]["numberBubbleDensity"].GetDouble();
+    abs_err=document["QmomKinetics"]["absoluteTolerance"].GetDouble();
+    rel_err=document["QmomKinetics"]["relativeTolerance"].GetDouble();
+    dt=document["QmomKinetics"]["timeStep"].GetDouble();
+    tend=document["QmomKinetics"]["endTime"].GetDouble();
     if (W_0<1e-8) {
         W_0=-1.0;
     }
