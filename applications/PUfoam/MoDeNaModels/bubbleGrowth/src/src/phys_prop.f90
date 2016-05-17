@@ -82,13 +82,6 @@ subroutine physical_properties(temp,conv,radius)
     if (.not. gelpoint .and. temp<500) then
         select case(visc_model)
         case(1)
-        case(2)
-            Aeta=4.1e-8_dp
-            Eeta=38.3e3_dp
-            Cg=0.85_dp
-            AA=4.e0_dp
-            B=-2.e0_dp
-            eta=Aeta*exp(Eeta/(Rg*temp))*(Cg/(Cg-conv))**(AA+B*conv)
         case(3)
             !set input vector
             call modena_inputs_set(viscInputs, viscTpos, temp);
@@ -133,14 +126,14 @@ subroutine physical_properties(temp,conv,radius)
             D(i) = modena_outputs_get(diffOutputs(i), 0_c_size_t)
         end select
         select case(sol_model(i))
-        case(1)
+        case(1) !constant
             call modena_inputs_set(solInputs(i), solTpos(i), temp)
             ret = modena_model_call(solModena(i), solInputs(i), solOutputs(i))
             if(ret /= 0) then
                 call exit(ret)
             endif
             KH(i) = modena_outputs_get(solOutputs(i), 0_c_size_t)
-        case(2)
+        case(2) !pcsaft
             ! TODO: implement properly
             call modena_inputs_set(solInputs(i), solTpos(i), temp)
             call modena_inputs_set(solInputs(i), solXgasPos(i), 1.0e-4_dp)

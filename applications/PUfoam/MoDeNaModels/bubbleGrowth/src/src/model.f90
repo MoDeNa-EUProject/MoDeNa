@@ -27,8 +27,8 @@ subroutine  odesystem (neq, t, y, ydot)
         do i=1,size(kineq)
             ydot(kineq(i))=kinsource(i)
         enddo
-        ydot(xWeq)=-ydot(kineq(5))/W0/1e-3_dp
-        ydot(xOHeq)=-(ydot(kineq(2))+ydot(kineq(3)))/(CE_A00+CE_A10)
+        ydot(xWeq)=-ydot(kineq(5))/W0*1.0e3_dp
+        ydot(xOHeq)=-(ydot(kineq(2))+ydot(kineq(3)))/OH0*1.0e3_dp
     else
         ydot(xOHeq) = AOH*exp(-EOH/Rg/temp)*(1-y(xOHeq))*&
             (NCO0-2*W0*y(xWeq)-OH0*y(xOHeq)) !polyol conversion

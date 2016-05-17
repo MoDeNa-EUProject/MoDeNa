@@ -38,8 +38,28 @@ subroutine read_inputs
     type(fson_value), pointer :: json_data
     write(*,*) 'loading input file ',TRIM(inputs)
     json_data => fson_parse('../unifiedInput.json')
-    call fson_get(json_data, "bubbleGrowth.integrator", integrator)
-    call fson_get(json_data, "bubbleGrowth.method", int_meth)
+    ngas=2
+    co2_pos=2
+    call fson_get(json_data, "bubbleGrowth.integrator", strval)
+    if (strval=="dlsode") then
+        integrator=1
+    elseif (strval=="dlsodes") then
+        integrator=2
+    else
+        stop 'unknown integrator'
+    endif
+    call fson_get(json_data, "bubbleGrowth.method", strval)
+    if (strval=="nonstiff") then
+        int_meth=10
+    elseif (strval=="stiff") then
+        if (integrator==1) then
+            int_meth=22
+        elseif (integrator==2) then
+            int_meth=222
+        endif
+    else
+        stop 'method can be either stiff or nonstiff'
+    endif
     call fson_get(json_data, "bubbleGrowth.inertialTerm", inertial_term)
     call fson_get(json_data, "bubbleGrowth.solubilityCorrection", solcorr)
     call fson_get(json_data, "bubbleGrowth.meshCoarseningParameter", mshco)
@@ -50,12 +70,10 @@ subroutine read_inputs
     call fson_get(json_data, "bubbleGrowth.maxInnerTimeSteps", maxts)
     call fson_get(json_data, "bubbleGrowth.relativeTolerance", rel_tol)
     call fson_get(json_data, "bubbleGrowth.absoluteTolerance", abs_tol)
-    call fson_get(json_data, "bubbleGrowth.numberOfDissolvedGases", ngas)
     allocate(D(ngas),cbl(ngas),xgas(ngas+1),KH(ngas),Mbl(ngas),&
         dHv(ngas),mb(ngas),mb2(ngas),mb3(ngas),avconc(ngas),pressure(ngas),&
         diff_model(ngas),sol_model(ngas),cpblg(ngas),cpbll(ngas),&
         wblpol(ngas),D0(ngas))
-    call fson_get(json_data, "bubbleGrowth.carbonDioxidePosition", co2_pos)
     call fson_get(json_data, "physicalProperties.pressure", pamb)
     call fson_get(json_data, "physicalProperties.blowingAgents.PBL.molarMass", Mbl(1))
     call fson_get(json_data, "physicalProperties.blowingAgents.CO2.molarMass", Mbl(2))
@@ -70,83 +88,107 @@ subroutine read_inputs
     call fson_get(json_data, "initialConditions.temperature", temp0)
     call fson_get(json_data, "initialConditions.bubbleRadius", R0)
     call fson_get(json_data, "initialConditions.numberBubbleDensity", nb0)
-    call fson_get(json_data, "initialConditions.concentrations.polyol", OH0)
-    call fson_get(json_data, "initialConditions.concentrations.water", W0)
-    call fson_get(json_data, "initialConditions.concentrations.isocyanate", NCO0)
-    call fson_get(json_data, "initialConditions.concentrations.blowingAgents.PBL", cbl(1))
-    call fson_get(json_data, "initialConditions.concentrations.blowingAgents.CO2", cbl(2))
     call fson_get(json_data, "kinetics.kineticModel", strval)
     if (strval=='Baser') then
         kin_model=1
     elseif (strval=='BaserRx') then
         kin_model=3
-    elseif (strval=='modena') then
+    elseif (strval=='RF-1') then
         kin_model=4
     else
         stop 'unknown kinetic model'
     endif
-    call fson_get(json_data, "kinetics.useDilution", dilution)
+    call fson_get(json_data, "initialConditions.concentrations.water", W0)
     if (kin_model==1 .or. kin_model==3) then
+        call fson_get(json_data, "kinetics.useDilution", dilution)
+        call fson_get(json_data, "initialConditions.concentrations.polyol", OH0)
+        call fson_get(json_data, "initialConditions.concentrations.isocyanate", NCO0)
         call fson_get(json_data, "kinetics.gellingReaction.frequentialFactor", AOH)
         call fson_get(json_data, "kinetics.gellingReaction.activationEnergy", EOH)
         call fson_get(json_data, "kinetics.blowingReaction.frequentialFactor", AW)
         call fson_get(json_data, "kinetics.blowingReaction.activationEnergy", EW)
+    elseif (kin_model==4) then
+        call fson_get(json_data, "initialConditions.concentrations.catalyst", catalyst)
+        call fson_get(json_data, "initialConditions.concentrations.polyol1", polyol1_ini)
+        call fson_get(json_data, "initialConditions.concentrations.polyol2", polyol2_ini)
+        call fson_get(json_data, "initialConditions.concentrations.amine", amine_ini)
+        call fson_get(json_data, "initialConditions.concentrations.isocyanate1", isocyanate1_ini)
+        call fson_get(json_data, "initialConditions.concentrations.isocyanate2", isocyanate2_ini)
+        call fson_get(json_data, "initialConditions.concentrations.isocyanate3", isocyanate3_ini)
+        OH0=polyol1_ini+polyol2_ini
     endif
+    call fson_get(json_data, "initialConditions.concentrations.blowingAgents.PBL", cbl(1))
+    call fson_get(json_data, "initialConditions.concentrations.blowingAgents.CO2", cbl(2))
     if (kin_model==1 .or. kin_model==3 .or. kin_model==4) then
         call fson_get(json_data, "kinetics.gellingReaction.reactionEnthalpy", dHOH)
         call fson_get(json_data, "kinetics.blowingReaction.reactionEnthalpy", dHW)
     endif
-    call fson_get(json_data, "physicalProperties.polymer.polymerDensityModel", rhop_model)
-    if (rhop_model==1) then
+    call fson_get(json_data, "physicalProperties.polymer.polymerDensityModel", strval)
+    if (strval=="constant") then
+        rhop_model=1
         call fson_get(json_data, "physicalProperties.polymer.density", rhop)
-    elseif (rhop_model==2) then
+    elseif (strval=="nanotools") then
+        rhop_model=2
     else
         stop 'unknown polymer density model'
     endif
-    call fson_get(json_data, "physicalProperties.surfaceTensionModel", itens_model)
-    if (itens_model==1) then
+    call fson_get(json_data, "physicalProperties.surfaceTensionModel", strval)
+    if (strval=="constant") then
+        itens_model=1
         call fson_get(json_data, "physicalProperties.surfaceTension", sigma)
-    elseif (itens_model==2) then
+    elseif (strval=="pcsaft") then
+        itens_model=2
     else
         stop 'unknown interfacial tension model'
     endif
-    call fson_get(json_data, "physicalProperties.blowingAgents.PBL.diffusivityModel", diff_model(1))
-    if (diff_model(1)==1) then
+    call fson_get(json_data, "physicalProperties.blowingAgents.PBL.diffusivityModel", strval)
+    if (strval=="constant") then
+        diff_model(1)=1
         call fson_get(json_data, "physicalProperties.blowingAgents.PBL.diffusivity", D(1))
-    elseif (diff_model(1)==2) then
+    elseif (strval=="nanotools") then
+        diff_model(1)=2
     else
         stop 'unknown diffusivity model'
     endif
-    call fson_get(json_data, "physicalProperties.blowingAgents.CO2.diffusivityModel", diff_model(2))
-    if (diff_model(2)==1) then
+    call fson_get(json_data, "physicalProperties.blowingAgents.CO2.diffusivityModel", strval)
+    if (strval=="constant") then
+        diff_model(2)=1
         call fson_get(json_data, "physicalProperties.blowingAgents.CO2.diffusivity", D(2))
-    elseif (diff_model(2)==2) then
+    elseif (strval=="nanotools") then
+        diff_model(2)=2
     else
         stop 'unknown diffusivity model'
     endif
-    call fson_get(json_data, "physicalProperties.blowingAgents.PBL.solubilityModel", sol_model(1))
-    if (sol_model(1)==1) then
+    call fson_get(json_data, "physicalProperties.blowingAgents.PBL.solubilityModel", strval)
+    if (strval=="constant") then
+        sol_model(1)=1
         call fson_get(json_data, "physicalProperties.blowingAgents.PBL.solubility", KH(1))
-    elseif (sol_model(1)==2) then
-    elseif (sol_model(1)==3) then
-    elseif (sol_model(1)==4) then
-    elseif (sol_model(1)==5) then
-    elseif (sol_model(1)==6) then
+    elseif (strval=="pcsaft") then
+        sol_model(1)=2
+    elseif (strval=="Gupta") then
+        sol_model(1)=3
+    elseif (strval=="Winkler") then
+        sol_model(1)=4
+    elseif (strval=="Baser") then
+        sol_model(1)=6
     else
         stop 'unknown solubility model'
     endif
-    call fson_get(json_data, "physicalProperties.blowingAgents.CO2.solubilityModel", sol_model(2))
-    if (sol_model(2)==1) then
+    call fson_get(json_data, "physicalProperties.blowingAgents.CO2.solubilityModel", strval)
+    if (strval=="constant") then
+        sol_model(2)=1
         call fson_get(json_data, "physicalProperties.blowingAgents.CO2.solubility", KH(2))
-    elseif (sol_model(2)==2) then
+    elseif (strval=="pcsaft") then
+        sol_model(2)=2
     else
         stop 'unknown solubility model'
     endif
-    call fson_get(json_data, "physicalProperties.polymer.viscosityModel", visc_model)
-    if (visc_model==1) then
+    call fson_get(json_data, "physicalProperties.polymer.viscosityModel", strval)
+    if (strval=="constant") then
+        visc_model=1
         call fson_get(json_data, "physicalProperties.polymer.viscosity", eta)
-    elseif (visc_model==2) then
-    elseif (visc_model==3) then
+    elseif (strval=="CastroMacosko") then
+        visc_model=3
     else
         stop 'unknown viscosity model'
     endif

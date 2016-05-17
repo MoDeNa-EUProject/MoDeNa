@@ -258,8 +258,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
             dydt[30] = modena_outputs_get(outputs_kinetics, source_R_1_vol_Pos);
 
             dydt[0] = -dydt[15]/(W_0/1000);
-            dydt[1] = -(dydt[12] + dydt[13])/(1.92250e3 + 2.2692e3)*1000;
-            OH_0 = 1.92250e3 + 2.2692e3;
+            dydt[1] = -(dydt[12] + dydt[13])/(OH_0)*1000;
             break;
     }
 
@@ -562,7 +561,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
 	dydt[10] 	= sgBA[3] + sgCO2[3] + sc[3];
 	// temperature
     C_TOT 		= C_Poly + CO2_g*C_CO2 + L_g*C_BG + L_l*C_BL;
-    dydt[2] 	= (-DH_OH*(OH_0))/(rhoPolySurrgate*C_TOT)*dydt[1]+\
+    dydt[2] 	= (-DH_OH*OH_0)/(rhoPolySurrgate*C_TOT)*dydt[1]+\
 				  (-DH_W*W_0)/(rhoPolySurrgate*C_TOT)*dydt[0]+\
 				  lambda/C_TOT*dydt[3];
 }
@@ -603,14 +602,14 @@ int main(int argc, char **argv)
 	air_g=y[8]/(1+y[8])*M_air*1e-3*(Pr+2*surfaceTension/R)/(RR*Temp0*rhoPoly);
 
     // initialize RF-1 variables
-    y[11]           = 6.73e-2;
-    y[12]           = 1.9225;
-    y[13]           = 2.2692;
-    y[14]           = 0.0;
+    y[11]           = catalyst*1e-3;
+    y[12]           = polyol1_ini*1e-3;
+    y[13]           = polyol2_ini*1e-3;
+    y[14]           = amine_ini*1e-3;
 	y[15]           = W_0*1e-3;
-    y[16]           = 2.1979;
-    y[17]           = 1.64;
-    y[18]           = 1.7103;
+    y[16]           = isocyanate1_ini*1e-3;
+    y[17]           = isocyanate2_ini*1e-3;
+    y[18]           = isocyanate3_ini*1e-3;
     y[19]           = 0.0;
     y[20]           = 0.0;
     y[21]           = 0.0;
@@ -618,11 +617,11 @@ int main(int argc, char **argv)
     y[23]           = 0.0;
     y[24]           = 0.0;
     y[25]           = 0.0;
-    y[26]           = 4.45849;
+    y[26]           = 0.0;
     y[27]           = 0.0;
-    y[28]           = 1.0;
-    y[29]           = 2.27e1;
-    y[30]           = 8.46382e-1;
+    y[28]           = 0.0;
+    y[29]           = 0.0;
+    y[30]           = 0.0;
 
 
     runge_kutta4< state_type > stepper;

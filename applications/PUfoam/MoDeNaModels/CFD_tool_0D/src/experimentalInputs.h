@@ -90,6 +90,15 @@
 	double OH_0   = 3765.0;
 	double NCO_0  = 3765.0;
 	double W_0    = -1.0;
+
+	double catalyst;
+	double polyol1_ini;
+	double polyol2_ini;
+	double amine_ini;
+	double isocyanate1_ini;
+	double isocyanate2_ini;
+	double isocyanate3_ini;
+
 /* Inputs for blowing reaction, XW */
 	double A_W      = 1.385e3;
 	double E_W      = 3.266e4;
@@ -118,7 +127,6 @@
 	double M_B     = 137.37;
 	double M_NCO   = 615.0;
 	double M_air   = 29.0;
-	double CO2_D   = 4.4e-4;
 	double L0      = 0.155;
 	double CO2_0   = 0.0;
 // Other physical properties
