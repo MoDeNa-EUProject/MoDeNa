@@ -355,7 +355,7 @@ subroutine effrad(spectra)
     write(*,'(2x,A,1x,es9.3,1x,A)') 'Rosseland extinction coefficient:',&
         rossextcoeff,'m^-1'
     write(*,'(2x,A,1x,es9.3,1x,A)') 'Rosseland extinction coefficient:',&
-        rossextcoeff/(1-por)/rho2,'kg/m^2'
+        rossextcoeff/(1-por)/rhos,'kg/m^2'
     write(*,'(2x,A,1x,es9.3,1x,A)') 'radiative conductivity:',&
         krad*1e3_dp,'mW/m/K'
     write(mfi,'(2x,A,1x,es9.3)') 'effective index of refraction:',effn
@@ -364,7 +364,7 @@ subroutine effrad(spectra)
     write(mfi,'(2x,A,1x,es9.3,1x,A)') 'Rosseland extinction coefficient:',&
         rossextcoeff,'m^-1'
     write(mfi,'(2x,A,1x,es9.3,1x,A)') 'Rosseland extinction coefficient:',&
-        rossextcoeff/(1-por)/rho2,'kg/m^2'
+        rossextcoeff/(1-por)/rhos,'kg/m^2'
     write(mfi,'(2x,A,1x,es9.3,1x,A)') 'radiative conductivity:',&
         krad*1e3_dp,'mW/m/K'
     deallocate(lambdaf)

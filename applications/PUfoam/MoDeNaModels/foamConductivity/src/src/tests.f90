@@ -16,7 +16,7 @@ module tests
     character(len=99) :: fileplacein_par='./'   !modena
     character(len=99) :: fileplacein_ref='../spectra/'  !modena
     character(len=99) :: fileplaceout='./'  !modena
-    character(len=99) :: inputs='foamConductivity.in',spectra='spectra.out'
+    character(len=99) :: inputs='foamConductivity.json',spectra='spectra.out'
     character(len=99) :: nspec='spec_n.in'
     character(len=99) :: kspec='spec_k.in'
     character(len=99) :: gasspec='gasspec.in'
@@ -35,7 +35,7 @@ subroutine eqcond(regions)
     enddo
     do i=1,regions
         call foam_morpholgy
-        if (testing) then
+        if (testMode) then
             write(*,*) 'TESTING: radiative properties not calculated.'
             write(*,*) 'Ask Pavel if you want more reasonable results.'
             krad=2e-3_dp
@@ -134,57 +134,67 @@ end subroutine eqcond_strut
 !> loads parameters, usually from text file
 subroutine loadParameters
     use physicalProperties
+    use fson
+    use fson_value_m, only: fson_value_get
+    type(fson_value), pointer :: json_data
     integer :: fi,ios,i,j
     logical :: file_exists
     real(dp) :: xCO2,xAir,xCyP
     inputs=TRIM(ADJUSTL(fileplacein_par))//TRIM(ADJUSTL(inputs))
-    spectra=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(spectra))
-    inquire(file=inputs,exist=file_exists)
-    if (file_exists) then
-        open(newunit(fi),file=inputs)
-    else
-        open(newunit(fi),file='../'//inputs)
+    inquire(file=inputs,exist=file_exists) !first try current folder
+    if (.not. file_exists) then
+        inputs='../'//inputs !then try one folder up
+        inquire(file=inputs,exist=file_exists)
+        if (.not. file_exists) stop 'input file not found'
     endif
-        read(fi,*) T1           !higher temperature
-        read(fi,*) T2           !lower temperature
-        read(fi,*) xCO2,xAir,xCyP
-        call gasConductivity(cond1,(t1+t2)/2,xCO2,xAir,xCyP)
-        ! read(fi,*) cond1        !gas conductivity
-!        read(fi,*) cond2        !solid conductivity
-        call polymerConductivity(cond2,(t1+t2)/2)
-        read(fi,*) emi1         !emittance 1
-        read(fi,*) emi2         !emittance 2
-        read(fi,*) rho1         !gas density
-        read(fi,*) rho2         !solid density
-        read(fi,*) por          !porosity
-        read(fi,*) dcell        !cell size
-        read(fi,*) morph_input  !morphology input 1=wall thickness,
-        ! 2=strut content, 3=strut diameter (3 is recommended others can have
-        ! multiple solutions)
-        read(fi,*) dwall        !wall thickness
-        read(fi,*) fs           !strut content
-        read(fi,*) dstrut       !strut diameter
-        read(fi,*) dfoam        !foam thickness
-        read(fi,*) nz           !spatial discretization
-        read(fi,*) nrays        !number of testing rays
-        read(fi,*) wdist        !use wall thickness distribution
-        read(fi,*) wsdev        !wall thickness standard deviation
-        read(fi,*) nbox         !number of gray boxes
-        read(fi,*) numcond      !calcualte effective conductivity numerically
-        read(fi,*) structureName!name of the file with morphology
-    close(fi)
-    tmean=(t1+t2)/2
+    spectra=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(spectra))
+    json_data => fson_parse(inputs)
+    call fson_get(json_data, "upperBoundary.temperature", temp1)
+    call fson_get(json_data, "lowerBoundary.temperature", temp2)
+    call fson_get(json_data, "upperBoundary.emittance", emi1)
+    call fson_get(json_data, "lowerBoundary.emittance", emi2)
+    call fson_get(json_data, "gasComposition.CO2", xCO2)
+    call fson_get(json_data, "gasComposition.Air", xAir)
+    call fson_get(json_data, "gasComposition.Cyclopentane", xCyP)
+    call fson_get(json_data, "gasDensity", rhog)
+    call fson_get(json_data, "solidDensity", rhos)
+    call fson_get(json_data, "porosity", por)
+    call fson_get(json_data, "cellSize", dcell)
+    call fson_get(json_data, "morphologyInput", morph_input)
+    call fson_get(json_data, "wallThickness", dwall)
+    call fson_get(json_data, "strutContent", fs)
+    call fson_get(json_data, "strutSize", dstrut)
+    call fson_get(json_data, "foamThickness", dfoam)
+    call fson_get(json_data, "spatialDiscretization", nz)
+    call fson_get(json_data, "useWallThicknessDistribution", wdist)
+    if (wdist) then
+        call fson_get(json_data, "wallThicknessStandardDeviation", wsdev)
+    endif
+    call fson_get(json_data, "numberOfGrayBoxes", nbox)
+    call fson_get(json_data, "numericalEffectiveConductivity", numcond)
+    if (numcond) then
+        call fson_get(json_data, "structureName", structureName)
+    endif
+    call fson_get(json_data, "testMode", testMode)
+    if (temp1<temp2) then
+        tmean=temp1
+        temp1=temp2
+        temp2=tmean
+    endif
+    tmean=(temp1+temp1)/2
+    call gasConductivity(cond1,tmean,xCO2,xAir,xCyP)
+    call polymerConductivity(cond2,tmean)
     n1=1
     k1=0
     write(*,*) 'System information:'
-    write(*,'(2x,A,1x,es9.3,1x,A)') 'higher temperature:',T1,'K'
-    write(*,'(2x,A,1x,es9.3,1x,A)') 'lower temperature: ',T2,'K'
+    write(*,'(2x,A,1x,es9.3,1x,A)') 'higher temperature:',temp1,'K'
+    write(*,'(2x,A,1x,es9.3,1x,A)') 'lower temperature: ',temp2,'K'
     write(*,*) 'Phase properties:'
     write(*,'(2x,A,1x,es9.3,1x,A)') 'gas conductivity:  ',cond1*1e3_dp,'mW/m/K'
     write(*,'(2x,A,1x,es9.3,1x,A)') 'solid conductivity:',cond2*1e3_dp,'mW/m/K'
     write(mfi,*) 'System information:'
-    write(mfi,'(2x,A,1x,es9.3,1x,A)') 'higher temperature:',T1,'K'
-    write(mfi,'(2x,A,1x,es9.3,1x,A)') 'lower temperature: ',T2,'K'
+    write(mfi,'(2x,A,1x,es9.3,1x,A)') 'higher temperature:',temp1,'K'
+    write(mfi,'(2x,A,1x,es9.3,1x,A)') 'lower temperature: ',temp2,'K'
     write(mfi,*) 'Phase properties:'
     write(mfi,'(2x,A,1x,es9.3,1x,A)') 'gas conductivity:  ',cond1*1e3_dp,'mW/m/K'
     write(mfi,'(2x,A,1x,es9.3,1x,A)') 'solid conductivity:',cond2*1e3_dp,'mW/m/K'

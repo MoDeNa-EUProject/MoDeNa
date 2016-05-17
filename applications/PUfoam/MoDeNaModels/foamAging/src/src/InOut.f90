@@ -6,8 +6,10 @@
 
 !> reads input file, packs variables to rpar and ipar variables
 subroutine input(rpar, ipar)
+	use fson
+    use fson_value_m, only: fson_value_get
 	implicit none
-!c
+	type(fson_value), pointer :: json_data
 	integer i
 	integer ipar(*)
 	integer divwall, ncell
@@ -23,44 +25,58 @@ subroutine input(rpar, ipar)
 	double precision pcA, pcB, pcApcB, TcA, TcB, TcATcB
 	double precision MA, MB, Mterm ,a, b, aToverTcsb
 	double precision fstrut,rhof
-!c
 	double precision  tend,tbeg
 	double precision rpar(*)					! real param
-
 	double precision PI
 	parameter (PI = 3.1415926d0)
 	parameter (R = 8.314d0)
 
 !c Read input params - pak module params :)
-	open(2, file = '../foamAging.in', status = 'old')
-	read(2, *) nroutputs
-	read(2, *) divwall
-	read(2, *) tbeg
-	read(2, *) tend
-	read(2, *) T
-	read(2, *) temp_cond
-	read(2, *) rhop
-    read(2, *) pressure
-
-	read(2, *) pBCair, pBCCO2, pBCpent  ! boundaries
-	read(2, *) pICair, pICCO2, pICpent  ! initial C
-
-	read(2, *) L
-	read(2, *) dwall
-	read(2, *) dcell
-
-	read(2, *) fstrut
-	read(2, *) rhof
-	read(2, *) solModel
-	read(2, *) Sair,SCO2,Spent
-	read(2, *) diffModel
-	read(2, *) Dair,DCO2,Dpent
-
-	close(2)
-	continue
-
+	json_data => fson_parse("../foamAging.json")
+	call fson_get(json_data, "numberOfOutputs", nroutputs)
+	call fson_get(json_data, "wallDiscretization", divwall)
+	call fson_get(json_data, "timeStart", tbeg)
+	call fson_get(json_data, "timeEnd", tend)
+	call fson_get(json_data, "agingTemperature", T)
+	call fson_get(json_data, "conductivityTemperature", temp_cond)
+	call fson_get(json_data, "polymerDensity", rhop)
+	call fson_get(json_data, "initialPressure", pressure)
+	call fson_get(json_data, "boundaryPressure.Air", pBCair)
+	call fson_get(json_data, "boundaryPressure.CO2", pBCCO2)
+	call fson_get(json_data, "boundaryPressure.Cyclopentane", pBCpent)
+	call fson_get(json_data, "initialComposition.Air", pICair)
+	call fson_get(json_data, "initialComposition.CO2", pICCO2)
+	call fson_get(json_data, "initialComposition.Cyclopentane", pICpent)
+	call fson_get(json_data, "foamHalfThickness", L)
+	call fson_get(json_data, "wallThickness", dwall)
+	call fson_get(json_data, "cellSize", dcell)
+	call fson_get(json_data, "strutContent", fstrut)
+	call fson_get(json_data, "foamDensity", rhof)
+	call fson_get(json_data, "solubilityModel.Air", solModel(1))
+	call fson_get(json_data, "solubilityModel.CO2", solModel(2))
+	call fson_get(json_data, "solubilityModel.Cyclopentane", solModel(3))
+	if (solModel(1)==0) then
+		call fson_get(json_data, "solubility.Air", Sair)
+	endif
+	if (solModel(2)==0) then
+		call fson_get(json_data, "solubility.CO2", SCO2)
+	endif
+	if (solModel(3)==0) then
+		call fson_get(json_data, "solubility.Cyclopentane", Spent)
+	endif
+	call fson_get(json_data, "diffusivityModel.Air", diffModel(1))
+	call fson_get(json_data, "diffusivityModel.CO2", diffModel(2))
+	call fson_get(json_data, "diffusivityModel.Cyclopentane", diffModel(3))
+	if (diffModel(1)==0) then
+		call fson_get(json_data, "diffusivity.Air", Dair)
+	endif
+	if (diffModel(2)==0) then
+		call fson_get(json_data, "diffusivity.CO2", DCO2)
+	endif
+	if (diffModel(3)==0) then
+		call fson_get(json_data, "diffusivity.Cyclopentane", Dpent)
+	endif
 	ncell = dint(L/(dcell+dwall))
-    continue
 	! ! computation of diffusivities and solubilities as a function of T
 	! DCO2=12.3d-4*dexp(-51180.0d0/R/T)!/1e0  ! m2/s
 	! DO2 =8.5d-4* dexp(-53300.0d0/R/T)
@@ -94,9 +110,7 @@ subroutine input(rpar, ipar)
 
 	! pressure in atmospheres, cm2/s
     Dgas = (aToverTcsb*pcApcB*TcATcB*Mterm)*1.0d5/pressure
-    continue
     Dgas = Dgas * 1.0d-4 ! m2/s
-    continue
 
 	ipar(1) = nroutputs
 	ipar(2) = ncell
@@ -207,18 +221,27 @@ subroutine output(iprof, time, ystate, neq)
 
     continue
 	open(unit=11,file='../results/H2perm_'//trim(name_f)//'.dat')
+	open(unit=12,file='../results/ppar_'//trim(name_f)//'.dat')
 
    ! BC
 	write (11,100) time/(3600.0d0*24.0d0),length(0), pBCair/RT,pBCCO2/RT,&
 		pBCpent/RT
+	write (12,101) time/(3600.0d0*24.0d0),length(0), pBCair,pBCCO2,&
+		pBCpent
 	! profiles
 	do i = 1, nFV
 		write (11,100) time/(3600.0d0*24.0d0),length(i),ystate(i),&
 			ystate(nFV+i),ystate(2*nFV+i)
 	enddo
+	do i = onecell, nFV, onecell
+		write (12,101) time/(3600.0d0*24.0d0),length(i),ystate(i)*RT,&
+			ystate(nFV+i)*RT,ystate(2*nFV+i)*RT
+	enddo
     continue
-    close (11)
+    close(11)
+	close(12)
 	return
-100   format (f8.2,F12.8,F12.6,F12.6,F12.6)
+100   format (f8.2,F12.3,F12.3,F12.3,F12.3)
+101   format (f8.2,E12.3,E12.3,E12.3,E12.3)
 end subroutine output
 !c
