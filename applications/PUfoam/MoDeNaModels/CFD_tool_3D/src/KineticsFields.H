@@ -11,61 +11,83 @@ IOdictionary kineticsProperties
 );
 word KineticsModel(kineticsProperties.lookup("KineticsModel"));
 
-if 
-( 
-    !(KineticsModel == "generic" 
-   || KineticsModel == "simple" 
-   || KineticsModel == "RF-1" ) 
+if
+(
+    !(KineticsModel == "generic"
+   || KineticsModel == "RF-1" )
 )
     {
         FatalErrorIn(args.executable())
             << "Invalid kinetics model " << KineticsModel
             << "\nValid kinetics models are: "
             << "\ngeneric,"
-            << "\nsimple,"
             << "\nRF-1,"
             << exit(FatalError);
     }
+scalar AOH, EOH, COH_0, CNCO_0, CW_0, AW, EW;
+AOH=EOH=COH_0=CNCO_0=CW_0=AW=EW=0.0;
+if (KineticsModel == "generic")
+{
+    AOH =
+        readScalar(kineticsProperties.subDict("GellingConstants").lookup("A_OH"));
+    EOH =
+        readScalar(kineticsProperties.subDict("GellingConstants").lookup("E_OH"));
 
-scalar AOH = 
-    readScalar(kineticsProperties.subDict("GellingConstants").lookup("A_OH"));
-scalar EOH = 
-    readScalar(kineticsProperties.subDict("GellingConstants").lookup("E_OH"));
-scalar COH_0 = 
-    readScalar
-    (
-        kineticsProperties.subDict("GellingConstants").lookup("initCOH")
-    );
-scalar CNCO_0 = 
-    readScalar
-    (
-        kineticsProperties.subDict("GellingConstants").lookup("initCNCO")
-    );
-scalar CW_0 = 
-    readScalar
-    (
-        kineticsProperties.subDict("GellingConstants").lookup("initCW")
-    );
-scalar XOH_Gel = 
+    COH_0 =
+        readScalar
+        (
+            kineticsProperties.subDict("GellingConstants").lookup("initCOH")
+        );
+    CNCO_0 =
+        readScalar
+        (
+            kineticsProperties.subDict("GellingConstants").lookup("initCNCO")
+        );
+    CW_0 =
+        readScalar
+        (
+            kineticsProperties.subDict("GellingConstants").lookup("initCW")
+        );
+    AW =
+        readScalar(kineticsProperties.subDict("BlowingConstants").lookup("A_W"));
+    EW =
+        readScalar(kineticsProperties.subDict("BlowingConstants").lookup("E_W"));
+    if (EOH < 0.0 || COH_0 < 0.0 || CNCO_0 < 0.0 || CW_0 < 0.0 )
+    {
+        FatalErrorIn(args.executable())
+        << "Invalid value for gelling constants!"
+        "\nGelling constats cannot be negative."
+        << exit(FatalError);
+    }
+    if (EW < 0.0)
+    {
+        FatalErrorIn(args.executable())
+        << "Invalid value for blowing constants!"
+        "\nActivation energy cannot be negative."
+        << exit(FatalError);
+    }
+}
+
+scalar XOH_Gel =
     readScalar
     (
         kineticsProperties.subDict("GellingConstants").lookup("gellingPoint")
     );
-
-if (EOH < 0.0 || COH_0 < 0.0 || CNCO_0 < 0.0 || CW_0 < 0.0 || XOH_Gel < 0.0 )
+if (XOH_Gel < 0.0)
 {
     FatalErrorIn(args.executable())
-    << "Invalid value for gelling constants!"
-    "\nGelling constats cannot be negative."
+    << "Invalid value for gelling point!"
+    "\nGelling point cannot be negative."
     << exit(FatalError);
 }
+
 
 word blowingAgent(kineticsProperties.lookup("blowingAgent"));
 
 if
 (
-    !(blowingAgent == "n-pentane" 
-    || blowingAgent == "R-11" 
+    !(blowingAgent == "n-pentane"
+    || blowingAgent == "R-11"
     || blowingAgent == "no")
 )
 {
@@ -78,75 +100,63 @@ if
     << exit(FatalError);
 }
 
-scalar AW = 
-    readScalar(kineticsProperties.subDict("BlowingConstants").lookup("A_W"));
-scalar EW = 
-    readScalar(kineticsProperties.subDict("BlowingConstants").lookup("E_W"));
 
-if (EW < 0.0)
-{
-    FatalErrorIn(args.executable())
-    << "Invalid value for blowing constants!"
-    "\nActivation energy cannot be negative."
-    << exit(FatalError);
-}
-
-scalar RR = 
+scalar RR =
     readScalar
     (
         kineticsProperties.subDict("GenericConstants").lookup("idealGasCons")
     );
-scalar rhoPoly = 
+scalar rhoPoly =
     readScalar
     (
         kineticsProperties.subDict("GenericConstants").lookup("rhoPolymer")
     );
-scalar rhoBL = 
+scalar rhoBL =
     readScalar
     (
         kineticsProperties.subDict("GenericConstants").lookup("rhoBlowingAgent")
     );
-scalar M_CO2 = 
+scalar M_CO2 =
     readScalar
     (
         kineticsProperties.subDict("GenericConstants").lookup("molecularMassCO2")
     );
-scalar M_B = 
+scalar M_B =
     readScalar
     (
         kineticsProperties.subDict("GenericConstants").lookup("molecularMassBlowingAgent")
     );
-scalar M_NCO = 
+scalar M_NCO =
     readScalar
     (
         kineticsProperties.subDict("GenericConstants").lookup("molecularMassNCO")
     );
-scalar CO2_D = 
+scalar CO2_D =
     readScalar
     (
         kineticsProperties.subDict("GenericConstants").lookup("dissolvedCO2")
     );
-scalar dxdT = 
+scalar dxdT =
     readScalar
     (
         kineticsProperties.subDict("GenericConstants").lookup("dxdTcons")
     );
-scalar L0 = 
+scalar L0 =
     readScalar
     (
         kineticsProperties.subDict("GenericConstants").lookup("initBlowingAgent")
     );
-scalar CO2_0 = 
+scalar CO2_0 =
     readScalar
     (
         kineticsProperties.subDict("GenericConstants").lookup("initCO2")
     );
-scalar M_liq = 
+scalar M_liq =
     readScalar
     (
         kineticsProperties.subDict("GenericConstants").lookup("molecularMassLiquidFoam")
     );
-scalar surfaceTension = 
+scalar surfaceTension =
     readScalar
     (
         kineticsProperties.subDict("GenericConstants").lookup("surfaceTension")
@@ -154,8 +164,8 @@ scalar surfaceTension =
 
 if
 (
-    RR < 0.0 || rhoPoly < 0.0 || rhoBL < 0.0 
-    || M_B < 0.0 || M_CO2 < 0.0 || M_NCO < 0.0 
+    RR < 0.0 || rhoPoly < 0.0 || rhoBL < 0.0
+    || M_B < 0.0 || M_CO2 < 0.0 || M_NCO < 0.0
     || L0 < 0.0 || M_liq < 0.0 || surfaceTension < 0.0
 )
 {
@@ -165,39 +175,39 @@ if
 }
 
 // Enthalpy
-scalar DH_OH = 
+scalar DH_OH =
     readScalar
     (
         kineticsProperties.subDict("EnthalpyConstants").lookup("deltaOH")
     );
-scalar DH_W = 
+scalar DH_W =
     readScalar
     (
         kineticsProperties.subDict("EnthalpyConstants").lookup("deltaW")
     );
-scalar C_Poly = 
+scalar C_Poly =
     readScalar
-    ( 
+    (
         kineticsProperties.subDict("EnthalpyConstants").lookup("PUspecificHeat")
     );
-scalar C_CO2 = 
+scalar C_CO2 =
     readScalar
     (
         kineticsProperties.subDict("EnthalpyConstants").lookup("CO2specificHeat")
     );
-scalar C_BG = 
+scalar C_BG =
     readScalar
     (
         kineticsProperties.subDict("EnthalpyConstants").lookup("BGspecificHeat")
     );
-scalar C_BL = 
+scalar C_BL =
     readScalar
     (
         kineticsProperties.subDict("EnthalpyConstants").lookup("BLspecificHeat")
     );
-scalar latenth = 
+scalar latenth =
     readScalar
-    ( 
+    (
         kineticsProperties.subDict("EnthalpyConstants").lookup("latentHeat")
     );
 // switch for the liquid mixture density
@@ -217,11 +227,11 @@ volScalarField XW
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     ),
-    mesh     
+    mesh
 );
 
 Info<< "Creating field rho_foam*alpha2\n" << endl;
-volScalarField rhoFoamAlpha2 
+volScalarField rhoFoamAlpha2
 (
     "rhoFoamAlpha2",
     rho_foam*alpha2
@@ -268,7 +278,7 @@ volScalarField XOH
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     ),
-    mesh     
+    mesh
 );
 
 Info<< "\nCreating source fields ScNonXOH for XOH: " << endl;
@@ -321,7 +331,7 @@ volScalarField::DimensionedInternalField SpXOH
     dimensionedScalar("SpXOH", dimensionSet(0,0,-1,0,0,0,0), 0.0)
 );
 
-volScalarField::DimensionedInternalField TSource 
+volScalarField::DimensionedInternalField TSource
 (
     IOobject
     (
@@ -344,7 +354,7 @@ volScalarField wBA_g
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     ),
-    mesh     
+    mesh
 );
 volScalarField::DimensionedInternalField wBA_gSource
 (
@@ -369,7 +379,7 @@ volScalarField wBA_l
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     ),
-    mesh     
+    mesh
 );
 
 volScalarField::DimensionedInternalField wBA_lSource
@@ -395,7 +405,7 @@ volScalarField wCO2_l
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     ),
-    mesh     
+    mesh
 );
 volScalarField::DimensionedInternalField wCO2_lSource
 (
@@ -420,7 +430,7 @@ volScalarField wCO2_g
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     ),
-    mesh     
+    mesh
 );
 volScalarField::DimensionedInternalField wCO2_gSource
 (
@@ -445,7 +455,7 @@ volScalarField g1_CO2
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     ),
-    mesh     
+    mesh
 );
 Info<< "Reading field g1_BA, source of mOne due to the evaporation of blowing agent\n" << endl;
 volScalarField g1_BA
@@ -458,7 +468,7 @@ volScalarField g1_BA
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     ),
-    mesh    
+    mesh
 );
 Info<< "Reading field cc1, a constant based on the growth rate due to blowing agent\n" << endl;
 volScalarField cc1
@@ -471,7 +481,7 @@ volScalarField cc1
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     ),
-    mesh     
+    mesh
 );
 
 volScalarField CO2
@@ -513,7 +523,7 @@ volScalarField TS
     mesh,
     dimensionedScalar("TS", dimensionSet(0,0,0,1,0,0,0), 298.0)
 );
-volScalarField::DimensionedInternalField TSSource 
+volScalarField::DimensionedInternalField TSSource
 (
     IOobject
     (
@@ -524,242 +534,6 @@ volScalarField::DimensionedInternalField TSSource
     mesh,
     dimensionedScalar("TSSource", dimensionSet(0,0,-1,1,0,0,0), 0.0)
 );
-// Required fields for simple kinetics surrogate models
-Info<< "Reading field EG_NCO \n" << endl;
-    volScalarField EG_NCO
-    (
-        IOobject
-        (
-            "EG_NCO",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh     
-    );
-
-Info<< "Reading field EG_OH \n" << endl;
-    volScalarField EG_OH
-    (
-        IOobject
-        (
-            "EG_OH",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh     
-    );
-
-Info<< "Reading field H2O \n" << endl;
-    volScalarField H2O
-    (
-        IOobject
-        (
-            "H2O",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh     
-    );
-
-Info<< "Reading field CO2_Sur \n" << endl;
-    volScalarField CO2_Sur
-    (
-        IOobject
-        (
-            "CO2_Sur",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh     
-    );
-
-Info<< "Reading field PENTANE \n" << endl;
-    volScalarField PENTANE
-    (
-        IOobject
-        (
-            "PENTANE",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh     
-    );
-
-Info<< "Reading field POLYMER \n" << endl;
-    volScalarField POLYMER
-    (
-        IOobject
-        (
-            "POLYMER",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh     
-    );
-
-Info<< "Reading field POLMERBLOW \n" << endl;
-    volScalarField POLMERBLOW
-    (
-        IOobject
-        (
-            "POLMERBLOW",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh     
-    );
-
-Info<< "Reading field UREA \n" << endl;
-    volScalarField UREA
-    (
-        IOobject
-        (
-            "UREA",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh     
-    );
-
-Info<< "Reading field R_1_temp \n" << endl;
-    volScalarField R_1_temp
-    (
-        IOobject
-        (
-            "R_1_temp",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-         mesh     
-    );
-
-// Source terms for the simple kinetics surrogate model
-Info<< "Creating source term source_EG_NCO" << endl;
-volScalarField::DimensionedInternalField source_EG_NCO
-    (
-         IOobject
-        (
-            "source_EG_NCO",
-            runTime.timeName(),
-            mesh
-        ),
-        mesh,
-        dimensionedScalar("source_EG_NCO", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
-    );
-Info<< "Creating source term source_EG_OH" << endl;
-volScalarField::DimensionedInternalField source_EG_OH
-    (
-         IOobject
-        (
-            "source_EG_OH",
-            runTime.timeName(),
-            mesh
-        ),
-        mesh,
-        dimensionedScalar("source_EG_OH", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
-    );
-Info<< "Creating source term source_H2O" << endl;
-volScalarField::DimensionedInternalField source_H2O
-    (
-         IOobject
-        (
-            "source_H2O",
-            runTime.timeName(),
-            mesh
-        ),
-        mesh,
-        dimensionedScalar("source_H2O", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
-    );
-Info<< "Creating source term source_CO2" << endl;
-volScalarField::DimensionedInternalField source_CO2
-    (
-         IOobject
-        (
-            "source_CO2",
-            runTime.timeName(),
-            mesh
-        ),
-        mesh,
-        dimensionedScalar("source_CO2", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
-    );
-Info<< "Creating source term source_PENTANE" << endl;
-volScalarField::DimensionedInternalField source_PENTANE
-    (
-         IOobject
-        (
-            "source_PENTANE",
-            runTime.timeName(),
-            mesh
-        ),
-        mesh,
-        dimensionedScalar("source_PENTANE", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
-    );
-Info<< "Creating source term source_POLYMER" << endl;
-volScalarField::DimensionedInternalField source_POLYMER
-    (
-         IOobject
-        (
-            "source_POLYMER",
-            runTime.timeName(),
-            mesh
-        ),
-        mesh,
-        dimensionedScalar("source_POLYMER", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
-    );
-Info<< "Creating source term source_POLMERBLOW" << endl;
-volScalarField::DimensionedInternalField source_POLMERBLOW
-    (
-         IOobject
-        (
-            "source_POLMERBLOW",
-            runTime.timeName(),
-            mesh
-        ),
-        mesh,
-        dimensionedScalar("source_POLMERBLOW", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
-    );
-Info<< "Creating source term source_UREA" << endl;
-volScalarField::DimensionedInternalField source_UREA
-    (
-         IOobject
-        (
-            "source_UREA",
-            runTime.timeName(),
-            mesh
-        ),
-        mesh,
-        dimensionedScalar("source_UREA", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
-    );
-Info<< "Creating source term source_R_1_temp" << endl;
-volScalarField::DimensionedInternalField source_R_1_temp
-    (
-         IOobject
-        (
-            "source_R_1_temp",
-            runTime.timeName(),
-            mesh
-        ),
-        mesh,
-        dimensionedScalar("source_R_1_temp", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
-    );
 // Required fields for RF-1 kinetics surrogate model
 Info<< "Reading field Catalyst_1 \n" << endl;
     volScalarField Catalyst_1
@@ -772,7 +546,7 @@ Info<< "Reading field Catalyst_1 \n" << endl;
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh     
+        mesh
     );
 Info<< "Reading field CE_A0 \n" << endl;
     volScalarField CE_A0
@@ -785,7 +559,7 @@ Info<< "Reading field CE_A0 \n" << endl;
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh     
+        mesh
     );
 Info<< "Reading field CE_A1 \n" << endl;
     volScalarField CE_A1
@@ -798,7 +572,7 @@ Info<< "Reading field CE_A1 \n" << endl;
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh     
+        mesh
     );
 Info<< "Reading field CE_B \n" << endl;
     volScalarField CE_B
@@ -811,7 +585,7 @@ Info<< "Reading field CE_B \n" << endl;
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh     
+        mesh
     );
 Info<< "Reading field CE_B2 \n" << endl;
     volScalarField CE_B2
@@ -824,7 +598,7 @@ Info<< "Reading field CE_B2 \n" << endl;
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh     
+        mesh
     );
 Info<< "Reading field CE_I0 \n" << endl;
     volScalarField CE_I0
@@ -837,7 +611,7 @@ Info<< "Reading field CE_I0 \n" << endl;
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh     
+        mesh
     );
 Info<< "Reading field CE_I1 \n" << endl;
     volScalarField CE_I1
@@ -850,7 +624,7 @@ Info<< "Reading field CE_I1 \n" << endl;
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh     
+        mesh
     );
 Info<< "Reading field CE_I2 \n" << endl;
     volScalarField CE_I2
@@ -863,7 +637,7 @@ Info<< "Reading field CE_I2 \n" << endl;
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh     
+        mesh
     );
 Info<< "Reading field CE_PBA \n" << endl;
     volScalarField CE_PBA
@@ -876,7 +650,7 @@ Info<< "Reading field CE_PBA \n" << endl;
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh     
+        mesh
     );
 Info<< "Reading field CE_Breac \n" << endl;
     volScalarField CE_Breac
@@ -889,7 +663,7 @@ Info<< "Reading field CE_Breac \n" << endl;
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh     
+        mesh
     );
 Info<< "Reading field CE_Areac0 \n" << endl;
     volScalarField CE_Areac0
@@ -902,7 +676,7 @@ Info<< "Reading field CE_Areac0 \n" << endl;
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh     
+        mesh
     );
 Info<< "Reading field CE_Areac1 \n" << endl;
     volScalarField CE_Areac1
@@ -915,7 +689,7 @@ Info<< "Reading field CE_Areac1 \n" << endl;
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh     
+        mesh
     );
 Info<< "Reading field CE_Ireac0 \n" << endl;
     volScalarField CE_Ireac0
@@ -928,7 +702,7 @@ Info<< "Reading field CE_Ireac0 \n" << endl;
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh     
+        mesh
     );
 Info<< "Reading field CE_Ireac1 \n" << endl;
     volScalarField CE_Ireac1
@@ -941,7 +715,7 @@ Info<< "Reading field CE_Ireac1 \n" << endl;
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh     
+        mesh
     );
 Info<< "Reading field CE_Ireac2 \n" << endl;
     volScalarField CE_Ireac2
@@ -954,7 +728,7 @@ Info<< "Reading field CE_Ireac2 \n" << endl;
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh     
+        mesh
     );
 Info<< "Reading field Bulk \n" << endl;
     volScalarField Bulk
@@ -967,7 +741,7 @@ Info<< "Reading field Bulk \n" << endl;
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh     
+        mesh
     );
 Info<< "Reading field R_1 \n" << endl;
     volScalarField R_1
@@ -980,7 +754,7 @@ Info<< "Reading field R_1 \n" << endl;
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh     
+        mesh
     );
 Info<< "Reading field R_1_mass \n" << endl;
     volScalarField R_1_mass
@@ -993,7 +767,7 @@ Info<< "Reading field R_1_mass \n" << endl;
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh     
+        mesh
     );
 Info<< "Reading field R_1_temp_RF1 \n" << endl;
     volScalarField R_1_temp_RF1
@@ -1006,7 +780,7 @@ Info<< "Reading field R_1_temp_RF1 \n" << endl;
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh     
+        mesh
     );
 Info<< "Reading field R_1_vol_RF1 \n" << endl;
     volScalarField R_1_vol_RF1
@@ -1019,7 +793,7 @@ Info<< "Reading field R_1_vol_RF1 \n" << endl;
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh     
+        mesh
     );
 // source terms for the RF-1 kinetics surrogate models
 Info<< "Creating source term source_Catalyst_1" << endl;
@@ -1262,3 +1036,18 @@ volScalarField::DimensionedInternalField source_R_1_vol_RF1
         mesh,
         dimensionedScalar("sourceR_1_vol_RF1", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
+
+if (KineticsModel == "RF-1")
+{
+    forAll(mesh.C(), celli)
+    {
+        if (alpha1[celli] == 0.0)
+        {
+            scalar foam_index;
+            foam_index = celli;
+            CW_0 = scalar(1000.0)*CE_B2[foam_index];
+            COH_0 = scalar(1000.0)*(CE_A0[foam_index] + CE_A1[foam_index]);
+            break;
+        }
+    }
+}
