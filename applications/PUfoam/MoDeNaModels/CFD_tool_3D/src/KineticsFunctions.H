@@ -186,12 +186,9 @@ double partialPressureCO2
     }
     else
     {
-    // Info<< "wCO2_g = " << wCO2_g << endl;
-    // Info<< "wBA_g = " << wBA_g << endl;
         pCO2 =
         (
             (wCO2_g/M_CO2)/(wBA_g/M_B + wCO2_g/M_CO2)
-           // *(p + 2*surfaceTension/Foam::max(R,ROOTVSMALL)
         );
     }
 
@@ -214,7 +211,6 @@ double partialPressureBA
 
             (
                 (wBA_g/M_B)/(wBA_g/M_B + wCO2_g/M_CO2)
-                // *(p + 2*surfaceTension/Foam::max(R,ROOTVSMALL))
             );
     }
     return (1e5*pBA);
@@ -263,10 +259,6 @@ double wBL_D(double &xBL, double &M_B, double &M_NCO, double &L0)
     {
         Lm = 1.0e-4;
     }
-    // if (Lm > L0)
-    // {
-    //  Lm = L0;
-    // }
     return (Lm);
 }
 
@@ -308,5 +300,4 @@ double thermalDiffusivityGas(double &T)
 double nodeRadius(const double &v)
 {
     return (Foam::pow(3.0*v/(4.0*M_PI), 1/3.0));
-    // return (Foam::pow((6.0*v/M_PI),1/3.0));
 }

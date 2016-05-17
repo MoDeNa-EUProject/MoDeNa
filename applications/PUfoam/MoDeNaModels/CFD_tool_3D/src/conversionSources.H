@@ -144,7 +144,7 @@ if (KineticsModel == "generic")
         }
     }
 }
-// if (KineticsModel == "RF-1")
+if (KineticsModel == "RF-1")
 {
     forAll(mesh.C(), celli)
     {

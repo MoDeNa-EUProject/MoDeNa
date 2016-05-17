@@ -184,9 +184,6 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
     R_1_temp    = y[29];
     R_1_vol     = y[30];
 
-    // EG_XNCO     = 1.0 - (y[11]/init_EG_NCO);
-    // EG_XOH      = 1.0 - (y[12]/init_EG_OH);
-    // XH2O        = 1.0 - (y[13]/init_H2O);
     double Rx;
     // Calling the RF-1 model
     switch (kinMod)
@@ -259,14 +256,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
             dydt[28] = modena_outputs_get(outputs_kinetics, source_R_1_mass_Pos);
             dydt[29] = modena_outputs_get(outputs_kinetics, source_R_1_temp_Pos);
             dydt[30] = modena_outputs_get(outputs_kinetics, source_R_1_vol_Pos);
-                // Check for negative sources
-            // for (int i = 11; i < 31; i++)
-            // {
-            //     if(dydt[i] < 0.0)
-            //     {
-            //         dydt[i] = 0.0;
-            //     }
-            // }
+
             dydt[0] = -dydt[15]/(W_0/1000);
             dydt[1] = -(dydt[12] + dydt[13])/(1.92250e3 + 2.2692e3)*1000;
             OH_0 = 1.92250e3 + 2.2692e3;
@@ -434,20 +424,16 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
     }
 
     PDA(we, vi, mom, nNodes);
-    // for (int j = 0; j < 2*nNodes; j++){
-    //     cout << "mom[" << j << "] = " << mom[j] << endl;
-    // }
+
 	Lm 			= LMax(T);
     // calling the surogate models for bubble growth rates.
     size_t Tbblgr1pos               = modena_model_inputs_argPos(bblgr1, "T");
     size_t Rbblgr1pos               = modena_model_inputs_argPos(bblgr1, "R");
-    // size_t KH1bblgr1pos             = modena_model_inputs_argPos(bblgr1, "kH");
     size_t c_1bblgr1pos             = modena_model_inputs_argPos(bblgr1, "c");
     size_t p_1bblgr1pos             = modena_model_inputs_argPos(bblgr1, "p");
     modena_model_argPos_check(bblgr1);
     size_t Tbblgr2pos               = modena_model_inputs_argPos(bblgr2, "T");
     size_t Rbblgr2pos               = modena_model_inputs_argPos(bblgr2, "R");
-    // size_t KH2bblgr2pos             = modena_model_inputs_argPos(bblgr2, "kH");
     size_t c_2bblgr2pos             = modena_model_inputs_argPos(bblgr2, "c");
     size_t p_2bblgr2pos             = modena_model_inputs_argPos(bblgr2, "p");
     modena_model_argPos_check(bblgr2);
@@ -458,8 +444,6 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
     double p_2  = partialPressureCO2(y);
     double c_1  = L_l*rhoPolySurrgate*1000.0/M_B;
     double c_2  = CO2_l*rhoPolySurrgate*1000.0/M_CO2;
-    // double KH1  = (rhoPolySurrgate*Lm)/((M_B/1000.0)*Pr);
-    // double KH2  = (rhoPolySurrgate*CO2_D)/((M_CO2/1000.0)*Pr);
 
     if (bubbleMode == "two nodes")
     {
@@ -471,11 +455,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
         int     ret_bblgr1[nNodes], ret_bblgr2[nNodes];
         for (int i = 0; i < nNodes; i++)
         {
-            // cout << endl;
-            // cout << "v[" << i << "] = " << vi[i] << endl;
-            // cout << "we[" << i << "] = " << we[i] << endl;
             nodeRadii[i] = nodeRadius(vi[i]);
-            // cout << "nodeRadii[" << i << "] = " << nodeRadii[i] << endl;
             // set input vector
             modena_inputs_set(inputs_bblgr1, Tbblgr1pos, T);
             modena_inputs_set(inputs_bblgr1, Rbblgr1pos, nodeRadii[i]);
@@ -484,9 +464,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
             modena_inputs_set(inputs_bblgr1, p_1bblgr1pos, p_1);
             // call the bblgr1 model
             ret_bblgr1[i]       = modena_model_call (bblgr1, inputs_bblgr1, outputs_bblgr1);
-            // cout << "ret_bblgr1[" << i << "] = " << ret_bblgr1[i] << endl;
             radiusGrowthBA[i]   = modena_outputs_get(outputs_bblgr1, 0);
-            // cout << "radiusGrowthBA[" << i << "] = " << radiusGrowthBA[i] << endl;
             // set input vector
             modena_inputs_set(inputs_bblgr2, Tbblgr2pos, T);
             modena_inputs_set(inputs_bblgr2, Rbblgr2pos, nodeRadii[i]);
@@ -503,7 +481,6 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
             {
                 cout << modena_error() << endl;
             }
-            // cout << "radiusGrowthCO2[" << i << "] = " << radiusGrowthCO2[i] << endl;
             volumeGrowthBA[i]   = (radiusGrowthBA[i]*RR*T)/(p_1);
             volumeGrowthCO2[i]  = (radiusGrowthCO2[i]*RR*T)/(p_2);
 
@@ -515,16 +492,9 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
             {
                 volumeGrowthCO2[i]  = 0.0;
             }
-            // cout << "volumeGrowthBA[" << i << "] = " << volumeGrowthBA[i] << endl;
-            // cout << "volumeGrowthCO2[" << i << "] = " << volumeGrowthCO2[i] << endl;
-
-            // cout << "Going into growthSource function***" << endl;
-            // double volumeGrowthBA = 1.0e-13;
-            // double volumeGrowthCO2 = 1.0e-30;
         }
 
         growthSource(sgBA, sgCO2, we, vi, nNodes, mOrder, CO2_l, L_l, T, volumeGrowthBA, volumeGrowthCO2);
-		// printf("%g %g\n", G1,G2);
     }
     else if (bubbleMode == "mean radius")
     {
@@ -557,32 +527,20 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
         }
         G1 = modena_outputs_get(outputs_bblgr1, 0);
         G2 = modena_outputs_get(outputs_bblgr2, 0);
-        // double mpar=0.0;
-        // double mpar2=1.0;
-        // G1=G1*pow(R,mpar)*mpar2; //for testing
-        // G2=G2*pow(R,mpar)*mpar2;
         dVdt_1[0] = (G1*RR*T)/(p_1);
-		// dVdt_1[1] = (G1*RR*T)/(p_1);
-        // dVdt_1 = (G1*RR*T)/(p_1) - ((4.0*M_PI*pow(R,3.0))/(3.0*p_1))*(dpdt[0]+dpdt[1]) + ((4.0*M_PI*pow(R,3))/(max((3.0*T),1.0e-6)))*dydt[2];
         if (dVdt_1[0] < 0.0 || G1 < 0.0 || L0<1e-8 || y[1]>0.5) //hardcoded gel point
         {
             dVdt_1[0] = 0.0;
         }
         dVdt_1[1] = dVdt_1[0];
         dVdt_2[0] = (G2*RR*T)/(p_2);
-		// dVdt_2[1] = (G2*RR*T)/(p_2);
-        // dVdt_2 = (G2*RR*T)/(p_2) - ((4.0*M_PI*pow(R,3.0))/(3.0*p_2))*(dpdt[0]+dpdt[1]) + ((4.0*M_PI*pow(R,3))/(max((3.0*T),1.0e-6)))*dydt[2];
         if (dVdt_2[0] < 0.0 || G2 < 0.0 || W_0<1e-8 || y[1]>0.5) //hardcoded gel point
         {
             dVdt_2[0] = 0.0;
         }
         dVdt_2[1] = dVdt_2[0];
 
-		// printf("%g %g\n", dVdt_1[0],dVdt_2[0]);
-		// printf("%i\n", nNodes);
-		// printf("%g %g\n", vi[0],vi[1]);
         growthSource(sgBA, sgCO2, we, vi, nNodes, mOrder, CO2_l, L_l, T, dVdt_1, dVdt_2);
-		// printf("%g %g\n", sgBA[1],sgCO2[1]);
     }
     else
     {
@@ -617,7 +575,6 @@ int main(int argc, char **argv)
 {
     #include "modenaCalls.h"
 
-
 	readParams();
 	// initial conditions
     state_type y(31);
@@ -650,7 +607,6 @@ int main(int argc, char **argv)
     y[12]           = 1.9225;
     y[13]           = 2.2692;
     y[14]           = 0.0;
-    // y[15]           = 5.462e-1;
 	y[15]           = W_0*1e-3;
     y[16]           = 2.1979;
     y[17]           = 1.64;

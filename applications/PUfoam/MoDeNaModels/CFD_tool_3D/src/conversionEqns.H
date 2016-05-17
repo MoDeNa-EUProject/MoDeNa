@@ -133,7 +133,7 @@ if (KineticsModel == "RF-1")
         fvm::ddt(CE_I1)
       + fvm::div(phi,CE_I1)
       + fvm::SuSp(expImpSource,CE_I1)
-      - fvm::div(alpha1phir,CE_I1) 
+      - fvm::div(alpha1phir,CE_I1)
       == source_CE_I1
     );
     CE_I1Eqn.relax();
