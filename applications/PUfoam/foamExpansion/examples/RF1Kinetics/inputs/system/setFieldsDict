@@ -1,0 +1,123 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.1.x                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      setFieldsDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+defaultFieldValues
+(
+    volScalarFieldValue alpha.gas 1
+    volScalarFieldValue wBA_l 0
+    volScalarFieldValue mZero 0
+    volScalarFieldValue mOne 0
+    volScalarFieldValue mTwo 0
+    volScalarFieldValue mThree 0
+    volScalarFieldValue mFour 0
+    volScalarFieldValue mFive 0
+    volScalarFieldValue M0 0
+    volScalarFieldValue M1 0
+    volScalarFieldValue M2 0
+    volScalarFieldValue M3 0
+    volScalarFieldValue M4 0
+    volScalarFieldValue M5 0
+    volScalarFieldValue rho_foam 1.2
+    volScalarFieldValue rho_gas 1.2
+    volScalarFieldValue weight0 0
+    volScalarFieldValue weight1 0
+    volScalarFieldValue weight2 0
+    volScalarFieldValue node0 0
+    volScalarFieldValue node1 0
+    volScalarFieldValue node2 0
+    volScalarFieldValue TS 298
+    // simple kinetics surrogate model
+    volScalarFieldValue EG_NCO 0
+    volScalarFieldValue EG_OH 0
+    volScalarFieldValue H2O 0
+    volScalarFieldValue R_1_temp 293.15
+    // RF-1 kinetics surrogate model
+    volScalarFieldValue Catalyst_1 0
+    volScalarFieldValue CE_A0 0
+    volScalarFieldValue CE_A1 0
+    volScalarFieldValue CE_B2 0
+    volScalarFieldValue CE_I0 0
+    volScalarFieldValue CE_I1 0
+    volScalarFieldValue CE_I2 0
+    volScalarFieldValue Bulk 0
+    volScalarFieldValue R_1_mass 0
+    volScalarFieldValue R_1_temp_RF1 333
+    volScalarFieldValue wCO2_g 0
+    volScalarFieldValue wBA_g 0
+    volScalarFieldValue wCO2_l 0
+);
+
+regions
+(
+    boxToCell
+    {
+        box (0 0 0) (0.1 0.02 0.01);
+
+        fieldValues
+        (
+        volScalarFieldValue alpha.gas 0
+	    volScalarFieldValue wBA_l 0.0
+	    volScalarFieldValue mZero 1.0e+11
+	    volScalarFieldValue mOne 5.9332e-8
+	    volScalarFieldValue mTwo 4.5201e-26
+	    volScalarFieldValue mThree 4.4216e-44
+        volScalarFieldValue mFour 8.1421e-61
+        volScalarFieldValue mFive 4.4594e-79
+        volScalarFieldValue M0 1.0e11
+        volScalarFieldValue M1 5.9332e-8
+        volScalarFieldValue M2 4.5201e-26
+        volScalarFieldValue M3 4.4216e-44
+        volScalarFieldValue M4 8.1421e-61
+        volScalarFieldValue M5 4.4594e-79
+	    volScalarFieldValue rho_foam 1100.0
+	    volScalarFieldValue rho_gas 1e-8
+	    volScalarFieldValue muFoamCorr 1e-3
+	    volScalarFieldValue muMixture  1e-3
+	    volScalarFieldValue muFoam  1e-3
+        volScalarFieldValue weight0 5.72635e+12
+        volScalarFieldValue weight1 4.27365e+12
+        volScalarFieldValue weight2 3.43594e+12
+        volScalarFieldValue node0 4.8065e-19
+        volScalarFieldValue node1 5.8728e-19
+        volScalarFieldValue node2 5.97756e-19
+        volScalarFieldValue TS 300
+        // simple kinetics surrogate model
+        volScalarFieldValue EG_NCO 5.20674
+        volScalarFieldValue EG_OH 4.79837
+        volScalarFieldValue H2O 2.04186e-1
+        volScalarFieldValue R_1_temp 293.15
+        // RF-1 kinetics surrogate model
+        volScalarFieldValue Catalyst_1 6.73000e-2
+        volScalarFieldValue CE_A0 1.92250
+        volScalarFieldValue CE_A1 2.26920
+        volScalarFieldValue CE_B2 0.671
+        volScalarFieldValue CE_I0 2.19790
+        volScalarFieldValue CE_I1 1.64000
+        volScalarFieldValue CE_I2 1.71030
+        volScalarFieldValue Bulk 0.0
+        volScalarFieldValue R_1_mass 0.0
+        volScalarFieldValue R_1_temp_RF1 333
+        volScalarFieldValue wCO2_g 5.7897e-10
+        volScalarFieldValue wBA_g 1.30294e-8
+        volScalarFieldValue wCO2_l 2.988303e-5
+        );
+    }
+
+);
+
+
+// ************************************************************************* //

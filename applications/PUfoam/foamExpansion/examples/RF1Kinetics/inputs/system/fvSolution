@@ -1,0 +1,217 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.2.2                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      fvSolution;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+solvers
+{
+ "alpha.*"
+    {
+       
+    
+        nAlphaCorr      1;
+        nAlphaSubCycles 0;
+        cAlpha          1;
+        icAlpha         0;
+
+        MULESCorr       yes;
+        nLimiterIter    8;
+        alphaApplyPrevCorr  yes;
+
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-8;
+        relTol          0.1;
+        minIter         1;
+    
+    }
+// For Moments
+    "(mZero|mOne|mTwo|mThree|mFour|mFive)"
+    {
+	solver          PBiCG;
+        preconditioner  none;
+        tolerance       1.0e-10;
+        relTol          1.0e-8;
+    }
+    "(mZero|mOne|mTwo|mThree|mFour|mFive)Final"
+    {
+	$mZero;
+        relTol          0;
+    } 
+
+// For Kinetics
+    "(wCO2_l|wCO2_g|wBA_g|wBA_l|XOH|XW|XNCO)"
+    {
+	    solver          PBiCG;
+        preconditioner  none;
+        tolerance       1.0e-4;
+        relTol          1.0e-4;
+    }
+    "(wCO2_l|wCO2_g|wBA_g|wBA_l|XOH|XW|XNCO)Final"
+    {
+	$wCO2_l;
+        relTol           0;
+    } 
+// For Kinetics using surrogate model
+    "(Catalyst_1|CE_A0|CE_A1|CE_B|CE_B2|CE_I0|CE_I1|CE_I2|CE_PBA|CE_Breac|CE_Areac0|CE_Areac1|CE_Ireac0|CE_Ireac1|CE_Ireac2|Bulk|R_1|R_1_temp_RF1)"
+    {
+        solver          PBiCG;
+        preconditioner  none;
+        tolerance       1.0e-6;
+        relTol          1.0e-6;
+    }
+    "(Catalyst_1|CE_A0|CE_A1|CE_B|CE_B2|CE_I0|CE_I1|CE_I2|CE_PBA|CE_Breac|CE_Areac0|CE_Areac1|CE_Ireac0|CE_Ireac1|CE_Ireac2|Bulk|R_1|R_1_temp_RF1)Final"
+    {
+        $Catalyst_1;
+        relTol           0;
+    }
+"(alpha.foam*rho_foam)Final"
+  {
+        solver          PCG;
+        preconditioner  DIC;
+        tolerance       1e-6;
+        relTol          0;
+    }
+"(alpha.gas*rho_gas)Final"
+  {
+        solver          PCG;
+        preconditioner  DIC;
+        tolerance       1e-6;
+        relTol          0;
+    }
+    "rho.*"
+    {
+        solver          PBiCG;
+        preconditioner  none;
+        tolerance       1.0e-4;
+        relTol          1.0e-4;
+    }
+
+   pcorr
+    {
+        solver          PCG;
+        preconditioner
+        {
+            preconditioner  GAMG;
+            tolerance       1e-05;
+            relTol          0;
+            smoother        DICGaussSeidel;
+            nPreSweeps      0;
+            nPostSweeps     2;
+            nFinestSweeps   2;
+            cacheAgglomeration true;
+            nCellsInCoarsestLevel 2;
+            agglomerator    faceAreaPair;
+            mergeLevels     1;
+        }
+        tolerance       1e-05;
+        relTol          0;
+        maxIter         1000;
+    }
+
+    p_rgh
+    {
+        solver          GAMG;
+        tolerance       1e-05;
+        relTol          0.01;
+        smoother        DIC;
+        nPreSweeps      0;
+        nPostSweeps     2;
+        nFinestSweeps   2;
+        cacheAgglomeration true;
+        nCellsInCoarsestLevel 2;
+        agglomerator    faceAreaPair;
+        mergeLevels     1;
+    }
+
+    p_rghFinal
+    {
+        solver          PCG;
+        preconditioner
+        {
+            preconditioner  GAMG;
+            tolerance       1e-05;
+            relTol          0;
+            nVcycles        2;
+            smoother        DICGaussSeidel;
+            nPreSweeps      2;
+            nPostSweeps     2;
+            nFinestSweeps   2;
+            cacheAgglomeration true;
+            nCellsInCoarsestLevel 2;
+            agglomerator    faceAreaPair;
+            mergeLevels     1;
+        }
+        tolerance       1e-05;
+        relTol          0;
+        maxIter         200;
+    }
+    "(p|pFinal)"
+    {
+        $p_rgh;
+        relTol    1e-5;
+    }
+
+    "(U|h|e|k|epsilon|R|T|TS|B|nuTilda)"
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-8; //H
+        relTol          1e-6;
+    }
+
+    "(U|h|e|k|epsilon|R|T|TS|B|alphafoam|alphagas|nuTilda)Final"
+    {
+        $U;
+        relTol          0;
+    }
+}
+
+PIMPLE
+{
+    momentumPredictor yes;
+    transonic       no;
+    nOuterCorrectors 1;
+    nCorrectors     2;
+    nNonOrthogonalCorrectors 0; 
+}
+relaxationFactors
+{
+    fields
+    {
+        rho                0.4;
+        "p_rgh*"           0.2;
+        wBA_g              0.2;
+    }
+    equations
+    {
+        "(h|e)*"           0.2;
+        "T*"               0.1;
+        "U*"               0.2;
+	    p		           0.2;
+        wBA_g              0.2;
+        wBA_l              0.2;
+        wCO2_l             0.2;
+        wCO2_g             0.2; 
+        mZero              0.5;
+        mOne               0.5;
+        mTwo               0.5;
+        mThree             0.5;   
+        mFour              0.5;
+        mFive              0.5;
+    }
+}
+
+// ************************************************************************* //
