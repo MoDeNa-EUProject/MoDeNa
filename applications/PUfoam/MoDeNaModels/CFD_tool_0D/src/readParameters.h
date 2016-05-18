@@ -2,7 +2,7 @@
 	@brief reads the inputs from the input files.
 */
 #include <rapidjson/document.h>
-#include <rapidjson/filereadstream.h>>
+#include <rapidjson/filereadstream.h>
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
 void readParams();
@@ -32,6 +32,11 @@ void readParams() {
         E_W=document["kinetics"]["blowingReaction"]["activationEnergy"].GetDouble();
         OH_0=document["initialConditions"]["concentrations"]["polyol"].GetDouble();
         NCO_0=document["initialConditions"]["concentrations"]["isocyanate"].GetDouble();
+        if (document["kinetics"]["useDilution"].GetBool()){
+            dilution=1;
+        } else {
+            dilution=0;
+        }
     } else if (kinMod==3) {
         catalyst=document["initialConditions"]["concentrations"]["catalyst"].GetDouble();
     	polyol1_ini=document["initialConditions"]["concentrations"]["polyol1"].GetDouble();
@@ -65,19 +70,15 @@ void readParams() {
         denMod=2;
         rhoPoly=document["physicalProperties"]["polymer"]["density"].GetDouble();
     }
-    if (document["kinetics"]["useDilution"].GetBool()){
-        dilution=1;
-    } else {
-        dilution=0;
-    }
+    
     M_CO2=document["physicalProperties"]["blowingAgents"]["CO2"]["molarMass"].GetDouble()*1e3;
     M_B=document["physicalProperties"]["blowingAgents"]["PBL"]["molarMass"].GetDouble()*1e3;
     M_NCO=document["physicalProperties"]["polymer"]["molarMassNCO"].GetDouble()*1e3;
     M_air=document["physicalProperties"]["air"]["molarMass"].GetDouble()*1e3;
     double cb=document["initialConditions"]["concentrations"]["blowingAgents"]["PBL"].GetDouble();
-    L0=cb*M_B/rhoPoly;
+    L0=cb*M_B/rhoPoly/1000.0;
     double cc=document["initialConditions"]["concentrations"]["blowingAgents"]["CO2"].GetDouble();
-    CO2_0=cc*M_CO2/rhoPoly;
+    CO2_0=cc*M_CO2/rhoPoly/1000.0;
     surfaceTension=document["physicalProperties"]["surfaceTension"].GetDouble();
     sig=document["initialConditions"]["bubbleRadiusDeviation"].GetDouble();
     init_size=document["initialConditions"]["bubbleRadius"].GetDouble()*2;
