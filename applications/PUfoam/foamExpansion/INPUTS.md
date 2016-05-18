@@ -1,0 +1,76 @@
+@ingroup app_foaming
+
+The recipe for the simulation is specified in the 'inputs' directory. Several test cases are prepared in the 'examples' directory. The 'unifiedInput.json' file controls the Bubble growth model and the 0D simulation, the rest of the files control the OpenFOAM simulation.
+
+### Preparing unifiedInput.json
+The following key-pairs should be defined:
+- "physicalBlowingAgent": "name of blowing agent" ["n-pentane", "R11"]
+- "initialConditions":
+    - "initial concentrations of reactants and blowing agents (mol/m^3)" (always water, PBL, CO2 and for Baser kinetics: isocyanate, polyol; for RF-1 kinetics: catalyst, polyol1, polyol2, amine, isocyanate1, isocyanate2, isocyanate3)
+    - "bubbleRadius": "initial bubble radius (m)",
+    - "bubbleRadiusDeviation": "standard deviation of initial BSD",
+    - "numberBubbleDensity": "initial number density of bubbles (1/m^3)",
+    - "temperature": "initial temperature (K)"
+- "kinetics":
+    - "kineticModel": "name of kinetic model" ["Baser", "RF-1"],
+    - "useDilution": "use correction for dilution in Baser model (t/f)",
+    - "gellingReaction": "parameters of gelling reaction"
+        - "frequentialFactor": "pre-exponential factor for Baser model (m^3/mol/s)",
+        - "activationEnergy": "activation energy for Baser model (J/mol)",
+        - "reactionEnthalpy": "reaction enthalpy used in all models (J/mol)"
+    - "blowingReaction":
+        - "frequentialFactor": pre-exponential factor for Baser model (1/s),
+        - "activationEnergy": activation energy for Baser model (J/mol),
+        - "reactionEnthalpy": reaction enthalpy used in all models (J/mol)
+- "physicalProperties":
+    - "pressure": (Pa)
+    - "blowingAgents":
+        - "PBL":
+            - "molarMass": (kg/mol)
+            - "heatCapacityInLiquidPhase": (J/kg/K)
+            - "heatCapacityInGaseousPhase": (J/kg/K)
+            - "evaporationHeat":  (J/kg)
+            - "density": (kg/m^3)
+            - "diffusivityModel": ["constant","nanotools"],
+            - "diffusivity": diffusivity when "constant" diffusivityModel is used (m^2/s)
+            - "solubilityModel": ["constant", "pcsaft", "Gupta", "Winkler", "Baser"] Gupta and Winkler are models for n-pentane, Baser is model for R11
+        - "CO2":
+            - "molarMass": (kg/mol)
+            - "heatCapacityInLiquidPhase": (J/kg/K)
+            - "heatCapacityInGaseousPhase": (J/kg/K)
+            - "evaporationHeat":  (J/kg)
+            - "density": (kg/m^3)
+            - "diffusivityModel": ["constant","nanotools"],
+            - "diffusivity": diffusivity when "constant" diffusivityModel is used (m^2/s)
+            - "solubilityModel": ["constant", "pcsaft"]
+            - "solubility": solubility when "constant" solubilityModel is used (mol/m^3/Pa)
+    - "air" :
+        - "molarMass": (kg/mol)
+    - "polymer":
+        - "heatCapacity": (J/kg/K)
+        - "polymerDensityModel": ["constant", "nanotools"],
+        - "density": when "constant" polymerDensityModel is used (kg/m^3)
+        - "viscosityModel": ["CastroMacosko"],
+        - "maxViscosity": maximum viscosity - for gel point detection (Pa s),
+        - "molarMassNCO": (kg/kmol)
+    - "surfaceTensionModel": ["constant" "pcsaft"],
+    - "surfaceTension": surface tension when "constant" is used (N/m)
+- "bubbleGrowth":
+    - "integrator": ["dlsode", "dlsodes"] dlsodes is recommended
+    - "method": ["nonstiff", "stiff"] stiff is recommended
+    - "inertialTerm": [t/f] use inertial term in bubble growth model
+    - "solubilityCorrection": [t/f] use solubility correction on surface tension
+    - "meshCoarseningParameter": 1.02 is recommended
+    - "internalNodes": number of nodes in shell around the bubble, 200 is recommended
+    - "initialTime": (s)
+    - "finalTime": (s)
+    - "outerTimeSteps": number of outputs
+    - "maxInnerTimeSteps": maximum number of internal time steps of integrator
+    - "relativeTolerance": 0 is recommended
+    - "absoluteTolerance": 1e-3 is recommended
+- "QmomKinetics":
+   - "relativeTolerance": 1e-6 is recommended
+   - "absoluteTolerance": 1e-6 is recommended
+   - "timeStep": (s)
+   - "endTime": (s)
+   - "bubbleMode": ["mean radius", "two nodes"]
