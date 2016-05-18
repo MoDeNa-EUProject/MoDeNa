@@ -47,5 +47,5 @@ import os
 
 # Source code in src/twoTanksMacroscopicProblem.C
 SIMULATION = BackwardMappingScriptTask(
-    script='../run/run.sh'
+    script='../inputs/run.sh'
 )
