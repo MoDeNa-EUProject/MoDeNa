@@ -16,7 +16,7 @@ contains
 !> set paths to all files
 subroutine set_paths
     fileplacein='../'
-    fileplaceout='../results/'
+    fileplaceout='./'
     inputs='unifiedInput.json'
     outputs_1d='outputs_1d.out'
     outputs_GR='outputs_GR.out'

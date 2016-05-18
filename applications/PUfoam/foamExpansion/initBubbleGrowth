@@ -72,7 +72,7 @@ def residual(params, T, R, c, p, G):
     return res
 
 # Load results of detailed simulation
-infilename = './results/outputs_GR.out'
+infilename = './results/bubbleGrowth/outputs_GR.out'
 infile = open(infilename, 'r')
 G1_exact, G2_exact, T, R, c1, c2, p1, p2 = loadtxt(
     infile, skiprows=2, unpack=True)  # TODO: correct for Ng>1
@@ -158,13 +158,13 @@ with open('./unifiedInput.json') as jsonfile:
         inputs['physicalProperties']['blowingAgents']['CO2']['solubilityModel'])
 subsModel=[]
 for i,j in enumerate(solubilityModel):
-    if j==1:
+    if j=="constant":
         subsModel.append(Solubility.m_solubilityCO2Baser)
-    elif j==3:
+    elif j=="Gupta":
         subsModel.append(Solubility.m_solubilityPentGupta)
-    elif j==4:
+    elif j=="Winkler":
         subsModel.append(Solubility.m_solubilityPentWinkler)
-    elif j==6:
+    elif j=="Baser":
         subsModel.append(Solubility.m_solubilityR11Baser)
 
 m = ForwardMappingModel(
@@ -241,7 +241,7 @@ model = SurrogateModel.load('bubbleGrowth2')
 for i, Te in enumerate(T):
     G2.append(surrModel(fittedParams2, T[i], R[i], c2[i], p2[i]))
 
-f = open('./results/outputs_sGR.out', 'w')
+f = open('./results/bubbleGrowth/outputs_sGR.out', 'w')
 for i, Ge in enumerate(G1):
     f.write('{0:.8e}  {1:.8e}\n'.format(G1[i], G2[i]))
 f.close()

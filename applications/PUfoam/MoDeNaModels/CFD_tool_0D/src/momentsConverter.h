@@ -16,10 +16,10 @@ void momentsConverter(const state_type &y , const double t)
 	M[3]				= kappa*y[10];
 
 	ofstream MM[4];
-	MM[0].open("../results/M0.txt", std::ios::app);
-	MM[1].open("../results/M1.txt", std::ios::app);
-	MM[2].open("../results/M2.txt", std::ios::app);
-	MM[3].open("../results/M3.txt", std::ios::app);
+	MM[0].open("./M0.txt", std::ios::app);
+	MM[1].open("./M1.txt", std::ios::app);
+	MM[2].open("./M2.txt", std::ios::app);
+	MM[3].open("./M3.txt", std::ios::app);
 
 	for (int i = 0; i < 4; i++)
 	{
