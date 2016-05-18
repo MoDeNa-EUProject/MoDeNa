@@ -203,9 +203,9 @@ end subroutine read_inputs
 !> opens output files and writes a header
 subroutine save_integration_header
     open (unit=newunit(fi1), file = outputs_1d)
-    write(fi1,'(1000A23)') '#time', 'radius','pressure1', 'pressure2',&
+    write(fi1,'(1000A24)') '#time', 'radius','pressure1', 'pressure2',&
         'conversion_of_polyol',&
-        'conversion_of_water', 'eq.concentration', 'first_concentration', &
+        'conversion_of_water', 'eq_concentration', 'first_concentration', &
         'viscosity', 'moles_in_polymer', 'moles_in_bubble', 'total_moles', &
         'shell_thickness', 'temperature', 'foam_density', 'weight_fraction1', &
         'weight_fraction2','porosity'
@@ -228,7 +228,7 @@ end subroutine save_integration_header
 !> writes an integration step to output file
 subroutine save_integration_step(iout)
     integer :: i,iout
-    write(fi1,"(1000es23.15)") time,radius,pressure,Y(xOHeq),Y(xWeq),&
+    write(fi1,"(1000es24.15e3)") time,radius,pressure,Y(xOHeq),Y(xWeq),&
         eqconc,Y(fceq),eta,mb(1),mb2(1),mb3(1),st,temp,rhofoam,&
         wblpol,porosity
     write(fi2,"(1000es23.15)") grrate, temp, radius, avconc, pressure
