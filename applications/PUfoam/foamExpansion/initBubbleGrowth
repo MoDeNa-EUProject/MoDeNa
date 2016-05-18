@@ -150,7 +150,7 @@ void bblgr_SM
 )
 
 solubilityModel=[]
-with open('./unifiedInput.json') as jsonfile:
+with open('./inputs/unifiedInput.json') as jsonfile:
     inputs=json.load(jsonfile)
     solubilityModel.append(
         inputs['physicalProperties']['blowingAgents']['PBL']['solubilityModel'])

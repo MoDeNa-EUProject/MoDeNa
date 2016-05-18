@@ -15,7 +15,7 @@ contains
 !********************************BEGINNING*************************************
 !> set paths to all files
 subroutine set_paths
-    fileplacein='../'
+    fileplacein='../inputs/'
     fileplaceout='./'
     inputs='unifiedInput.json'
     outputs_1d='outputs_1d.out'
@@ -37,7 +37,7 @@ subroutine read_inputs
     character(len=1024) :: strval
     type(fson_value), pointer :: json_data
     write(*,*) 'loading input file ',TRIM(inputs)
-    json_data => fson_parse('../unifiedInput.json')
+    json_data => fson_parse(inputs)
     ngas=2
     co2_pos=2
     call fson_get(json_data, "bubbleGrowth.integrator", strval)

@@ -7,7 +7,7 @@
 #include "rapidjson/stringbuffer.h"
 void readParams();
 void readParams() {
-    FILE * pFile = fopen ("../unifiedInput.json" , "r");
+    FILE * pFile = fopen ("../inputs/unifiedInput.json" , "r");
     char buffer[65536];
     rapidjson::FileReadStream is(pFile, buffer, sizeof(buffer));
     rapidjson::Document document;
