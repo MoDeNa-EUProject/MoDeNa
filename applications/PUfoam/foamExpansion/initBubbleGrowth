@@ -40,12 +40,17 @@ Contributors
 '''
 import json
 import sys
+import os
 from pymongo import MongoClient
 from numpy import array, loadtxt, ones
 from scipy.optimize import leastsq
 import modena
 from modena import CFunction, ForwardMappingModel, SurrogateModel
 import Solubility
+
+# import Solubility destroys Backward mapping models
+# we need to re-create them
+os.system('./initModels')
 
 global model
 
@@ -160,6 +165,8 @@ subsModel=[]
 for i,j in enumerate(solubilityModel):
     if j=="constant":
         subsModel.append(Solubility.m_solubilityCO2Baser)
+    if j=="pcsaft":
+        subsModel.append(Solubility.m_solubilityCO2)
     elif j=="Gupta":
         subsModel.append(Solubility.m_solubilityPentGupta)
     elif j=="Winkler":

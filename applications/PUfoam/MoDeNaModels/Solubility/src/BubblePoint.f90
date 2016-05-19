@@ -61,8 +61,8 @@ Module BubblePoint
       H=xi(1,1)*mm(1)/(xi(1,2)*mm(2))/p*1e5
       write(*,*)'Solubility Coefficient g/g/bar', H
   elseif (ncomp == 3) then
-      H=xi(1,1)*mm(1)/(xi(1,2)*mm(2)+xi(1,3)*mm(3))/p*1e5
-      H=1100/mm(1)/1e-3/H
+      H=xi(1,1)*mm(1)/(xi(1,2)*mm(2)+xi(1,3)*mm(3))/p
+      H=H*1100/mm(1)/1e-3
       write(*,*)'Solubility Coefficient mol/m3/Pa', H,mm(1)
   endif
   write(78,*) H

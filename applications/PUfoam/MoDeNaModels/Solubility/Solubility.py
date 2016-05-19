@@ -516,3 +516,150 @@ m_solubilityPentWinkler = ForwardMappingModel(
     inputs=inputsExp,
     outputs=outputs,
 )
+
+@explicit_serialize
+class SolubilityExactSim2(ModenaFireTask):
+    """
+    This FireTask controls the execution of the detailed model of the Solubility model.
+    The detailed model uses the PC-SAFT equation of state. A
+    detailed description of PC-SAFT model can be found in Deliverable 1.3 on the MoDeNa website.
+
+    In order to start the detailed model, the input values for the model are first written to the
+    file "in.txt". The detailed model code picks them up from this file and performs the according
+    calculation. Once it is done, the output value is written to the file "out.txt". This FireTask
+    then reads in the calculated solubility from "out.txt" and inserts this value into the
+    database.
+    """
+    def task(self, fw_spec):
+        print(
+            term.yellow
+          + "Performing exact simulation (microscopic code recipe)"
+          + term.normal
+        )
+
+        # Write input for detailed model
+        ff = open('in.txt', 'w')
+        Tstr = str(self['point']['T'])
+        ff.write('%s \n' %(Tstr))
+        if (self['indices']['B']=='2'):
+            ff.write('2 \n')       #number of components in system
+            if (self['indices']['A']=='CO2'):
+                ff.write('co2 \n')
+            elif (self['indices']['A']=='Air'):
+                ff.write('air \n')
+            elif (self['indices']['A']=='CyP'):
+                ff.write('cyclopentane \n')
+            #pass molar liquid composition
+            x1l_str = str(self['point']['xl1'])
+            x2l_str = str(self['point']['xl2'])
+            ff.write('%s \n' %(x1l_str))
+            ff.write('%s \n' %(x2l_str))
+        elif (self['indices']['B']=='3'):
+            ff.write('3 \n')       #number of components in system
+            if (self['indices']['A']=='CO2'):
+                ff.write('co2 \n')
+            elif (self['indices']['A']=='Air'):
+                ff.write('air \n')
+            elif (self['indices']['A']=='CyP'):
+                ff.write('cyclopentane \n')
+            #pass molar liquid composition
+            # x1l_str = str(self['point']['xl1'])
+            # x2l_str = str(self['point']['xl2'])
+            # x3l_str = str(self['point']['xl3'])
+            x1l_str = 1.0e-4
+            x2l_str = 0.5
+            x3l_str = 0.5
+            ff.write('%s \n' %(x1l_str))
+            ff.write('%s \n' %(x2l_str))
+            ff.write('%s \n' %(x3l_str))
+        ff.close()
+
+        #create output file for detailed code
+        fff = open('out.txt', 'w+')
+        fff.close()
+
+        # Execute the detailed model
+        # path to **this** file + /src/...
+        # will break if distributed computing
+        os.system(os.path.dirname(os.path.abspath(__file__))+\
+            '/src/pcsaft')
+
+        # Analyse output
+        # os.getcwd() returns the path to the "launcher" directory
+        try:
+            FILE = open(os.getcwd()+'/out.txt','r')
+        except IOError:
+            raise IOError("File not found")
+        self['point']['H'] = float(FILE.readline())
+        FILE.close()
+
+Ccode='''
+#include "modena.h"
+#include "math.h"
+
+void surroSolubility
+(
+const modena_model_t* model,
+const double* inputs,
+double *outputs
+)
+{
+{% block variables %}{% endblock %}
+
+const double P0 = parameters[0];
+const double P1 = parameters[1];
+const double P2 = parameters[2];
+
+const double term1 = P1*(1/T - 1/P2);
+const double term2 = exp(term1);
+
+outputs[0] = P0*term2;
+
+outputs[0] = P0 + T*P1 + P2*T*T;
+}
+'''
+if 'argPos' in inputsExp['T']: #added by previous CFunction
+    inputsExp['T'].pop('argPos')
+fx = CFunction(Ccode=Ccode,
+    inputs=inputsExp,
+    outputs=outputs,
+    parameters=parameters,
+    indices=indices
+)
+outOfBoundsStrategy=Strategy.ExtendSpaceStochasticSampling(
+    nNewPoints=4
+)
+parameterFittingStrategy=Strategy.NonLinFitWithErrorContol(
+    testDataPercentage=0.2,
+    maxError=0.5,
+    improveErrorStrategy=Strategy.StochasticSampling(
+        nNewPoints=2
+    ),
+    maxIterations=5  # Currently not used
+)
+m_solubilityCO2 = BackwardMappingModel(
+    _id='Solubility[A=CO2,B=3]',
+    surrogateFunction=fx,
+    exactTask=SolubilityExactSim2(),
+    substituteModels=[],
+    initialisationStrategy=Strategy.InitialPoints(
+        initialPoints={
+            'T': [290, 450, 350, 380],
+        },
+    ),
+    outOfBoundsStrategy=outOfBoundsStrategy,
+    parameterFittingStrategy=parameterFittingStrategy
+)
+# m_solubilityCyclopentane = BackwardMappingModel(
+#     _id='Solubility[A=CyP,B=3]',
+#     surrogateFunction=fx,
+#     exactTask=SolubilityExactSim2(),
+#     substituteModels=[],
+#     initialisationStrategy=Strategy.InitialPoints(
+#         initialPoints={
+#             'T': [300, 420, 400],
+#         },
+#     ),
+#     outOfBoundsStrategy=outOfBoundsStrategy,
+#     parameterFittingStrategy=parameterFittingStrategy
+# )

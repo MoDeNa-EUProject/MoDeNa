@@ -136,9 +136,9 @@ subroutine physical_properties(temp,conv,radius)
         case(2) !pcsaft
             ! TODO: implement properly
             call modena_inputs_set(solInputs(i), solTpos(i), temp)
-            call modena_inputs_set(solInputs(i), solXgasPos(i), 1.0e-4_dp)
-            call modena_inputs_set(solInputs(i), solXmdiPos(i), 0.5_dp)
-            call modena_inputs_set(solInputs(i), solXpolyolPos(i), 0.5_dp)
+            ! call modena_inputs_set(solInputs(i), solXgasPos(i), 1.0e-4_dp)
+            ! call modena_inputs_set(solInputs(i), solXmdiPos(i), 0.5_dp)
+            ! call modena_inputs_set(solInputs(i), solXpolyolPos(i), 0.5_dp)
             ret = modena_model_call(solModena(i), solInputs(i), solOutputs(i))
             if(ret /= 0) then
                 call exit(ret)
@@ -180,6 +180,8 @@ subroutine physical_properties(temp,conv,radius)
             ! stop
         end select
     enddo
+    ! write(unit=*, fmt=*) temp,KH(1)
+    ! stop
     if (solcorr) KH=KH*exp(2*sigma*Mbl/(rhop*Rg*temp*radius))
     cp=cppol+sum(cbl*Mbl*cpbll)/rhop
 end subroutine physical_properties
