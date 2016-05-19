@@ -50,8 +50,9 @@ import Rheology_Arrhenius
 launchpad = LaunchPad(**MODENA_PARSED_URI)
 launchpad.reset('', require_password=False)
 
-m = Rheology_Arrhenius.m
-initWfs = m.initialisationStrategy().workflow(m)
+initWfs = Workflow2([])
+for m in SurrogateModel.get_instances():
+    initWfs.addNoLink(m.initialisationStrategy().workflow(m))
 
 # store workflow and launch it locally
 launchpad.add_wf(initWfs)
