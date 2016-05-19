@@ -139,12 +139,12 @@ subroutine createModenaModels
             solOutputs(i) = modena_outputs_new (solModena(i));
             solTpos(i) = modena_model_inputs_argPos(solModena(i), &
                 c_char_"T"//c_null_char);
-            solXgasPos(i) = modena_model_inputs_argPos(solModena(i), &
-                c_char_"xl["//gasname(i)//"]"//c_null_char);
-            solXmdiPos(i) = modena_model_inputs_argPos(solModena(i), &
-                c_char_"xl[mdi]"//c_null_char);
-            solXpolyolPos(i) = modena_model_inputs_argPos(solModena(i), &
-                c_char_"xl[polyol]"//c_null_char);
+            ! solXgasPos(i) = modena_model_inputs_argPos(solModena(i), &
+            !     c_char_"xl1"//c_null_char);
+            ! solXpolyolPos(i) = modena_model_inputs_argPos(solModena(i), &
+            !     c_char_"xl2"//c_null_char);
+            ! solXmdiPos(i) = modena_model_inputs_argPos(solModena(i), &
+            !     c_char_"xl3"//c_null_char);
             call modena_model_argPos_check(solModena(i))
         endif
         if (sol_model(i)==3) then

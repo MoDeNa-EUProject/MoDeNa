@@ -34,14 +34,14 @@ Description
     Turbulence modelling is generic, i.e.  laminar, RAS or LES may be selected.
 
     The solver has been adapted for modeling of Polyurethane foams (PU). In that,
-    it includes the Quadrature Method of Moments (QMOM) to solve a 'Population Balance Equation' 
+    it includes the Quadrature Method of Moments (QMOM) to solve a 'Population Balance Equation'
     (PBE) determining the bubble size distribution inside PU foams.
-    
-    Moreover, the kinetics of the reactions including gelling, blowing and evaporation 
+
+    Moreover, the kinetics of the reactions including gelling, blowing and evaporation
     of the physical blowing agent are incorporated into the solver.
-    
-    Finally, the kinetics and PBE has been coupled to describe the time evolution 
-    of foaming process. 
+
+    Finally, the kinetics and PBE has been coupled to describe the time evolution
+    of foaming process.
 
 \*---------------------------------------------------------------------------*/
 
@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createMesh.H"
     #include "readGravitationalAcceleration.H"
-    
+
     pimpleControl pimple(mesh);
 
     #include "readTimeControls.H"
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
     bool gellingPoint = false;
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     // #include "modenaCalls.h"
-    
+
     Info<< "\nStarting time loop\n" << endl;
     Info<< "initialFoamMass : " << initialFoamMass << endl;
     while (runTime.run())
@@ -108,11 +108,11 @@ int main(int argc, char *argv[])
         {
             if (simulationTarget == "mold-filling")
             {
-                if 
+                if
                 (
-                    alpha1.weightedAverage(mesh.V()).value() > 0.01 
-                 && gellingPoint == false 
-                ) 
+                    alpha1.weightedAverage(mesh.V()).value() > 0.01
+                 && gellingPoint == false
+                )
                 {
                     #include "alphaEqnsSubCycle.H"
                     // correct interface on first PIMPLE corrector
@@ -123,26 +123,26 @@ int main(int argc, char *argv[])
                     #include "alphaCorrection.H"
                     #include "checkGellingPoint.H"
                     solve(fvm::ddt(rho) + fvc::div(rhoPhi));
-                    
-                    
+
+
                     #include "conversionSources.H"
-                    #include "conversionEqns.H" 
+                    #include "conversionEqns.H"
                     #include "conversionCheck.H"
 
                     #include "rheologyModel.H"
-                   
-                    #include "UEqn.H"  
+
+                    #include "UEqn.H"
 
                     #include "TSSource.H"
                     #include "TSEqn.H"
 
-                    #include "TCheck.H"              
+                    #include "TCheck.H"
                     #include "densityEqns.H"
-                    
-                    #include "MomSources.H"      
+
+                    #include "MomSources.H"
                     #include "MomEqns.H"
-                    #include "MomConvert.H" 
-                                
+                    #include "MomConvert.H"
+
                     // --- Pressure corrector loop
                     while (pimple.correct())
                     {
@@ -163,35 +163,35 @@ int main(int argc, char *argv[])
                 if (gellingPoint == false)
                 {
                     #include "alphaEqnsSubCycle.H"
-                
+
                     // correct interface on first PIMPLE corrector
                     if (pimple.corr() == 1)
                     {
                         interface.correct();
                     }
                     #include "alphaCorrection.H"
-               
-                
+
+
                     #include "checkGellingPoint.H"
-                    solve(fvm::ddt(rho) + fvc::div(rhoPhi));             
+                    solve(fvm::ddt(rho) + fvc::div(rhoPhi));
                     #include "conversionSources.H"
-                    #include "conversionEqns.H" 
+                    #include "conversionEqns.H"
                     #include "conversionCheck.H"
-    
+
                     #include "rheologyModel.H"
-                   
-                    #include "UEqn.H"  
-                   
+
+                    #include "UEqn.H"
+
                     #include "TSSource.H"
                     #include "TSEqn.H"
-    
-                    #include "TCheck.H"              
+
+                    #include "TCheck.H"
                     #include "densityEqns.H"
-                    
-                    #include "MomSources.H"      
+
+                    #include "MomSources.H"
                     #include "MomEqns.H"
-                    #include "MomConvert.H" 
-                                    
+                    #include "MomConvert.H"
+
                     // --- Pressure corrector loop
                     while (pimple.correct())
                     {
@@ -200,29 +200,29 @@ int main(int argc, char *argv[])
                     #include "BASources.H"
                     #include "BAEqns.H"
                     #include "BACheck.H"
-    
+
                     if (pimple.turbCorr())
                     {
                         turbulence->correct();
                     }
                 }
             }
-                  
+
         #include "continuityErrors.H"
 
-        Info<< "\nMass of foam: " 
-            << fvc::domainIntegrate(alpha2*rho_foam) 
+        Info<< "\nMass of foam: "
+            << fvc::domainIntegrate(alpha2*rho_foam)
             << endl;
         }
 
         runTime.write();
-        
+
         Info<< "ExecutionTime = "
             << runTime.elapsedCpuTime()
             << " s\n\n" << endl;
     }
-    Info<< "finalFoamMass : " 
-        << fvc::domainIntegrate(rho_foam*alpha2) 
+    Info<< "finalFoamMass : "
+        << fvc::domainIntegrate(rho_foam*alpha2)
         << endl;
     Info<< "End\n" << endl;
 

@@ -18,7 +18,7 @@ if (KineticsModel == "generic")
       + fvm::SuSp(XWSource,XW)
       + fvm::SuSp(expImpSource,XW)
       - fvm::div(alpha1phir,XW)
-     == XWSource    
+     == XWSource
     );
     XWEqn.relax();
     XWEqn.solve();
@@ -36,95 +36,38 @@ if (KineticsModel == "generic")
     XOHEqn.relax();
     XOHEqn.solve();
 }
-if (KineticsModel == "simple")
-{
-    fvScalarMatrix EG_NCOEqn
-    (
-          fvm::ddt(rhoFoamAlpha2,EG_NCO)
-        + fvm::div(frhoFoamAlpha2,EG_NCO)
-      == source_EG_NCO
-    );
-    EG_NCOEqn.relax();
-    EG_NCOEqn.solve();
 
-    fvScalarMatrix EG_OHEqn
-    (
-        fvm::ddt(rhoFoamAlpha2,EG_OH)
-        + fvm::div(frhoFoamAlpha2,EG_OH)
-     == source_EG_OH
-    );
-    EG_OHEqn.relax();
-    EG_OHEqn.solve();
-
-    fvScalarMatrix H2OEqn
-    (
-        fvm::ddt(rhoFoamAlpha2,H2O)
-      + fvm::div(frhoFoamAlpha2,H2O)
-    == source_H2O
-    );
-    H2OEqn.relax();
-    H2OEqn.solve();
-
-    fvScalarMatrix CO2_SurEqn
-    (
-        fvm::ddt(rhoFoamAlpha2,CO2_Sur)
-      + fvm::div(frhoFoamAlpha2,CO2_Sur)
-    == source_CO2
-    );
-    CO2_SurEqn.relax();
-    CO2_SurEqn.solve();
-
-    fvScalarMatrix PENTANEEqn
-    (
-        fvm::ddt(rhoFoamAlpha2,PENTANE)
-      + fvm::div(frhoFoamAlpha2,PENTANE)
-     == source_PENTANE
-    );
-    PENTANEEqn.relax();
-    PENTANEEqn.solve();
-
-    fvScalarMatrix POLYMEREqn
-    (
-        fvm::ddt(rhoFoamAlpha2,POLYMER)
-      + fvm::div(frhoFoamAlpha2,POLYMER)
-     == source_POLYMER
-    );
-    POLYMEREqn.relax();
-    POLYMEREqn.solve();
-
-    fvScalarMatrix POLMERBLOWEqn
-    (
-        fvm::ddt(rhoFoamAlpha2,POLMERBLOW)
-      + fvm::div(frhoFoamAlpha2,POLMERBLOW)
-     == source_POLMERBLOW
-    );
-    POLMERBLOWEqn.relax();
-    POLMERBLOWEqn.solve();
-
-    fvScalarMatrix UREAEqn
-    (
-        fvm::ddt(rhoFoamAlpha2,UREA)
-      + fvm::div(frhoFoamAlpha2,UREA)
-     == source_UREA
-    );
-    UREAEqn.relax();
-    UREAEqn.solve();
-
-    fvScalarMatrix R_1_tempEqn
-    (
-        fvm::ddt(rhoFoamAlpha2,R_1_temp)
-      + fvm::div(frhoFoamAlpha2,R_1_temp)
-     == source_R_1_temp
-    );
-    R_1_tempEqn.relax();
-    R_1_tempEqn.solve();
-}
 if (KineticsModel == "RF-1")
 {
+
+    fvScalarMatrix XWEqn
+    (
+        fvm::ddt(XW)
+      + fvm::div(phi,XW)
+      + fvm::SuSp(expImpSource,XW)
+      - fvm::div(alpha1phir,XW)
+     == XWSource
+    );
+    XWEqn.relax();
+    XWEqn.solve();
+
+    fvScalarMatrix XOHEqn
+    (
+        fvm::ddt(XOH)
+      + fvm::div(phi,XOH)
+      + fvm::SuSp(expImpSource,XOH)
+      - fvm::div(alpha1phir,XOH)
+     == XOHSource
+    );
+    XOHEqn.relax();
+    XOHEqn.solve();
+
     fvScalarMatrix Catalyst_1Eqn
     (
-        fvm::ddt(rhoFoamAlpha2,Catalyst_1)
-      + fvm::div(frhoFoamAlpha2,Catalyst_1)
+        fvm::ddt(Catalyst_1)
+      + fvm::div(phi,Catalyst_1)
+      + fvm::SuSp(expImpSource,Catalyst_1)
+      - fvm::div(alpha1phir,Catalyst_1)
      == source_Catalyst_1
     );
     Catalyst_1Eqn.relax();
@@ -132,17 +75,21 @@ if (KineticsModel == "RF-1")
 
     fvScalarMatrix CE_A0Eqn
     (
-        fvm::ddt(rhoFoamAlpha2,CE_A0)
-      + fvm::div(frhoFoamAlpha2,CE_A0)
-     == source_CE_A0 
+        fvm::ddt(CE_A0)
+      + fvm::div(phi,CE_A0)
+      + fvm::SuSp(expImpSource,CE_A0)
+      - fvm::div(alpha1phir,CE_A0)
+     == source_CE_A0
     );
     CE_A0Eqn.relax();
     CE_A0Eqn.solve();
 
     fvScalarMatrix CE_A1Eqn
     (
-        fvm::ddt(rhoFoamAlpha2,CE_A1)
-      + fvm::div(frhoFoamAlpha2,CE_A1)
+        fvm::ddt(CE_A1)
+      + fvm::div(phi,CE_A1)
+      + fvm::SuSp(expImpSource,CE_A1)
+      - fvm::div(alpha1phir,CE_A1)
      == source_CE_A1
     );
     CE_A1Eqn.relax();
@@ -150,8 +97,10 @@ if (KineticsModel == "RF-1")
 
     fvScalarMatrix CE_BEqn
     (
-        fvm::ddt(rhoFoamAlpha2,CE_B)
-      + fvm::div(frhoFoamAlpha2,CE_B)
+        fvm::ddt(CE_B)
+      + fvm::div(phi,CE_B)
+      + fvm::SuSp(expImpSource,CE_B)
+      - fvm::div(alpha1phir,CE_B)
      == source_CE_B
     );
     CE_BEqn.relax();
@@ -159,8 +108,10 @@ if (KineticsModel == "RF-1")
 
     fvScalarMatrix CE_B2Eqn
     (
-        fvm::ddt(rhoFoamAlpha2,CE_B2)
-      + fvm::div(frhoFoamAlpha2,CE_B2)
+        fvm::ddt(CE_B2)
+      + fvm::div(phi,CE_B2)
+      + fvm::SuSp(expImpSource,CE_B2)
+      - fvm::div(alpha1phir,CE_B2)
      == source_CE_B2
     );
     CE_B2Eqn.relax();
@@ -168,26 +119,32 @@ if (KineticsModel == "RF-1")
 
     fvScalarMatrix CE_I0Eqn
     (
-        fvm::ddt(rhoFoamAlpha2,CE_I0)
-      + fvm::div(frhoFoamAlpha2,CE_I0)
-     == source_CE_I0
+        fvm::ddt(CE_I0)
+      + fvm::div(phi,CE_I0)
+      + fvm::SuSp(expImpSource,CE_I0)
+      - fvm::div(alpha1phir,CE_I0)
+      == source_CE_I0
     );
     CE_I0Eqn.relax();
     CE_I0Eqn.solve();
 
     fvScalarMatrix CE_I1Eqn
     (
-        fvm::ddt(rhoFoamAlpha2,CE_I1)
-      + fvm::div(frhoFoamAlpha2,CE_I1)
-     == source_CE_I1
+        fvm::ddt(CE_I1)
+      + fvm::div(phi,CE_I1)
+      + fvm::SuSp(expImpSource,CE_I1)
+      - fvm::div(alpha1phir,CE_I1)
+      == source_CE_I1
     );
     CE_I1Eqn.relax();
     CE_I1Eqn.solve();
 
     fvScalarMatrix CE_I2Eqn
     (
-        fvm::ddt(rhoFoamAlpha2,CE_I2)
-      + fvm::div(frhoFoamAlpha2,CE_I2)
+        fvm::ddt(CE_I2)
+      + fvm::div(phi,CE_I2)
+      + fvm::SuSp(expImpSource,CE_I2)
+      - fvm::div(alpha1phir,CE_I2)
      == source_CE_I2
     );
     CE_I2Eqn.relax();
@@ -195,8 +152,10 @@ if (KineticsModel == "RF-1")
 
     fvScalarMatrix CE_PBAEqn
     (
-        fvm::ddt(rhoFoamAlpha2,CE_PBA)
-      + fvm::div(frhoFoamAlpha2,CE_PBA)
+        fvm::ddt(CE_PBA)
+      + fvm::div(phi,CE_PBA)
+      + fvm::SuSp(expImpSource,CE_PBA)
+      - fvm::div(alpha1phir,CE_PBA)
      == source_CE_PBA
     );
     CE_PBAEqn.relax();
@@ -204,8 +163,10 @@ if (KineticsModel == "RF-1")
 
     fvScalarMatrix CE_BreacEqn
     (
-        fvm::ddt(rhoFoamAlpha2,CE_Breac)
-      + fvm::div(frhoFoamAlpha2,CE_Breac)
+        fvm::ddt(CE_Breac)
+      + fvm::div(phi,CE_Breac)
+      + fvm::SuSp(expImpSource,CE_Breac)
+      - fvm::div(alpha1phir,CE_Breac)
      == source_CE_Breac
     );
     CE_BreacEqn.relax();
@@ -213,8 +174,10 @@ if (KineticsModel == "RF-1")
 
     fvScalarMatrix CE_Areac0Eqn
     (
-        fvm::ddt(rhoFoamAlpha2,CE_Areac0)
-      + fvm::div(frhoFoamAlpha2,CE_Areac0)
+        fvm::ddt(CE_Areac0)
+      + fvm::div(phi,CE_Areac0)
+      + fvm::SuSp(expImpSource,CE_Areac0)
+      - fvm::div(alpha1phir,CE_Areac0)
      == source_CE_Areac0
     );
     CE_Areac0Eqn.relax();
@@ -222,8 +185,10 @@ if (KineticsModel == "RF-1")
 
     fvScalarMatrix CE_Areac1Eqn
     (
-        fvm::ddt(rhoFoamAlpha2,CE_Areac1)
-      + fvm::div(frhoFoamAlpha2,CE_Areac1)
+        fvm::ddt(CE_Areac1)
+      + fvm::div(phi,CE_Areac1)
+      + fvm::SuSp(expImpSource,CE_Areac1)
+      - fvm::div(alpha1phir,CE_Areac1)
      == source_CE_Areac1
     );
     CE_Areac1Eqn.relax();
@@ -231,8 +196,10 @@ if (KineticsModel == "RF-1")
 
     fvScalarMatrix CE_Ireac0Eqn
     (
-        fvm::ddt(rhoFoamAlpha2,CE_Ireac0)
-      + fvm::div(frhoFoamAlpha2,CE_Ireac0)
+        fvm::ddt(CE_Ireac0)
+      + fvm::div(phi,CE_Ireac0)
+      + fvm::SuSp(expImpSource,CE_Ireac0)
+      - fvm::div(alpha1phir,CE_Ireac0)
      == source_CE_Ireac0
     );
     CE_Ireac0Eqn.relax();
@@ -240,8 +207,10 @@ if (KineticsModel == "RF-1")
 
     fvScalarMatrix CE_Ireac1Eqn
     (
-        fvm::ddt(rhoFoamAlpha2,CE_Ireac1)
-      + fvm::div(frhoFoamAlpha2,CE_Ireac1)
+        fvm::ddt(CE_Ireac1)
+      + fvm::div(phi,CE_Ireac1)
+      + fvm::SuSp(expImpSource,CE_Ireac1)
+      - fvm::div(alpha1phir,CE_Ireac1)
      == source_CE_Ireac1
     );
     CE_Ireac1Eqn.relax();
@@ -249,8 +218,10 @@ if (KineticsModel == "RF-1")
 
     fvScalarMatrix CE_Ireac2Eqn
     (
-        fvm::ddt(rhoFoamAlpha2,CE_Ireac2)
-      + fvm::div(frhoFoamAlpha2,CE_Ireac2)
+        fvm::ddt(CE_Ireac2)
+      + fvm::div(phi,CE_Ireac2)
+      + fvm::SuSp(expImpSource,CE_Ireac2)
+      - fvm::div(alpha1phir,CE_Ireac2)
      == source_CE_Ireac2
     );
     CE_Ireac2Eqn.relax();
@@ -258,8 +229,10 @@ if (KineticsModel == "RF-1")
 
     fvScalarMatrix BulkEqn
     (
-        fvm::ddt(rhoFoamAlpha2,Bulk)
-      + fvm::div(frhoFoamAlpha2,Bulk)
+        fvm::ddt(Bulk)
+      + fvm::div(phi,Bulk)
+      + fvm::SuSp(expImpSource,Bulk)
+      - fvm::div(alpha1phir,Bulk)
      == source_Bulk
     );
     BulkEqn.relax();
@@ -267,8 +240,10 @@ if (KineticsModel == "RF-1")
 
     fvScalarMatrix R_1Eqn
     (
-        fvm::ddt(rhoFoamAlpha2,R_1)
-      + fvm::div(frhoFoamAlpha2,R_1)
+        fvm::ddt(R_1)
+      + fvm::div(phi,R_1)
+      + fvm::SuSp(expImpSource,R_1)
+      - fvm::div(alpha1phir,R_1)
      == source_R_1
     );
     R_1Eqn.relax();
@@ -276,8 +251,10 @@ if (KineticsModel == "RF-1")
 
     fvScalarMatrix R_1_temp_RF1Eqn
     (
-        fvm::ddt(rhoFoamAlpha2,R_1_temp_RF1)
-      + fvm::div(frhoFoamAlpha2,R_1_temp_RF1)
+        fvm::ddt(R_1_temp_RF1)
+      + fvm::div(phi,R_1_temp_RF1)
+      + fvm::SuSp(expImpSource,R_1_temp_RF1)
+      - fvm::div(alpha1phir,R_1_temp_RF1)
      == source_R_1_temp_RF1
     );
     R_1_temp_RF1Eqn.relax();

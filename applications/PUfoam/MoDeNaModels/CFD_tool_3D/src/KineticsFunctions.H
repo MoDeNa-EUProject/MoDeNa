@@ -1,6 +1,6 @@
 // Functions for kinetics calculations
-// 
-// LliqMax - maximum allowable amount of liquid blowing agent (n-pentane) in liquid 
+//
+// LliqMax - maximum allowable amount of liquid blowing agent (n-pentane) in liquid
 // @param - double &tmptr, the input temperature.
 // ddT_LliqMax - derivative of LliqMax with respect to temperature
 // @param - double &tmptr, the input temperature.
@@ -13,7 +13,7 @@
 // @param - double& rhoPoly - density of liquid mixture (polymer)
 // @param - double& rhoBL - density of blowing agent
 // QKinW - arrhenius term times by dilution term
-// @param - similar to arrehenius and BAdilution functions  
+// @param - similar to arrehenius and BAdilution functions
 // henryCoefficient - Henry coefficient for CO2
 // @param - double &T - Temperature
 // bubbleRadius - radius of bubbles based on moments
@@ -27,14 +27,14 @@
 // @param - double &wBA_g - weight frcation of blowing agent in gas
 // @param - double &p - ambient pressure
 // @param - double &R - bubble radius
-// partialPressureBA - partial pressure of blowing agent 
+// partialPressureBA - partial pressure of blowing agent
 // @param - double &M_B - molecular weight of blowing agent
 // @param - double &M_CO2 - molecular weight of CO2
 // @param - double &surfaceTension - surface tenstion
 // @param - double &wBA_g - weight frcation of blowing agent in gas
 // @param - double &wCO2_g - weight fraction of CO2 in gas
 // @param - double &p - ambient pressure
-// @param - double &R - bubble radius   
+// @param - double &R - bubble radius
 
 // wCO2Max - dissolved amount of CO2 in liquid
 // @param - double &M_CO2 - molecular weight of CO2
@@ -43,7 +43,7 @@
 // @param - double &henryCoeff - Henry coefficient
 // xBL - mole fraction of blowing agent (R-11) in liquid polymer
 // @param - double &T - temperature
-// @param - double &dxdT - constant 
+// @param - double &dxdT - constant
 // wBL_D - weight fraction of maximum allowable blowing agent (R-11) in liquid
 // @param - double &xBL - mole fraction of blowing agent (R-11)
 // @param - double &M_B - molecular weight of blowing agent (R-11)
@@ -68,7 +68,7 @@ double LliqMax (double &);
 double ddT_LliqMax (double &);
 double arrhenius (double &, double &, double &);
 double BAdilution(double &, double &, double &);
-double QKinW 
+double QKinW
     (
         double &, double &, double &, double &, double &, double &, double &
     );
@@ -81,8 +81,8 @@ double partialPressureCO2
     );
 double partialPressureBA
     (
-        double &M_B, double &M_CO2, double &surfaceTension, 
-        double &wBA_g_val, double &wCO2_g_val, 
+        double &M_B, double &M_CO2, double &surfaceTension,
+        double &wBA_g_val, double &wCO2_g_val,
         double &prsr, double &bubble_radius
     );
 double wCO2Max (double &M_CO2, double &M_liq, double &pCO2, double &henryCoeff);
@@ -101,15 +101,15 @@ double LliqMax (double& tmptr)
     const double a = 0.0064, h = 0.0551, T0 = 298.0, ww = 17.8;
     double lMax;
     if (tmptr > T0)
-    {   
+    {
         double tempDummy = Foam::pow((tmptr-T0),2.0);
         lMax = (a + h*Foam::exp((-tempDummy/(2.0*ww*ww))));
     }
     else
     {
-        lMax = (a+h);       
-    }   
-    return (lMax);   
+        lMax = (a+h);
+    }
+    return (lMax);
 }
 
 double ddT_LliqMax (double& tmptr)
@@ -122,7 +122,7 @@ double ddT_LliqMax (double& tmptr)
 
 double arrhenius (double& AOH, double& EOH, double& tempt)
 {
-    const double R = 8.3145; // J/mol K 
+    const double R = 8.3145; // J/mol K
     return (AOH*Foam::exp(-EOH/(R*tempt)));
 }
 
@@ -131,9 +131,9 @@ double BAdilution(double& L_l, double& rhoPoly, double& rhoBL)
     return (1/(1+L_l*(rhoPoly/rhoBL)));
 }
 
-double QKinW 
+double QKinW
 (
-    double& AW, double& EW, double& tempi, double& Lliq, 
+    double& AW, double& EW, double& tempi, double& Lliq,
     double& rhoPoly, double& rhoBL
 )
 {
@@ -171,27 +171,26 @@ double bubbleRadius (const double m0, const double m1)
     {
         return (30e-6);
     }
-    
+
 }
-double partialPressureCO2 
+double partialPressureCO2
 (
     double &M_CO2, double &M_B, double &surfaceTension, double &wCO2_g,
     double &wBA_g, double &p, double &R
 )
 {
-    double pCO2;  
-    // if (wCO2_g == 0.0) 
-    // {
-    //     pCO2 = ROOTVSMALL;
-    // }
-    // else
-    // {
-        pCO2 = 
+    double pCO2;
+    if (wCO2_g == 0.0)
+    {
+        pCO2 = SMALL;
+    }
+    else
+    {
+        pCO2 =
         (
             (wCO2_g/M_CO2)/(wBA_g/M_B + wCO2_g/M_CO2)
-           // *(p + 2*surfaceTension/Foam::max(R,ROOTVSMALL)
         );
-    // }
+    }
 
     return (1e5*pCO2);
 }
@@ -202,19 +201,18 @@ double partialPressureBA
 )
 {
     double pBA;
-    // if (wBA_g == 0.0)
-    // {
-    //     pBA = ROOTVSMALL;
-    // }
-    // else
-    // {
-        pBA = 
-        
+    if (wBA_g == 0.0)
+    {
+        pBA = SMALL;
+    }
+    else
+    {
+        pBA =
+
             (
                 (wBA_g/M_B)/(wBA_g/M_B + wCO2_g/M_CO2)
-                // *(p + 2*surfaceTension/Foam::max(R,ROOTVSMALL))
             );
-    // }
+    }
     return (1e5*pBA);
 }
 
@@ -230,14 +228,14 @@ double wCO2Max (double &M_CO2, double &M_liq, double &pCO2, double &henryCoeff)
         Info<< "'wCO2Max' is replaced by a constant." << endl;
         return (4.4e-4);
     }
-    
+
 }
 
 double xBL (double &T, double &dxdT)
 {
     double xBL_value;
     xBL_value   = dxdT*(T - 300.0) + 0.5;
-    
+
     if (xBL_value < 0.0)
     {
         return (0.0);
@@ -253,7 +251,7 @@ double xBL (double &T, double &dxdT)
 }
 
 double wBL_D(double &xBL, double &M_B, double &M_NCO, double &L0)
-{   
+{
     double Lm;
     Lm  = (xBL/(1.0 - xBL))*(M_B/M_NCO);
 
@@ -261,10 +259,6 @@ double wBL_D(double &xBL, double &M_B, double &M_NCO, double &L0)
     {
         Lm = 1.0e-4;
     }
-    // if (Lm > L0)
-    // {
-    //  Lm = L0;
-    // }
     return (Lm);
 }
 
@@ -274,14 +268,14 @@ double LmaxR11(double &tmptr)
         const double a = 1e-7, h = 4.293, T0 = 203.4, ww = 40.02;
         double lMax;
         if (tmptr > T0)
-        {   
+        {
             double tempDummy = Foam::pow((tmptr-T0),2.0);
             lMax = (a + h*Foam::exp((-tempDummy/(2.0*ww*ww))));
         }
         else
         {
-            lMax = (a+h);       
-        } 
+            lMax = (a+h);
+        }
     return (lMax);
 }
 
@@ -301,13 +295,9 @@ double dTdtSecondOrder(double &Tc, double &To, double &Too, double &timeStep)
 
 double thermalDiffusivityGas(double &T)
 {
-    // constants
-    double a = 7.860e-10;
-    double b = 0.000001038;
-    double c = -0.0001518;
-    return (a*T*T + b*T + c);
+    return (2.56008e-3*std::pow(T,0.5)/(1+207.009/T))/1010/1.2;
 }
 double nodeRadius(const double &v)
 {
-    return (pow((6.0*v/M_PI),1/3));
+    return (Foam::pow(3.0*v/(4.0*M_PI), 1/3.0));
 }

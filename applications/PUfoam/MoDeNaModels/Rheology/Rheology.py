@@ -40,7 +40,7 @@ Contributors
 import os
 import modena
 import SurfaceTension
-import polymerViscosity 
+import polymerViscosity
 from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, CFunction, ModenaFireTask
 import modena.Strategy as Strategy
 from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
@@ -61,13 +61,15 @@ __date__ = 'Sep 4, 2014'
 class RheologyExactTask(ModenaFireTask):
     """
     A FireTask that starts a microscopic code and updates the database.
-    """   
+    """
     def task(self, fw_spec):
 
         # Write input
         Template('''{{ s['point']['T'] }}
                 {{ s['point']['shear'] }}
                 {{ s['point']['X'] }}
+                {{ s['point']['m0'] }}
+                {{ s['point']['m1'] }}
 		{{ s['point']['mu'] }}
 		{{ s['point']['ST'] }}'''.strip()).stream(s=self).dump('RheologyExact.in')
 
@@ -79,9 +81,9 @@ class RheologyExactTask(ModenaFireTask):
 
         # Analyse output
         f=open('RheologyExact.out','r')
-        self['point']['mu_ap'] = float(f.readline())
+        self['point']['mu_car'] = float(f.readline())
         f.close()
-        
+
         os.remove('RheologyExact.in')
         os.remove('RheologyExact.out')
 
@@ -98,7 +100,7 @@ void rheology_SM
     const double* inputs,
     double *outputs
 )
-{    
+{
     {% block variables %}{% endblock %}
 
     const double lambda = parameters[0];
@@ -113,22 +115,18 @@ void rheology_SM
     const double mu_c = 0;
     const double mu_d = 0.001;
     const double X_gel = 0.615;
-    const double mu_0_const = 0.195; 
+    const double mu_0_const = 0.195;
     const double mu_inf_const = 0.266;
-//    const double lambda = 11.35 ;
-//    const double alpha = 2; 
-//    const double n_rh = 0.2;
 
-    double mu_0, mu_inf, f_t;
-    double mu_ap;
-    
-    mu_0 = (log(X+mu_d) - log(mu_d) + pow(X_gel / ( X_gel - X ), mu_a + X*mu_b + mu_c*pow(X,2))) * mu_0_const; 
+    double mu_0, mu_inf;
+    double mu_car;
+
+    mu_0 = (log(X+mu_d) - log(mu_d) + pow(X_gel / ( X_gel - X ), mu_a + X*mu_b + mu_c*pow(X,2))) * mu_0_const;
     mu_inf = (log(X+mu_d) - log(mu_d) + pow(X_gel / ( X_gel - X ), mu_a + X*mu_b + mu_c*pow(X,2)))* mu_inf_const;
-    f_t = A_mu * exp(E_mu / R_rh / T );
 
-    mu_ap = (mu_inf + (mu_0 - mu_inf)*pow(1 + pow(lambda*shear,alpha), (n_rh - 1) / alpha)) * f_t;
-    //printf("apparent viscosity %f", mu_ap);
-    outputs[0] = mu_ap;
+    mu_car = (mu_inf + (mu_0 - mu_inf)*pow(1 + pow(lambda*shear,alpha), (n_rh - 1) / alpha));
+//    printf("apparent viscosity car %f", mu_car);
+    outputs[0] = mu_car;
 }
 ''',
    # These are global bounds for the function
@@ -136,12 +134,14 @@ void rheology_SM
        'T': {'min': 0, 'max': 9e99 },
        'shear': {'min': 0, 'max': 9e99 },
        'X': {'min': 0, 'max': 1 },
+       'm0': {'min': 0, 'max': 9e99 },
+       'm1': {'min': 0, 'max': 9e99 },
        'mu': {'min': 0, 'max': 1000 },
        'ST': {'min': 0, 'max': 100 },
-       
+
    },
    outputs={
-       'mu_ap': { 'min': 0, 'max': 9e99, 'argPos': 0 },
+       'mu_car': { 'min': 0, 'max': 9e99, 'argPos': 0 },
    },
    parameters={
        'lamdba': { 'min': 1.35, 'max': 21.35, 'argPos': 0 },
@@ -151,7 +151,7 @@ void rheology_SM
 )
 
 m = BackwardMappingModel(
-    _id= 'Rheology',    
+    _id= 'Rheology',
     surrogateFunction= f,
     exactTask= RheologyExactTask(),
     substituteModels= [ polymerViscosity.m_polymerViscosity, SurfaceTension.m],
@@ -162,6 +162,8 @@ m = BackwardMappingModel(
             'T': [300.0, 310.0], # 310 is the maximum that is supported by Surface Tension Model
             'shear': [0.01, 0.1],
             'X': [0.1, 0.3],
+            'm0': [0.1, 0.3],
+            'm1': [0.1, 0.3],
         },
     ),
     outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(

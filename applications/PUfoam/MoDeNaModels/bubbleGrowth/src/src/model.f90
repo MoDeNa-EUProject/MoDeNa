@@ -22,35 +22,38 @@ subroutine  odesystem (neq, t, y, ydot)
     call dim_var(t,y)
     call molar_balance(y)
     ydot=0
-    ydot(xOHeq) = AOH*exp(-EOH/Rg/temp)*(1-y(xOHeq))*&
-        (NCO0-2*W0*y(xWeq)-OH0*y(xOHeq)) !polyol conversion
-    if (kin_model==3) then
-        if (y(xOHeq)>0.5_dp .and. y(xOHeq)<0.87_dp) ydot(xOHeq)=ydot(xOHeq)*&
-            (-2.027_dp*y(xOHeq)+2.013_dp) !gelling influence on kinetics
-        if (y(xOHeq)>0.87_dp) ydot(xOHeq)=ydot(xOHeq)*&
-            (3.461_dp*y(xOHeq)-2.761_dp)
-    endif
-    if (W0>1e-3) then
-        ! water conversion
-        ! ydot(xWeq) = AW*exp(-EW/Rg/temp)*(1-y(xWeq))*&
-        !     (NCO0-2*W0*y(xWeq)-OH0*y(xOHeq)) 2nd order
-        ydot(xWeq) = AW*exp(-EW/Rg/temp)*(1-y(xWeq)) !1st order
-    endif
-    if (dilution) then
-        if (co2_pos==1) then
-            bll=mb(2)/Vsh*Mbl(2)/rhop
-        else
-            bll=mb(1)/Vsh*Mbl(1)/rhop
-        endif
-        dil=1/(1+rhop/rhobl*bll)
-        ydot(xOHeq)=ydot(xOHeq)*dil
-        ydot(xWeq)=ydot(xWeq)*dil
-    endif
     if (kin_model==4) then
         call kinModel(y)
         do i=1,size(kineq)
             ydot(kineq(i))=kinsource(i)
         enddo
+        ydot(xWeq)=-ydot(kineq(5))/W0*1.0e3_dp
+        ydot(xOHeq)=-(ydot(kineq(2))+ydot(kineq(3)))/OH0*1.0e3_dp
+    else
+        ydot(xOHeq) = AOH*exp(-EOH/Rg/temp)*(1-y(xOHeq))*&
+            (NCO0-2*W0*y(xWeq)-OH0*y(xOHeq)) !polyol conversion
+        if (kin_model==3) then
+            if (y(xOHeq)>0.5_dp .and. y(xOHeq)<0.87_dp) ydot(xOHeq)=ydot(xOHeq)*&
+                (-2.027_dp*y(xOHeq)+2.013_dp) !gelling influence on kinetics
+            if (y(xOHeq)>0.87_dp) ydot(xOHeq)=ydot(xOHeq)*&
+                (3.461_dp*y(xOHeq)-2.761_dp)
+        endif
+        if (W0>1e-3) then
+            ! water conversion
+            ! ydot(xWeq) = AW*exp(-EW/Rg/temp)*(1-y(xWeq))*&
+            !     (NCO0-2*W0*y(xWeq)-OH0*y(xOHeq)) 2nd order
+            ydot(xWeq) = AW*exp(-EW/Rg/temp)*(1-y(xWeq)) !1st order
+        endif
+        if (dilution) then
+            if (co2_pos==1) then
+                bll=mb(2)/Vsh*Mbl(2)/rhop
+            else
+                bll=mb(1)/Vsh*Mbl(1)/rhop
+            endif
+            dil=1/(1+rhop/rhobl*bll)
+            ydot(xOHeq)=ydot(xOHeq)*dil
+            ydot(xWeq)=ydot(xWeq)*dil
+        endif
     endif
     !temperature (enthalpy balance)
     ydot(teq) = -dHOH*OH0/(rhop*cp)*ydot(xOHeq)-dHW*W0/(rhop*cp)*ydot(xWeq)
@@ -59,7 +62,7 @@ subroutine  odesystem (neq, t, y, ydot)
             (rhop*cp*Vsh)*(y(fceq+i-1)-KH(i)*y(fpeq+i-1))/(dz(1)/2)
     enddo
     if (kin_model==4) then
-        ! ydot(kineq(19))=ydot(teq)
+        ydot(kineq(19))=ydot(teq)
     endif
     if (firstrun) then
         if (inertial_term) then
@@ -202,7 +205,8 @@ subroutine kinModel(y)
         enddo
     endif
     !TODO: implement temperature
-    call modena_inputs_set(kinInputs, kinInputsPos(19), 60.0_dp)
+    ! call modena_inputs_set(kinInputs, kinInputsPos(19), 60.0_dp)
+    call modena_inputs_set(kinInputs, kinInputsPos(19), y(teq)-273.15_dp)
     ret = modena_model_call (kinModena, kinInputs, kinOutputs)
     if(ret /= 0) then
         call exit(ret)

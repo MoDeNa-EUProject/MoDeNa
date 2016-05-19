@@ -6,6 +6,7 @@ EXE_INC = \
     -I$(LIB_SRC)/transportModels/interfaceProperties/lnInclude \
     -I$(LIB_SRC)/turbulenceModels/compressible/turbulenceModel \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/meshTools/lnInclude \    
     -I$(HOME)/include/modena \
     -I/usr/include/python2.7 \
     -I/usr/local/include/libmongoc-1.0 \

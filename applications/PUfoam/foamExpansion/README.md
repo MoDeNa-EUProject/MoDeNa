@@ -1,0 +1,160 @@
+@ingroup app_foaming
+
+# Foaming simulation
+Collection of software tools for the simulation of polyurethane (PU) foaming
+process. Based on a recipe the model predicts the evolution of chemical
+kinetics, temperature, foam density, bubble size distribution, etc.
+This directory includes the foaming process in zero dimensional and three
+dimensional spaces. In order to run a test case, firstly the source codes should
+be compiled. The script `build` compiles the necessary models. The surrogate
+models will be loaded into the database by executing the two scripts provided:
+ `initModels` and `initBubbleGrowth`. Finally, the scripts `workflow*` run the
+ simulations and detailed model for bubble growth.
+
+# Dependencies and Installation
+Several models need to be compiled. C++ and Fortran compilers are required.
+First the MoDeNa framework should be compiled.
+The [following steps](https://github.com/MoDeNa-EUProject/MoDeNa) describes how
+to install MoDeNa framework.
+
+### 1. Install OpenFOAM
+The model is tested for OpenFOAM 2.3.0 and 2.4.0. In order to install OpenFOAM,
+you can either follow the steps in [OpenFOAM]
+(http://openfoam.org/archive/2.3.0/download/ubuntu.php) official website or
+copy/paste the commands below which install OpenFOAM and paraview:
+
+```
+cd $HOME
+wget http://rheologic.net/sites/default/files/downloads/RheologicRemix-2.3.0-Ubuntu-12.04-LTS.tgz
+tar -xvf RheologicRemix-2.3.0-Ubuntu-12.04-LTS.tgz
+cat bashrc-OpenFOAM-2.3.0 >> .bashrc
+mkdir -p $FOAM_RUN
+mkdir -p $FOAM_USER_APPBIN
+mkdir -p $FOAM_USER_LIBBIN
+```
+*Note*: For Ubuntu 16.04 you need to compile OpenFOAM 2.4.0 following
+[this guide line](https://openfoamwiki.net/index.php/Installation/Linux/OpenFOAM-2.4.0/Ubuntu#Ubuntu_16.04).
+
+### 2. Install MongoDB C++ Driver
+```
+cd $HOME
+git clone -b r1.3 https://github.com/mongodb/mongo-c-driver
+cd mongo-c-driver
+./autogen.sh
+make
+sudo make install
+cd $HOME
+git clone -b master https://github.com/mongodb/mongo-cxx-driver
+cd mongo-cxx-driver/build
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local ..
+sudo make
+sudo make install
+```
+### 3. Install boost library
+```
+sudo apt-get install libboost-dev
+```
+### 4. Install PETSc globally:
+```
+sudo mkdir /opt/petsc
+sudo chown user:group /opt/petsc
+cd /opt/petsc
+wget http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-3.4.5.tar.gz
+tar -xzf petsc-3.4.5.tar.gz
+cd petsc-3.4.5
+./configure --with-cc=gcc --with-fc=gfortran --download-f-blas-lapack --download-mpich --download-scalapak=yes
+make
+```
+Export variables in `.bashrc`
+```
+export PETSC_DIR=/opt/petsc/petsc-3.4.5
+export PETSC_ARCH=arch-linux2-c-debug
+```
+### 5. Install rapidjson library
+```
+cd where-you-want-source-files
+git clone https://github.com/miloyip/rapidjson.git
+cd rapidjson
+cmake .
+make
+sudo make install
+```
+set the environmental variables:
+```
+user=$(whoami)
+export LD_LIBRARY_PATH=/home/${user}/OpenFOAM/${user}-2.3.0/platforms/linux64GccDPDebug/lib:$LD_LIBRARY_PATH
+export PKG_CONFIG_PATH=${PKG_CONFIG_PATH:-}:${HOME}/lib/pkgconfig:/usr/local/lib/pkgconfig
+export PYTHONPATH=${PYTHONPATH:-}:${HOME}/lib/python2.7/site-packages
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH:-}:${HOME}/lib/python2.7/site-packages:${HOME}/lib/modena:/usr/local/lib
+
+```
+Compile the models using:
+```
+./build
+```
+Please note that the output of build should not contain any error messages.
+Otherwise, the tool cannot work properly.
+### (Optional)
+Some results can be easily visualized using [VEUSZ](http://home.gna.org/veusz/)
+program. It can be installed in Ubuntu using:
+```
+sudo apt-get install veusz
+```
+
+# Run
+In order to execute the program, you need to first provide the input variables
+for all the modelling tools. In the `examples` directory several cases have
+been provided. One can copy the `inputs` directory into the `foamExpansion` and
+modify it for the targeted recipe. The `unifiedInput.json` provides the input
+data for the zero dimensional simulation, whereas the rest of input directory
+creates the test case for OpenFOAM simulation. The details of the input
+variables have been elaborated here. After preparing the inputs the following
+steps should be executed:
+
+1. Initialize surrogate nano-scale models:
+```
+./initModels
+```
+2.  Execute meso-scopic bubble growth simulation:
+```
+./workflow_bubbleGrowth
+```
+3. Initialize surrogate bubble growth model:
+```
+./initBubbleGrowth
+```
+4. Run macroscopic simulation (0D or 3D):
+```
+./workflow_0D
+```
+or
+```
+./workflow_3D
+```
+*Note:*
+
+In case of any changes in the input files steps 2-4 should repeated.
+
+ If the following error occurs:
+```
+     --> FOAM FATAL ERROR:
+     Wrong number of arguments, expected 0 found 1
+
+     FOAM exiting
+
+     cannot find system Renviron
+     Fatal error: unable to open the base package
+```
+The workaround is to set the R environment variable as below:
+```
+R_HOME=/usr/lib/R (where you have installed R)
+export R_HOME=/usr/lib/R
+```
+
+# Results
+Results of the last simulation are stored in the corresponding sub-directory of
+the `results` directory. As mentioned before, we use `VEUSZ` to visualize the 
+results of simulations. For example, to look at selected results for a 0D 
+simulation, you can open `plotQmom0D.vsz` using VEUSZ. Further, the results of 
+the 3D simulation (stored in the launcher directory) can be displayed using a 
+third party software such as [paraview.](http://www.paraview.org/)

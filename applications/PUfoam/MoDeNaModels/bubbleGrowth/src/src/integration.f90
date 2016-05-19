@@ -187,27 +187,14 @@ subroutine set_initial_conditions
     y(xOHeq) = conv        !xOH
     y(xWeq) = 0        !xW
     if (kin_model==4) then
-        y(kineq(1)) = 6.73000e-02_dp
-        y(kineq(2)) = 1.92250e+00_dp
-        y(kineq(3)) = 2.26920e+00_dp
-        y(kineq(4)) = 0.00000e+00_dp
-        y(kineq(5)) = 5.46200e-01_dp
-        ! y(kineq(5)) = 1.0924e+00_dp
-        y(kineq(6)) = 2.19790e+00_dp
-        y(kineq(7)) = 1.64000e+00_dp
-        y(kineq(8)) = 1.71030e+00_dp
-        y(kineq(9)) = 0.00000e+00_dp
-        y(kineq(10)) = 0.00000e+00_dp
-        y(kineq(11)) = 0.00000e+00_dp
-        y(kineq(12)) = 0.00000e+00_dp
-        y(kineq(13)) = 0.00000e+00_dp
-        y(kineq(14)) = 0.00000e+00_dp
-        y(kineq(15)) = 0.00000e+00_dp
-        y(kineq(16)) = 4.45849e+00_dp
-        y(kineq(17)) = 0.00000e+00_dp
-        y(kineq(18)) = 1.00000e+00_dp
-        y(kineq(19)) = 60!2.27000e+01_dp
-        y(kineq(20)) = 1e0_dp!8.46382e-01_dp
+        y(kineq(1)) = catalyst*1e-3_dp
+        y(kineq(2)) = polyol1_ini*1e-3_dp
+        y(kineq(3)) = polyol2_ini*1e-3_dp
+        y(kineq(4)) = amine_ini*1e-3_dp
+        y(kineq(5)) = W0*1e-3_dp
+        y(kineq(6)) = isocyanate1_ini*1e-3_dp
+        y(kineq(7)) = isocyanate2_ini*1e-3_dp
+        y(kineq(8)) = isocyanate3_ini*1e-3_dp
     endif
     do j=1,ngas
         do i=1,p+1

@@ -13,9 +13,9 @@ IOdictionary simulationMode
 word simulationTarget(simulationMode.lookup("simulationTarget"));
 
 if
-( 
-    !(simulationTarget == "mold-filling" 
-   || simulationTarget == "validation") 
+(
+    !(simulationTarget == "mold-filling"
+   || simulationTarget == "validation")
 )
 {
     FatalErrorIn(args.executable())

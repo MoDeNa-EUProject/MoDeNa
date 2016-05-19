@@ -16,26 +16,26 @@ void write_kinetics( const state_type &y , const double t )
     n = y.size();
 
     ofstream out[n];
-    out[0].open("../results/XW1.txt", std::ios::app);
-    out[1].open("../results/XOH1.txt", std::ios::app);
-    out[2].open("../results/T1.txt", std::ios::app);
-    out[3].open("../results/L_l1.txt", std::ios::app);
-    out[4].open("../results/L_g1.txt", std::ios::app);
-    out[5].open("../results/CO2_l1.txt", std::ios::app);
-    out[6].open("../results/CO2_g1.txt", std::ios::app);
-    out[7].open("../results/m01.txt", std::ios::app);
-    out[8].open("../results/m11.txt", std::ios::app);
-    out[9].open("../results/m21.txt", std::ios::app);
-    out[10].open("../results/m31.txt", std::ios::app);
-    // out[11].open("../results/EG_XNCO1.txt", std::ios::app);
-    // out[12].open("../results/EG_XOH1.txt", std::ios::app);
-    // out[13].open("../results/XH2O1.txt", std::ios::app);
-    // out[14].open("../results/CO21.txt", std::ios::app);
-    // out[15].open("../results/PENTANE1.txt", std::ios::app);
-    // out[16].open("../results/POLYMER1.txt", std::ios::app);
-    // out[17].open("../results/POLYMERBLOW1.txt", std::ios::app);
-    // out[18].open("../results/UREA1.txt", std::ios::app);
-    // out[19].open("../results/R_1_temp1.txt", std::ios::app);
+    out[0].open("./XW1.txt", std::ios::app);
+    out[1].open("./XOH1.txt", std::ios::app);
+    out[2].open("./T1.txt", std::ios::app);
+    out[3].open("./L_l1.txt", std::ios::app);
+    out[4].open("./L_g1.txt", std::ios::app);
+    out[5].open("./CO2_l1.txt", std::ios::app);
+    out[6].open("./CO2_g1.txt", std::ios::app);
+    out[7].open("./m01.txt", std::ios::app);
+    out[8].open("./m11.txt", std::ios::app);
+    out[9].open("./m21.txt", std::ios::app);
+    out[10].open("./m31.txt", std::ios::app);
+    // out[11].open("./EG_XNCO1.txt", std::ios::app);
+    // out[12].open("./EG_XOH1.txt", std::ios::app);
+    // out[13].open("./XH2O1.txt", std::ios::app);
+    // out[14].open("./CO21.txt", std::ios::app);
+    // out[15].open("./PENTANE1.txt", std::ios::app);
+    // out[16].open("./POLYMER1.txt", std::ios::app);
+    // out[17].open("./POLYMERBLOW1.txt", std::ios::app);
+    // out[18].open("./UREA1.txt", std::ios::app);
+    // out[19].open("./R_1_temp1.txt", std::ios::app);
 
     for (int i = 0; i < n; i++)
     {
@@ -96,18 +96,18 @@ void write_kinetics( const state_type &y , const double t )
     double rho_foam 	= (rho_bubble*(y[8]/(1.0+y[8])) + rhoPolySurrgate*(1.0 - (y[8]/(1.0+y[8]))));
 
 	ofstream rho_bubbleout;
-	rho_bubbleout.open("../results/rho_bubble.txt", std::ios::app);
+	rho_bubbleout.open("./rho_bubble.txt", std::ios::app);
 	rho_bubbleout << t << '\t' << rho_bubble << '\n';
 	rho_bubbleout.close();
 
 	ofstream rho_foamout;
-	rho_foamout.open("../results/rho_foam.txt", std::ios::app);
+	rho_foamout.open("./rho_foam.txt", std::ios::app);
 	rho_foamout << t << '\t' << rho_foam << '\n';
 	rho_foamout.close();
 
     ofstream R_bubble;
     double R = bubbleRadius(y[7], y[8]);
-    R_bubble.open("../results/R_bubble.txt", std::ios::app);
+    R_bubble.open("./R_bubble.txt", std::ios::app);
     R_bubble << t << '\t' << R << '\n';
     R_bubble.close();
 
@@ -115,13 +115,13 @@ void write_kinetics( const state_type &y , const double t )
 
 	double p_1 = partialPressureBA(y);
 	ofstream p1out;
-	p1out.open("../results/p_1.txt", std::ios::app);
+	p1out.open("./p_1.txt", std::ios::app);
 	p1out << t << '\t' << p_1 << '\n';
 	p1out.close();
 
 	double p_2 = partialPressureCO2(y);
 	ofstream p2out;
-	p2out.open("../results/p_2.txt", std::ios::app);
+	p2out.open("./p_2.txt", std::ios::app);
 	p2out << t << '\t' << p_2 << '\n';
 	p2out.close();
 }
