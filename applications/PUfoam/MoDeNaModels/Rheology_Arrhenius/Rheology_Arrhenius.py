@@ -79,7 +79,7 @@ void Arrhenius
 
     f_t = A_mu * exp(E_mu / R_rh / T );
 
-    mu_ap = mu_inf * f_t;
+    mu_ap = mu_car * f_t;
     // printf("apparent viscosity %f", mu_ap);
     outputs[0] = mu_ap;
 }
@@ -88,9 +88,11 @@ void Arrhenius
        'T': {'min': 0, 'max': 9e99 },
        'shear': {'min': 0, 'max': 9e99 },
        'X': {'min': 0, 'max': 1 },
+       'm0' : {'min': 0, 'max' : 9e99},
+       'm1' : {'min': 0, 'max' : 9e99},
        'mu' : {'min': 0, 'max' : 9e99},
        'ST' : {'min': 0, 'max' : 9e99},
-       'mu_inf' : {'min': 0, 'max' : 9e99},
+       'mu_car' : {'min': 0, 'max' : 9e99},
    },
    outputs={
        'mu_ap': { 'min': 0, 'max': 9e99, 'argPos': 0 },

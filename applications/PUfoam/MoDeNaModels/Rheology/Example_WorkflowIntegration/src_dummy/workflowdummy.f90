@@ -3,13 +3,15 @@ program workflowdummy
    use fmodena
 !  use tfem_m
   implicit none
-  real(8) :: temp, shear, conv
+  real(8) :: temp, shear, conv, m0, m1
   real(8) :: mu, surfaceTension, Viscosity
   integer :: ret
 
    integer(c_size_t) :: TPos
    integer(c_size_t) :: XPos
    integer(c_size_t) :: shearPos
+   integer(c_size_t) :: m0Pos
+   integer(c_size_t) :: m1Pos
    type(c_ptr) :: Model, Inputs, Outputs
   print*, "Hello World"
   Model = modena_model_new (c_char_"Rheology_Arrhenius"//c_null_char);
@@ -26,6 +28,10 @@ program workflowdummy
   shearPos = modena_model_inputs_argPos(Model, &
              c_char_"shear"//c_null_char);
   XPos = modena_model_inputs_argPos(Model, &
+             c_char_"X"//c_null_char);
+  m0Pos = modena_model_inputs_argPos(Model, &
+             c_char_"X"//c_null_char);
+  m1Pos = modena_model_inputs_argPos(Model, &
              c_char_"X"//c_null_char);
 !
 ! viscosityModel = modena_model_new (c_char_"polymerViscosity"//c_null_char);
@@ -54,6 +60,8 @@ program workflowdummy
   call modena_inputs_set(Inputs, TPos, temp )
   call modena_inputs_set(Inputs, XPos, conv )
   call modena_inputs_set(Inputs, shearPos, shear )
+  call modena_inputs_set(Inputs, m0Pos, m0 )
+  call modena_inputs_set(Inputs, m1Pos, m1 )
 
 ! call modena_inputs_set( viscosityInputs, viscosityTempPos, temp )
 ! call modena_inputs_set( viscosityInputs, viscosityConvPos, conv )
