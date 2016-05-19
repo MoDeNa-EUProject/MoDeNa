@@ -1,6 +1,6 @@
 @ingroup app_foaming
 
-The recipe for the simulation is specified in the 'inputs' directory. Several test cases are prepared in the 'examples' directory. The 'unifiedInput.json' file controls the Bubble growth model and the 0D simulation, the rest of the files control the OpenFOAM simulation.
+The recipe for the simulation is specified in the 'inputs' directory. Several test cases are prepared in the 'examples' directory. The 'unifiedInput.json' file controls the Bubble growth model and the 0D simulation, whereas the rest of the files and directories control the OpenFOAM simulation.
 
 ### Preparing unifiedInput.json
 The following key-pairs should be defined:
@@ -74,3 +74,62 @@ The following key-pairs should be defined:
    - "timeStep": (s)
    - "endTime": (s)
    - "bubbleMode": ["mean radius", "two nodes"]
+
+### Preparing the test case for OpenFOAM simulation
+- `0` directory: initial and boundary conditions can be defined. Further details can be found in [OpenFOAM UserGuide](http://cfd.direct/openfoam/user-guide/)
+- `system` directory: includes dictioneries to control the simulation details such as time discretization, solution methods and etc. For further details, one should consult with [OpenFOAM UserGuide](http://cfd.direct/openfoam/user-guide/)
+- `constant` directory: includes the mesh and and dictionaries to define the physical properties of fluid flow. There are also additional dictionaries, specifically for PU foam.
+
+    - `kineticsProperties`: defines the details of kinetics scheme
+
+        - `liquidMixtureDensitySurrogate`: enable the surrogate model for mixture density [on/off],
+        - `blowingAgent`: name of blowing agent [n-pentane, R-11],
+        - `kineticsModel`: name of kinetics model [generic, RF-1],
+        - `GellingConstants`: constants for the gelling reaction
+
+            - `A_OH`: pre-exponential factor (m^3/mol s),
+            - `E_OH`: activation energy (J/mol),
+            - `initCOH`: initial concentration of polyol OH groups in the mixutre (mol/m3),
+            - `initCNCO`: initial concentration of isocianate NCO groups in the mixutre (mol/m3),
+            - `initCW`: initial concentration of water in the mixture (mol/m3),
+            - `gellingPoint`: gelling point
+        - `BlowingConstants` constants for the blowing reaction
+
+            - `A_W`: pre-exponential factor (m^3/mol s),
+            - `E_W`: activation energy (J/mol)
+        - `GenericConstants`: generic constants
+
+            - `idealGasCons`: ideal gas constant (J/mol K),
+            - `rhoPolymer`: density of the liquid polymer (kg/m^3),
+            - `rhoBlowingAgent`: density of the blowing agent (kg/m3),
+            - `molecularMassCO2`: molecular mass of carbon dioxide, (kg/kmol),
+            - `molecularMassBlowingAgent`: molecular mass of blowing agent (kg/kmol),
+            - `molecularMassNCO`: molecular weight of NCO (kg/kmol),
+            - `molecularMassLiquidFoam`: molecular weight of liquid mixture (kg/kmol),
+            - `dissolvedCO2`: weight fraction of dissolved CO2 in the mixture (kg/kg),
+            - `dxdTcons`: model constant for the blowing agent (-0.01162790697 is recommended),
+            - `initBlowingAgent`: initial weight fraction of blowing agent in the liquid (kg/kg),
+            - `initCO2`: initial weight fraction of CO2 in the liquid (kg/kg),
+            - `surfaceTension`: surface tension
+       - `EnthalpyConstants`: constant for energy equation
+
+           - `deltaOH`: reaction heat for the gelling reaction (J/mol),
+           - `deltaW`: reaction heat for the blowing reaction (J/mol),
+           - `PUspecificHeat`: polyurethane specific heat (J/kg K),
+           - `CO2specificHeat`: CO2 specific heat (J/kg K),
+           - `BGspecificHeat`: physical blowing agent in gas phase specific heat (J/kg K),
+           - `BLspecificHeat`: physical blowing agent in liquid phase specific heat (J/kg K),
+           - `latentHeat`: latent heat of blowing agent (J/kg)
+    - `PBEProperties`: defines the details of population balance solution
+
+        - `PBESwitch`: enbale PBE model [on/off],
+        - `PBEMethod`: solution method for PBE. In the current version `QMOM` is available.
+        - `nNodes`: number of quadrature approximation nodes [2-3],
+        - `bubbleGrowthSurrogateSwitch`: enable bubble growth surrogate model [on/off],
+        - `bubbleGrowthMode`: use of mean bubble radius or two nodes [meanRadius, twoNodes].
+    - `rheologyProperties`: define the rheology model ([further details](http://onlinelibrary.wiley.com/doi/10.1002/masy.201500108/abstract))
+
+        - `viscosityModel`: viscosity model [constant, castro-macosko, bird-carreau]
+    - `simulationMode`: defines the how long the simulation should run
+
+        - `simulationTarget`: two different modes for the simulation: mold-filling and validation. Mold-filling would disable the solution of equations when the mould is filled and validation would continue until the defined end time.
