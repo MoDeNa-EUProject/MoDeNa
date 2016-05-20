@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 '''
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
@@ -10,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2016 MoDeNa Consortium, All rights reserved.
+    2014-2015 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -22,14 +21,14 @@ License
 
     Modena is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
-    details.
+    FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
-    A simple workflow
+    Python library of FireTasks
 
 Authors
     Henrik Rusche
@@ -37,22 +36,4 @@ Authors
 Contributors
 '''
 
-from modena import SurrogateModel, MODENA_PARSED_URI
-from fireworks import Firework, Workflow, LaunchPad
-from fireworks.core.rocket_launcher import rapidfire
-
-import WorkflowTest
-print MODENA_PARSED_URI
-# set up the LaunchPad and reset it
-# launchpad = LaunchPad(host='ds011840.mlab.com', name='modenatst', port=11840, username='sigveka', password='sigveka')
-launchpad = LaunchPad(**MODENA_PARSED_URI)
-launchpad.reset('', require_password=False)
-
-# create the individual FireWorks and Workflow
-# Source code in src/twoTanksMacroscopicProblem.C
-
-wf = Workflow([Firework(WorkflowTest.m)], {}, name="simulation")
-
-# store workflow and launch it locally
-launchpad.add_wf(wf)
-rapidfire(launchpad)
+from Rheology_Arrhenius import m
