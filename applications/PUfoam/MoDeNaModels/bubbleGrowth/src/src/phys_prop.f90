@@ -180,8 +180,6 @@ subroutine physical_properties(temp,conv,radius)
             ! stop
         end select
     enddo
-    ! write(unit=*, fmt=*) temp,KH(1)
-    ! stop
     if (solcorr) KH=KH*exp(2*sigma*Mbl/(rhop*Rg*temp*radius))
     cp=cppol+sum(cbl*Mbl*cpbll)/rhop
 end subroutine physical_properties

@@ -162,17 +162,27 @@ with open('./inputs/unifiedInput.json') as jsonfile:
     solubilityModel.append(
         inputs['physicalProperties']['blowingAgents']['CO2']['solubilityModel'])
 subsModel=[]
-for i,j in enumerate(solubilityModel):
-    if j=="constant":
-        subsModel.append(Solubility.m_solubilityCO2Baser)
-    if j=="pcsaft":
-        subsModel.append(Solubility.m_solubilityCO2)
-    elif j=="Gupta":
-        subsModel.append(Solubility.m_solubilityPentGupta)
-    elif j=="Winkler":
-        subsModel.append(Solubility.m_solubilityPentWinkler)
-    elif j=="Baser":
-        subsModel.append(Solubility.m_solubilityR11Baser)
+j=solubilityModel[0]
+if j=="pcsaft":
+    subsModel.append(Solubility.m_solubilityCyclopentane)
+elif j=="Gupta":
+    subsModel.append(Solubility.m_solubilityPentGupta)
+elif j=="Winkler":
+    subsModel.append(Solubility.m_solubilityPentWinkler)
+elif j=="Baser":
+    subsModel.append(Solubility.m_solubilityR11Baser)
+else:
+    "PBL solubility model not found"
+    sys.exit()
+
+j=solubilityModel[1]
+if j=="constant":
+    subsModel.append(Solubility.m_solubilityCO2Baser)
+elif j=="pcsaft":
+    subsModel.append(Solubility.m_solubilityCO2)
+else:
+    "CO2 solubility model not found"
+    sys.exit()
 
 m = ForwardMappingModel(
     _id='bubbleGrowth1',
