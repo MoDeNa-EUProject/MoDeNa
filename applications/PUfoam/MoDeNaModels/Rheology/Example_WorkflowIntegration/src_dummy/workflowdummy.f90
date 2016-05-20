@@ -16,6 +16,7 @@ program workflowdummy
   print*, "Hello World"
   Model = modena_model_new (c_char_"Rheology_Arrhenius"//c_null_char);
 
+  print*, "Model loaded from db"
   if ( modena_error_occurred() ) then
     call exit( modena_error() )
   end if
