@@ -164,6 +164,9 @@ m = BackwardMappingModel(
             'X': [0.1, 0.3],
             'm0': [0.1, 0.3],
             'm1': [0.1, 0.3],
+            # 'X': [0.0, 1.0],
+            # 'm0': [1e8, 1e15],
+            # 'm1': [1e-30, 1e1],
         },
     ),
     outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(
@@ -178,4 +181,3 @@ m = BackwardMappingModel(
         maxIterations= 5 # Currently not used
     ),
 )
-

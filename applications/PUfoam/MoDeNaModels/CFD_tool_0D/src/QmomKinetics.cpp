@@ -321,36 +321,39 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
 
 
     // call the surrogate model for rheology
-    // if (apparentViscosity)
-    // {
-    //     double shearRate = 0.05;
+    if (apparentViscosity)
+    {
+        double shearRate = 0.05;
 
-    //     size_t temp_rheopos     = modena_model_inputs_argPos(rheologymodel, "temp");
-    //     size_t conv_rheopos     = modena_model_inputs_argPos(rheologymodel, "conv");
-    //     size_t shear_rheopos    = modena_model_inputs_argPos(rheologymodel, "shear");
+        size_t temp_rheopos     = modena_model_inputs_argPos(rheologymodel, "T");
+		size_t shear_rheopos    = modena_model_inputs_argPos(rheologymodel, "shear");
+        size_t conv_rheopos     = modena_model_inputs_argPos(rheologymodel, "X");
+		size_t m0_rheopos       = modena_model_inputs_argPos(rheologymodel, "m0");
+		size_t m1_rheopos       = modena_model_inputs_argPos(rheologymodel, "m1");
 
-    //     modena_model_argPos_check(rheologymodel);
+        // modena_model_argPos_check(rheologymodel);
 
-    //     // // set input vector
-    //     modena_inputs_set(inputs_rheo, temp_rheopos, T);
-    //     modena_inputs_set(inputs_rheo, conv_rheopos, XOH);
-    //     modena_inputs_set(inputs_rheo, shear_rheopos, shearRate);
-    //     // // call the model
-    //     int ret_rheo = modena_model_call (rheologymodel, inputs_rheo, outputs_rheo);
+        // // set input vector
+        modena_inputs_set(inputs_rheo, temp_rheopos, T);
+        modena_inputs_set(inputs_rheo, conv_rheopos, XOH);
+        modena_inputs_set(inputs_rheo, shear_rheopos, shearRate);
+		modena_inputs_set(inputs_rheo, m0_rheopos, mom[0]);
+		modena_inputs_set(inputs_rheo, m1_rheopos, mom[1]);
+        // // call the model
+        int ret_rheo = modena_model_call (rheologymodel, inputs_rheo, outputs_rheo);
 
-    //     // // terminate, if requested
-    //     if(modena_error_occurred())
-    //     {
-    //         modena_inputs_destroy (inputs_rheo);
-    //         modena_outputs_destroy (outputs_rheo);
-    //         modena_model_destroy (rheologymodel);
-    //         cout << "Modena Error: " << (modena_error()) << endl;
-    //     }
+        // // terminate, if requested
+        if(modena_error_occurred())
+        {
+            modena_inputs_destroy (inputs_rheo);
+            modena_outputs_destroy (outputs_rheo);
+            modena_model_destroy (rheologymodel);
+            cout << "Modena Error: " << (modena_error()) << endl;
+        }
 
-    //     double mu_app = modena_outputs_get(outputs_rheo, 0);
-    //     cout << "apparent viscosity: " << mu_app << endl;
-    // }
-
+        double mu_app = modena_outputs_get(outputs_rheo, 0);
+        cout << "apparent viscosity: " << mu_app << endl;
+    }
 
     // Gelling point representation
     if(y[1] > 0.5)

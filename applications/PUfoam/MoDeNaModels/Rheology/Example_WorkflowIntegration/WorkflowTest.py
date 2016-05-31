@@ -8,7 +8,6 @@ from fireworks import Firework, Workflow, FWAction
 from fireworks.utilities.fw_utilities import explicit_serialize
 from blessings import Terminal
 from jinja2 import Template
-import Rheology
 
 ## Create terminal for colour output
 term = Terminal()
@@ -20,4 +19,3 @@ term = Terminal()
 m = Strategy.BackwardMappingScriptTask(
         script=os.path.dirname(os.path.abspath(__file__))+'/src_dummy/workflowdummy'
             )
-

@@ -234,26 +234,26 @@ m = BackwardMappingModel(
     ),
 )
 
-m2 = BackwardMappingModel(
-    _id= 'SurfaceTension[A=CO2,B=PU]',
-    surrogateFunction= f,
-    exactTask= SurfaceTensionExactSim(),
-    substituteModels= [ ],
-    initialisationStrategy= Strategy.InitialPoints(
-        initialPoints=
-        {
-            'T': [270.0, 290.0, 300.0],
-        },
-    ),
-    outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(
-        nNewPoints= 4
-    ),
-    parameterFittingStrategy= Strategy.NonLinFitWithErrorContol(
-        testDataPercentage= 0.2,
-        maxError= 30.0,
-        improveErrorStrategy= Strategy.StochasticSampling(
-            nNewPoints= 2
-        ),
-        maxIterations= 5 # Currently not used
-    ),
-)
+# m2 = BackwardMappingModel(
+#     _id= 'SurfaceTension[A=CO2,B=PU]',
+#     surrogateFunction= f,
+#     exactTask= SurfaceTensionExactSim(),
+#     substituteModels= [ ],
+#     initialisationStrategy= Strategy.InitialPoints(
+#         initialPoints=
+#         {
+#             'T': [270.0, 290.0, 300.0],
+#         },
+#     ),
+#     outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(
+#         nNewPoints= 4
+#     ),
+#     parameterFittingStrategy= Strategy.NonLinFitWithErrorContol(
+#         testDataPercentage= 0.2,
+#         maxError= 30.0,
+#         improveErrorStrategy= Strategy.StochasticSampling(
+#             nNewPoints= 2
+#         ),
+#         maxIterations= 5 # Currently not used
+#     ),
+# )

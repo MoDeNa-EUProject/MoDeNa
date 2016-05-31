@@ -31,9 +31,9 @@ program workflowdummy
   XPos = modena_model_inputs_argPos(Model, &
              c_char_"X"//c_null_char);
   m0Pos = modena_model_inputs_argPos(Model, &
-             c_char_"X"//c_null_char);
+             c_char_"m0"//c_null_char);
   m1Pos = modena_model_inputs_argPos(Model, &
-             c_char_"X"//c_null_char);
+             c_char_"m1"//c_null_char);
 !
 ! viscosityModel = modena_model_new (c_char_"polymerViscosity"//c_null_char);
 ! viscosityInputs = modena_inputs_new (viscosityModel);
@@ -43,7 +43,7 @@ program workflowdummy
 ! viscosityConvPos = modena_model_inputs_argPos(viscosityModel, &
 !            c_char_"X"//c_null_char);
 
-!  call modena_model_argPos_check(Model)
+ ! call modena_model_argPos_check(Model)
 
   print*, "Argpos"
 ! call modena_model_argPos_check(viscosityModel)
@@ -55,9 +55,11 @@ program workflowdummy
 ! shear =0.5
 !  temp = 305
 !  conv = 0.4
- shear =0.01
- temp = 300
- conv = 0.1
+ shear =0.02
+ temp = 305
+ conv = 0.2
+ m0=0.2
+ m1=0.2
   call modena_inputs_set(Inputs, TPos, temp )
   call modena_inputs_set(Inputs, XPos, conv )
   call modena_inputs_set(Inputs, shearPos, shear )
@@ -87,12 +89,12 @@ program workflowdummy
 
  viscosity = modena_outputs_get(Outputs, 0_c_size_t);
 ! polymerViscosity = modena_outputs_get(viscosityOutputs, 0_c_size_t);
-
+write(unit=*, fmt=*) viscosity
 
 ! mu = 1.0
 ! open(15, file='RheologyExact.out')
 ! write(15,*) mu
 ! close(15)
- 
- 
+
+
 end program workflowdummy

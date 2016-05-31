@@ -36,6 +36,12 @@ if (modena_error_occurred())
     return modena_error();
 }
 
+rheologymodel = modena_model_new("Rheology_Arrhenius");
+if (modena_error_occurred())
+{
+    return modena_error();
+}
+
 inputs_bblgr1 = modena_inputs_new(bblgr1);
 outputs_bblgr1 = modena_outputs_new(bblgr1);
 
@@ -48,6 +54,8 @@ outputs_kinetics = modena_outputs_new(kinetics);
 inputs_den = modena_inputs_new (density_reaction_mixturemodel);
 outputs_den = modena_outputs_new (density_reaction_mixturemodel);
 
+inputs_rheo = modena_inputs_new (rheologymodel);
+outputs_rheo = modena_outputs_new (rheologymodel);
 
 // inputs argPos
 Catalyst_1_Pos   = modena_model_inputs_argPos(kinetics, "'Catalyst_1'");

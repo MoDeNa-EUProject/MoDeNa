@@ -11,6 +11,8 @@ modena_model_t *kinetics;
 
 modena_model_t *density_reaction_mixturemodel;
 
+modena_model_t *rheologymodel;
+
 modena_inputs_t *inputs_bblgr1;
 modena_outputs_t *outputs_bblgr1;
 
@@ -22,6 +24,9 @@ modena_outputs_t *outputs_kinetics;
 
 modena_inputs_t *inputs_den;
 modena_outputs_t *outputs_den;
+
+modena_inputs_t *inputs_rheo;
+modena_outputs_t *outputs_rheo;
 
 size_t Catalyst_1_Pos;
 size_t CE_A0_Pos;
