@@ -226,7 +226,7 @@ m = BackwardMappingModel(
     ),
     parameterFittingStrategy= Strategy.NonLinFitWithErrorContol(
         testDataPercentage= 0.2,
-        maxError= 30.0,
+        maxError= 1e-2,
         improveErrorStrategy= Strategy.StochasticSampling(
             nNewPoints= 2
         ),

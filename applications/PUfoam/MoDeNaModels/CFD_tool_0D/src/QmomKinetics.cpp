@@ -192,7 +192,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
             Rx=1;
             break;
         case 2:
-            if (y[1]<0.5) {
+            if (y[1]<X_gel) {
                 Rx=1;
             } else if (y[1]<0.87) {
                 Rx=-2.027*y[1]+2.013;
@@ -356,7 +356,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
     }
 
     // Gelling point representation
-    if(y[1] > 0.5)
+    if(y[1] > X_gel)
     {
         beta0   = 0.0;
     }
@@ -486,11 +486,11 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
             volumeGrowthBA[i]   = (radiusGrowthBA[i]*RR*T)/(p_1);
             volumeGrowthCO2[i]  = (radiusGrowthCO2[i]*RR*T)/(p_2);
 
-            if (volumeGrowthBA[i] < 0.0 || radiusGrowthBA[i] < 0.0 || L0 < 1.0e-8 || y[1] > 0.5)
+            if (volumeGrowthBA[i] < 0.0 || radiusGrowthBA[i] < 0.0 || L0 < 1.0e-8 || y[1] > X_gel)
             {
                 volumeGrowthBA[i]   = 0.0;
             }
-            if (volumeGrowthCO2[i] < 0.0 || radiusGrowthCO2[i] < 0.0 || W_0 < 1.0e-8 || y[1] > 0.5)
+            if (volumeGrowthCO2[i] < 0.0 || radiusGrowthCO2[i] < 0.0 || W_0 < 1.0e-8 || y[1] > X_gel)
             {
                 volumeGrowthCO2[i]  = 0.0;
             }
@@ -530,13 +530,13 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
         G1 = modena_outputs_get(outputs_bblgr1, 0);
         G2 = modena_outputs_get(outputs_bblgr2, 0);
         dVdt_1[0] = (G1*RR*T)/(p_1);
-        if (dVdt_1[0] < 0.0 || G1 < 0.0 || L0<1e-8 || y[1]>0.5) //hardcoded gel point
+        if (dVdt_1[0] < 0.0 || G1 < 0.0 || L0<1e-8 || y[1]>X_gel)
         {
             dVdt_1[0] = 0.0;
         }
         dVdt_1[1] = dVdt_1[0];
         dVdt_2[0] = (G2*RR*T)/(p_2);
-        if (dVdt_2[0] < 0.0 || G2 < 0.0 || W_0<1e-8 || y[1]>0.5) //hardcoded gel point
+        if (dVdt_2[0] < 0.0 || G2 < 0.0 || W_0<1e-8 || y[1]>X_gel)
         {
             dVdt_2[0] = 0.0;
         }

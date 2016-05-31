@@ -22,6 +22,7 @@
     },
     "kinetics": {
         "kineticModel": "RF-1",
+        "gelPoint": 0.6,
         "gellingReaction": {
             "reactionEnthalpy": -6.85e4
         },

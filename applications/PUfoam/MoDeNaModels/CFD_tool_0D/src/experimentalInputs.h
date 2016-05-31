@@ -122,6 +122,7 @@
 // kinetics model used
 	int    kinMod  = 2;
 	bool   dilution= true;
+	double X_gel;
 /* Inputs for weight fraction of gaseous CO2 in the mixture */
 	double M_CO2   = 44.0;
 	double M_B     = 137.37;

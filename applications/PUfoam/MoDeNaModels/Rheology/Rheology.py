@@ -38,6 +38,7 @@ Contributors
 '''
 
 import os
+import json
 import modena
 import SurfaceTension
 import polymerViscosity
@@ -87,6 +88,9 @@ class RheologyExactTask(ModenaFireTask):
         os.remove('RheologyExact.in')
         os.remove('RheologyExact.out')
 
+with open(os.getcwd()+'/inputs/unifiedInput.json') as jsonfile:
+    inputs=json.load(jsonfile)
+    X_gel=inputs['kinetics']['gelPoint']
 
 f = CFunction(
     Ccode= '''
@@ -114,7 +118,7 @@ void rheology_SM
     const double mu_b = 1;
     const double mu_c = 0;
     const double mu_d = 0.001;
-    const double X_gel = 0.615;
+    const double X_gel = '''+str(X_gel)+''';
     const double mu_0_const = 0.195;
     const double mu_inf_const = 0.266;
 
@@ -165,7 +169,7 @@ m = BackwardMappingModel(
         {
             'T': [270.0, 330.0], # 330 is the maximum that is supported by Surface Tension Model (Air+THF)
             'shear': [0.01, 0.1],
-            'X': [0, 0.4],
+            'X': [0, 0.3],
             'm0': [1e8, 1e15],
             'm1': [1e-30, 1e5],
         },

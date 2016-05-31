@@ -18,6 +18,7 @@
     "kinetics": {
         "kineticModel": "Baser",
         "useDilution": true,
+        "gelPoint": 0.6,
         "gellingReaction": {
             "frequentialFactor": 1,
             "activationEnergy": 3.514e4,
