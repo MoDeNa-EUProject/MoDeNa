@@ -14,6 +14,7 @@ The following key-pairs should be defined:
 - "kinetics":
     - "kineticModel": "name of kinetic model" ["Baser", "RF-1"],
     - "useDilution": "use correction for dilution in Baser model (t/f)",
+    - "gelPoint": "conversion at the gel point"
     - "gellingReaction": "parameters of gelling reaction"
         - "frequentialFactor": "pre-exponential factor for Baser model (m^3/mol/s)",
         - "activationEnergy": "activation energy for Baser model (J/mol)",

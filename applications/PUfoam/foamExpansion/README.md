@@ -113,7 +113,8 @@ steps should be executed:
 
 1. Initialize surrogate nano-scale models:
 ```
-./initModels
+./initModels1
+./initModels2
 ```
 2.  Execute meso-scopic bubble growth simulation:
 ```
