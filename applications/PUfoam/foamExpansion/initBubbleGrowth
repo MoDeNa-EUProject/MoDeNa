@@ -50,7 +50,7 @@ import Solubility
 
 # import Solubility destroys Backward mapping models
 # we need to re-create them
-os.system('./initModels')
+os.system('./initModels1')
 
 global model
 
