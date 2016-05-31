@@ -5,7 +5,7 @@ program workflowdummy
   implicit none
   real(8) :: temp, shear, conv, m0, m1
   real(8) :: mu, surfaceTension, Viscosity
-  integer :: ret
+  integer :: ret,i
 
    integer(c_size_t) :: TPos
    integer(c_size_t) :: XPos
@@ -56,9 +56,9 @@ program workflowdummy
 !  temp = 305
 !  conv = 0.4
  shear =0.02
- temp = 305
- conv = 0.2
- m0=0.2
+ temp = 320
+ conv = 0.8
+ m0=1e10
  m1=0.2
   call modena_inputs_set(Inputs, TPos, temp )
   call modena_inputs_set(Inputs, XPos, conv )
@@ -91,6 +91,16 @@ program workflowdummy
 ! polymerViscosity = modena_outputs_get(viscosityOutputs, 0_c_size_t);
 write(unit=*, fmt=*) viscosity
 
+open(11,file='visc.out')
+conv=0
+do i=1,11
+    call modena_inputs_set(Inputs, XPos, conv )
+    ret = modena_model_call(Model, Inputs, Outputs)
+    viscosity = modena_outputs_get(Outputs, 0_c_size_t);
+    write(11,*) conv,viscosity
+    conv=conv+0.4/10
+enddo
+close(11)
 ! mu = 1.0
 ! open(15, file='RheologyExact.out')
 ! write(15,*) mu

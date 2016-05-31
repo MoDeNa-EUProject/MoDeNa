@@ -194,7 +194,7 @@ outputs[0] = P0 + T*P1 + P2*T*T;
 ''',
     # These are global bounds for the function
     inputs={
-        'T': { 'min': 270.0, 'max': 310.0 },        #check if boundaries reasonable, from this range, the random values for the DOE are chosen!
+        'T': { 'min': 270.0, 'max': 450.0 },        #check if boundaries reasonable, from this range, the random values for the DOE are chosen!
     },
     outputs={
         'ST': { 'min': 9e99, 'max': -9e99, 'argPos': 0 },
@@ -218,7 +218,7 @@ m = BackwardMappingModel(
     initialisationStrategy= Strategy.InitialPoints(
         initialPoints=
         {
-            'T': [270.0, 290.0, 300.0],
+            'T': [270.0, 290.0, 330.0],
         },
     ),
     outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(

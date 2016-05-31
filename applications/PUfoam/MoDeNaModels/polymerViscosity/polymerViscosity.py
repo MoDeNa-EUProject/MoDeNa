@@ -76,7 +76,11 @@ void viscosity_SM
 
     const double Rg = 8.31446218;
 
-    outputs[0] = Aeta*exp(Eeta/(Rg*T))*pow(Xg/(Xg-X),AA+B*X);
+    if (X<Xg) {
+        outputs[0] = Aeta*exp(Eeta/(Rg*T))*pow(Xg/(Xg-X),AA+B*X);
+    } else {
+        outputs[0] = 1e10;
+    }
 }
 ''',
     # These are global bounds for the function
