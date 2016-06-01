@@ -35,7 +35,7 @@ subroutine eqcond(regions)
     enddo
     do i=1,regions
         call foam_morpholgy
-        if (testMode) then
+        if (testMode .or. por < 0.8_dp) then
             write(*,*) 'TESTING: radiative properties not calculated.'
             write(*,*) 'Ask Pavel if you want more reasonable results.'
             krad=2e-3_dp
