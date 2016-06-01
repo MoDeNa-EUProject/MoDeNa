@@ -13,6 +13,8 @@ modena_model_t *density_reaction_mixturemodel;
 
 modena_model_t *rheologymodel;
 
+modena_model_t *strutContentmodel;
+
 modena_inputs_t *inputs_bblgr1;
 modena_outputs_t *outputs_bblgr1;
 
@@ -27,6 +29,9 @@ modena_outputs_t *outputs_den;
 
 modena_inputs_t *inputs_rheo;
 modena_outputs_t *outputs_rheo;
+
+modena_inputs_t *inputs_strutContent;
+modena_outputs_t *outputs_strutContent;
 
 size_t Catalyst_1_Pos;
 size_t CE_A0_Pos;
@@ -70,6 +75,10 @@ size_t source_R_1_Pos;
 size_t source_R_1_mass_Pos;
 size_t source_R_1_temp_Pos;
 size_t source_R_1_vol_Pos;
+
+// strut content
+size_t rho_foam_Pos;
+size_t strut_content_Pos;
 
 
 #endif

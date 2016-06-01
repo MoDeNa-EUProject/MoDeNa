@@ -42,6 +42,12 @@ if (modena_error_occurred())
     return modena_error();
 }
 
+strutContentmodel = modena_model_new("strutContent");
+if (modena_error_occurred())
+{
+    return modena_error();
+}
+
 inputs_bblgr1 = modena_inputs_new(bblgr1);
 outputs_bblgr1 = modena_outputs_new(bblgr1);
 
@@ -56,6 +62,10 @@ outputs_den = modena_outputs_new (density_reaction_mixturemodel);
 
 inputs_rheo = modena_inputs_new (rheologymodel);
 outputs_rheo = modena_outputs_new (rheologymodel);
+
+inputs_strutContent = modena_inputs_new (strutContentmodel);
+outputs_strutContent = modena_outputs_new (strutContentmodel);
+
 
 // inputs argPos
 Catalyst_1_Pos   = modena_model_inputs_argPos(kinetics, "'Catalyst_1'");
@@ -102,6 +112,13 @@ source_R_1_temp_Pos     = modena_model_outputs_argPos(kinetics, "source_R_1_temp
 source_R_1_vol_Pos      = modena_model_outputs_argPos(kinetics, "source_R_1_vol");
 
 modena_model_argPos_check(kinetics);
+
+// strut contents argPos
+rho_foam_Pos = modena_model_inputs_argPos(strutContentmodel, "rho");
+strut_content_Pos = modena_model_outputs_argPos(strutContentmodel, "fs");
+modena_model_argPos_check(strutContentmodel);
+
+
 
 
 #endif

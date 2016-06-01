@@ -95,6 +95,17 @@ void write_kinetics( const state_type &y , const double t )
 	// double rho_foam 	= (rho_bubble*(y[8]/(1.0+y[8])) + (1.0+L0)*rhoPolySurrgate*(1.0 - (y[8]/(1.0+y[8]))));
     double rho_foam 	= (rho_bubble*(y[8]/(1.0+y[8])) + rhoPolySurrgate*(1.0 - (y[8]/(1.0+y[8]))));
 
+    // print out the strut content
+    // set input vector
+    modena_inputs_set(inputs_strutContent, rho_foam_Pos, rho_foam);
+    // call the model
+    int ret_strutContent = modena_model_call (strutContentmodel, inputs_strutContent, outputs_strutContent);
+    if ((tend - t) < 2)
+    {
+        cout << "final foam density: " << rho_foam << endl;
+        cout << "strut content: " << modena_outputs_get(outputs_strutContent, 0) << endl;
+    }
+
 	ofstream rho_bubbleout;
 	rho_bubbleout.open("./rho_bubble.txt", std::ios::app);
 	rho_bubbleout << t << '\t' << rho_bubble << '\n';
