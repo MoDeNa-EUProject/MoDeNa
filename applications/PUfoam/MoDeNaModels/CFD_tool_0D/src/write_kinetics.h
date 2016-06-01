@@ -98,6 +98,7 @@ void write_kinetics( const state_type &y , const double t )
     // print out the strut content
     // set input vector
     modena_inputs_set(inputs_strutContent, rho_foam_Pos, rho_foam);
+    
     // call the model
     int ret_strutContent = modena_model_call (strutContentmodel, inputs_strutContent, outputs_strutContent);
     if ((tend - t) < 2)
@@ -105,6 +106,42 @@ void write_kinetics( const state_type &y , const double t )
         cout << "final foam density: " << rho_foam << endl;
         cout << "strut content: " << modena_outputs_get(outputs_strutContent, 0) << endl;
     }
+
+    double thermalConductivity;
+    if (rho_foam > 48.0)
+    {
+        thermalConductivity = 8.7006e-8*rho_foam*rho_foam + 8.4674e-5*rho_foam
+                             + 1.16e-2;
+    }
+    else
+    {
+        thermalConductivity = 9.3738e-6*rho_foam*rho_foam - 7.3511e-4*rho_foam
+                             + 2.956e-2;
+    }
+    // surrogate model for thermal conductivity
+    modena_inputs_set(inputs_thermalConductivity, porosity_Pos, (1.0 - rho_foam/rhoPoly));
+    double R = bubbleRadius(y[7], y[8]);
+    modena_inputs_set(inputs_thermalConductivity, cell_size_Pos, (2.0*R));
+    modena_inputs_set(inputs_thermalConductivity, temp_Pos, y[2]);
+    modena_inputs_set(inputs_thermalConductivity, X_CO2_Pos, (p2/(p1+p2)));
+    modena_inputs_set(inputs_thermalConductivity, X_O2_Pos, 0.0);
+    modena_inputs_set(inputs_thermalConductivity, X_N2_Pos, 0.0);
+    modena_inputs_set(inputs_thermalConductivity, X_Cyp_Pos, (p1/(p1+p2)));
+    double st_c;
+    st_c = modena_outputs_get(outputs_strutContent, 0);
+    modena_inputs_set(inputs_thermalConductivity, strut_c_Pos, st_c);
+    int ret_thermalConductivitymodel = modena_model_call (thermalConductivitymodel, inputs_thermalConductivity, outputs_thermalConductivity);
+    if(modena_error_occurred())
+    {
+        exit(modena_error());
+    }
+    double the_con;
+    the_con = modena_outputs_get(outputs_thermalConductivity, 0);
+    ofstream thermalOut;
+    thermalOut.open("./thermalConductivity.txt", std::ios::app);
+    thermalOut << the_con << '\t' << thermalConductivity << '\t' << rho_foam << '\n';
+    thermalOut.close();
+
 
 	ofstream rho_bubbleout;
 	rho_bubbleout.open("./rho_bubble.txt", std::ios::app);
@@ -117,7 +154,6 @@ void write_kinetics( const state_type &y , const double t )
 	rho_foamout.close();
 
     ofstream R_bubble;
-    double R = bubbleRadius(y[7], y[8]);
     R_bubble.open("./R_bubble.txt", std::ios::app);
     R_bubble << t << '\t' << R << '\n';
     R_bubble.close();

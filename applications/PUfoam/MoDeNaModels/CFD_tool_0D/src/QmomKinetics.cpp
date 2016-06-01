@@ -352,7 +352,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
         }
 
         double mu_app = modena_outputs_get(outputs_rheo, 0);
-        cout << "apparent viscosity: " << mu_app << endl;
+        // cout << "apparent viscosity: " << mu_app << endl;
     }
 
     // Gelling point representation
