@@ -41,6 +41,7 @@ f = CFunction(
     Ccode='''
 #include "modena.h"
 #include "math.h"
+#define MAX(a,b) ((a) > (b) ? a : b)
 void strutContent
 (
     const modena_model_t* model,
@@ -55,7 +56,7 @@ void strutContent
     const double c = parameters[2];
     const double pi = 3.14159;
 
-    outputs[0] = atan(a*rho*rho + b*rho + c)/pi*2;
+    outputs[0] = MAX(atan(a*rho + b)/pi*2,0.0);
 }
 ''',
     # These are global bounds for the function
@@ -78,7 +79,7 @@ m = ForwardMappingModel(
     _id='strutContent',
     surrogateFunction=f,
     substituteModels= [ ],
-    parameters=[-1.15151781e-04,7.22364197e-02,-9.76646680e-01],
+    parameters=[0.06115509, -0.72513392,  1.],
     inputs={
         'rho': { 'min': 0, 'max': 1e5 },
     },
