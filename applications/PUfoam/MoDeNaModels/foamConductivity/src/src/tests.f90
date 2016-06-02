@@ -34,8 +34,18 @@ subroutine eqcond(regions)
         regbound(i)=(i-1)*dfoam/regions
     enddo
     do i=1,regions
+        if (por < 0.8_dp) then
+            write(*,*) 'Radiative prop. not calculated for porosity < 0.8'
+            write(mfi,*) 'Radiative prop. not calculated for porosity < 0.8'
+            krad=2e-3_dp
+            call effcond
+            open(newunit(fi),file='foamConductivity.out')
+            write(fi,*) effc
+            close(fi)
+            stop
+        endif
         call foam_morpholgy
-        if (testMode .or. por < 0.8_dp) then
+        if (testMode) then
             write(*,*) 'TESTING: radiative properties not calculated.'
             write(*,*) 'Ask Pavel if you want more reasonable results.'
             krad=2e-3_dp
@@ -196,8 +206,10 @@ subroutine loadParameters
     write(mfi,'(2x,A,1x,es9.3,1x,A)') 'higher temperature:',temp1,'K'
     write(mfi,'(2x,A,1x,es9.3,1x,A)') 'lower temperature: ',temp2,'K'
     write(mfi,*) 'Phase properties:'
-    write(mfi,'(2x,A,1x,es9.3,1x,A)') 'gas conductivity:  ',cond1*1e3_dp,'mW/m/K'
-    write(mfi,'(2x,A,1x,es9.3,1x,A)') 'solid conductivity:',cond2*1e3_dp,'mW/m/K'
+    write(mfi,'(2x,A,1x,es9.3,1x,A)') &
+        'gas conductivity:  ',cond1*1e3_dp,'mW/m/K'
+    write(mfi,'(2x,A,1x,es9.3,1x,A)') &
+        'solid conductivity:',cond2*1e3_dp,'mW/m/K'
 
     j=0
     open(newunit(fi),file=TRIM(ADJUSTL(fileplacein_ref))//TRIM(ADJUSTL(nspec)))
@@ -230,7 +242,8 @@ subroutine loadParameters
     close(fi)
 
     j=0
-    open(newunit(fi),file=TRIM(ADJUSTL(fileplacein_ref))//TRIM(ADJUSTL(gasspec)))
+    open(newunit(fi),&
+        file=TRIM(ADJUSTL(fileplacein_ref))//TRIM(ADJUSTL(gasspec)))
         do  !find number of points
             read(fi,*,iostat=ios)
             if (ios/=0) exit

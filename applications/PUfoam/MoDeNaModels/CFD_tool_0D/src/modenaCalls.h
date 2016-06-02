@@ -137,5 +137,26 @@ X_N2_Pos = modena_model_inputs_argPos(thermalConductivitymodel, "x[N2]");
 X_Cyp_Pos = modena_model_inputs_argPos(thermalConductivitymodel, "x[CyP]");
 modena_model_argPos_check(thermalConductivitymodel);
 
+// apparent viscosity
+if (apparentViscosity) {
+    temp_rheopos     = modena_model_inputs_argPos(rheologymodel, "T");
+    shear_rheopos    = modena_model_inputs_argPos(rheologymodel, "shear");
+    conv_rheopos     = modena_model_inputs_argPos(rheologymodel, "X");
+    m0_rheopos       = modena_model_inputs_argPos(rheologymodel, "m0");
+    m1_rheopos       = modena_model_inputs_argPos(rheologymodel, "m1");
+    // modena_model_argPos_check(rheologymodel);
+}
+
+// bubble growth
+Tbblgr1pos               = modena_model_inputs_argPos(bblgr1, "T");
+Rbblgr1pos               = modena_model_inputs_argPos(bblgr1, "R");
+c_1bblgr1pos             = modena_model_inputs_argPos(bblgr1, "c");
+p_1bblgr1pos             = modena_model_inputs_argPos(bblgr1, "p");
+modena_model_argPos_check(bblgr1);
+Tbblgr2pos               = modena_model_inputs_argPos(bblgr2, "T");
+Rbblgr2pos               = modena_model_inputs_argPos(bblgr2, "R");
+c_2bblgr2pos             = modena_model_inputs_argPos(bblgr2, "c");
+p_2bblgr2pos             = modena_model_inputs_argPos(bblgr2, "p");
+modena_model_argPos_check(bblgr2);
 
 #endif

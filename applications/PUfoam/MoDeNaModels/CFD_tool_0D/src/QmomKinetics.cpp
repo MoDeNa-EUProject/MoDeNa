@@ -324,15 +324,6 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
     if (apparentViscosity)
     {
         double shearRate = 0.05;
-
-        size_t temp_rheopos     = modena_model_inputs_argPos(rheologymodel, "T");
-		size_t shear_rheopos    = modena_model_inputs_argPos(rheologymodel, "shear");
-        size_t conv_rheopos     = modena_model_inputs_argPos(rheologymodel, "X");
-		size_t m0_rheopos       = modena_model_inputs_argPos(rheologymodel, "m0");
-		size_t m1_rheopos       = modena_model_inputs_argPos(rheologymodel, "m1");
-
-        // modena_model_argPos_check(rheologymodel);
-
         // // set input vector
         modena_inputs_set(inputs_rheo, temp_rheopos, T);
         modena_inputs_set(inputs_rheo, conv_rheopos, XOH);
@@ -341,7 +332,6 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
 		modena_inputs_set(inputs_rheo, m1_rheopos, mom[1]);
         // // call the model
         int ret_rheo = modena_model_call (rheologymodel, inputs_rheo, outputs_rheo);
-
         // // terminate, if requested
         if(modena_error_occurred())
         {
@@ -350,7 +340,6 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
             modena_model_destroy (rheologymodel);
             cout << "Modena Error: " << (modena_error()) << endl;
         }
-
         double mu_app = modena_outputs_get(outputs_rheo, 0);
         // cout << "apparent viscosity: " << mu_app << endl;
     }
@@ -429,16 +418,6 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
 
 	Lm 			= LMax(T);
     // calling the surogate models for bubble growth rates.
-    size_t Tbblgr1pos               = modena_model_inputs_argPos(bblgr1, "T");
-    size_t Rbblgr1pos               = modena_model_inputs_argPos(bblgr1, "R");
-    size_t c_1bblgr1pos             = modena_model_inputs_argPos(bblgr1, "c");
-    size_t p_1bblgr1pos             = modena_model_inputs_argPos(bblgr1, "p");
-    modena_model_argPos_check(bblgr1);
-    size_t Tbblgr2pos               = modena_model_inputs_argPos(bblgr2, "T");
-    size_t Rbblgr2pos               = modena_model_inputs_argPos(bblgr2, "R");
-    size_t c_2bblgr2pos             = modena_model_inputs_argPos(bblgr2, "c");
-    size_t p_2bblgr2pos             = modena_model_inputs_argPos(bblgr2, "p");
-    modena_model_argPos_check(bblgr2);
 
     // partial pressure within bubbles due to the evaporation of physical blowing agent
     double p_1  = partialPressureBA(y);

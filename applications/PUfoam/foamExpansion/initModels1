@@ -49,6 +49,7 @@ import Solubility
 import PolymerDensity_units
 import Kinetics
 import StrutContent
+import foamConductivity
 # import Rheology_Arrhenius
 
 # set up the LaunchPad and reset it

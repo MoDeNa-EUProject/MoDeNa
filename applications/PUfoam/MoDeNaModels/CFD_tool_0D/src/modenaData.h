@@ -95,5 +95,21 @@ size_t X_Cyp_Pos;
 size_t X_O2_Pos;
 size_t X_N2_Pos;
 
+// apparent viscosity
+size_t temp_rheopos;
+size_t shear_rheopos;
+size_t conv_rheopos;
+size_t m0_rheopos;
+size_t m1_rheopos;
+
+// bubble growth
+size_t Tbblgr1pos;
+size_t Rbblgr1pos;
+size_t c_1bblgr1pos;
+size_t p_1bblgr1pos;
+size_t Tbblgr2pos;
+size_t Rbblgr2pos;
+size_t c_2bblgr2pos;
+size_t p_2bblgr2pos;
 
 #endif
