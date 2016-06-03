@@ -99,6 +99,7 @@ subroutine read_inputs
         stop 'unknown kinetic model'
     endif
     call fson_get(json_data, "initialConditions.concentrations.water", W0)
+    call fson_get(json_data, "kinetics.gelPoint", gelpointconv)
     if (kin_model==1 .or. kin_model==3) then
         call fson_get(json_data, "kinetics.useDilution", dilution)
         call fson_get(json_data, "initialConditions.concentrations.polyol", OH0)
@@ -192,7 +193,6 @@ subroutine read_inputs
     else
         stop 'unknown viscosity model'
     endif
-    call fson_get(json_data, "physicalProperties.polymer.maxViscosity", maxeta)
     write(*,*) 'done: inputs loaded'
     write(*,*)
 end subroutine read_inputs

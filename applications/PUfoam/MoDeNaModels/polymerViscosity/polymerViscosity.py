@@ -86,7 +86,7 @@ void viscosity_SM
 ''',
     # These are global bounds for the function
     inputs={
-        'T': {'min': 200, 'max': 450 },
+        'T': {'min': 200, 'max': 500 },
         'X': {'min': 0, 'max': 1 },
     },
     outputs={
@@ -126,11 +126,4 @@ m_polymerViscosity = ForwardMappingModel(
     surrogateFunction=f_polymerViscosity,
     substituteModels=[],
     parameters=par4,
-    inputs={
-        'T': {'min': 200, 'max': 450},
-        'X': {'min': 0, 'max': 1},
-    },
-    outputs={
-        'mu': {'min': 0, 'max': +9e99},
-    },
 )

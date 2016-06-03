@@ -62,7 +62,6 @@
             "polymerDensityModel": "constant",
             "density": 1100,
             "viscosityModel": "CastroMacosko",
-            "maxViscosity": 1.0e10,
             "molarMassNCO": 615
         },
         "surfaceTensionModel": "constant",

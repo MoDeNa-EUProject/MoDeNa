@@ -94,15 +94,12 @@ subroutine physical_properties(temp,conv,radius)
             !fetch results
             eta = modena_outputs_get(viscOutputs, 0_c_size_t);
         end select
-        if (eta>maxeta .or. isnan(eta)) then
-            eta=maxeta
+        if (conv>gelpointconv) then
             gelpoint=.true.
             write(*,'(2x,A,es8.2,A)') 'gel point reached at time t = ',time,' s'
             write(*,'(2x,A,es8.2,A)') 'temperature at gel point T = ',temp,' K'
             write(*,'(2x,A,es8.2)') 'conversion at gel point X = ',conv
         endif
-    else
-        eta=maxeta
     endif
     select case(itens_model)
     case(1)
