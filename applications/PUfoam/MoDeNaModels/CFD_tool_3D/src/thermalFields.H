@@ -12,6 +12,11 @@ volScalarField thermalConductivity
     dimensionedScalar("thermalConductivity", dimensionSet(0, 2, -1, 0, 0, 0, 0), 0.024)
    );
 
+Switch thermalConductivitySurrogateSwitch
+    (
+        kineticsProperties.lookup("thermalConductivitySurrogateSwitch")
+    );
+
 volScalarField::DimensionedInternalField XNCOSource
 (
     IOobject

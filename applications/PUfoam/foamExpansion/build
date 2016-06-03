@@ -21,3 +21,7 @@ make --directory=${solubility}
 
 surfaceTension="${MODELS_DIR}/SurfaceTension/src"
 make --directory=${surfaceTension} DFT
+
+foamConductivity="${MODELS_DIR}/foamConductivity/src"
+cmake -H${foamConductivity} -B${foamConductivity} && \
+  make --directory=${foamConductivity}

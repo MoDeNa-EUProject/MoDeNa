@@ -16,6 +16,7 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 liquidMixtureDensitySurrogate off;
+thermalConductivitySurrogateSwitch on;
 blowingAgent    	n-pentane;
 KineticsModel    RF-1;
 GellingConstants
