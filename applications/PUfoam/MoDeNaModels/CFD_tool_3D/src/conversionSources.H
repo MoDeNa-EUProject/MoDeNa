@@ -223,17 +223,17 @@ if (KineticsModel == "RF-1")
             modena_outputs_get(outputs_kinetics, source_R_1_temp_RF1_Pos);
         source_R_1_vol_RF1[celli] =
             modena_outputs_get(outputs_kinetics, source_R_1_vol_RF1_Pos);
-        if (XOH[celli] < XOH_Gel)
-        {
+        // if (XOH[celli] < XOH_Gel)
+        // {
             XWSource[celli] = scalar(-1.0)*
                               source_CE_B2[celli]/(CW_0/scalar(1000.0));
-        }
+        // }
 
-        if (XOH[celli] <  XOH_Gel)
-        {
+        // if (XOH[celli] <  XOH_Gel)
+        // {
             XOHSource[celli] = scalar(-1.0)*
                                (source_CE_A0[celli] + source_CE_A1[celli])/
                                ((COH_0))*scalar(1000.0);
-        }
+        // }
     }
 }
