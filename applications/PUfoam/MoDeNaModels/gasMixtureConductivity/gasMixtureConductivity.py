@@ -149,7 +149,7 @@ f_gasMixtureConductivity = CFunction(
     Ccode=weightedAverageCode,
     # These are global bounds for the function
     inputs={
-        'T': {'min': 273, 'max': 500},
+        'T': {'min': 273, 'max': 550},
         'x': {'index': gasConductivity.species, 'min': 0, 'max': 1},
         'gas_thermal_conductivity': {'index': gasConductivity.species, 'min': 0, 'max': 1},
     },

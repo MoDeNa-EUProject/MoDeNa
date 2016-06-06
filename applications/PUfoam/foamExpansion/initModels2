@@ -79,7 +79,7 @@ collection.update(
 doc=collection.find({'_id': 'SurfaceTension[A=AIR,B=THF]'})
 for key in doc:
     inputs=key['inputs']
-    inputs['T']['max']=500
+    inputs['T']['max']=550
 collection.update(
     {'_id': 'SurfaceTension[A=AIR,B=THF]'},
     {
@@ -92,7 +92,7 @@ collection.update(
 doc=collection.find({'_id': 'Rheology'})
 for key in doc:
     inputs=key['inputs']
-    inputs['T']['max']=500
+    inputs['T']['max']=550
     inputs['X']['max']=1.0
 collection.update(
     {'_id': 'Rheology'},

@@ -80,10 +80,4 @@ m = ForwardMappingModel(
     surrogateFunction=f,
     substituteModels= [ ],
     parameters=[0.06115509, -0.72513392,  1.],
-    inputs={
-        'rho': { 'min': 0, 'max': 1e5 },
-    },
-    outputs={
-        'fs': { 'min': 0, 'max': 1 },
-    },
 )

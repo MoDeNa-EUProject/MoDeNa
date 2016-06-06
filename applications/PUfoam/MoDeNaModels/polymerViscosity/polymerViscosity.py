@@ -86,7 +86,7 @@ void viscosity_SM
 ''',
     # These are global bounds for the function
     inputs={
-        'T': {'min': 200, 'max': 500 },
+        'T': {'min': 200, 'max': 550 },
         'X': {'min': 0, 'max': 1 },
     },
     outputs={

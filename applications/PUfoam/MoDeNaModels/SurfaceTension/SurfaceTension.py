@@ -194,7 +194,7 @@ outputs[0] = P0 + T*P1 + P2*T*T;
 ''',
     # These are global bounds for the function
     inputs={
-        'T': { 'min': 270.0, 'max': 450.0 },        #check if boundaries reasonable, from this range, the random values for the DOE are chosen!
+        'T': { 'min': 270.0, 'max': 550.0 },        #check if boundaries reasonable, from this range, the random values for the DOE are chosen!
     },
     outputs={
         'ST': { 'min': 9e99, 'max': -9e99, 'argPos': 0 },

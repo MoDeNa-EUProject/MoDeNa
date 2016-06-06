@@ -195,6 +195,7 @@ subroutine set_initial_conditions
         y(kineq(6)) = isocyanate1_ini*1e-3_dp
         y(kineq(7)) = isocyanate2_ini*1e-3_dp
         y(kineq(8)) = isocyanate3_ini*1e-3_dp
+        y(kineq(19)) = temp-273.15_dp
     endif
     do j=1,ngas
         do i=1,p+1

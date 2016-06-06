@@ -59,7 +59,7 @@ void densityreactionmixture
 )
 {
     {% block variables %}{% endblock %}
-    
+
     const double a_L0 = parameters[0];
     const double b_L0 = parameters[1];
     const double a_P0 = parameters[2];
@@ -70,7 +70,7 @@ void densityreactionmixture
 ''',
     # These are global bounds for the function
     inputs={
-        'T': { 'min': 273, 'max': 450},
+        'T': { 'min': 273, 'max': 550},
         'XOH': { 'min': 0, 'max': 1},
     },
     outputs={
@@ -91,12 +91,4 @@ m = ForwardMappingModel(
     surrogateFunction=f,
     substituteModels= [ ],
     parameters=[-0.0006, 1287.8, -0.000048, 992.8],
-    inputs=
-    {
-    'T': { 'min': 273, 'max': 450 },
-    'XOH': { 'min': 0, 'max': 1 },
-    },
-    outputs={
-       'density_reaction_mixtureSM': { 'min': 0, 'max': 8000.0 },
-   },
 )
