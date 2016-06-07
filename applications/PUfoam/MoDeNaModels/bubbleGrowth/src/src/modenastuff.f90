@@ -107,7 +107,7 @@ subroutine createModenaModels
     do i=1,ngas
         if (diff_model(i)==2) then
             diffModena(i) = modena_model_new (&
-                c_char_"gas_diffusivity[A="//gasname(i)//"]"//c_null_char);
+                c_char_"diffusivityPol[A="//gasname(i)//"]"//c_null_char);
             if (modena_error_occurred()) then
                 call exit(modena_error())
             endif
