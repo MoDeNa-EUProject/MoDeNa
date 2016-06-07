@@ -25,3 +25,6 @@ make --directory=${surfaceTension} DFT
 foamConductivity="${MODELS_DIR}/foamConductivity/src"
 cmake -H${foamConductivity} -B${foamConductivity} && \
   make --directory=${foamConductivity}
+
+initMoments="${CFD_tool_3D}/initMoments"
+cmake -H${initMoments} -B${initMoments} && make --directory=${initMoments}

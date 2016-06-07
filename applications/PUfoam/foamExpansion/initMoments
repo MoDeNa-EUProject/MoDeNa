@@ -39,6 +39,7 @@ Authors
 Contributors
 '''
 import json
+from os import system, remove
 from numpy import pi, log, exp, arange, zeros
 
 # Number of moments of the bubble size distribution to be tracked
@@ -80,4 +81,10 @@ print('')
 for l in arange(0,n):
     print('M[{0}] = {1}'.format(l,M[l]))
 
+with open('initMoments.txt', 'w') as file:
+    file.write('{0}\n'.format(n))
+    for j in arange(0,n):
+        file.write('{0}\n'.format(m[j]))
 
+system('../MoDeNaModels/CFD_tool_3D/src/initMoments/initMoments')
+remove('initMoments.txt')
