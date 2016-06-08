@@ -30,12 +30,19 @@ if (modena_error_occurred())
     return modena_error();
 }
 
-density_reaction_mixturemodel = modena_model_new("density_reaction_mixture");
-if (modena_error_occurred())
-{
-    return modena_error();
+if (denMod==1) {
+    density_reaction_mixturemodel = modena_model_new("density_reaction_mixture");
+    if (modena_error_occurred())
+    {
+        return modena_error();
+    }
+} else if (denMod==3) {
+    density_reaction_mixturemodel = modena_model_new("PolymerDensity[A=AIR,B=PU]");
+    if (modena_error_occurred())
+    {
+        return modena_error();
+    }
 }
-
 rheologymodel = modena_model_new("Rheology_Arrhenius");
 if (modena_error_occurred())
 {
@@ -63,8 +70,10 @@ outputs_bblgr2 = modena_outputs_new(bblgr2);
 inputs_kinetics = modena_inputs_new(kinetics);
 outputs_kinetics = modena_outputs_new(kinetics);
 
-inputs_den = modena_inputs_new (density_reaction_mixturemodel);
-outputs_den = modena_outputs_new (density_reaction_mixturemodel);
+if (denMod==1 || denMod == 3) {
+    inputs_den = modena_inputs_new (density_reaction_mixturemodel);
+    outputs_den = modena_outputs_new (density_reaction_mixturemodel);
+}
 
 inputs_rheo = modena_inputs_new (rheologymodel);
 outputs_rheo = modena_outputs_new (rheologymodel);

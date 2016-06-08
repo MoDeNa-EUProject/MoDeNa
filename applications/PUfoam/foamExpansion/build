@@ -29,3 +29,7 @@ cmake -H${foamConductivity} -B${foamConductivity} && \
 
 initMoments="${CFD_tool_3D}/initMoments"
 cmake -H${initMoments} -B${initMoments} && make --directory=${initMoments}
+
+PolymerDensity="${MODELS_DIR}/PolymerDensity/src"
+cmake -H${PolymerDensity} -B${PolymerDensity} && \
+    make --directory=${PolymerDensity}

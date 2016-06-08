@@ -54,6 +54,20 @@ subroutine set_initial_physical_properties
         endif
         !average density during foaming
         rhop=(rhop + modena_outputs_get(rhopOutputs, 0_c_size_t))/2
+    case(3)
+        call modena_inputs_set(rhopInputs, rhopTpos, temp)
+        ret = modena_model_call (rhopModena, rhopInputs, rhopOutputs)
+        if(ret /= 0) then
+            call exit(ret)
+        endif
+        rhop = modena_outputs_get(rhopOutputs, 0_c_size_t)
+        call modena_inputs_set(rhopInputs, rhopTpos, temp+100)
+        ret = modena_model_call (rhopModena, rhopInputs, rhopOutputs)
+        if(ret /= 0) then
+            call exit(ret)
+        endif
+        !average density during foaming
+        rhop=(rhop + modena_outputs_get(rhopOutputs, 0_c_size_t))/2
     end select
     call physical_properties(temp,conv,radius)
     D0=D

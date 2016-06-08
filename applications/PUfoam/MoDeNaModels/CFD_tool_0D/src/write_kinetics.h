@@ -79,9 +79,31 @@ void write_kinetics( const state_type &y , const double t )
                 exit(ret_den);
             }
             rhoPolySurrgate = modena_outputs_get(outputs_den, 0);
+            break;
         }
         case 2:
             rhoPolySurrgate = rhoPoly;
+            break;
+        case 3:
+		{
+			// Calling the PCSAFT model for density reaction mixture
+            size_t T_denpos     = modena_model_inputs_argPos(density_reaction_mixturemodel, "T");
+            modena_model_argPos_check(density_reaction_mixturemodel);
+            modena_inputs_set(inputs_den, T_denpos, y[2]);
+            // // call the model
+            int ret_den = modena_model_call (density_reaction_mixturemodel, inputs_den, outputs_den);
+            if (ret_den != 0)
+            {
+                modena_inputs_destroy (inputs_den);
+                modena_outputs_destroy (outputs_den);
+                modena_model_destroy (density_reaction_mixturemodel);
+                exit(ret_den);
+            }
+            rhoPolySurrgate = modena_outputs_get(outputs_den, 0);
+            break;
+		}
+        default:
+            cout << rhoPolySurrgate << endl;
     }
 
     double p1,p2;
@@ -94,7 +116,7 @@ void write_kinetics( const state_type &y , const double t )
     // print out the strut content
     // set input vector
     modena_inputs_set(inputs_strutContent, rho_foam_Pos, rho_foam);
-    
+
     // call the model
     int ret_strutContent = modena_model_call (strutContentmodel, inputs_strutContent, outputs_strutContent);
     if ((tend - t) < 2)
@@ -115,7 +137,7 @@ void write_kinetics( const state_type &y , const double t )
                              + 2.956e-2;
     }
     // surrogate model for thermal conductivity
-    modena_inputs_set(inputs_thermalConductivity, porosity_Pos, (1.0 - rho_foam/rhoPoly));
+    modena_inputs_set(inputs_thermalConductivity, porosity_Pos, (1.0 - rho_foam/rhoPolySurrgate));
     double R = bubbleRadius(y[7], y[8]);
     modena_inputs_set(inputs_thermalConductivity, cell_size_Pos, (2.0*R));
     modena_inputs_set(inputs_thermalConductivity, temp_Pos, y[2]);

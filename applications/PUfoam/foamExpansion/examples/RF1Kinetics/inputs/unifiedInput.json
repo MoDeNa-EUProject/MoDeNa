@@ -65,7 +65,8 @@
             "molarMassNCO": 615
         },
         "surfaceTensionModel": "constant",
-        "surfaceTension": 25e-3
+        "surfaceTension": 25e-3,
+        "ModenaFoamViscosityModel": false
     },
     "bubbleGrowth": {
         "integrator": "dlsodes",

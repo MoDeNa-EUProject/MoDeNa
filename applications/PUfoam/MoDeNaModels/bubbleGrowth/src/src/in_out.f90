@@ -130,6 +130,8 @@ subroutine read_inputs
         call fson_get(json_data, "physicalProperties.polymer.density", rhop)
     elseif (strval=="nanotools") then
         rhop_model=2
+    elseif (strval=="pcsaft") then
+        rhop_model=3
     else
         stop 'unknown polymer density model'
     endif

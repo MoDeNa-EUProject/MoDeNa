@@ -261,7 +261,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
             dydt[1] = -(dydt[12] + dydt[13])/(OH_0)*1000;
             break;
     }
-    
+
     switch (denMod)
     {
         case 1:
@@ -292,6 +292,24 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
         case 2:
             rhoPolySurrgate = rhoPoly;
             break;
+		case 3:
+		{
+			// Calling the PCSAFT model for density reaction mixture
+            size_t T_denpos     = modena_model_inputs_argPos(density_reaction_mixturemodel, "T");
+            modena_model_argPos_check(density_reaction_mixturemodel);
+            modena_inputs_set(inputs_den, T_denpos, T);
+            // // call the model
+            int ret_den = modena_model_call (density_reaction_mixturemodel, inputs_den, outputs_den);
+            if (ret_den != 0)
+            {
+                modena_inputs_destroy (inputs_den);
+                modena_outputs_destroy (outputs_den);
+                modena_model_destroy (density_reaction_mixturemodel);
+                exit(ret_den);
+            }
+            rhoPolySurrgate = modena_outputs_get(outputs_den, 0);
+            break;
+		}
     }
     if (kinMod == 1 || kinMod == 2)
     {
@@ -551,9 +569,9 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
 */
 int main(int argc, char **argv)
 {
+	readParams();
     #include "modenaCalls.h"
 
-	readParams();
 	// initial conditions
     state_type y(31);
     y[0]			= 0.0;
@@ -639,7 +657,7 @@ int main(int argc, char **argv)
              << setw(12) << y[20] << " " << setw(12) << y[21] << " " << setw(12) << y[22] << " "
              << setw(12) << y[23] << " " << setw(12) << y[24] << " " << setw(12) << y[25] << " "
              << endl;
-        write_kinetics(y, t);
+		write_kinetics(y, t);
 
         pBA           = partialPressureBA(y);
         pCO2          = partialPressureCO2(y);

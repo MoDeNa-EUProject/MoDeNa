@@ -56,6 +56,7 @@ The following key-pairs should be defined:
         - "molarMassNCO": (kg/kmol)
     - "surfaceTensionModel": ["constant" "pcsaft"],
     - "surfaceTension": surface tension when "constant" is used (N/m)
+    - "ModenaFoamViscosityModel": use TUE model to calculate foam viscosity (t/f)
 - "bubbleGrowth":
     - "integrator": ["dlsode", "dlsodes"] dlsodes is recommended
     - "method": ["nonstiff", "stiff"] stiff is recommended

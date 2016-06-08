@@ -145,6 +145,6 @@
 // Realizability
 	bool realizabilityCheck = false; 	// switch for realizability
 // 2nodes vs meanDiameter
-	std::string bubbleMode = "two nodes"; 	// mean radius, two nodes
-	bool apparentViscosity = true;
+	std::string bubbleMode; 	// mean radius, two nodes
+	bool apparentViscosity;
 	// bool kinetics_basf = false;

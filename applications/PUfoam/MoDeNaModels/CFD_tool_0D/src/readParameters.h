@@ -70,8 +70,9 @@ void readParams() {
     } else if (document["physicalProperties"]["polymer"]["polymerDensityModel"].GetString()==std::string("constant")) {
         denMod=2;
         rhoPoly=document["physicalProperties"]["polymer"]["density"].GetDouble();
+    } else if (document["physicalProperties"]["polymer"]["polymerDensityModel"].GetString()==std::string("pcsaft")) {
+        denMod=3;
     }
-
     M_CO2=document["physicalProperties"]["blowingAgents"]["CO2"]["molarMass"].GetDouble()*1e3;
     M_B=document["physicalProperties"]["blowingAgents"]["PBL"]["molarMass"].GetDouble()*1e3;
     M_NCO=document["physicalProperties"]["polymer"]["molarMassNCO"].GetDouble()*1e3;
@@ -92,4 +93,5 @@ void readParams() {
     if (W_0<1e-8) {
         W_0=-1.0;
     }
+    apparentViscosity=document["physicalProperties"]["ModenaFoamViscosityModel"].GetBool();
 }
