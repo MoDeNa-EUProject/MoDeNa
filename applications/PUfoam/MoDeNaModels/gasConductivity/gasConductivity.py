@@ -83,7 +83,7 @@ void gas_thermal_conductivity
 ''',
     # These are global bounds for the function
     inputs={
-        'T': {'min': 273, 'max': 450},
+        'T': {'min': 273, 'max': 550},
     },
     outputs={
         'gas_thermal_conductivity[A]': {'min': 0, 'max': +9e99, 'argPos': 0},

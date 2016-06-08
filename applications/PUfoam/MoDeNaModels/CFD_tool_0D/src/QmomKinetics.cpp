@@ -192,7 +192,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
             Rx=1;
             break;
         case 2:
-            if (y[1]<0.5) {
+            if (y[1]<X_gel) {
                 Rx=1;
             } else if (y[1]<0.87) {
                 Rx=-2.027*y[1]+2.013;
@@ -262,6 +262,55 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
             break;
     }
 
+    switch (denMod)
+    {
+        case 1:
+        {
+            // Calling the model for density reaction mixture
+            size_t T_denpos     = modena_model_inputs_argPos(density_reaction_mixturemodel, "T");
+            size_t XOH_denpos   = modena_model_inputs_argPos(density_reaction_mixturemodel, "XOH");
+            modena_model_argPos_check(density_reaction_mixturemodel);
+
+            // // set input vector
+            modena_inputs_set(inputs_den, T_denpos, T);
+            modena_inputs_set(inputs_den, XOH_denpos, XOH);
+
+            // // call the model
+            int ret_den = modena_model_call (density_reaction_mixturemodel, inputs_den, outputs_den);
+
+            if (ret_den != 0)
+            {
+                modena_inputs_destroy (inputs_den);
+                modena_outputs_destroy (outputs_den);
+                modena_model_destroy (density_reaction_mixturemodel);
+                exit(ret_den);
+            }
+
+            rhoPolySurrgate = modena_outputs_get(outputs_den, 0);
+            break;
+        }
+        case 2:
+            rhoPolySurrgate = rhoPoly;
+            break;
+		case 3:
+		{
+			// Calling the PCSAFT model for density reaction mixture
+            size_t T_denpos     = modena_model_inputs_argPos(density_reaction_mixturemodel, "T");
+            modena_model_argPos_check(density_reaction_mixturemodel);
+            modena_inputs_set(inputs_den, T_denpos, T);
+            // // call the model
+            int ret_den = modena_model_call (density_reaction_mixturemodel, inputs_den, outputs_den);
+            if (ret_den != 0)
+            {
+                modena_inputs_destroy (inputs_den);
+                modena_outputs_destroy (outputs_den);
+                modena_model_destroy (density_reaction_mixturemodel);
+                exit(ret_den);
+            }
+            rhoPolySurrgate = modena_outputs_get(outputs_den, 0);
+            break;
+		}
+    }
     if (kinMod == 1 || kinMod == 2)
     {
         // ODEs
@@ -286,74 +335,32 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
         }
     }
 
-	switch (denMod)
-    {
-		case 1:
-        {
-            // Calling the model for density reaction mixture
-            size_t T_denpos     = modena_model_inputs_argPos(density_reaction_mixturemodel, "T");
-            size_t XOH_denpos   = modena_model_inputs_argPos(density_reaction_mixturemodel, "XOH");
-            modena_model_argPos_check(density_reaction_mixturemodel);
-
-            // // set input vector
-            modena_inputs_set(inputs_den, T_denpos, T);
-            modena_inputs_set(inputs_den, XOH_denpos, XOH);
-
-            // // call the model
-            int ret_den = modena_model_call (density_reaction_mixturemodel, inputs_den, outputs_den);
-
-            if (ret_den != 0)
-            {
-                modena_inputs_destroy (inputs_den);
-                modena_outputs_destroy (outputs_den);
-                modena_model_destroy (density_reaction_mixturemodel);
-                exit(ret_den);
-            }
-
-            rhoPolySurrgate = modena_outputs_get(outputs_den, 0);
-            break;
-		}
-		case 2:
-			rhoPolySurrgate = rhoPoly;
-            break;
-	}
-
-
-
     // call the surrogate model for rheology
-    // if (apparentViscosity)
-    // {
-    //     double shearRate = 0.05;
-
-    //     size_t temp_rheopos     = modena_model_inputs_argPos(rheologymodel, "temp");
-    //     size_t conv_rheopos     = modena_model_inputs_argPos(rheologymodel, "conv");
-    //     size_t shear_rheopos    = modena_model_inputs_argPos(rheologymodel, "shear");
-
-    //     modena_model_argPos_check(rheologymodel);
-
-    //     // // set input vector
-    //     modena_inputs_set(inputs_rheo, temp_rheopos, T);
-    //     modena_inputs_set(inputs_rheo, conv_rheopos, XOH);
-    //     modena_inputs_set(inputs_rheo, shear_rheopos, shearRate);
-    //     // // call the model
-    //     int ret_rheo = modena_model_call (rheologymodel, inputs_rheo, outputs_rheo);
-
-    //     // // terminate, if requested
-    //     if(modena_error_occurred())
-    //     {
-    //         modena_inputs_destroy (inputs_rheo);
-    //         modena_outputs_destroy (outputs_rheo);
-    //         modena_model_destroy (rheologymodel);
-    //         cout << "Modena Error: " << (modena_error()) << endl;
-    //     }
-
-    //     double mu_app = modena_outputs_get(outputs_rheo, 0);
-    //     cout << "apparent viscosity: " << mu_app << endl;
-    // }
-
+    if (apparentViscosity)
+    {
+        double shearRate = 0.05;
+        // // set input vector
+        modena_inputs_set(inputs_rheo, temp_rheopos, T);
+        modena_inputs_set(inputs_rheo, conv_rheopos, XOH);
+        modena_inputs_set(inputs_rheo, shear_rheopos, shearRate);
+		modena_inputs_set(inputs_rheo, m0_rheopos, mom[0]);
+		modena_inputs_set(inputs_rheo, m1_rheopos, mom[1]);
+        // // call the model
+        int ret_rheo = modena_model_call (rheologymodel, inputs_rheo, outputs_rheo);
+        // // terminate, if requested
+        if(modena_error_occurred())
+        {
+            modena_inputs_destroy (inputs_rheo);
+            modena_outputs_destroy (outputs_rheo);
+            modena_model_destroy (rheologymodel);
+            cout << "Modena Error: " << (modena_error()) << endl;
+        }
+        double mu_app = modena_outputs_get(outputs_rheo, 0);
+        // cout << "apparent viscosity: " << mu_app << endl;
+    }
 
     // Gelling point representation
-    if(y[1] > 0.5)
+    if(y[1] > X_gel)
     {
         beta0   = 0.0;
     }
@@ -426,16 +433,6 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
 
 	Lm 			= LMax(T);
     // calling the surogate models for bubble growth rates.
-    size_t Tbblgr1pos               = modena_model_inputs_argPos(bblgr1, "T");
-    size_t Rbblgr1pos               = modena_model_inputs_argPos(bblgr1, "R");
-    size_t c_1bblgr1pos             = modena_model_inputs_argPos(bblgr1, "c");
-    size_t p_1bblgr1pos             = modena_model_inputs_argPos(bblgr1, "p");
-    modena_model_argPos_check(bblgr1);
-    size_t Tbblgr2pos               = modena_model_inputs_argPos(bblgr2, "T");
-    size_t Rbblgr2pos               = modena_model_inputs_argPos(bblgr2, "R");
-    size_t c_2bblgr2pos             = modena_model_inputs_argPos(bblgr2, "c");
-    size_t p_2bblgr2pos             = modena_model_inputs_argPos(bblgr2, "p");
-    modena_model_argPos_check(bblgr2);
 
     // partial pressure within bubbles due to the evaporation of physical blowing agent
     double p_1  = partialPressureBA(y);
@@ -483,11 +480,11 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
             volumeGrowthBA[i]   = (radiusGrowthBA[i]*RR*T)/(p_1);
             volumeGrowthCO2[i]  = (radiusGrowthCO2[i]*RR*T)/(p_2);
 
-            if (volumeGrowthBA[i] < 0.0 || radiusGrowthBA[i] < 0.0 || L0 < 1.0e-8 || y[1] > 0.5)
+            if (volumeGrowthBA[i] < 0.0 || radiusGrowthBA[i] < 0.0 || L0 < 1.0e-8 || y[1] > X_gel)
             {
                 volumeGrowthBA[i]   = 0.0;
             }
-            if (volumeGrowthCO2[i] < 0.0 || radiusGrowthCO2[i] < 0.0 || W_0 < 1.0e-8 || y[1] > 0.5)
+            if (volumeGrowthCO2[i] < 0.0 || radiusGrowthCO2[i] < 0.0 || W_0 < 1.0e-8 || y[1] > X_gel)
             {
                 volumeGrowthCO2[i]  = 0.0;
             }
@@ -527,13 +524,13 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
         G1 = modena_outputs_get(outputs_bblgr1, 0);
         G2 = modena_outputs_get(outputs_bblgr2, 0);
         dVdt_1[0] = (G1*RR*T)/(p_1);
-        if (dVdt_1[0] < 0.0 || G1 < 0.0 || L0<1e-8 || y[1]>0.5) //hardcoded gel point
+        if (dVdt_1[0] < 0.0 || G1 < 0.0 || L0<1e-8 || y[1]>X_gel)
         {
             dVdt_1[0] = 0.0;
         }
         dVdt_1[1] = dVdt_1[0];
         dVdt_2[0] = (G2*RR*T)/(p_2);
-        if (dVdt_2[0] < 0.0 || G2 < 0.0 || W_0<1e-8 || y[1]>0.5) //hardcoded gel point
+        if (dVdt_2[0] < 0.0 || G2 < 0.0 || W_0<1e-8 || y[1]>X_gel)
         {
             dVdt_2[0] = 0.0;
         }
@@ -543,7 +540,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
     }
     else
     {
-        cerr << "Invalide choice of bubbleMode!" << endl;
+        cerr << "Invalid choice of bubbleMode!" << endl;
         exit(1);
     }
 
@@ -572,9 +569,9 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
 */
 int main(int argc, char **argv)
 {
+	readParams();
     #include "modenaCalls.h"
 
-	readParams();
 	// initial conditions
     state_type y(31);
     y[0]			= 0.0;
@@ -660,7 +657,7 @@ int main(int argc, char **argv)
              << setw(12) << y[20] << " " << setw(12) << y[21] << " " << setw(12) << y[22] << " "
              << setw(12) << y[23] << " " << setw(12) << y[24] << " " << setw(12) << y[25] << " "
              << endl;
-        write_kinetics(y, t);
+		write_kinetics(y, t);
 
         pBA           = partialPressureBA(y);
         pCO2          = partialPressureCO2(y);

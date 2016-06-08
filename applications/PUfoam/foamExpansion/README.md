@@ -108,12 +108,13 @@ been provided. One can copy the `inputs` directory into the `foamExpansion` and
 modify it for the targeted recipe. The `unifiedInput.json` provides the input
 data for the zero dimensional simulation, whereas the rest of input directory
 creates the test case for OpenFOAM simulation. The details of the input
-variables have been elaborated here. After preparing the inputs the following
+variables have been elaborated in `INPUTS.md`. After preparing the inputs the following
 steps should be executed:
 
 1. Initialize surrogate nano-scale models:
 ```
-./initModels
+./initModels1
+./initModels2
 ```
 2.  Execute meso-scopic bubble growth simulation:
 ```
@@ -133,9 +134,13 @@ or
 ```
 *Note:*
 
-In case of any changes in the input files steps 2-4 should repeated.
+- In case of any changes in the input files steps 2-4 should repeated.
 
- If the following error occurs:
+- Initial moments of the bubble size distribution can be calculated by running
+`initMoments`. This script uses the mean, variance and initial number 
+density of bubbles from `unifiedInput.json`.
+
+- If the following error occurs:
 ```
      --> FOAM FATAL ERROR:
      Wrong number of arguments, expected 0 found 1

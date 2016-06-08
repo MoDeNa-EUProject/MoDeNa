@@ -118,10 +118,11 @@
 // physical blowing agent (used for solubility model)
 	int    phBL    = 1;		// 1=pentane, 2=R-11
 // density model used
-	int    denMod  = 2;
+	int    denMod;
 // kinetics model used
 	int    kinMod  = 2;
 	bool   dilution= true;
+	double X_gel;
 /* Inputs for weight fraction of gaseous CO2 in the mixture */
 	double M_CO2   = 44.0;
 	double M_B     = 137.37;
@@ -144,6 +145,6 @@
 // Realizability
 	bool realizabilityCheck = false; 	// switch for realizability
 // 2nodes vs meanDiameter
-	std::string bubbleMode = "two nodes"; 	// mean radius, two nodes
-	bool apparentViscosity = false;
+	std::string bubbleMode; 	// mean radius, two nodes
+	bool apparentViscosity;
 	// bool kinetics_basf = false;

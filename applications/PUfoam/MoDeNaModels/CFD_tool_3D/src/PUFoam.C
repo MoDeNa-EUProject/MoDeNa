@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
 
                     #include "conversionSources.H"
                     #include "conversionEqns.H"
-                    #include "conversionCheck.H"
+                    // #include "conversionCheck.H"
 
                     #include "rheologyModel.H"
 
@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
                     solve(fvm::ddt(rho) + fvc::div(rhoPhi));
                     #include "conversionSources.H"
                     #include "conversionEqns.H"
-                    #include "conversionCheck.H"
+                    // #include "conversionCheck.H"
 
                     #include "rheologyModel.H"
 

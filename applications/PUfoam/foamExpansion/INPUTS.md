@@ -14,6 +14,7 @@ The following key-pairs should be defined:
 - "kinetics":
     - "kineticModel": "name of kinetic model" ["Baser", "RF-1"],
     - "useDilution": "use correction for dilution in Baser model (t/f)",
+    - "gelPoint": "conversion at the gel point"
     - "gellingReaction": "parameters of gelling reaction"
         - "frequentialFactor": "pre-exponential factor for Baser model (m^3/mol/s)",
         - "activationEnergy": "activation energy for Baser model (J/mol)",
@@ -48,13 +49,14 @@ The following key-pairs should be defined:
         - "molarMass": (kg/mol)
     - "polymer":
         - "heatCapacity": (J/kg/K)
-        - "polymerDensityModel": ["constant", "nanotools"],
+        - "polymerDensityModel": ["constant", "nanotools", "pcsaft"],
         - "density": when "constant" polymerDensityModel is used (kg/m^3)
         - "viscosityModel": ["CastroMacosko"],
         - "maxViscosity": maximum viscosity - for gel point detection (Pa s),
         - "molarMassNCO": (kg/kmol)
     - "surfaceTensionModel": ["constant" "pcsaft"],
     - "surfaceTension": surface tension when "constant" is used (N/m)
+    - "ModenaFoamViscosityModel": use TUE model to calculate foam viscosity (t/f)
 - "bubbleGrowth":
     - "integrator": ["dlsode", "dlsodes"] dlsodes is recommended
     - "method": ["nonstiff", "stiff"] stiff is recommended

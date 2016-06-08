@@ -38,6 +38,7 @@ Surrogate function and model definitions for polymer viscosity model.
 """
 
 import os
+import json
 import modena
 from modena import CFunction, IndexSet, Workflow2, \
     ForwardMappingModel, BackwardMappingModel, SurrogateModel
@@ -76,12 +77,16 @@ void viscosity_SM
 
     const double Rg = 8.31446218;
 
-    outputs[0] = Aeta*exp(Eeta/(Rg*T))*pow(Xg/(Xg-X),AA+B*X);
+    if (X<Xg) {
+        outputs[0] = Aeta*exp(Eeta/(Rg*T))*pow(Xg/(Xg-X),AA+B*X);
+    } else {
+        outputs[0] = 1e10;
+    }
 }
 ''',
     # These are global bounds for the function
     inputs={
-        'T': {'min': 200, 'max': 450 },
+        'T': {'min': 200, 'max': 550 },
         'X': {'min': 0, 'max': 1 },
     },
     outputs={
@@ -95,20 +100,23 @@ void viscosity_SM
         'param5': {'min': -1e9, 'max': 1e9, 'argPos': 4},
     },
 )
+with open(os.getcwd()+'/inputs/unifiedInput.json') as jsonfile:
+    inputs=json.load(jsonfile)
+    X_gel=inputs['kinetics']['gelPoint']
 
 ## [literature data](http://dx.doi.org/10.1002/aic.690280213)
-par = [4.1e-8, 38.3e3, 4.0, -2.0, 0.85]
+par = [4.1e-8, 38.3e3, 4.0, -2.0, X_gel]
 
 ## [literature data](http://dx.doi.org/10.1002/aic.690280213)
-par2 = [10.3e-8, 41.3e3, 1.5, 1.0, 0.65]
+par2 = [10.3e-8, 41.3e3, 1.5, 1.0, X_gel]
 
 ## [literature data][1]
 ## [1]: http://dx.doi.org/10.1002/(SICI)1097-4628(19961017)62:3<567::AID-APP14>3.0.CO;2-W
-par3 = [3.32e-8, 42.9e3, 2.32, 1.4, 0.64]
+par3 = [3.32e-8, 42.9e3, 2.32, 1.4, X_gel]
 
 ## based on [literature data](http://dx.doi.org/10.1002/aic.690280213), but
 ## gel point changed to 0.5 (Baser and Khakhar)
-par4 = [4.1e-8, 38.3e3, 4.0, -2.0, 0.5]
+par4 = [4.1e-8, 38.3e3, 4.0, -2.0, X_gel]
 
 ## Surrogate model for polymer viscosity
 #
@@ -118,11 +126,4 @@ m_polymerViscosity = ForwardMappingModel(
     surrogateFunction=f_polymerViscosity,
     substituteModels=[],
     parameters=par4,
-    inputs={
-        'T': {'min': 200, 'max': 450},
-        'X': {'min': 0, 'max': 1},
-    },
-    outputs={
-        'mu': {'min': 0, 'max': +9e99},
-    },
 )

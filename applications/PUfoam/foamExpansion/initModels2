@@ -29,7 +29,7 @@ License
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
-    Initialisation script for the Foam aging application.
+    Initialisation script needed to run Bubble growth model.
 
 Authors
     Henrik Rusche
@@ -41,13 +41,13 @@ Contributors
 from modena import SurrogateModel, Workflow2, MODENA_PARSED_URI
 from fireworks import LaunchPad
 from fireworks.core.rocket_launcher import rapidfire
+from pymongo import MongoClient
 
-import diffusivity # automatic initialization fails
-# import gasMixtureConductivity # imported by foamConductivity
-# import gasConductivity # imported by gasMixtureConductivity
-import foamConductivity
-import Solubility # automatic initialization fails
-import StrutContent
+# import polymerViscosity # imported by Rheology_Arrhenius
+# import SurfaceTension # imported by Rheology_Arrhenius
+# import PolymerDensity_units
+# import Kinetics
+import Rheology_Arrhenius
 
 # set up the LaunchPad and reset it
 launchpad = LaunchPad(**MODENA_PARSED_URI)
@@ -60,3 +60,45 @@ for m in SurrogateModel.get_instances():
 # store workflow and launch it locally
 launchpad.add_wf(initWfs)
 rapidfire(launchpad)
+
+# Surface tension has outsidePoint after initialization. Delete it.
+# Create connections to database
+url = 'mongodb://localhost:27017/'
+client = MongoClient(url)
+collection = client.test.surrogate_model
+# Update the model
+collection.update(
+    {'_id': 'SurfaceTension[A=AIR,B=THF]'},
+    {
+        '$unset': {
+            'outsidePoint': ""
+        }
+    }
+)
+# PCSAFT surface tension model has problems with large temperatures
+doc=collection.find({'_id': 'SurfaceTension[A=AIR,B=THF]'})
+for key in doc:
+    inputs=key['inputs']
+    inputs['T']['max']=550
+collection.update(
+    {'_id': 'SurfaceTension[A=AIR,B=THF]'},
+    {
+        '$set': {
+            'inputs': inputs
+        }
+    }
+)
+# Rheology model has problems with large conversion (beyond gel point)
+doc=collection.find({'_id': 'Rheology'})
+for key in doc:
+    inputs=key['inputs']
+    inputs['T']['max']=550
+    inputs['X']['max']=1.0
+collection.update(
+    {'_id': 'Rheology'},
+    {
+        '$set': {
+            'inputs': inputs
+        }
+    }
+)

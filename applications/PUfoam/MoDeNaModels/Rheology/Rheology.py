@@ -38,6 +38,7 @@ Contributors
 '''
 
 import os
+import json
 import modena
 import SurfaceTension
 import polymerViscosity
@@ -87,6 +88,9 @@ class RheologyExactTask(ModenaFireTask):
         os.remove('RheologyExact.in')
         os.remove('RheologyExact.out')
 
+with open(os.getcwd()+'/inputs/unifiedInput.json') as jsonfile:
+    inputs=json.load(jsonfile)
+    X_gel=inputs['kinetics']['gelPoint']
 
 f = CFunction(
     Ccode= '''
@@ -114,18 +118,22 @@ void rheology_SM
     const double mu_b = 1;
     const double mu_c = 0;
     const double mu_d = 0.001;
-    const double X_gel = 0.615;
+    const double X_gel = '''+str(X_gel)+''';
     const double mu_0_const = 0.195;
     const double mu_inf_const = 0.266;
 
     double mu_0, mu_inf;
     double mu_car;
 
-    mu_0 = (log(X+mu_d) - log(mu_d) + pow(X_gel / ( X_gel - X ), mu_a + X*mu_b + mu_c*pow(X,2))) * mu_0_const;
-    mu_inf = (log(X+mu_d) - log(mu_d) + pow(X_gel / ( X_gel - X ), mu_a + X*mu_b + mu_c*pow(X,2)))* mu_inf_const;
+    if (X<X_gel) {
+        mu_0 = (log(X+mu_d) - log(mu_d) + pow(X_gel / ( X_gel - X ), mu_a + X*mu_b + mu_c*pow(X,2))) * mu_0_const;
+        mu_inf = (log(X+mu_d) - log(mu_d) + pow(X_gel / ( X_gel - X ), mu_a + X*mu_b + mu_c*pow(X,2)))* mu_inf_const;
 
-    mu_car = (mu_inf + (mu_0 - mu_inf)*pow(1 + pow(lambda*shear,alpha), (n_rh - 1) / alpha));
-//    printf("apparent viscosity car %f", mu_car);
+        mu_car = (mu_inf + (mu_0 - mu_inf)*pow(1 + pow(lambda*shear,alpha), (n_rh - 1) / alpha));
+    } else {
+        mu_car = 1e6;
+    }
+    //    printf("apparent viscosity car %f", mu_car);
     outputs[0] = mu_car;
 }
 ''',
@@ -159,11 +167,11 @@ m = BackwardMappingModel(
     initialisationStrategy= Strategy.InitialPoints(
         initialPoints=
         {
-            'T': [300.0, 310.0], # 310 is the maximum that is supported by Surface Tension Model
+            'T': [270.0, 330.0], # 330 is the maximum that is supported by Surface Tension Model (Air+THF)
             'shear': [0.01, 0.1],
-            'X': [0.1, 0.3],
-            'm0': [0.1, 0.3],
-            'm1': [0.1, 0.3],
+            'X': [0, 0.3],
+            'm0': [1e8, 1e15],
+            'm1': [1e-30, 1e5],
         },
     ),
     outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(
@@ -178,4 +186,3 @@ m = BackwardMappingModel(
         maxIterations= 5 # Currently not used
     ),
 )
-

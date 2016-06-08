@@ -41,12 +41,18 @@ Contributors
 from modena import SurrogateModel, Workflow2, MODENA_PARSED_URI
 from fireworks import LaunchPad
 from fireworks.core.rocket_launcher import rapidfire
+from pymongo import MongoClient
 
-import polymerViscosity
-# import SurfaceTension
+# import polymerViscosity # imported by Rheology_Arrhenius
+# import SurfaceTension # imported by Rheology_Arrhenius
+import PolymerDensity
+import Solubility
 import PolymerDensity_units
 import Kinetics
-import Solubility
+import StrutContent
+import foamConductivity
+import diffusivity
+# import Rheology_Arrhenius
 
 # set up the LaunchPad and reset it
 launchpad = LaunchPad(**MODENA_PARSED_URI)

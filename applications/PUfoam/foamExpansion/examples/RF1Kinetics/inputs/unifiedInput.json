@@ -22,6 +22,7 @@
     },
     "kinetics": {
         "kineticModel": "RF-1",
+        "gelPoint": 0.6,
         "gellingReaction": {
             "reactionEnthalpy": -6.85e4
         },
@@ -61,11 +62,11 @@
             "polymerDensityModel": "constant",
             "density": 1100,
             "viscosityModel": "CastroMacosko",
-            "maxViscosity": 1.0e10,
             "molarMassNCO": 615
         },
         "surfaceTensionModel": "constant",
-        "surfaceTension": 25e-3
+        "surfaceTension": 25e-3,
+        "ModenaFoamViscosityModel": false
     },
     "bubbleGrowth": {
         "integrator": "dlsodes",

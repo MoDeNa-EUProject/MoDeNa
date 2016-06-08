@@ -24,8 +24,8 @@ License
 
 """
 @file
-Surrogate function and model definitions for the density of the reaction mixturemode
-@author    Erik Laurini
+Surrogate function and model definitions for the strut content
+@author    Pavel Ferkl
 @author    Mohsen Karimi
 @copyright 2014-2015, MoDeNa Project. GNU Public License.
 @ingroup   app_aging
@@ -33,25 +33,16 @@ Surrogate function and model definitions for the density of the reaction mixture
 
 import os
 import modena
-from modena import CFunction, IndexSet, Workflow2, \
-    ForwardMappingModel, BackwardMappingModel, SurrogateModel
-import modena.Strategy as Strategy
-from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
-from fireworks import Firework, Workflow, FWAction
-from fireworks.utilities.fw_utilities import explicit_serialize
-from blessings import Terminal
-from jinja2 import Template
-
-## Create terminal for colour output
-term = Terminal()
-## Surrogate function for density of the reaction mixture.
+from modena import CFunction, ForwardMappingModel
+## Surrogate function for strut content.
 #
-# Density is a function of temperature and conversion of gelling reaction.
+# Strut content is a assumed to be a function of foam density.
 f = CFunction(
     Ccode='''
 #include "modena.h"
 #include "math.h"
-void densityreactionmixture
+#define MAX(a,b) ((a) > (b) ? a : b)
+void strutContent
 (
     const modena_model_t* model,
     const double* inputs,
@@ -60,35 +51,33 @@ void densityreactionmixture
 {
     {% block variables %}{% endblock %}
 
-    const double a_L0 = parameters[0];
-    const double b_L0 = parameters[1];
-    const double a_P0 = parameters[2];
-    const double b_P0 = parameters[3];
+    const double a = parameters[0];
+    const double b = parameters[1];
+    const double c = parameters[2];
+    const double pi = 3.14159;
 
-    outputs[0] = ((a_L0*T + b_L0) + ((a_P0*T + b_P0) - (a_L0*T + b_L0))*XOH);
+    outputs[0] = MAX(atan(a*rho + b)/pi*2,0.0);
 }
 ''',
     # These are global bounds for the function
     inputs={
-        'T': { 'min': 273, 'max': 550},
-        'XOH': { 'min': 0, 'max': 1},
+        'rho': { 'min': 0, 'max': 1e5},
     },
     outputs={
-        'density_polymer': { 'min': 0, 'max': 8000, 'argPos': 0 },
+        'fs': { 'min': 0, 'max': 1, 'argPos': 0 },
     },
     parameters={
         'param0': { 'min': -9e99, 'max': +9e99, 'argPos': 0 },
-        'param1': { 'min': 0.0, 'max': +9e99, 'argPos': 1 },
+        'param1': { 'min': -9e99, 'max': +9e99, 'argPos': 1 },
         'param2': { 'min': -9e99, 'max': +9e99, 'argPos': 2 },
-        'param3': { 'min': 0.0, 'max': +9e99, 'argPos': 3 },
     },
 )
 ## Surrogate model for density_reaction_mixture
 #
 # Forward mapping model is used.
 m = ForwardMappingModel(
-    _id='density_reaction_mixture',
+    _id='strutContent',
     surrogateFunction=f,
     substituteModels= [ ],
-    parameters=[-0.0006, 1287.8, -0.000048, 992.8],
+    parameters=[0.06115509, -0.72513392,  1.],
 )

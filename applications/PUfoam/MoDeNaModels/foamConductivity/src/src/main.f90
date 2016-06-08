@@ -7,8 +7,8 @@
 !! - LAPACK 3.4.2 or higher
 !! - BLAS 3.4.2 or higher
 program hahtf
-    use tests
-    use ioutils
+    use tests, only: loadParameters,eqcond
+    use ioutils, only: newunit
     use constants, only: mfi
     implicit none
     write(*,*) 'Welcome in hahtf'

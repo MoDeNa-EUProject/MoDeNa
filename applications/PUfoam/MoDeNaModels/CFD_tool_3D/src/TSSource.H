@@ -165,48 +165,98 @@ forAll(mesh.C(), celli)
             TSSource[celli] = ROOTVSMALL;
         }
     }
-    if (blowingAgent == "n-pentane")
+    if (thermalConductivitySurrogateSwitch)
     {
         if (alphaFO > 0.5)
         {
-            if (rhoFO > 48)
+            // surrogate model for thermal conductivity for CO2, cyclo-pentane
+            modena_inputs_set(inputs_thermalConductivity, porosity_Pos, (1.0 - rhoFO/rhoPolyMixture));
+            scalar radiusBubble;
+            radiusBubble = bubbleRadius(mZero[celli], mOne[celli]);
+            modena_inputs_set(inputs_thermalConductivity, cell_size_Pos, (2.0*radiusBubble));
+            modena_inputs_set(inputs_thermalConductivity, temp_Pos, TS[celli]);
+            scalar pp_CO2, pp_BA;
+            pp_CO2 =
+                    partialPressureCO2
+                    (
+                        M_CO2, M_B, surfaceTension, wCO2_g[celli],
+                        wBA_g[celli], p[celli], radiusBubble
+                    );
+            pp_BA =
+               partialPressureBA
+                        (
+                            M_B, M_CO2, surfaceTension, wBA_g[celli], wCO2_g[celli],
+                            p[celli], radiusBubble
+                        );
+            modena_inputs_set(inputs_thermalConductivity, X_CO2_Pos, (pp_CO2/(pp_BA+pp_CO2)));
+            modena_inputs_set(inputs_thermalConductivity, X_O2_Pos, 0.0);
+            modena_inputs_set(inputs_thermalConductivity, X_N2_Pos, 0.0);
+            modena_inputs_set(inputs_thermalConductivity, X_Cyp_Pos, (pp_BA/(pp_BA+pp_CO2)));
+            // input for strut content
+            modena_inputs_set(inputs_strutContent, rho_foam_Pos, rhoFO);
+            int ret_strutContent = modena_model_call (strutContentmodel, inputs_strutContent, outputs_strutContent);
+            scalar st_c;
+            st_c = modena_outputs_get(outputs_strutContent, 0);
+            modena_inputs_set(inputs_thermalConductivity, strut_c_Pos, st_c);
+            int ret_thermalConductivitymodel = modena_model_call (thermalConductivitymodel, inputs_thermalConductivity, outputs_thermalConductivity);
+            if(modena_error_occurred())
             {
-                thermalConductivity[celli] =
-                (
-                    (scalar(8.7006e-8)*Foam::pow(rhoFO,2)
-                  + scalar(8.4674e-5)*rhoFO + scalar(1.16e-2))
-                );
+                exit(modena_error());
             }
-            else
-            {
-                thermalConductivity[celli] =
-                (
-                    (scalar(9.3738e-6)*Foam::pow(rhoFO,2)
-                  - scalar(7.3511e-4)*rhoFO+scalar(2.956e-2))
-                );
-            }
+            thermalConductivity[celli] = modena_outputs_get(outputs_thermalConductivity, 0);
             thermalDiff_foam[celli] = (thermalConductivity[celli]/(rhoFO*C_Poly));
         }
         else
         {
             thermalDiff_foam[celli] = thermalDiffusivityGas(T_C);
         }
-
         thermalDiff_gas[celli] = thermalDiffusivityGas(T_C);
     }
     else
     {
-        if (alphaFO > 0.5)
+        if (blowingAgent == "n-pentane")
         {
-            thermalConductivity[celli]  = 0.03;
-            thermalDiff_foam[celli] =
-                (thermalConductivity[celli]/(rhoFO*C_Poly));
+            if (alphaFO > 0.5)
+            {
+                if (rhoFO > 48)
+                {
+                    thermalConductivity[celli] =
+                    (
+                        (scalar(8.7006e-8)*Foam::pow(rhoFO,2)
+                      + scalar(8.4674e-5)*rhoFO + scalar(1.16e-2))
+                    );
+                }
+                else
+                {
+                    thermalConductivity[celli] =
+                    (
+                        (scalar(9.3738e-6)*Foam::pow(rhoFO,2)
+                      - scalar(7.3511e-4)*rhoFO+scalar(2.956e-2))
+                    );
+                }
+                thermalDiff_foam[celli] = (thermalConductivity[celli]/(rhoFO*C_Poly));
+            }
+            else
+            {
+                thermalDiff_foam[celli] = thermalDiffusivityGas(T_C);
+            }
+
+            thermalDiff_gas[celli] = thermalDiffusivityGas(T_C);
         }
         else
         {
-            thermalDiff_foam[celli] = thermalDiffusivityGas(T_C);
+            if (alphaFO > 0.5)
+            {
+                thermalConductivity[celli]  = 0.03;
+                thermalDiff_foam[celli] =
+                    (thermalConductivity[celli]/(rhoFO*C_Poly));
+            }
+            else
+            {
+                thermalDiff_foam[celli] = thermalDiffusivityGas(T_C);
+            }
+            thermalDiff_gas[celli] = thermalDiffusivityGas(T_C);
         }
-        thermalDiff_gas[celli] = thermalDiffusivityGas(T_C);
     }
     thermalDiffusivity[celli] =
         alpha1[celli]*thermalDiff_gas[celli]

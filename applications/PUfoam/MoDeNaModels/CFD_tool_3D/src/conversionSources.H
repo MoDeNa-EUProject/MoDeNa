@@ -4,10 +4,6 @@ if (KineticsModel == "generic")
            temp_old,
            Arhns_current,
            Arhns_old,
-           rhoFoam_current,
-           rhoFoam_old,
-           alphaFoam_current,
-           alphaFoam_old,
            XW_val,
            XOH_valOld,
            BA_dilution,
@@ -26,10 +22,6 @@ if (KineticsModel == "generic")
     {
         temp_current = TS[celli];
         temp_old = TS.oldTime()[celli];
-        rhoFoam_current = rho_foam[celli];
-        rhoFoam_old = rho_foam.oldTime()[celli];
-        alphaFoam_current = alpha2[celli];
-        alphaFoam_old = alpha2.oldTime()[celli];
 
         if (liquidMixtureDensitySurrogate)
         {
@@ -148,9 +140,6 @@ if (KineticsModel == "RF-1")
 {
     forAll(mesh.C(), celli)
     {
-        double alphaFoam, rhoFoam;
-        alphaFoam = alpha2[celli];
-        rhoFoam = rho_foam[celli];
         modena_inputs_set(inputs_kinetics, Catalyst_1_Pos, (Catalyst_1[celli]));
         modena_inputs_set(inputs_kinetics, CE_A0_Pos, (CE_A0[celli]));
         modena_inputs_set(inputs_kinetics, CE_A1_Pos, (CE_A1[celli]));
@@ -223,17 +212,12 @@ if (KineticsModel == "RF-1")
             modena_outputs_get(outputs_kinetics, source_R_1_temp_RF1_Pos);
         source_R_1_vol_RF1[celli] =
             modena_outputs_get(outputs_kinetics, source_R_1_vol_RF1_Pos);
-        if (XOH[celli] < XOH_Gel)
-        {
+
             XWSource[celli] = scalar(-1.0)*
                               source_CE_B2[celli]/(CW_0/scalar(1000.0));
-        }
 
-        if (XOH[celli] <  XOH_Gel)
-        {
             XOHSource[celli] = scalar(-1.0)*
                                (source_CE_A0[celli] + source_CE_A1[celli])/
                                ((COH_0))*scalar(1000.0);
-        }
     }
 }
