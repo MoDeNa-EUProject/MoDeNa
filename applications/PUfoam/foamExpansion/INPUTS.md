@@ -49,7 +49,7 @@ The following key-pairs should be defined:
         - "molarMass": (kg/mol)
     - "polymer":
         - "heatCapacity": (J/kg/K)
-        - "polymerDensityModel": ["constant", "nanotools"],
+        - "polymerDensityModel": ["constant", "nanotools", "pcsaft"],
         - "density": when "constant" polymerDensityModel is used (kg/m^3)
         - "viscosityModel": ["CastroMacosko"],
         - "maxViscosity": maximum viscosity - for gel point detection (Pa s),

@@ -103,7 +103,8 @@ void write_kinetics( const state_type &y , const double t )
             break;
 		}
         default:
-            cout << rhoPolySurrgate << endl;
+            cerr << "Invalid density model" << endl;
+            exit(1);
     }
 
     double p1,p2;
