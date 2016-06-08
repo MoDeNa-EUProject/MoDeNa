@@ -261,34 +261,10 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
             dydt[1] = -(dydt[12] + dydt[13])/(OH_0)*1000;
             break;
     }
-
-    if (kinMod == 1 || kinMod == 2)
+    
+    switch (denMod)
     {
-        // ODEs
-        dydt[0]     = A_W*exp(-E_W/(RR*y[2]))*(1-y[0]);
-        if(dydt[0] < 0.0)
-        {
-            dydt[0] = 0.0;
-        }
-        if(W_0 < 0.0)
-        {
-            dydt[0] = 0.0;
-        }
-
-        dydt[1]     = Rx*A_OH*exp(-E_OH/(RR*y[2]))*OH_0*(1-y[1])*(NCO_0/OH_0 - 2.0*y[0]*W_0/OH_0 - y[1]);
-        if(dydt[1] < 0.0)
-        {
-            dydt[1] = 0.0;
-        }
-        if (dilution) {
-            dydt[0]=dydt[0]/(1+y[3]*rhoPolySurrgate/rhoBL);
-            dydt[1]=dydt[1]/(1+y[3]*rhoPolySurrgate/rhoBL);
-        }
-    }
-
-	switch (denMod)
-    {
-		case 1:
+        case 1:
         {
             // Calling the model for density reaction mixture
             size_t T_denpos     = modena_model_inputs_argPos(density_reaction_mixturemodel, "T");
@@ -312,13 +288,34 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
 
             rhoPolySurrgate = modena_outputs_get(outputs_den, 0);
             break;
-		}
-		case 2:
-			rhoPolySurrgate = rhoPoly;
+        }
+        case 2:
+            rhoPolySurrgate = rhoPoly;
             break;
-	}
+    }
+    if (kinMod == 1 || kinMod == 2)
+    {
+        // ODEs
+        dydt[0]     = A_W*exp(-E_W/(RR*y[2]))*(1-y[0]);
+        if(dydt[0] < 0.0)
+        {
+            dydt[0] = 0.0;
+        }
+        if(W_0 < 0.0)
+        {
+            dydt[0] = 0.0;
+        }
 
-
+        dydt[1]     = Rx*A_OH*exp(-E_OH/(RR*y[2]))*OH_0*(1-y[1])*(NCO_0/OH_0 - 2.0*y[0]*W_0/OH_0 - y[1]);
+        if(dydt[1] < 0.0)
+        {
+            dydt[1] = 0.0;
+        }
+        if (dilution) {
+            dydt[0]=dydt[0]/(1+y[3]*rhoPolySurrgate/rhoBL);
+            dydt[1]=dydt[1]/(1+y[3]*rhoPolySurrgate/rhoBL);
+        }
+    }
 
     // call the surrogate model for rheology
     if (apparentViscosity)
@@ -525,7 +522,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
     }
     else
     {
-        cerr << "Invalide choice of bubbleMode!" << endl;
+        cerr << "Invalid choice of bubbleMode!" << endl;
         exit(1);
     }
 

@@ -61,28 +61,24 @@ void write_kinetics( const state_type &y , const double t )
     double rhoPolySurrgate;
     switch (denMod) {
 		case 1: {
-        	// // Calling the model for density reaction mixture
-         //    size_t T_denpos     = modena_model_inputs_argPos(density_reaction_mixturemodel, "T");
-         //    size_t XOH_denpos   = modena_model_inputs_argPos(density_reaction_mixturemodel, "XOH");
-         //    modena_model_argPos_check(density_reaction_mixturemodel);
-         //    // set input vector
-         //    double EG_XOH;
-         //    double init_EG_OH = 5.0;
-         //    EG_XOH      = 1.0 - (y[12]/init_EG_OH);
-         //    modena_inputs_set(inputs_den, T_denpos, y[2]);
-         //    modena_inputs_set(inputs_den, XOH_denpos, EG_XOH);
-         //    // call the model
-         //    int ret_den = modena_model_call (density_reaction_mixturemodel, inputs_den, outputs_den);
-         //    // terminate, if requested
-         //    if(ret_den != 0)
-         //    {
-         //        modena_inputs_destroy (inputs_den);
-         //        modena_outputs_destroy (outputs_den);
-         //        modena_model_destroy (density_reaction_mixturemodel);
-         //        exit(ret_den);
-         //        //return ret_den;
-         //    }
-         //    rhoPolySurrgate = modena_outputs_get(outputs_den, 0);
+            // Calling the model for density reaction mixture
+            size_t T_denpos     = modena_model_inputs_argPos(density_reaction_mixturemodel, "T");
+            size_t XOH_denpos   = modena_model_inputs_argPos(density_reaction_mixturemodel, "XOH");
+            modena_model_argPos_check(density_reaction_mixturemodel);
+            // set input vector
+            modena_inputs_set(inputs_den, T_denpos, y[2]);
+            modena_inputs_set(inputs_den, XOH_denpos, y[1]);
+            // call the model
+            int ret_den = modena_model_call (density_reaction_mixturemodel, inputs_den, outputs_den);
+            // terminate, if requested
+            if(ret_den != 0)
+            {
+                modena_inputs_destroy (inputs_den);
+                modena_outputs_destroy (outputs_den);
+                modena_model_destroy (density_reaction_mixturemodel);
+                exit(ret_den);
+            }
+            rhoPolySurrgate = modena_outputs_get(outputs_den, 0);
         }
         case 2:
             rhoPolySurrgate = rhoPoly;

@@ -118,7 +118,7 @@
 // physical blowing agent (used for solubility model)
 	int    phBL    = 1;		// 1=pentane, 2=R-11
 // density model used
-	int    denMod  = 2;
+	int    denMod;
 // kinetics model used
 	int    kinMod  = 2;
 	bool   dilution= true;
