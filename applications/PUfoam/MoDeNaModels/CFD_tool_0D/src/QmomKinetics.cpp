@@ -257,7 +257,11 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
             dydt[29] = modena_outputs_get(outputs_kinetics, source_R_1_temp_Pos);
             dydt[30] = modena_outputs_get(outputs_kinetics, source_R_1_vol_Pos);
 
-            dydt[0] = -dydt[15]/(W_0/1000);
+			if (W_0 > 1e-8) {
+				dydt[0] = -dydt[15]/(W_0/1000);
+			} else {
+				dydt[0] = 0;
+			}
             dydt[1] = -(dydt[12] + dydt[13])/(OH_0)*1000;
             break;
     }
@@ -603,7 +607,7 @@ int main(int argc, char **argv)
     y[12]           = polyol1_ini*1e-3;
     y[13]           = polyol2_ini*1e-3;
     y[14]           = amine_ini*1e-3;
-	y[15]           = W_0*1e-3;
+	y[15]           = max(W_0*1e-3,0.0);
     y[16]           = isocyanate1_ini*1e-3;
     y[17]           = isocyanate2_ini*1e-3;
     y[18]           = isocyanate3_ini*1e-3;

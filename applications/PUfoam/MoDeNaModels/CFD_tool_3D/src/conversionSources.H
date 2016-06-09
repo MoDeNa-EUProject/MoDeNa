@@ -213,8 +213,12 @@ if (KineticsModel == "RF-1")
         source_R_1_vol_RF1[celli] =
             modena_outputs_get(outputs_kinetics, source_R_1_vol_RF1_Pos);
 
-            XWSource[celli] = scalar(-1.0)*
-                              source_CE_B2[celli]/(CW_0/scalar(1000.0));
+            if (CW_0 > scalar(1e-8)) {
+                XWSource[celli] = scalar(-1.0)*
+                    source_CE_B2[celli]/(CW_0/scalar(1000.0));
+            } else {
+                XWSource[celli] = scalar(0.0);
+            }
 
             XOHSource[celli] = scalar(-1.0)*
                                (source_CE_A0[celli] + source_CE_A1[celli])/
