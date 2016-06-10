@@ -191,7 +191,7 @@ subroutine loadParameters
         temp1=temp2
         temp2=tmean
     endif
-    tmean=(temp1+temp1)/2
+    tmean=(temp1+temp2)/2
     call gasConductivity(cond1,tmean,xCO2,xAir,xCyP)
     call polymerConductivity(cond2,tmean)
     n1=1
