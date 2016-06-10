@@ -206,21 +206,29 @@ initialPoints_foamConductivity_auto = {
     'x[N2]': setIP(xAir0*0.79),
 }
 
+foaming_ini={
+    'eps': [0.9,0.0,0.96,0.99,0.7,0.5],
+    'dcell': [200e-6,0.0,300e-6,100e-6,1e-2,200e-6],
+    # 'eps': [0.0,0.1,0.2,0.3,0.4,0.5],
+    # 'dcell': [200e-6,0.0,300e-6,100e-6,100e-6,200e-6],
+    'fstrut': [0.0,1.0,0.7,0.6,0.0,0.9],
+    'T': [280,549,300,350,330,300],
+    'x[CO2]': [0,0,1,1,1,0],
+    'x[CyP]': [1,1,0,0,0,1],
+    'x[O2]': [0,0,0,0,0,0],
+    'x[N2]': [0,0,0,0,0,0],
+}
 try:
     with open('inputs/unifiedInput.json','r') as f:
         inputs=json.load(f)
-    initialPoints_foamConductivity_auto = {
-        'eps': [0.9,0.0,0.96,0.99, 0.7, 0.5],
-        'dcell': [200e-6,0.0,300e-6,100e-6, 1e-2, 200e-6],
-        'fstrut': [0.0,1.0,0.7,0.6, 0.0, 0.9],
-        'T': [280,549,300,350, 330, 300],
-        'x[CO2]': [0,0,1,1, 1, 0],
-        'x[CyP]': [1,1,0,0,0,1],
-        'x[O2]': [0,0,0,0,0,0],
-        'x[N2]': [0,0,0,0,0,0],
-    }
-except:
-    pass
+    initialPoints_foamConductivity_auto = foaming_ini
+except IOError:
+    try:
+        with open('../inputs/unifiedInput.json','r') as f:
+            inputs=json.load(f)
+        initialPoints_foamConductivity_auto = foaming_ini
+    except:
+        pass
 print initialPoints_foamConductivity_auto
 ## Surrogate model for foam conductivity
 #

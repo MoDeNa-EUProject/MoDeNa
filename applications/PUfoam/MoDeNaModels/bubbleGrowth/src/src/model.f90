@@ -27,7 +27,11 @@ subroutine  odesystem (neq, t, y, ydot)
         do i=1,size(kineq)
             ydot(kineq(i))=kinsource(i)
         enddo
-        ydot(xWeq)=-ydot(kineq(5))/W0*1.0e3_dp
+        if (W0>1e-8_dp) then
+            ydot(xWeq)=-ydot(kineq(5))/W0*1.0e3_dp
+        else
+            ydot(xWeq)=0
+        endif
         ydot(xOHeq)=-(ydot(kineq(2))+ydot(kineq(3)))/OH0*1.0e3_dp
     else
         ydot(xOHeq) = AOH*exp(-EOH/Rg/temp)*(1-y(xOHeq))*&

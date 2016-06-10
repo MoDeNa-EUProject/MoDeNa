@@ -13,7 +13,7 @@ contains
 !> determine all geometric parameters of the foam
 subroutine foam_morpholgy
     integer, parameter :: n=2
-    integer :: info
+    integer :: info,i
     real (dp) :: tol=1e-8_dp
     real (dp), dimension(n) :: x,fvec,diag
     write(*,*) 'Foam morphology:'
@@ -44,9 +44,17 @@ subroutine foam_morpholgy
             dwall=(1-por)*dcell/3.775_dp
             dstrut=0
         else
-            x(1)=dwall
-            x(2)=dstrut
-            call hbrd(fcn_fs,n,x,fvec,epsilon(pi),tol,info,diag)
+            do i=1,10
+                x(1)=dwall*i
+                x(2)=dstrut*i
+                call hbrd(fcn_fs,n,x,fvec,epsilon(pi),tol,info,diag)
+                if (info /= 1) then
+                    write(*,*) 'unable to determine foam morphology parameters, &
+                        hbrd returned',info, 'restarting'
+                    write(mfi,*) 'unable to determine foam morphology parameters, &
+                        hbrd returned',info, 'restarting'
+                endif
+            enddo
             if (info /= 1) then
                 write(*,*) 'unable to determine foam morphology parameters, &
                     hbrd returned',info

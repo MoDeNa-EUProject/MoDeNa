@@ -170,7 +170,7 @@ forAll(mesh.C(), celli)
         if (alphaFO > 0.5)
         {
             // surrogate model for thermal conductivity for CO2, cyclo-pentane
-            modena_inputs_set(inputs_thermalConductivity, porosity_Pos, (1.0 - rhoFO/rhoPolyMixture));
+            modena_inputs_set(inputs_thermalConductivity, porosity_Pos, max(1.0 - rhoFO/rhoPolyMixture,0.0));
             scalar radiusBubble;
             radiusBubble = bubbleRadius(mZero[celli], mOne[celli]);
             modena_inputs_set(inputs_thermalConductivity, cell_size_Pos, (2.0*radiusBubble));
