@@ -21,6 +21,7 @@ module model
 
     real(dp) :: dr
     real(dp) :: rs
+    real(dp) :: vsold
     real(dp), dimension(:), allocatable :: r,u
 
     !time integration variables for lsode
@@ -51,8 +52,11 @@ subroutine  fex8 (neq, t, y, ydot)
     real(dp) :: h,he,hw,hee,hww,heee,hwww
     real(dp) :: he1,hw1,he2,hw2,he3,hw3
     real(dp) :: fluxe,fluxw
+    real(dp) :: vf,vs,vt
     dr=rc/neq
-    ! dr=(rc-y(neq))/neq
+    dr=(rc-y(neq)/sqrt(3.0_dp))/neq
+    call volume_balance(vf,vs,vt)
+    q=(vs-vsold)/timestep
     do i=1,neq
         if (i==1) then
             z=dr/2
@@ -136,6 +140,7 @@ end subroutine fex8
 subroutine  drain
     integer :: i,j,fi,fi2
     real(dp) :: h,h1,h2,h3,h4,de
+    real(dp) :: vf,vs,vt
     write(*,*) 'wellcome to wall drainage.'
     allocate(r(neq),y(neq),u(-1:neq+2))
     nnz=neq**2 !i really don't know, smaller numbers can make problems
@@ -172,13 +177,17 @@ subroutine  drain
     open (unit=newunit(fi), file = 'filmthickness.out')
     open (unit=newunit(fi2), file = 'time.out')
     write(*,'(1x,100a12)') 'film: ','strut: ','total: '
-    call volume_balance
+    call volume_balance(vf,vs,vt)
+    write(*,'(100es12.3)') vf,vs,vt
+    vsold=vs
     do i=1,its
         write(fi,"(10000es12.4)") y(1:neq)
         write(fi2,"(10000es12.4)") tout
         call dlsodes (sub_ptr, neq, y, t, tout, itol, rtol, atol, itask, &
             istate, iopt, rwork, lrw, iwork, liw, jac, mf)
-        call volume_balance
+        call volume_balance(vf,vs,vt)
+        write(*,'(100es12.3)') vf,vs,vt
+        vsold=vs
         tout = tout+timestep
     enddo
     close(fi)
@@ -190,21 +199,20 @@ end subroutine drain
 
 !********************************BEGINNING*************************************
 !checks whether we are losing some mass or not
-subroutine  volume_balance
+subroutine  volume_balance(vf,vs,vt)
     integer :: i
-    real(dp) :: vf,vs,vt
+    real(dp), intent(out) :: vf,vs,vt
     vf=0
     do i=1,neq
-        ! dr=(rc-y(neq))/neq
+        dr=(rc-y(neq)/sqrt(3.0_dp))/neq
         vf=vf+2*pi*dr*(0.5_dp+i-1)*y(i)*dr
     enddo
-    vs=2*pi*rc*y(neq)**2/sqrt(3.0_dp)
+    ! vs=2*pi*rc*y(neq)**2/sqrt(3.0_dp)
     ! vs=2*pi*(rc-y(neq)/sqrt(3.0_dp))*y(neq)**2/sqrt(3.0_dp)
     ! vs=pi*(rc+y(neq)/sqrt(3.0_dp))*y(neq)**2/sqrt(3.0_dp)
-    vs=pi*y(neq)/3*((rc+y(neq)/sqrt(3.0_dp))**2+(rc+y(neq)/sqrt(3.0_dp))*rc+&
-        rc**2)-pi*y(neq)*rc**2
+    vs=pi*y(neq)/3*(rc**2+(rc-y(neq)/sqrt(3.0_dp))*rc+&
+        (rc-y(neq)/sqrt(3.0_dp))**2)-pi*y(neq)*(rc-y(neq)/sqrt(3.0_dp))**2
     vt=vf+vs
-    write(*,'(100es12.3)') vf,vs,vt
 end subroutine volume_balance
 !***********************************END****************************************
 end module model
