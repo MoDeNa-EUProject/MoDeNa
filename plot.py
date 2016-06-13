@@ -34,6 +34,7 @@ if plots[0]:
 #    plt.legend(loc=2, fontsize=14)
     plt.xlabel('position', fontsize=14)
     plt.ylabel('half thickness (um)', fontsize=14)
+    plt.show()
     if saveplots[0]:
         plt.savefig('profiles.pdf')
 
@@ -74,8 +75,9 @@ if plots[1]:
         x3=2*d-x1
         y3=2*d*a-y1+2*c
         line3,=plt.plot(x3*1e6,y3*1e6,color=colors[i])
-        if saveplots[1]:
-            plt.savefig('profiles2d.pdf')
+    plt.show()
+    if saveplots[1]:
+        plt.savefig('profiles2d.pdf')
 
 if plots[2]:
     fig = plt.figure(figsize=(5.0,4.0))
@@ -83,10 +85,11 @@ if plots[2]:
     radius3d, time3d = numpy.meshgrid(radius, time)
     surf = ax.plot_surface(time3d, radius3d*1e6, data*1e6, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
     #surf = ax.plot_surface(time3d, radius3d, data, rstride=2, cstride=2, cmap=cm.coolwarm, linewidth=0, antialiased=False)
-#    ax.set_xlabel('time')
-#    ax.set_ylabel('radius (um)')
-#    ax.set_zlabel('thickness (um)')
-#    plt.rc('xtick', labelsize=10)
-#    plt.rc('ytick', labelsize=10)
+    # ax.set_xlabel('time')
+    # ax.set_ylabel('radius (um)')
+    # ax.set_zlabel('thickness (um)')
+    # plt.rc('xtick', labelsize=10)
+    # plt.rc('ytick', labelsize=10)
+    plt.show()
     if saveplots[2]:
         plt.savefig('profiles3d.png')
