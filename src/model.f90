@@ -12,7 +12,7 @@ module model
     integer :: its=100
     real(dp) :: timestep=1e-3_dp
     real(dp) :: hi=5e-6_dp
-    real(dp) :: rc=1e-4_dp
+    real(dp) :: rd=1e-4_dp
     real(dp) :: s=1/sqrt(3._dp)
     real(dp) :: q=0*2e-1_dp
     real(dp) :: mu=1e-1_dp
@@ -20,7 +20,7 @@ module model
     real(dp) :: dstr=0.2_dp
 
     real(dp) :: dr
-    real(dp) :: rs
+    real(dp) :: rs,rc
     real(dp) :: vsold
     real(dp), dimension(:), allocatable :: r,u
 
@@ -53,8 +53,8 @@ subroutine  fex8 (neq, t, y, ydot)
     real(dp) :: he1,hw1,he2,hw2,he3,hw3
     real(dp) :: fluxe,fluxw
     real(dp) :: vf,vs,vt
-    dr=rc/neq
-    dr=(rc-y(neq)/sqrt(3.0_dp))/neq
+    rd=rc-y(neq)/sqrt(3.0_dp)
+    dr=rd/neq
     call volume_balance(vf,vs,vt)
     q=(vs-vsold)/timestep
     do i=1,neq
@@ -138,7 +138,7 @@ end subroutine fex8
 !********************************BEGINNING*************************************
 !simulates film drainage
 subroutine  drain
-    integer :: i,j,fi,fi2
+    integer :: i,fi,fi2
     real(dp) :: h,h1,h2,h3,h4,de
     real(dp) :: vf,vs,vt
     write(*,*) 'wellcome to wall drainage.'
@@ -157,23 +157,21 @@ subroutine  drain
     iwork(6)=maxts
     tout =t+timestep
     itol = 1 !don't change, or you must declare atol as atol(neq)
-    dr=rc/neq
-    rs=rc*sqrt((1+s**2)/s**2)*dstr
-    r(1)=dr/2
-    do i=2,neq
-        r(i)=r(i-1)+dr
+    dr=rd/neq
+    rs=rd*sqrt((1+s**2)/s**2)*dstr
+    do i=1,neq
+        r(i)=dr*(0.5_dp+i-1)
     enddo
     open (unit=newunit(fi), file = 'radius.out')
     y=hi
-    j=1
     do i=1,neq
         if (i>neq*(1-dstr)) then
-            y(i)=(rs+hi)-sqrt(rs**2-r(j)**2)
-            j=j+1
+            y(i)=(rs+hi)-sqrt(rs**2-(r(i)-(1-dstr)*rd)**2)
         endif
         write(fi,"(10000es12.4)") r(i)
     enddo
     close(fi)
+    rc=rd+y(neq)/sqrt(3.0_dp)
     open (unit=newunit(fi), file = 'filmthickness.out')
     open (unit=newunit(fi2), file = 'time.out')
     write(*,'(1x,100a12)') 'film: ','strut: ','total: '
@@ -204,14 +202,10 @@ subroutine  volume_balance(vf,vs,vt)
     real(dp), intent(out) :: vf,vs,vt
     vf=0
     do i=1,neq
-        dr=(rc-y(neq)/sqrt(3.0_dp))/neq
         vf=vf+2*pi*dr*(0.5_dp+i-1)*y(i)*dr
     enddo
-    ! vs=2*pi*rc*y(neq)**2/sqrt(3.0_dp)
-    ! vs=2*pi*(rc-y(neq)/sqrt(3.0_dp))*y(neq)**2/sqrt(3.0_dp)
-    ! vs=pi*(rc+y(neq)/sqrt(3.0_dp))*y(neq)**2/sqrt(3.0_dp)
-    vs=pi*y(neq)/3*(rc**2+(rc-y(neq)/sqrt(3.0_dp))*rc+&
-        (rc-y(neq)/sqrt(3.0_dp))**2)-pi*y(neq)*(rc-y(neq)/sqrt(3.0_dp))**2
+    vs=pi*y(neq)/3*(rd**2+(rd-y(neq)/sqrt(3.0_dp))*rd+&
+        (rd-y(neq)/sqrt(3.0_dp))**2)-pi*y(neq)*(rd-y(neq)/sqrt(3.0_dp))**2
     vt=vf+vs
 end subroutine volume_balance
 !***********************************END****************************************
