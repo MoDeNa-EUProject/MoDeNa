@@ -2,6 +2,7 @@
 *.o
 *.mod
 *.out
+*.csv
 CMakeFiles/
 Makefile
 cmake_install.cmake

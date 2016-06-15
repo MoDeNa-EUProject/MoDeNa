@@ -10,24 +10,28 @@ from math import radians,cos,sin,tan,pi
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
-# path='C:/Pavel/workspace/drainage/' #HORNET windows
-#path='C:/workspace/drainage/' #laptop windows
-#path='/home/me/workspace/drainage/' #HORNET linux
 path='./'
 plots=[1,1,0]
 saveplots=[0,0,0]
-data=numpy.loadtxt(path+'filmthickness.out')
-radius=numpy.loadtxt(path+'radius.out')
-time=numpy.loadtxt(path+'time.out')
+data=numpy.loadtxt(path+'filmthickness.csv')
+time,dr,np,vf,vs,vt=numpy.loadtxt(path+'results_1d.csv',skiprows=1,unpack=True)
+points=int(np[0]) #discretization points
+radius=[]
+for i in range(points):
+    radius.append(dr[0]*(0.5+i))
+xran=len(radius)
+radius=numpy.array(radius)
 if plots[0]:
     nlines=5
     xpart=1
-    xran=(len(radius)-1)*xpart
+    xran=len(radius)*xpart
     fig = plt.figure(figsize=(5.0,4.0))
     plt.rc('xtick', labelsize=14)
     plt.rc('ytick', labelsize=14)
     for i in range(nlines):
         j=(len(time)-1)/(nlines-1)*i
+        for k in range(xran):
+            radius[k]=dr[j]*(0.5+k)
         line1,=plt.plot(radius[0:xran]*1e6,data[j][0:xran]*1e6,
             label='t={0:.1e} s'.format(time[j]),lw=2)
 #    plt.ylim(0,1)
@@ -43,8 +47,8 @@ if plots[1]:
     colors=['b','g','m']
     times=[0,len(data)/20,len(data)-1]
     fig = plt.figure(figsize=(5.0,5.0))
-    plt.xlim(-40,40)
-    plt.ylim(-40,40)
+    plt.xlim(-100,100)
+    plt.ylim(-100,100)
     Rc=radius[-1]
     for i,j in enumerate(times):
         x0=radius[0:xran]

@@ -10,8 +10,8 @@ module model
 
     integer :: maxts=5000
     integer :: its=100
-    real(dp) :: timestep=1e-3_dp
-    real(dp) :: hi=5e-6_dp
+    real(dp) :: timestep=1e-2_dp
+    real(dp) :: hi=3e-6_dp
     real(dp) :: rd=1e-4_dp
     real(dp) :: s=1/sqrt(3._dp)
     real(dp) :: q=0*2e-1_dp
@@ -157,29 +157,29 @@ subroutine  drain
     do i=1,neq
         r(i)=dr*(0.5_dp+i-1)
     enddo
-    open (unit=newunit(fi), file = 'radius.out')
     y=hi
     do i=1,neq
         if (i>neq*(1-dstr)) then
             y(i)=(rs+hi)-sqrt(rs**2-(r(i)-(1-dstr)*rd)**2)
         endif
-        write(fi,"(10000es12.4)") r(i)
     enddo
-    close(fi)
     rc=rd+y(neq)/sqrt(3.0_dp)
-    open (unit=newunit(fi), file = 'filmthickness.out')
-    open (unit=newunit(fi2), file = 'time.out')
-    write(*,'(1x,100a12)') 'film: ','strut: ','total: '
+    open (unit=newunit(fi), file = 'filmthickness.csv')
+    open (unit=newunit(fi2), file = 'results_1d.csv')
     call volume_balance(vf,vs,vt)
-    write(*,'(100es12.3)') vf,vs,vt
+    write(*,'(1x,100a12)') 'time:','dr:','film: ','strut: ','total: '
+    write(*,'(100es12.3)') t,dr,vf,vs,vt
+    write(fi,"(10000es12.4)") y(1:neq)
+    write(unit=fi2, fmt='(10000a12)') '#time','dr','np','vf','vs','vt'
+    write(unit=fi2, fmt='(10000es12.4)') t,dr,real(neq),vf,vs,vt
     vsold=vs
     do i=1,its
         write(fi,"(10000es12.4)") y(1:neq)
-        write(fi2,"(10000es12.4)") tout
         call dlsodes (sub_ptr, neq, y, t, tout, itol, rtol, atol, itask, &
             istate, iopt, rwork, lrw, iwork, liw, jac, mf)
         call volume_balance(vf,vs,vt)
-        write(*,'(100es12.3)') vf,vs,vt
+        write(*,'(100es12.3)') t,dr,vf,vs,vt
+        write(unit=fi2, fmt='(10000es12.4)') t,dr,real(neq),vf,vs,vt
         vsold=vs
         tout = tout+timestep
     enddo
