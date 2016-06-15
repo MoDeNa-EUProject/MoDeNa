@@ -28,10 +28,11 @@ if plots[0]:
     plt.rc('ytick', labelsize=14)
     for i in range(nlines):
         j=(len(time)-1)/(nlines-1)*i
-        line1,=plt.plot(radius[0:xran]*1e6,data[j][0:xran]*1e6,label='t={0:.1e}'.format(time[j]),lw=2)
+        line1,=plt.plot(radius[0:xran]*1e6,data[j][0:xran]*1e6,
+            label='t={0:.1e} s'.format(time[j]),lw=2)
 #    plt.ylim(0,1)
 #    plt.xlim(0,40)
-#    plt.legend(loc=2, fontsize=14)
+    plt.legend(loc=2, fontsize=14)
     plt.xlabel('position', fontsize=14)
     plt.ylabel('half thickness (um)', fontsize=14)
     plt.show()
@@ -62,19 +63,32 @@ if plots[1]:
         y2=y2[::-1]
         x1=numpy.append(x1,x2)
         y1=numpy.append(y1,y2)
-        line1,=plt.plot(x1*1e6,y1*1e6,color=colors[i])
+        if i==0:
+            line1,=plt.plot(x1*1e6,y1*1e6,color=colors[i],
+                label='t={0:.1e} s'.format(time[times[i]]))
+        else:
+            line1,=plt.plot(x1*1e6,y1*1e6,color=colors[i])
         a=tan(-pi/3)
         c=0
         d=(x1+a*(y1-c))/(1+a**2)
         x2=2*d-x1
         y2=2*d*a-y1+2*c
-        line2,=plt.plot(x2*1e6,y2*1e6,color=colors[i])
+        if i==1:
+            line2,=plt.plot(x2*1e6,y2*1e6,color=colors[i],
+                label='t={0:.1e} s'.format(time[times[i]]))
+        else:
+            line2,=plt.plot(x2*1e6,y2*1e6,color=colors[i])
         a=tan(0)
         c=0
         d=(x1+a*(y1-c))/(1+a**2)
         x3=2*d-x1
         y3=2*d*a-y1+2*c
-        line3,=plt.plot(x3*1e6,y3*1e6,color=colors[i])
+        if i==2:
+            line3,=plt.plot(x3*1e6,y3*1e6,color=colors[i],
+                label='t={0:.1e} s'.format(time[times[i]]))
+        else:
+            line3,=plt.plot(x3*1e6,y3*1e6,color=colors[i])
+    plt.legend()
     plt.show()
     if saveplots[1]:
         plt.savefig('profiles2d.pdf')

@@ -89,7 +89,7 @@ subroutine  fex8 (neq, t, y, ydot)
             hw3=(he-2*h+2*hww-hwww)/(dr**3/4)
             fluxw=hw**3*((2*hw1**3/zw+hw1**5/zw+hw1*(1+3*zw**2*hw2**2)/zw-&
                 hw2-zw*hw3-hw1**2*(hw2+zw*hw3))/(1+hw1**2)**2.5_dp)*gam
-            fluxe=-q
+            fluxe=-q*3*mu/2/pi
         else
             zww=z
             zw=ze
@@ -125,11 +125,6 @@ subroutine  fex8 (neq, t, y, ydot)
                 he2-ze*he3-he1**2*(he2+ze*he3))/(1+he1**2)**2.5_dp)*gam
         endif
         ydot(i)=(fluxe-fluxw)/(z*dr)/3/mu
-        ! if (i==neq) ydot(i)=-fluxw/(3*mu*rc*dr+3*mu*rc*y(i)/sqrt(3.0_dp))
-        ! if (i==neq) ydot(i)=-fluxw/(3*mu*rc*dr+&
-        !     3*mu*(rc-y(i)/sqrt(3.0_dp))*y(i)/sqrt(3.0_dp))
-        ! if (i==neq) ydot(i)=-fluxw/(3*mu*rc*dr+&
-        !     1.5_dp*mu*(rc+y(i)/sqrt(3.0_dp))*y(i)/sqrt(3.0_dp))
     enddo
 end subroutine fex8
 !***********************************END****************************************
