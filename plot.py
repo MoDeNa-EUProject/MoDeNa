@@ -1,18 +1,18 @@
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
 """
-Created on Wed Jan 21 16:04:39 2015
-
+Wall drainage plots
 @author: Pavel Ferkl
 """
 from __future__ import division
 import numpy
-from math import radians,cos,sin,tan,pi
+from math import radians,cos,sin,tan,pi,sqrt
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
+import matplotlib.animation as animation
 path='./'
-plots=[1,1,0]
-saveplots=[0,0,0]
+plots=[1,1,0,1]
+saveplots=[0,0,0,0]
 data=numpy.loadtxt(path+'filmthickness.csv')
 time,dr,np,vf,vs,vt=numpy.loadtxt(path+'results_1d.csv',skiprows=1,unpack=True)
 points=int(np[0]) #discretization points
@@ -24,7 +24,7 @@ radius=numpy.array(radius)
 if plots[0]:
     nlines=5
     xpart=1
-    xran=len(radius)*xpart
+    xran=int(len(radius)*xpart)
     fig = plt.figure(figsize=(5.0,4.0))
     plt.rc('xtick', labelsize=14)
     plt.rc('ytick', labelsize=14)
@@ -47,10 +47,16 @@ if plots[1]:
     colors=['b','g','m']
     times=[0,len(data)/20,len(data)-1]
     fig = plt.figure(figsize=(5.0,5.0))
-    plt.xlim(-100,100)
-    plt.ylim(-100,100)
-    Rc=radius[-1]
+    for k in range(xran):
+        radius[k]=dr[0]*(0.5+k)
+    Rc=radius[-1]+dr[0]/2
+    plt.xlim(-Rc/sqrt(3.0)*1e6,Rc*1e6)
+    plt.ylim(-Rc*1e6,Rc*1e6)
     for i,j in enumerate(times):
+        xran=len(radius)
+        for k in range(xran):
+            radius[k]=dr[j]*(0.5+k)
+        Rc=radius[-1]
         x0=radius[0:xran]
         y0=data[times[i]][0:xran]
         a=tan(pi/2)
@@ -111,3 +117,37 @@ if plots[2]:
     plt.show()
     if saveplots[2]:
         plt.savefig('profiles3d.png')
+
+if plots[3]:
+    fig,ax = plt.subplots(figsize=(5.0,4.0))
+    ax.set_xlim(radius[0]*1e6, radius[-1]*1e6)
+    ax.set_ylim(0, max(map(max,data))*1e6)
+    line,=ax.plot(radius[0:xran]*1e6,data[0][0:xran]*1e6,
+        label='t={0:.1e} s'.format(time[0]),lw=2)
+    plt.rc('xtick', labelsize=14)
+    plt.rc('ytick', labelsize=14)
+    plt.legend(loc=2, fontsize=14)
+    plt.xlabel('position', fontsize=14)
+    plt.ylabel('half thickness (um)', fontsize=14)
+    iii=[]
+    iii.append(-1)
+
+def update(x):
+    iii[0]=iii[0]+1
+    if iii[0]>len(time)-1:
+        iii[0]=0
+    plt.legend(['t={0:.1e} s'.format(time[iii[0]])], loc=2, fontsize=14)
+    line.set_ydata(data[iii[0]][0:xran]*1e6)
+    return line,
+
+def data_gen():
+    while True: yield data[0][0:xran]*1e6
+
+if plots[3]:
+    try:
+        ani=animation.FuncAnimation(fig,update,data_gen,interval=100)
+        plt.show()
+    except:
+        pass
+    if saveplots[3]:
+        print 'saving of animation not implemented'
