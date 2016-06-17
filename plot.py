@@ -47,9 +47,10 @@ if plots[1]:
     colors=['b','g','m']
     times=[0,len(data)/20,len(data)-1]
     fig = plt.figure(figsize=(5.0,5.0))
+    j=numpy.argmax(dr)
     for k in range(xran):
-        radius[k]=dr[0]*(0.5+k)
-    Rc=radius[-1]+dr[0]/2
+        radius[k]=dr[j]*(0.5+k)
+    Rc=radius[-1]+dr[j]/2
     plt.xlim(-Rc/sqrt(3.0)*1e6,Rc*1e6)
     plt.ylim(-Rc*1e6,Rc*1e6)
     for i,j in enumerate(times):
@@ -119,8 +120,11 @@ if plots[2]:
         plt.savefig('profiles3d.png')
 
 if plots[3]:
+    j=numpy.argmax(dr)
+    for k in range(xran):
+        radius[k]=dr[j]*(0.5+k)
     fig,ax = plt.subplots(figsize=(5.0,4.0))
-    ax.set_xlim(radius[0]*1e6, radius[-1]*1e6)
+    ax.set_xlim(radius[0]*1e6, (radius[-1]+dr[0]/2)*1e6)
     ax.set_ylim(0, max(map(max,data))*1e6)
     line,=ax.plot(radius[0:xran]*1e6,data[0][0:xran]*1e6,
         label='t={0:.1e} s'.format(time[0]),lw=2)
@@ -137,6 +141,9 @@ def update(x):
     if iii[0]>len(time)-1:
         iii[0]=0
     plt.legend(['t={0:.1e} s'.format(time[iii[0]])], loc=2, fontsize=14)
+    for k in range(xran):
+        radius[k]=dr[iii[0]]*(0.5+k)
+    line.set_xdata(radius[0:xran]*1e6)
     line.set_ydata(data[iii[0]][0:xran]*1e6)
     return line,
 

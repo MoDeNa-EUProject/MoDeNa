@@ -1,26 +1,25 @@
 !contains model subroutines
-!TODO: material balance (to check results)
-!TODO: dimensional results
-!TODO: complete flow boundary conditions in several models
 !TODO: add condition for film breakage
 module model
     use constants
     use ioutils
     implicit none
 
+    logical :: cylindrical=.false.
     integer :: maxts=5000
     integer :: its=100
-    real(dp) :: timestep=1e-2_dp
-    real(dp) :: hi=3e-6_dp
-    real(dp) :: rd=1e-4_dp
+    real(dp) :: timestep=1e-4_dp
+    real(dp) :: hi=5e-6_dp
+    real(dp) :: rd=100e-6_dp
     real(dp) :: s=1/sqrt(3._dp)
     real(dp) :: q=0*2e-1_dp
     real(dp) :: mu=1e-1_dp
     real(dp) :: gam=25e-3_dp
     real(dp) :: dstr=0.2_dp
+    real(dp) :: gr=0
 
     real(dp) :: dr
-    real(dp) :: rs,rc
+    real(dp) :: rs,rc,rc0
     real(dp) :: vsold
     real(dp), dimension(:), allocatable :: r,u
 
@@ -28,8 +27,8 @@ module model
     integer :: iout
     real(dp), dimension(:), allocatable :: rwork,y
     integer, dimension(:), allocatable :: iwork
-    real(dp) :: jac,tout,rtol=1e-8_dp,atol=0,t=0
-    integer :: iopt, istate, itask, itol, liw, lrw, neq=400, nnz, lenrat, mf=222
+    real(dp) :: jac,tout,rtol=1e-5_dp,atol=0,t=0
+    integer :: iopt, istate, itask, itol, liw, lrw, neq=200, nnz, lenrat, mf=222
 
     !needed for selection of model subroutine
     abstract interface
@@ -39,7 +38,7 @@ module model
             real(dp) ::  t, y(neq), ydot(neq)
         end subroutine sub
     end interface
-    procedure (sub), pointer :: sub_ptr => fex8!null ()
+    procedure (sub), pointer :: sub_ptr => null ()
 contains
 !********************************BEGINNING*************************************
 !fvm, equidistant mesh
@@ -53,6 +52,7 @@ subroutine  fex8 (neq, t, y, ydot)
     real(dp) :: he1,hw1,he2,hw2,he3,hw3
     real(dp) :: fluxe,fluxw
     real(dp) :: vf,vs,vt
+    rc=rc0+gr*t
     rd=rc-y(neq)/sqrt(3.0_dp)
     dr=rd/neq
     call volume_balance(vf,vs,vt)
@@ -89,7 +89,7 @@ subroutine  fex8 (neq, t, y, ydot)
             hw3=(he-2*h+2*hww-hwww)/(dr**3/4)
             fluxw=hw**3*((2*hw1**3/zw+hw1**5/zw+hw1*(1+3*zw**2*hw2**2)/zw-&
                 hw2-zw*hw3-hw1**2*(hw2+zw*hw3))/(1+hw1**2)**2.5_dp)*gam
-            fluxe=-q*3*mu/2/pi
+            fluxe=-q*3*mu/2/pi! -gr*he*3*mu*zw/4
         else
             zww=z
             zw=ze
@@ -130,6 +130,93 @@ end subroutine fex8
 !***********************************END****************************************
 
 
+
+!********************************BEGINNING*************************************
+!fvm, equidistant mesh
+!cartesian coordiantes
+subroutine  fex1 (neq, t, y, ydot)
+    integer :: neq,i
+    real(dp) :: t, y(neq), ydot(neq)
+    real(dp) :: z,ze,zw,zee,zww
+    real(dp) :: lame,lamw
+    real(dp) :: h,he,hw,hee,hww,heee,hwww
+    real(dp) :: he1,hw1,he2,hw2,he3,hw3
+    real(dp) :: fluxe,fluxw
+    real(dp) :: vf,vs,vt
+    rc=rc0+gr*t
+    rd=rc-y(neq)/sqrt(3.0_dp)
+    ! dr=rd/neq
+    call volume_balance(vf,vs,vt)
+    q=(vs-vsold)/timestep
+    do i=1,neq
+        if (i==1) then
+            z=dr/2
+            ze=dr
+            zee=3*dr/2
+            lame=(ze-z)/(zee-z)
+            h=y(i)
+            hee=y(i+1)
+            hw=h
+            he=hee*lame+h*(1-lame)
+            heee=y(i+2)*lame+hee*(1-lame)
+            he1=(hee-h)/(dr)
+            he2=(hee-2*he+h)/(dr**2/4)
+            he3=(heee-2*hee+2*h-hw)/(dr**3/4)
+            fluxw=0
+            fluxe=he**3*he3*gam
+        elseif (i==neq) then
+            zww=z
+            zw=ze
+            z=zee
+            lamw=(zw-zww)/(z-zww)
+            hww=y(i-1)
+            h=y(i)
+            hw=h*lamw+hww*(1-lamw)
+            he=h+dr*s/2
+            hwww=hww*lamw+y(i-2)*(1-lamw)
+            hw1=(h-hww)/(dr)
+            hw2=(h-2*hw+hww)/(dr**2/4)
+            hw3=(he-2*h+2*hww-hwww)/(dr**3/4)
+            fluxw=hw**3*hw3*gam
+            fluxe=0!-q*3*mu
+        else
+            zww=z
+            zw=ze
+            z=zee
+            ze=ze+dr
+            zee=ze+dr/2
+            lamw=(zw-zww)/(z-zww)
+            lame=(ze-z)/(zee-z)
+            hww=y(i-1)
+            h=y(i)
+            hee=y(i+1)
+            hw=h*lamw+hww*(1-lamw)
+            he=hee*lame+h*(1-lame)
+            if (i==2) then
+                hwww=hww
+            else
+                hwww=hww*lamw+y(i-2)*(1-lamw)
+            endif
+            if (i==neq-1) then
+                heee=hee+dr*s/2
+            else
+                heee=y(i+2)*lame+hee*(1-lame)
+            endif
+            hw1=(h-hww)/(dr)
+            hw2=(h-2*hw+hww)/(dr**2/4)
+            hw3=(he-2*h+2*hww-hwww)/(dr**3/4)
+            he1=(hee-h)/(dr)
+            he2=(hee-2*he+h)/(dr**2/4)
+            he3=(heee-2*hee+2*h-hw)/(dr**3/4)
+            fluxw=hw**3*hw3*gam
+            fluxe=he**3*he3*gam
+        endif
+        ydot(i)=(fluxe-fluxw)/dr/3/mu
+    enddo
+end subroutine fex1
+!***********************************END****************************************
+
+
 !********************************BEGINNING*************************************
 !simulates film drainage
 subroutine  drain
@@ -152,6 +239,11 @@ subroutine  drain
     iwork(6)=maxts
     tout =t+timestep
     itol = 1 !don't change, or you must declare atol as atol(neq)
+    if (cylindrical) then
+        sub_ptr => fex8
+    else
+        sub_ptr => fex1
+    endif
     dr=rd/neq
     rs=rd*sqrt((1+s**2)/s**2)*dstr
     do i=1,neq
@@ -163,7 +255,7 @@ subroutine  drain
             y(i)=(rs+hi)-sqrt(rs**2-(r(i)-(1-dstr)*rd)**2)
         endif
     enddo
-    rc=rd+y(neq)/sqrt(3.0_dp)
+    rc0=rd+y(neq)/sqrt(3.0_dp)
     open (unit=newunit(fi), file = 'filmthickness.csv')
     open (unit=newunit(fi2), file = 'results_1d.csv')
     call volume_balance(vf,vs,vt)
@@ -171,7 +263,7 @@ subroutine  drain
     write(*,'(100es12.3)') t,dr,vf,vs,vt
     write(fi,"(10000es12.4)") y(1:neq)
     write(unit=fi2, fmt='(10000a12)') '#time','dr','np','vf','vs','vt'
-    write(unit=fi2, fmt='(10000es12.4)') t,dr,real(neq),vf,vs,vt
+    write(unit=fi2, fmt='(10000es12.4)') t,dr,dble(neq),vf,vs,vt
     vsold=vs
     do i=1,its
         write(fi,"(10000es12.4)") y(1:neq)
@@ -179,7 +271,7 @@ subroutine  drain
             istate, iopt, rwork, lrw, iwork, liw, jac, mf)
         call volume_balance(vf,vs,vt)
         write(*,'(100es12.3)') t,dr,vf,vs,vt
-        write(unit=fi2, fmt='(10000es12.4)') t,dr,real(neq),vf,vs,vt
+        write(unit=fi2, fmt='(10000es12.4)') t,dr,dble(neq),vf,vs,vt
         vsold=vs
         tout = tout+timestep
     enddo
@@ -192,15 +284,22 @@ end subroutine drain
 
 !********************************BEGINNING*************************************
 !checks whether we are losing some mass or not
-subroutine  volume_balance(vf,vs,vt)
+pure subroutine  volume_balance(vf,vs,vt)
     integer :: i
     real(dp), intent(out) :: vf,vs,vt
     vf=0
-    do i=1,neq
-        vf=vf+2*pi*dr*(0.5_dp+i-1)*y(i)*dr
-    enddo
-    vs=pi*y(neq)/3*(rd**2+(rd-y(neq)/sqrt(3.0_dp))*rd+&
-        (rd-y(neq)/sqrt(3.0_dp))**2)-pi*y(neq)*(rd-y(neq)/sqrt(3.0_dp))**2
+    if (cylindrical) then
+        do i=1,neq
+            vf=vf+2*pi*dr*(0.5_dp+i-1)*y(i)*dr
+        enddo
+        vs=pi*y(neq)/3*(rd**2+(rd-y(neq)/sqrt(3.0_dp))*rd+&
+            (rd-y(neq)/sqrt(3.0_dp))**2)-pi*y(neq)*(rd-y(neq)/sqrt(3.0_dp))**2
+    else
+        do i=1,neq
+            vf=vf+y(i)*dr
+        enddo
+        vs=y(neq)**2/2/sqrt(3.0_dp)
+    endif
     vt=vf+vs
 end subroutine volume_balance
 !***********************************END****************************************
