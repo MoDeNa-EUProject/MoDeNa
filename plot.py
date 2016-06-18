@@ -29,7 +29,7 @@ if plots[0]:
     plt.rc('xtick', labelsize=14)
     plt.rc('ytick', labelsize=14)
     for i in range(nlines):
-        j=(len(time)-1)/(nlines-1)*i
+        j=int((len(time)-1)/(nlines-1)*i)
         for k in range(xran):
             radius[k]=dr[j]*(0.5+k)
         line1,=plt.plot(radius[0:xran]*1e6,data[j][0:xran]*1e6,
@@ -45,7 +45,7 @@ if plots[0]:
 
 if plots[1]:
     colors=['b','g','m']
-    times=[0,len(data)/20,len(data)-1]
+    times=[0,int(len(data)/20),len(data)-1]
     fig = plt.figure(figsize=(5.0,5.0))
     j=numpy.argmax(dr)
     for k in range(xran):

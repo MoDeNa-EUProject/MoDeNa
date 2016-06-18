@@ -5,18 +5,18 @@ module model
     use ioutils
     implicit none
 
-    logical :: cylindrical=.false.
+    logical :: cylindrical=.true.
     integer :: maxts=5000
     integer :: its=100
-    real(dp) :: timestep=1e-4_dp
+    real(dp) :: timestep=1e-2_dp
     real(dp) :: hi=5e-6_dp
     real(dp) :: rd=100e-6_dp
     real(dp) :: s=1/sqrt(3._dp)
     real(dp) :: q=0*2e-1_dp
     real(dp) :: mu=1e-1_dp
     real(dp) :: gam=25e-3_dp
-    real(dp) :: dstr=0.2_dp
-    real(dp) :: gr=0
+    real(dp) :: dstr=0.5_dp
+    real(dp) :: gr=10e-6*0
 
     real(dp) :: dr
     real(dp) :: rs,rc,rc0
@@ -27,7 +27,7 @@ module model
     integer :: iout
     real(dp), dimension(:), allocatable :: rwork,y
     integer, dimension(:), allocatable :: iwork
-    real(dp) :: jac,tout,rtol=1e-5_dp,atol=0,t=0
+    real(dp) :: jac,tout,rtol=1e-8_dp,atol=0,t=0
     integer :: iopt, istate, itask, itol, liw, lrw, neq=200, nnz, lenrat, mf=222
 
     !needed for selection of model subroutine
@@ -72,8 +72,9 @@ subroutine  fex8 (neq, t, y, ydot)
             he2=(hee-2*he+h)/(dr**2/4)
             he3=(heee-2*hee+2*h-hw)/(dr**3/4)
             fluxw=0
-            fluxe=he**3*((2*he1**3/ze+he1**5/ze+he1*(1+3*ze**2*he2**2)/ze-&
-                he2-ze*he3-he1**2*(he2+ze*he3))/(1+he1**2)**2.5_dp)*gam
+            fluxe=gam*he**3*(2*he1**3/ze+he1**5/ze+he1*(1+3*ze**2*he2**2)/ze-&
+                he2-ze*he3-he1**2*(he2+ze*he3))/(1+he1**2)**2.5_dp
+            ! fluxe=gam*he**3*(-he1/ze+he2+he3*ze)
         elseif (i==neq) then
             zww=z
             zw=ze
@@ -87,9 +88,10 @@ subroutine  fex8 (neq, t, y, ydot)
             hw1=(h-hww)/(dr)
             hw2=(h-2*hw+hww)/(dr**2/4)
             hw3=(he-2*h+2*hww-hwww)/(dr**3/4)
-            fluxw=hw**3*((2*hw1**3/zw+hw1**5/zw+hw1*(1+3*zw**2*hw2**2)/zw-&
-                hw2-zw*hw3-hw1**2*(hw2+zw*hw3))/(1+hw1**2)**2.5_dp)*gam
-            fluxe=-q*3*mu/2/pi! -gr*he*3*mu*zw/4
+            fluxw=gam*hw**3*(2*hw1**3/zw+hw1**5/zw+hw1*(1+3*zw**2*hw2**2)/zw-&
+                hw2-zw*hw3-hw1**2*(hw2+zw*hw3))/(1+hw1**2)**2.5_dp
+            ! fluxw=gam*hw**3*(-hw1/zw+hw2+hw3*zw)
+            fluxe=-q*3*mu/2/pi !-gr*he*3*mu*zw/4
         else
             zww=z
             zw=ze
@@ -119,10 +121,12 @@ subroutine  fex8 (neq, t, y, ydot)
             he1=(hee-h)/(dr)
             he2=(hee-2*he+h)/(dr**2/4)
             he3=(heee-2*hee+2*h-hw)/(dr**3/4)
-            fluxw=hw**3*((2*hw1**3/zw+hw1**5/zw+hw1*(1+3*zw**2*hw2**2)/zw-&
-                hw2-zw*hw3-hw1**2*(hw2+zw*hw3))/(1+hw1**2)**2.5_dp)*gam
-            fluxe=he**3*((2*he1**3/ze+he1**5/ze+he1*(1+3*ze**2*he2**2)/ze-&
-                he2-ze*he3-he1**2*(he2+ze*he3))/(1+he1**2)**2.5_dp)*gam
+            fluxw=gam*hw**3*(2*hw1**3/zw+hw1**5/zw+hw1*(1+3*zw**2*hw2**2)/zw-&
+                hw2-zw*hw3-hw1**2*(hw2+zw*hw3))/(1+hw1**2)**2.5_dp
+            ! fluxw=gam*hw**3*(-hw1/zw+hw2+hw3*zw)
+            fluxe=gam*he**3*(2*he1**3/ze+he1**5/ze+he1*(1+3*ze**2*he2**2)/ze-&
+                he2-ze*he3-he1**2*(he2+ze*he3))/(1+he1**2)**2.5_dp
+            ! fluxe=gam*he**3*(-he1/ze+he2+he3*ze)
         endif
         ydot(i)=(fluxe-fluxw)/(z*dr)/3/mu
     enddo
@@ -148,6 +152,7 @@ subroutine  fex1 (neq, t, y, ydot)
     ! dr=rd/neq
     call volume_balance(vf,vs,vt)
     q=(vs-vsold)/timestep
+    q=0
     do i=1,neq
         if (i==1) then
             z=dr/2
@@ -164,6 +169,9 @@ subroutine  fex1 (neq, t, y, ydot)
             he3=(heee-2*hee+2*h-hw)/(dr**3/4)
             fluxw=0
             fluxe=he**3*he3*gam
+            ! fluxe=gam*he**3/(he3/(1+he1**2)**1.5_dp+&
+            !     (-he1*he2**2-he3*he1**2)/(1+he1**2)**2.5_dp-&
+            !     5*he1**3*he2**2/(1+he1**2)**3.5_dp)
         elseif (i==neq) then
             zww=z
             zw=ze
@@ -173,12 +181,16 @@ subroutine  fex1 (neq, t, y, ydot)
             h=y(i)
             hw=h*lamw+hww*(1-lamw)
             he=h+dr*s/2
+            ! he=4*h/3-hw/3+s*dr/3
             hwww=hww*lamw+y(i-2)*(1-lamw)
             hw1=(h-hww)/(dr)
             hw2=(h-2*hw+hww)/(dr**2/4)
             hw3=(he-2*h+2*hww-hwww)/(dr**3/4)
             fluxw=hw**3*hw3*gam
-            fluxe=0!-q*3*mu
+            ! fluxw=gam*hw**3/(hw3/(1+hw1**2)**1.5_dp+&
+            !     (-hw1*hw2**2-hw3*hw1**2)/(1+hw1**2)**2.5_dp-&
+            !     5*hw1**3*hw2**2/(1+hw1**2)**3.5_dp)
+            fluxe=-q*3*mu/2/pi! -gr*he*3*mu*zw/4
         else
             zww=z
             zw=ze
@@ -199,6 +211,7 @@ subroutine  fex1 (neq, t, y, ydot)
             endif
             if (i==neq-1) then
                 heee=hee+dr*s/2
+                ! heee=4*hee/3-h/3+s*dr/3
             else
                 heee=y(i+2)*lame+hee*(1-lame)
             endif
@@ -209,9 +222,15 @@ subroutine  fex1 (neq, t, y, ydot)
             he2=(hee-2*he+h)/(dr**2/4)
             he3=(heee-2*hee+2*h-hw)/(dr**3/4)
             fluxw=hw**3*hw3*gam
+            ! fluxw=gam*hw**3/(hw3/(1+hw1**2)**1.5_dp+&
+            !     (-hw1*hw2**2-hw3*hw1**2)/(1+hw1**2)**2.5_dp-&
+            !     5*hw1**3*hw2**2/(1+hw1**2)**3.5_dp)
             fluxe=he**3*he3*gam
+            ! fluxe=gam*he**3/(he3/(1+he1**2)**1.5_dp+&
+            !     (-he1*he2**2-he3*he1**2)/(1+he1**2)**2.5_dp-&
+            !     5*he1**3*he2**2/(1+he1**2)**3.5_dp)
         endif
-        ydot(i)=(fluxe-fluxw)/dr/3/mu
+        ydot(i)=(fluxe-fluxw)/(dr)/3/mu
     enddo
 end subroutine fex1
 !***********************************END****************************************
@@ -254,6 +273,8 @@ subroutine  drain
         if (i>neq*(1-dstr)) then
             y(i)=(rs+hi)-sqrt(rs**2-(r(i)-(1-dstr)*rd)**2)
         endif
+        ! y(i)=s/Rd/2*r(i)**2+hi
+        ! y(i)=s/Rd**2/3*r(i)**3+hi
     enddo
     rc0=rd+y(neq)/sqrt(3.0_dp)
     open (unit=newunit(fi), file = 'filmthickness.csv')
@@ -269,6 +290,9 @@ subroutine  drain
         write(fi,"(10000es12.4)") y(1:neq)
         call dlsodes (sub_ptr, neq, y, t, tout, itol, rtol, atol, itask, &
             istate, iopt, rwork, lrw, iwork, liw, jac, mf)
+        rc=rc0+gr*t
+        rd=rc-y(neq)/sqrt(3.0_dp)
+        dr=rd/neq
         call volume_balance(vf,vs,vt)
         write(*,'(100es12.3)') t,dr,vf,vs,vt
         write(unit=fi2, fmt='(10000es12.4)') t,dr,dble(neq),vf,vs,vt
