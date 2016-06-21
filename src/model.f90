@@ -8,19 +8,24 @@ module model
     logical :: cylindrical=.true.
     integer :: maxts=5000
     integer :: its=100
-    real(dp) :: timestep=1e-2_dp
+    real(dp) :: timestep=1e0_dp
     real(dp) :: hi=5e-6_dp
     real(dp) :: rd=100e-6_dp
     real(dp) :: s=1/sqrt(3._dp)
     real(dp) :: q=0*2e-1_dp
-    real(dp) :: mu=1e-1_dp
+    real(dp) :: mu=1e1_dp
     real(dp) :: gam=25e-3_dp
-    real(dp) :: dstr=0.5_dp
-    real(dp) :: gr=10e-6*0
+    real(dp) :: dstr=0.2_dp
+    real(dp) :: ndp=4.0_dp
+    real(dp) :: mdp=3.0_dp
+    real(dp) :: cdp=0.05_dp
+    real(dp) :: hdp=1.0e-7_dp
+    real(dp) :: bdp=3.0e3_dp*0
+    real(dp) :: gr=1e-6
 
     real(dp) :: dr
     real(dp) :: rs,rc,rc0
-    real(dp) :: vsold
+    real(dp) :: vsold,vfold
     real(dp), dimension(:), allocatable :: r,u
 
     !time integration variables for lsode
@@ -52,11 +57,14 @@ subroutine  fex8 (neq, t, y, ydot)
     real(dp) :: he1,hw1,he2,hw2,he3,hw3
     real(dp) :: fluxe,fluxw
     real(dp) :: vf,vs,vt
+    real(dp) :: dispr,dph
     rc=rc0+gr*t
     rd=rc-y(neq)/sqrt(3.0_dp)
     dr=rd/neq
     call volume_balance(vf,vs,vt)
-    q=(vs-vsold)/timestep
+    q=(vs-vsold)/timestep-(vf-vfold)/timestep
+    q=-(vf-vfold)/timestep
+    ! q=(vs-vsold)/timestep
     do i=1,neq
         if (i==1) then
             z=dr/2
@@ -72,8 +80,10 @@ subroutine  fex8 (neq, t, y, ydot)
             he2=(hee-2*he+h)/(dr**2/4)
             he3=(heee-2*hee+2*h-hw)/(dr**3/4)
             fluxw=0
+            call dispress(he,dispr,dph)
             fluxe=gam*he**3*(2*he1**3/ze+he1**5/ze+he1*(1+3*ze**2*he2**2)/ze-&
-                he2-ze*he3-he1**2*(he2+ze*he3))/(1+he1**2)**2.5_dp
+                he2-ze*he3-he1**2*(he2+ze*he3))/(1+he1**2)**2.5_dp+&
+                dph*he1*he**3*ze
             ! fluxe=gam*he**3*(-he1/ze+he2+he3*ze)
         elseif (i==neq) then
             zww=z
@@ -88,10 +98,12 @@ subroutine  fex8 (neq, t, y, ydot)
             hw1=(h-hww)/(dr)
             hw2=(h-2*hw+hww)/(dr**2/4)
             hw3=(he-2*h+2*hww-hwww)/(dr**3/4)
+            call dispress(he,dispr,dph)
             fluxw=gam*hw**3*(2*hw1**3/zw+hw1**5/zw+hw1*(1+3*zw**2*hw2**2)/zw-&
-                hw2-zw*hw3-hw1**2*(hw2+zw*hw3))/(1+hw1**2)**2.5_dp
+                hw2-zw*hw3-hw1**2*(hw2+zw*hw3))/(1+hw1**2)**2.5_dp+&
+                dph*hw1*hw**3*zw
             ! fluxw=gam*hw**3*(-hw1/zw+hw2+hw3*zw)
-            fluxe=-q*3*mu/2/pi !-gr*he*3*mu*zw/4
+            fluxe=-q*3*mu/2/pi !-gr*he*3*mu*zw
         else
             zww=z
             zw=ze
@@ -121,11 +133,15 @@ subroutine  fex8 (neq, t, y, ydot)
             he1=(hee-h)/(dr)
             he2=(hee-2*he+h)/(dr**2/4)
             he3=(heee-2*hee+2*h-hw)/(dr**3/4)
+            call dispress(he,dispr,dph)
             fluxw=gam*hw**3*(2*hw1**3/zw+hw1**5/zw+hw1*(1+3*zw**2*hw2**2)/zw-&
-                hw2-zw*hw3-hw1**2*(hw2+zw*hw3))/(1+hw1**2)**2.5_dp
+                hw2-zw*hw3-hw1**2*(hw2+zw*hw3))/(1+hw1**2)**2.5_dp+&
+                dph*hw1*hw**3*zw
             ! fluxw=gam*hw**3*(-hw1/zw+hw2+hw3*zw)
+            call dispress(he,dispr,dph)
             fluxe=gam*he**3*(2*he1**3/ze+he1**5/ze+he1*(1+3*ze**2*he2**2)/ze-&
-                he2-ze*he3-he1**2*(he2+ze*he3))/(1+he1**2)**2.5_dp
+                he2-ze*he3-he1**2*(he2+ze*he3))/(1+he1**2)**2.5_dp+&
+                dph*he1*he**3*ze
             ! fluxe=gam*he**3*(-he1/ze+he2+he3*ze)
         endif
         ydot(i)=(fluxe-fluxw)/(z*dr)/3/mu
@@ -277,6 +293,7 @@ subroutine  drain
         ! y(i)=s/Rd**2/3*r(i)**3+hi
     enddo
     rc0=rd+y(neq)/sqrt(3.0_dp)
+    rc=rc0
     open (unit=newunit(fi), file = 'filmthickness.csv')
     open (unit=newunit(fi2), file = 'results_1d.csv')
     call volume_balance(vf,vs,vt)
@@ -286,6 +303,7 @@ subroutine  drain
     write(unit=fi2, fmt='(10000a12)') '#time','dr','np','vf','vs','vt'
     write(unit=fi2, fmt='(10000es12.4)') t,dr,dble(neq),vf,vs,vt
     vsold=vs
+    vfold=vf
     do i=1,its
         write(fi,"(10000es12.4)") y(1:neq)
         call dlsodes (sub_ptr, neq, y, t, tout, itol, rtol, atol, itask, &
@@ -297,6 +315,7 @@ subroutine  drain
         write(*,'(100es12.3)') t,dr,vf,vs,vt
         write(unit=fi2, fmt='(10000es12.4)') t,dr,dble(neq),vf,vs,vt
         vsold=vs
+        vfold=vf
         tout = tout+timestep
     enddo
     close(fi)
@@ -316,8 +335,7 @@ pure subroutine  volume_balance(vf,vs,vt)
         do i=1,neq
             vf=vf+2*pi*dr*(0.5_dp+i-1)*y(i)*dr
         enddo
-        vs=pi*y(neq)/3*(rd**2+(rd-y(neq)/sqrt(3.0_dp))*rd+&
-            (rd-y(neq)/sqrt(3.0_dp))**2)-pi*y(neq)*(rd-y(neq)/sqrt(3.0_dp))**2
+        vs=pi*y(neq)/3*(rd**2+rc*rd+rc**2)-pi*y(neq)*rd**2
     else
         do i=1,neq
             vf=vf+y(i)*dr
@@ -326,5 +344,18 @@ pure subroutine  volume_balance(vf,vs,vt)
     endif
     vt=vf+vs
 end subroutine volume_balance
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!disjoining pressure
+subroutine dispress(h,dispr,dph)
+    real(dp), intent(in) :: h
+    real(dp), intent(out) :: dispr !disjoining pressure
+    real(dp), intent(out) :: dph !derivative of disjoining pressure
+    dispr=bdp*((hdp/h)**(ndp-1)-(hdp/h)**(mdp-1))*(hdp-cdp)
+    dph=(bdp*(hdp/h)**mdp*(hdp*mdp+cdp*(h-h*mdp))-&
+        bdp*(hdp/h)**ndp*(hdp*ndp+cdp*(h-h*ndp)))/(h*hdp)
+end subroutine dispress
 !***********************************END****************************************
 end module model
