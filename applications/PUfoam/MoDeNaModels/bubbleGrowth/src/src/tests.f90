@@ -34,6 +34,9 @@ end subroutine onegrowth
 !! uses precalculated evolution of bubble radius to calculate bubble pressure
 subroutine secondgrowth
     use globals
+    use phys_prop, only:Rb_initialized
+    real(dp) :: tt,rr
+    Rb_initialized=.false.
     ! prepare to work with files
     call set_paths
     ! obtain tend and clean after yourself
@@ -43,12 +46,16 @@ subroutine secondgrowth
         dHv,mb,mb2,mb3,avconc,pressure,&
         diff_model,sol_model,cpblg,cpbll,&
         wblpol,D0)
+    if (kin_model==4) then
+        deallocate(kineq,kinsource)
+    endif
     ! feed results to function Rb(t)
     call load_old_results
     bub_inx=1
     ! simulation
     firstrun=.false.
     call onegrowth
+    Rb_initialized=.false.
 end subroutine secondgrowth
 !***********************************END****************************************
 

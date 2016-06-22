@@ -15,7 +15,8 @@ module phys_prop
     logical :: Rb_initialized
     integer :: Rb_kx=5,Rb_iknot=0,Rb_inbvx
     real(dp), dimension(:), allocatable :: Rb_tx,Rb_coef
-    public set_initial_physical_properties,physical_properties,Rb,Rderiv
+    public set_initial_physical_properties,physical_properties,Rb,Rderiv,&
+        Rb_initialized
 contains
 !********************************BEGINNING*************************************
 !> determine physical properties
@@ -205,14 +206,15 @@ real(dp) function Rderiv(t)
     integer :: nx,idx,iflag
     nx=size(bub_rad(:,1))
     if (.not. Rb_initialized) then
-        allocate(Rb_tx(nx+Rb_kx),Rb_coef(nx))
-        call db1ink(bub_rad(:,1),nx,bub_rad(:,bub_inx+1),&
-            Rb_kx,Rb_iknot,Rb_tx,Rb_coef,iflag)
-        Rb_inbvx=1
-        Rb_initialized=.true.
+        call Rb_spline_ini
     endif
     idx=1
     call db1val(t,idx,Rb_tx,nx,Rb_kx,Rb_coef,Rderiv,iflag,Rb_inbvx)
+    if (iflag /= 0) then
+        print*, 'evaluation of bubble radius derivative from spline failed',&
+            iflag
+        stop
+    endif
 endfunction Rderiv
 !***********************************END****************************************
 
@@ -225,14 +227,38 @@ real(dp) function Rb(t)
     integer :: nx,idx,iflag
     nx=size(bub_rad(:,1))
     if (.not. Rb_initialized) then
-        allocate(Rb_tx(nx+Rb_kx),Rb_coef(nx))
-        call db1ink(bub_rad(:,1),nx,bub_rad(:,bub_inx+1),&
-            Rb_kx,Rb_iknot,Rb_tx,Rb_coef,iflag)
-        Rb_inbvx=1
-        Rb_initialized=.true.
+        call Rb_spline_ini
     endif
     idx=0
     call db1val(t,idx,Rb_tx,nx,Rb_kx,Rb_coef,Rb,iflag,Rb_inbvx)
+    if (iflag /= 0) then
+        print*, 'evaluation of bubble radius from spline failed',iflag
+        stop
+    endif
 endfunction Rb
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> initialization of spline
+subroutine Rb_spline_ini
+    use bspline_module
+    integer :: nx,iflag
+    nx=size(bub_rad(:,1))
+    if (allocated(Rb_tx)) deallocate(Rb_tx)
+    if (allocated(Rb_coef)) deallocate(Rb_coef)
+    Rb_kx=5
+    Rb_iknot=0
+    allocate(Rb_tx(nx+Rb_kx),Rb_coef(nx))
+    Rb_tx=0
+    call db1ink(bub_rad(:,1),nx,bub_rad(:,bub_inx+1),&
+        Rb_kx,Rb_iknot,Rb_tx,Rb_coef,iflag)
+    Rb_inbvx=1
+    Rb_initialized=.true.
+    if (iflag /= 0) then
+        print*, 'initialization of spline failed'
+        stop
+    endif
+end subroutine Rb_spline_ini
 !***********************************END****************************************
 end module phys_prop
