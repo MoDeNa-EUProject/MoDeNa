@@ -156,9 +156,10 @@ subroutine set_integrator
     case default
         stop 'unknown integrator'
     end select
-    itask = 1
+    itask = 4
     istate = 1
     iopt = 1
+    rwork(1)=tend+epsilon(tend)*1.0e3_dp
     rwork(5:10)=0
     iwork(5:10)=0
     lrw = size(rwork)

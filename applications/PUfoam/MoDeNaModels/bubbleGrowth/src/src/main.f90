@@ -9,10 +9,11 @@
 !! - LAPACK 3.4.2 or higher
 !! - BLAS 3.4.2 or higher
 program singlebubblegrowth
-    use tests, only:onegrowth,secondgrowth
+    use tests, only:onegrowth,secondgrowth,shooting_method,shooting_method_test
     use foaming_globals_m
     implicit none
     firstrun=.true.
     call onegrowth
     ! call secondgrowth
+    ! call shooting_method_test
 end program

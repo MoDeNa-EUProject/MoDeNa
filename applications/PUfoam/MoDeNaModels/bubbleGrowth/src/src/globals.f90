@@ -18,7 +18,8 @@ module globals
         inertial_term,& !include inertial term in equations (t/f)
         solcorr,& !use solubility correction on bubble radius (t/f)
         gelpoint,& !gel point reached (t/f)
-        dilution !use dilution effect for kinetics
+        dilution,& !use dilution effect for kinetics (t/f)
+        shooting !am I using shooting method (t/f)
     integer :: &
         fi1,fi2,fi3,fi4,fi5,& !file indices
         integrator,& !integrator. 1=dlsode,2=dlsodes
@@ -85,6 +86,7 @@ module globals
         pair0,& !initial partial pressure of air
         pair,& !partial pressure of air
         timestep,& !timestep
+        goalRadius,& !final radius we want to achieve
         nold(2),& !moles in bubble
         vsh,& !shell volume
         temp,& !temperature (K)

@@ -13,7 +13,7 @@ module phys_prop
     private
     ! interpolation variables
     logical :: Rb_initialized
-    integer :: Rb_kx=5,Rb_iknot=0,Rb_inbvx
+    integer :: Rb_kx=4,Rb_iknot=0,Rb_inbvx
     real(dp), dimension(:), allocatable :: Rb_tx,Rb_coef
     public set_initial_physical_properties,physical_properties,Rb,Rderiv,&
         Rb_initialized
@@ -82,6 +82,9 @@ subroutine set_initial_physical_properties
     gelpoint=.false.
     timestep=(tend-tstart)/its
     if (firstrun) then
+        if (allocated(etat)) deallocate(etat)
+        if (allocated(port)) deallocate(port)
+        if (allocated(init_bub_rad)) deallocate(init_bub_rad)
         allocate(etat(0:its,2),port(0:its,2),init_bub_rad(0:its,2))
     endif
 end subroutine set_initial_physical_properties
@@ -203,7 +206,10 @@ end subroutine physical_properties
 real(dp) function Rderiv(t)
     use bspline_module
     real(dp) :: t
+    real(dp) :: dt
     integer :: nx,idx,iflag
+    ! dt=timestep/100
+    ! Rderiv=(Rb(t+dt)-Rb(t))/dt
     nx=size(bub_rad(:,1))
     if (.not. Rb_initialized) then
         call Rb_spline_ini
@@ -223,9 +229,16 @@ endfunction Rderiv
 !> bubble radius as function of time
 real(dp) function Rb(t)
     use bspline_module
+    use interpolation
     real(dp) :: t
     integer :: nx,idx,iflag
+    integer :: ni=1   !number of points, where we want to interpolate
+    real(dp) :: xi(1)   !x-values of points, where we want to interpolate
+    real(dp) :: yi(1)   !interpolated y-values
     nx=size(bub_rad(:,1))
+    ! xi(1)=t
+    ! call pwl_interp_1d ( nx, bub_rad(:,1), bub_rad(:,bub_inx+1), ni, xi, yi )
+    ! Rb=yi(1)
     if (.not. Rb_initialized) then
         call Rb_spline_ini
     endif
@@ -247,8 +260,6 @@ subroutine Rb_spline_ini
     nx=size(bub_rad(:,1))
     if (allocated(Rb_tx)) deallocate(Rb_tx)
     if (allocated(Rb_coef)) deallocate(Rb_coef)
-    Rb_kx=5
-    Rb_iknot=0
     allocate(Rb_tx(nx+Rb_kx),Rb_coef(nx))
     Rb_tx=0
     call db1ink(bub_rad(:,1),nx,bub_rad(:,bub_inx+1),&

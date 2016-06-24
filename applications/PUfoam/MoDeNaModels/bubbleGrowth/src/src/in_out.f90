@@ -65,7 +65,7 @@ subroutine read_inputs
     call fson_get(json_data, "bubbleGrowth.meshCoarseningParameter", mshco)
     call fson_get(json_data, "bubbleGrowth.internalNodes", p)
     call fson_get(json_data, "bubbleGrowth.initialTime", tstart)
-    if (firstrun) call fson_get(json_data, "bubbleGrowth.finalTime", tend)
+    if (firstrun .and. .not. shooting) call fson_get(json_data, "bubbleGrowth.finalTime", tend)
     call fson_get(json_data, "bubbleGrowth.outerTimeSteps", its)
     call fson_get(json_data, "bubbleGrowth.maxInnerTimeSteps", maxts)
     call fson_get(json_data, "bubbleGrowth.relativeTolerance", rel_tol)
@@ -86,7 +86,7 @@ subroutine read_inputs
     call fson_get(json_data, "physicalProperties.blowingAgents.CO2.evaporationHeat", dHv(2))
     call fson_get(json_data, "physicalProperties.blowingAgents.PBL.density", rhobl)
     call fson_get(json_data, "initialConditions.temperature", temp0)
-    call fson_get(json_data, "initialConditions.bubbleRadius", R0)
+    if (.not. shooting) call fson_get(json_data, "initialConditions.bubbleRadius", R0)
     call fson_get(json_data, "initialConditions.numberBubbleDensity", nb0)
     call fson_get(json_data, "kinetics.kineticModel", strval)
     if (strval=='Baser') then
@@ -260,10 +260,10 @@ subroutine save_integration_close(iout)
     real(dp), dimension(:,:), allocatable :: matr
     close(fi1)
     close(fi2)
-    close(fi3)
     if (kin_model==4) then
-        close(fi4)
+        close(fi3)
     endif
+    close(fi4)
     ! reallocate matrices for eta_rm and bub_vf functions
     ! interpolation doesn't work otherwise
     if (iout /= its) then
