@@ -100,6 +100,13 @@ subroutine physical_properties(temp,conv,radius)
     if (.not. gelpoint .and. temp<500) then
         select case(visc_model)
         case(1)
+        case(2)
+            Aeta=4.1e-8_dp
+            Eeta=38.3e3_dp
+            AA=4.0_dp
+            B=-2.0_dp
+            eta=Aeta*exp(Eeta/(Rg*temp))*&
+                (gelpointconv/(gelpointconv-conv))**(AA+B*conv)
         case(3)
             !set input vector
             call modena_inputs_set(viscInputs, viscTpos, temp);
@@ -131,7 +138,6 @@ subroutine physical_properties(temp,conv,radius)
     end select
     do i=1,ngas
         select case(diff_model(i))
-        case(1)
         case(2)
             call modena_inputs_set(diffInputs(i), diffTpos(i), temp)
             ret = modena_model_call(diffModena(i),diffInputs(i),diffOutputs(i))
@@ -141,7 +147,7 @@ subroutine physical_properties(temp,conv,radius)
             D(i) = modena_outputs_get(diffOutputs(i), 0_c_size_t)
         end select
         select case(sol_model(i))
-        case(1) !constant
+        case(1) !constant Baser 10.1002/pen.760340805
             call modena_inputs_set(solInputs(i), solTpos(i), temp)
             ret = modena_model_call(solModena(i), solInputs(i), solOutputs(i))
             if(ret /= 0) then
@@ -172,9 +178,7 @@ subroutine physical_properties(temp,conv,radius)
                 call exit(ret)
             endif
             KH(i) = modena_outputs_get(solOutputs(i), 0_c_size_t)
-        case(4) !n-pentane, Winkler Ph.D.
-            ! KH(i)=rhop/Mbl(i)/pamb*(0.0064_dp+0.0551_dp*exp(-(temp-298)**2/&
-            !     (2*17.8_dp**2)))
+        case(4) !pentane, Winkler Ph.D.
             call modena_inputs_set(solInputs(i), solTpos(i), temp)
             ret = modena_model_call(solModena(i), solInputs(i), solOutputs(i))
             if(ret /= 0) then
@@ -193,6 +197,10 @@ subroutine physical_properties(temp,conv,radius)
             !     exp(-(temp-203.3556_dp)**2/(2*40.016_dp**2)))
             ! print*, KH(i)
             ! stop
+        case(7) !pentane, Winkler Ph.D.
+            KH(i)=rhop/Mbl(i)/pamb*(0.0064_dp+0.0551_dp*exp(-(temp-298)**2/&
+                (2*17.8_dp**2)))
+        case(8) !constant Baser 10.1002/pen.760340805
         end select
     enddo
     if (solcorr) KH=KH*exp(2*sigma*Mbl/(rhop*Rg*temp*radius))

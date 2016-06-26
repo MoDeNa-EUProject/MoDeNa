@@ -174,15 +174,19 @@ subroutine read_inputs
         sol_model(1)=4
     elseif (strval=="Baser") then
         sol_model(1)=6
+    elseif (strval=="hardcodedWinkler") then
+        sol_model(1)=7
     else
         stop 'unknown solubility model'
     endif
     call fson_get(json_data, "physicalProperties.blowingAgents.CO2.solubilityModel", strval)
     if (strval=="constant") then
         sol_model(2)=1
-        call fson_get(json_data, "physicalProperties.blowingAgents.CO2.solubility", KH(2))
     elseif (strval=="pcsaft") then
         sol_model(2)=2
+    elseif (strval=="hardcodedconstant") then
+        sol_model(2)=8
+        call fson_get(json_data, "physicalProperties.blowingAgents.CO2.solubility", KH(2))
     else
         stop 'unknown solubility model'
     endif
@@ -190,11 +194,14 @@ subroutine read_inputs
     if (strval=="constant") then
         visc_model=1
         call fson_get(json_data, "physicalProperties.polymer.viscosity", eta)
+    elseif (strval=="hardcodedCastroMacosko") then
+        visc_model=2
     elseif (strval=="CastroMacosko") then
         visc_model=3
     else
         stop 'unknown viscosity model'
     endif
+    call fson_destroy(json_data)
     write(*,*) 'done: inputs loaded'
     write(*,*)
 end subroutine read_inputs
