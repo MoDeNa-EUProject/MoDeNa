@@ -1,13 +1,14 @@
 !handling of input and output
 module in_out
-    use globals
     implicit none
     private
-    public read_inputs
+    integer, dimension(:), allocatable :: fi
+    public read_inputs,save_int_header,save_int_step,save_int_close
 contains
 !********************************BEGINNING*************************************
 ! reads inputs from json file
 subroutine read_inputs
+    use globals
     use fson
     use fson_value_m, only: fson_value_get
     character(len=1024) :: strval
@@ -41,5 +42,56 @@ subroutine read_inputs
     call fson_get(json_data, "algebraicEquationSolver.tolerance", ae_tol)
     call fson_destroy(json_data)
 end subroutine read_inputs
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+! saves initial condition
+subroutine save_int_header(y,t,dr)
+    use constants, only: dp
+    use ioutils, only: newunit
+    use model, only: volume_balance
+    real(dp), intent(in) :: t,dr
+    real(dp), dimension(:), intent(in) :: y
+    integer :: neq
+    real(dp) :: vf,vs,vt
+    neq=size(y)
+    call volume_balance(y,vf,vs,vt)
+    allocate(fi(10))
+    open (unit=newunit(fi(1)), file = 'filmthickness.csv')
+    open (unit=newunit(fi(2)), file = 'results_1d.csv')
+    write(*,'(1x,100a12)') 'time:','dr:','film: ','strut: ','total: '
+    write(*,'(100es12.3)') t,dr,vf,vs,vt
+    write(fi(1),"(10000es12.4)") y(1:neq)
+    write(unit=fi(2), fmt='(10000a12)') '#time','dr','np','vf','vs','vt'
+    write(unit=fi(2), fmt='(10000es12.4)') t,dr,dble(neq),vf,vs,vt
+end subroutine save_int_header
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+! saves results at current time
+subroutine save_int_step(y,t,dr)
+    use constants, only: dp
+    use model, only: volume_balance
+    real(dp), intent(in) :: t,dr
+    real(dp), dimension(:), intent(in) :: y
+    integer :: neq
+    real(dp) :: vf,vs,vt
+    neq=size(y)
+    call volume_balance(y,vf,vs,vt)
+    write(*,'(100es12.3)') t,dr,vf,vs,vt
+    write(fi(1),"(10000es12.4)") y(1:neq)
+    write(unit=fi(2), fmt='(10000es12.4)') t,dr,dble(neq),vf,vs,vt
+end subroutine save_int_step
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+! closes files
+subroutine save_int_close
+    close(fi(1))
+    close(fi(2))
+end subroutine save_int_close
 !***********************************END****************************************
 end module in_out

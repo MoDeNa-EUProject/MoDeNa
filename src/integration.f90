@@ -1,7 +1,6 @@
 !sets up and integrates the models
 module integration
     use globals
-    use ioutils, only: newunit
     use model, only: odesystem,volume_balance,dr,rs,rc,rc0
     implicit none
     private
@@ -69,16 +68,7 @@ subroutine preprocess
     enddo
     rc0=rd+y(neq)/sqrt(3.0_dp)
     rc=rc0
-    open (unit=newunit(fi), file = 'filmthickness.csv')
-    open (unit=newunit(fi2), file = 'results_1d.csv')
     call volume_balance(y,vf,vs,vt)
-    write(*,'(1x,100a12)') 'time:','dr:','film: ','strut: ','total: '
-    write(*,'(100es12.3)') t,dr,vf,vs,vt
-    write(fi,"(10000es12.4)") y(1:neq)
-    write(unit=fi2, fmt='(10000a12)') '#time','dr','np','vf','vs','vt'
-    write(unit=fi2, fmt='(10000es12.4)') t,dr,dble(neq),vf,vs,vt
-    vsold=vs
-    vfold=vf
     vt0=vt
 end subroutine preprocess
 !***********************************END****************************************
@@ -88,11 +78,12 @@ end subroutine preprocess
 ! prepares integration
 subroutine integrate
     use Solve_NonLin, only: hbrd
+    use in_out, only: save_int_header,save_int_step,save_int_close
     integer :: i,fi,fi2
-    real(dp) :: vf,vs,vt
     integer, parameter :: n=1
     integer :: info
     real (dp), dimension(n) :: x,fvec,diag
+    call save_int_header(y,t,dr)
     do i=1,its
         told=t
         yold=y
@@ -105,15 +96,10 @@ subroutine integrate
             write(unit=*, fmt=*) 'Hbrd returned info = ',info
             stop
         endif
-        write(fi,"(10000es12.4)") y(1:neq)
-        write(*,'(100es12.3)') t,dr,vf,vs,vt
-        write(unit=fi2, fmt='(10000es12.4)') t,dr,dble(neq),vf,vs,vt
-        vsold=vs
-        vfold=vf
+        call save_int_step(y,t,dr)
         tout = tout+timestep
     enddo
-    close(fi)
-    close(fi2)
+    call save_int_close
     write(*,*) 'program exited normally.'
 end subroutine integrate
 !***********************************END****************************************
