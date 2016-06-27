@@ -8,7 +8,7 @@ module model
     logical :: cylindrical=.true.
     integer :: maxts=5000
     integer :: its=100
-    real(dp) :: timestep=1e0_dp
+    real(dp) :: timestep=1e-0_dp
     real(dp) :: hi=5e-6_dp
     real(dp) :: rd=100e-6_dp
     real(dp) :: s=1/sqrt(3._dp)
@@ -20,19 +20,19 @@ module model
     real(dp) :: mdp=3.0_dp
     real(dp) :: cdp=0.05_dp
     real(dp) :: hdp=1.0e-7_dp
-    real(dp) :: bdp=3.0e3_dp*0
+    real(dp) :: bdp=3.0e3_dp*0 !set to zero for no disjoining pressure
     real(dp) :: gr=1e-6
 
-    real(dp) :: dr
+    real(dp) :: dr,told
     real(dp) :: rs,rc,rc0
-    real(dp) :: vsold,vfold
-    real(dp), dimension(:), allocatable :: r,u
+    real(dp) :: vsold,vfold,vt0
+    real(dp), dimension(:), allocatable :: r,u,yold
 
     !time integration variables for lsode
     integer :: iout
     real(dp), dimension(:), allocatable :: rwork,y
     integer, dimension(:), allocatable :: iwork
-    real(dp) :: jac,tout,rtol=1e-8_dp,atol=0,t=0
+    real(dp) :: jac,tout,rtol=1e-12_dp,atol=0,t=0
     integer :: iopt, istate, itask, itol, liw, lrw, neq=200, nnz, lenrat, mf=222
 
     !needed for selection of model subroutine
@@ -61,9 +61,9 @@ subroutine  fex8 (neq, t, y, ydot)
     rc=rc0+gr*t
     rd=rc-y(neq)/sqrt(3.0_dp)
     dr=rd/neq
-    call volume_balance(vf,vs,vt)
-    q=(vs-vsold)/timestep-(vf-vfold)/timestep
-    q=-(vf-vfold)/timestep
+    ! call volume_balance(vf,vs,vt)
+    ! q=(vs-vsold)/timestep-(vf-vfold)/timestep
+    ! q=-(vf-vfold)/timestep
     ! q=(vs-vsold)/timestep
     do i=1,neq
         if (i==1) then
@@ -255,11 +255,15 @@ end subroutine fex1
 !********************************BEGINNING*************************************
 !simulates film drainage
 subroutine  drain
+    use Solve_NonLin
     integer :: i,fi,fi2
-    real(dp) :: h,h1,h2,h3,h4,de
     real(dp) :: vf,vs,vt
+    integer, parameter :: n=1
+    integer :: info
+    real(dp) :: tol=1.0e-6_dp
+    real (dp), dimension(n) :: x,fvec,diag
     write(*,*) 'wellcome to wall drainage.'
-    allocate(r(neq),y(neq),u(-1:neq+2))
+    allocate(r(neq),y(neq),u(-1:neq+2),yold(neq))
     nnz=neq**2 !i really don't know, smaller numbers can make problems
     lenrat=2 !depends on dp
     allocate(rwork(int(20+(2+1._dp/lenrat)*nnz+(11+9._dp/lenrat)*neq)),&
@@ -304,14 +308,24 @@ subroutine  drain
     write(unit=fi2, fmt='(10000es12.4)') t,dr,dble(neq),vf,vs,vt
     vsold=vs
     vfold=vf
+    vt0=vt
     do i=1,its
+        ! call dlsodes (sub_ptr, neq, y, t, tout, itol, rtol, atol, itask, &
+        !     istate, iopt, rwork, lrw, iwork, liw, jac, mf)
+        ! rc=rc0+gr*t
+        ! rd=rc-y(neq)/sqrt(3.0_dp)
+        ! dr=rd/neq
+        ! call volume_balance(vf,vs,vt)
+        told=t
+        yold=y
+        x(1)=q
+        call hbrd(drain_residual,n,x,fvec,epsilon(pi),tol,info,diag)
+        if (info /= 1) then
+            write(unit=*, fmt=*) 'Flux not found.'
+            write(unit=*, fmt=*) 'Hbrd returned info = ',info
+            stop
+        endif
         write(fi,"(10000es12.4)") y(1:neq)
-        call dlsodes (sub_ptr, neq, y, t, tout, itol, rtol, atol, itask, &
-            istate, iopt, rwork, lrw, iwork, liw, jac, mf)
-        rc=rc0+gr*t
-        rd=rc-y(neq)/sqrt(3.0_dp)
-        dr=rd/neq
-        call volume_balance(vf,vs,vt)
         write(*,'(100es12.3)') t,dr,vf,vs,vt
         write(unit=fi2, fmt='(10000es12.4)') t,dr,dble(neq),vf,vs,vt
         vsold=vs
@@ -357,5 +371,29 @@ subroutine dispress(h,dispr,dph)
     dph=(bdp*(hdp/h)**mdp*(hdp*mdp+cdp*(h-h*mdp))-&
         bdp*(hdp/h)**ndp*(hdp*ndp+cdp*(h-h*ndp)))/(h*hdp)
 end subroutine dispress
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> residual function for the draininng
+subroutine drain_residual(n,x,fvec,iflag)
+    integer, intent(in) :: n
+    integer, intent(inout) :: iflag
+    real(dp), dimension(n), intent(in) :: x
+    real(dp), dimension(n), intent(out) :: fvec
+    real(dp) :: vf,vs,vt
+    q=x(1)
+    t=told
+    y=yold
+    istate=1
+    call dlsodes (sub_ptr, neq, y, t, tout, itol, rtol, atol, itask, &
+        istate, iopt, rwork, lrw, iwork, liw, jac, mf)
+    rc=rc0+gr*t
+    rd=rc-y(neq)/sqrt(3.0_dp)
+    dr=rd/neq
+    call volume_balance(vf,vs,vt)
+    fvec(1)=sqrt((vt-vt0)**2)
+    print*, x(1),fvec(1)
+end subroutine drain_residual
 !***********************************END****************************************
 end module model
