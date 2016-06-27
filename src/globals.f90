@@ -10,7 +10,11 @@ module globals
     real(dp) :: &
         timestep,&  !time step (how often are values written)
         hi,&    !film thickness at center
-        rd,&    !radius of initial strut curvature
+        rs,&    !radius of initial strut curvature
+        rd,&    !computational domain size (radius)
+        rc,&    !total window size (radius)
+        rc0,&    !initial total window size (radius)
+        dr,&    !mesh points spacing
         s,& !film thickness derivative at outer domain boundary
         q,& !flux into domain from strut
         mu,&    !viscosity

@@ -1,19 +1,15 @@
-!contains model subroutines
-!TODO: calculate minimum film thickness at each time step and its
-!distance from center
-!TODO: add condition for film breakage
+!contains main model
 module model
     use globals
-    use ioutils
     implicit none
     private
-    real(dp) :: dr,rs,rc,rc0
-    public odesystem,volume_balance,dr,rs,rc,rc0
+    public odesystem,set_initial_conditions
 contains
 !********************************BEGINNING*************************************
 !fvm, equidistant mesh
 !cylindrical geometry, sin(alpha)=(dh/dr)/(1+(dh/dr)**2)
 subroutine odesystem(neq, t, y, ydot)
+    use phys_prop, only: dispress
     integer :: neq,i
     real(dp) :: t, y(neq), ydot(neq)
     real(dp) :: z,ze,zw,zee,zww
@@ -108,31 +104,28 @@ end subroutine odesystem
 
 
 !********************************BEGINNING*************************************
-!checks whether we are losing some mass or not
-pure subroutine  volume_balance(y,vf,vs,vt)
-    real(dp), intent(out) :: vf,vs,vt
-    real(dp), dimension(:), intent(in) :: y
-    integer :: i,neq
-    neq=size(y)
-    vf=0
-    do i=1,neq
-        vf=vf+2*pi*dr*(0.5_dp+i-1)*y(i)*dr
-    enddo
-    vs=pi*y(neq)/3*(rd**2+rc*rd+rc**2)-pi*y(neq)*rd**2
-    vt=vf+vs
-end subroutine volume_balance
-!***********************************END****************************************
-
-
-!********************************BEGINNING*************************************
 !disjoining pressure
-subroutine dispress(h,dispr,dph)
-    real(dp), intent(in) :: h
-    real(dp), intent(out) :: dispr !disjoining pressure
-    real(dp), intent(out) :: dph !derivative of disjoining pressure
-    dispr=bdp*((hdp/h)**(ndp-1)-(hdp/h)**(mdp-1))*(hdp-cdp)
-    dph=(bdp*(hdp/h)**mdp*(hdp*mdp+cdp*(h-h*mdp))-&
-        bdp*(hdp/h)**ndp*(hdp*ndp+cdp*(h-h*ndp)))/(h*hdp)
-end subroutine dispress
+subroutine set_initial_conditions(y)
+    real(dp), dimension(:), intent(out) :: y
+    integer :: i,neq
+    real(dp), dimension(:), allocatable :: r
+    neq=size(y)
+    dr=rd/neq
+    rs=rd*sqrt((1+s**2)/s**2)*dstr
+    allocate(r(neq))
+    do i=1,neq
+        r(i)=dr*(0.5_dp+i-1)
+    enddo
+    y=hi
+    do i=1,neq
+        if (i>neq*(1-dstr)) then
+            y(i)=(rs+hi)-sqrt(rs**2-(r(i)-(1-dstr)*rd)**2)
+        endif
+        ! y(i)=s/Rd/2*r(i)**2+hi
+        ! y(i)=s/Rd**2/3*r(i)**3+hi
+    enddo
+    rc0=rd+y(neq)/sqrt(3.0_dp)
+    rc=rc0
+end subroutine set_initial_conditions
 !***********************************END****************************************
 end module model

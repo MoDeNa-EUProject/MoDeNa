@@ -50,7 +50,7 @@ end subroutine read_inputs
 subroutine save_int_header(y,t,dr)
     use constants, only: dp
     use ioutils, only: newunit
-    use model, only: volume_balance
+    use phys_prop, only: volume_balance
     real(dp), intent(in) :: t,dr
     real(dp), dimension(:), intent(in) :: y
     integer :: neq
@@ -73,7 +73,7 @@ end subroutine save_int_header
 ! saves results at current time
 subroutine save_int_step(y,t,dr)
     use constants, only: dp
-    use model, only: volume_balance
+    use phys_prop, only: volume_balance
     real(dp), intent(in) :: t,dr
     real(dp), dimension(:), intent(in) :: y
     integer :: neq
