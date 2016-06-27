@@ -6,32 +6,14 @@ module model
     use globals
     use ioutils
     implicit none
-    real(dp) :: dr,told
-    real(dp) :: rs,rc,rc0
-    real(dp) :: vsold,vfold,vt0
-    real(dp), dimension(:), allocatable :: r,u,yold
-
-    !time integration variables for lsode
-    integer :: iout
-    real(dp), dimension(:), allocatable :: rwork,y
-    integer, dimension(:), allocatable :: iwork
-    real(dp) :: jac,tout,rtol,atol,t
-    integer :: iopt, istate, itask, itol, liw, lrw, neq, nnz, lenrat, mf
-
-    !needed for selection of model subroutine
-    abstract interface
-        subroutine sub (neq, t, y, ydot)
-            use constants
-            integer :: neq
-            real(dp) ::  t, y(neq), ydot(neq)
-        end subroutine sub
-    end interface
-    procedure (sub), pointer :: sub_ptr => null ()
+    private
+    real(dp) :: dr,rs,rc,rc0
+    public odesystem,volume_balance,dr,rs,rc,rc0
 contains
 !********************************BEGINNING*************************************
 !fvm, equidistant mesh
 !cylindrical geometry, sin(alpha)=(dh/dr)/(1+(dh/dr)**2)
-subroutine  fex8 (neq, t, y, ydot)
+subroutine odesystem(neq, t, y, ydot)
     integer :: neq,i
     real(dp) :: t, y(neq), ydot(neq)
     real(dp) :: z,ze,zw,zee,zww
@@ -121,100 +103,17 @@ subroutine  fex8 (neq, t, y, ydot)
         endif
         ydot(i)=(fluxe-fluxw)/(z*dr)/3/mu
     enddo
-end subroutine fex8
-!***********************************END****************************************
-
-
-!********************************BEGINNING*************************************
-!simulates film drainage
-subroutine  drain
-    use Solve_NonLin, only: hbrd
-    use in_out, only: read_inputs
-    integer :: i,fi,fi2
-    real(dp) :: vf,vs,vt
-    integer, parameter :: n=1
-    integer :: info
-    real (dp), dimension(n) :: x,fvec,diag
-    write(*,*) 'wellcome to wall drainage.'
-    call read_inputs
-    neq=meshpoints
-    mf=int_method
-    t=initialTime
-    atol=int_abstol
-    rtol=int_reltol
-    q=1.0e-15_dp
-    s=1/sqrt(3._dp)
-    allocate(r(neq),y(neq),u(-1:neq+2),yold(neq))
-    nnz=neq**2 !i really don't know, smaller numbers can make problems
-    lenrat=2 !depends on dp
-    allocate(rwork(int(20+(2+1._dp/lenrat)*nnz+(11+9._dp/lenrat)*neq)),&
-        iwork(30))
-    itask = 1
-    istate = 1
-    iopt = 1
-    rwork(5:10)=0
-    iwork(5:10)=0
-    lrw = size(rwork)
-    liw = size(iwork)
-    iwork(6)=maxts
-    tout =t+timestep
-    itol = 1 !don't change, or you must declare atol as atol(neq)
-    sub_ptr => fex8
-    dr=rd/neq
-    rs=rd*sqrt((1+s**2)/s**2)*dstr
-    do i=1,neq
-        r(i)=dr*(0.5_dp+i-1)
-    enddo
-    y=hi
-    do i=1,neq
-        if (i>neq*(1-dstr)) then
-            y(i)=(rs+hi)-sqrt(rs**2-(r(i)-(1-dstr)*rd)**2)
-        endif
-        ! y(i)=s/Rd/2*r(i)**2+hi
-        ! y(i)=s/Rd**2/3*r(i)**3+hi
-    enddo
-    rc0=rd+y(neq)/sqrt(3.0_dp)
-    rc=rc0
-    open (unit=newunit(fi), file = 'filmthickness.csv')
-    open (unit=newunit(fi2), file = 'results_1d.csv')
-    call volume_balance(vf,vs,vt)
-    write(*,'(1x,100a12)') 'time:','dr:','film: ','strut: ','total: '
-    write(*,'(100es12.3)') t,dr,vf,vs,vt
-    write(fi,"(10000es12.4)") y(1:neq)
-    write(unit=fi2, fmt='(10000a12)') '#time','dr','np','vf','vs','vt'
-    write(unit=fi2, fmt='(10000es12.4)') t,dr,dble(neq),vf,vs,vt
-    vsold=vs
-    vfold=vf
-    vt0=vt
-    do i=1,its
-        told=t
-        yold=y
-        x(1)=q
-        call hbrd(drain_residual,n,x,fvec,epsilon(pi),ae_tol,info,diag)
-        if (info /= 1) then
-            write(unit=*, fmt=*) 'Flux not found.'
-            write(unit=*, fmt=*) 'Hbrd returned info = ',info
-            stop
-        endif
-        write(fi,"(10000es12.4)") y(1:neq)
-        write(*,'(100es12.3)') t,dr,vf,vs,vt
-        write(unit=fi2, fmt='(10000es12.4)') t,dr,dble(neq),vf,vs,vt
-        vsold=vs
-        vfold=vf
-        tout = tout+timestep
-    enddo
-    close(fi)
-    close(fi2)
-    write(*,*) 'program exited normally.'
-end subroutine drain
+end subroutine odesystem
 !***********************************END****************************************
 
 
 !********************************BEGINNING*************************************
 !checks whether we are losing some mass or not
-pure subroutine  volume_balance(vf,vs,vt)
-    integer :: i
+pure subroutine  volume_balance(y,vf,vs,vt)
     real(dp), intent(out) :: vf,vs,vt
+    real(dp), dimension(:), intent(in) :: y
+    integer :: i,neq
+    neq=size(y)
     vf=0
     do i=1,neq
         vf=vf+2*pi*dr*(0.5_dp+i-1)*y(i)*dr
@@ -235,29 +134,5 @@ subroutine dispress(h,dispr,dph)
     dph=(bdp*(hdp/h)**mdp*(hdp*mdp+cdp*(h-h*mdp))-&
         bdp*(hdp/h)**ndp*(hdp*ndp+cdp*(h-h*ndp)))/(h*hdp)
 end subroutine dispress
-!***********************************END****************************************
-
-
-!********************************BEGINNING*************************************
-!> residual function for the draininng
-subroutine drain_residual(n,x,fvec,iflag)
-    integer, intent(in) :: n
-    integer, intent(inout) :: iflag
-    real(dp), dimension(n), intent(in) :: x
-    real(dp), dimension(n), intent(out) :: fvec
-    real(dp) :: vf,vs,vt
-    q=x(1)
-    t=told
-    y=yold
-    istate=1
-    call dlsodes (sub_ptr, neq, y, t, tout, itol, rtol, atol, itask, &
-        istate, iopt, rwork, lrw, iwork, liw, jac, mf)
-    rc=rc0+gr*t
-    rd=rc-y(neq)/sqrt(3.0_dp)
-    dr=rd/neq
-    call volume_balance(vf,vs,vt)
-    fvec(1)=sqrt((vt-vt0)**2)
-    print*, x(1),fvec(1)
-end subroutine drain_residual
 !***********************************END****************************************
 end module model
