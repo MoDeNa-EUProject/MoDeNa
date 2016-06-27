@@ -3,27 +3,9 @@
 !distance from center
 !TODO: add condition for film breakage
 module model
-    use constants
+    use globals
     use ioutils
     implicit none
-
-    integer :: maxts=5000
-    integer :: its=100
-    real(dp) :: timestep=1e-0_dp
-    real(dp) :: hi=5e-6_dp
-    real(dp) :: rd=100e-6_dp
-    real(dp) :: s=1/sqrt(3._dp)
-    real(dp) :: q=1.0e-15_dp
-    real(dp) :: mu=1e1_dp
-    real(dp) :: gam=25e-3_dp
-    real(dp) :: dstr=1.0_dp
-    real(dp) :: ndp=4.0_dp
-    real(dp) :: mdp=3.0_dp
-    real(dp) :: cdp=0.05_dp
-    real(dp) :: hdp=1.0e-7_dp
-    real(dp) :: bdp=3.0e3_dp*0 !set to zero for no disjoining pressure
-    real(dp) :: gr=1e-6
-
     real(dp) :: dr,told
     real(dp) :: rs,rc,rc0
     real(dp) :: vsold,vfold,vt0
@@ -33,8 +15,8 @@ module model
     integer :: iout
     real(dp), dimension(:), allocatable :: rwork,y
     integer, dimension(:), allocatable :: iwork
-    real(dp) :: jac,tout,rtol=1e-12_dp,atol=0,t=0
-    integer :: iopt, istate, itask, itol, liw, lrw, neq=200, nnz, lenrat, mf=222
+    real(dp) :: jac,tout,rtol,atol,t
+    integer :: iopt, istate, itask, itol, liw, lrw, neq, nnz, lenrat, mf
 
     !needed for selection of model subroutine
     abstract interface
@@ -146,14 +128,22 @@ end subroutine fex8
 !********************************BEGINNING*************************************
 !simulates film drainage
 subroutine  drain
-    use Solve_NonLin
+    use Solve_NonLin, only: hbrd
+    use in_out, only: read_inputs
     integer :: i,fi,fi2
     real(dp) :: vf,vs,vt
     integer, parameter :: n=1
     integer :: info
-    real(dp) :: tol=1.0e-4_dp
     real (dp), dimension(n) :: x,fvec,diag
     write(*,*) 'wellcome to wall drainage.'
+    call read_inputs
+    neq=meshpoints
+    mf=int_method
+    t=initialTime
+    atol=int_abstol
+    rtol=int_reltol
+    q=1.0e-15_dp
+    s=1/sqrt(3._dp)
     allocate(r(neq),y(neq),u(-1:neq+2),yold(neq))
     nnz=neq**2 !i really don't know, smaller numbers can make problems
     lenrat=2 !depends on dp
@@ -200,7 +190,7 @@ subroutine  drain
         told=t
         yold=y
         x(1)=q
-        call hbrd(drain_residual,n,x,fvec,epsilon(pi),tol,info,diag)
+        call hbrd(drain_residual,n,x,fvec,epsilon(pi),ae_tol,info,diag)
         if (info /= 1) then
             write(unit=*, fmt=*) 'Flux not found.'
             write(unit=*, fmt=*) 'Hbrd returned info = ',info
