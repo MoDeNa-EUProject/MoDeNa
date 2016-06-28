@@ -1,0 +1,32 @@
+{
+    "initialConditions": {
+        "hi": 5e-6,
+        "rd": 100e-6,
+        "dstr": 1.0
+    },
+    "growthRate": 1e-6,
+    "physicalProperties": {
+        "viscosity": 1e1,
+        "surfaceTension": 25e-3,
+        "disjoiningPressure": {
+            "N": 4.0,
+            "M": 3.0,
+            "hst": 1.0e-7,
+            "C": 0.05,
+            "B1": 0
+        },
+    },
+    "integration": {
+        "initialTime": 0,
+        "timeStep": 1.0,
+        "outerTimeSteps": 100,
+        "method": "stiff",
+        "internalNodes": 200,
+        "maxInnerTimeSteps": 5000,
+        "relativeTolerance": 1e-8,
+        "absoluteTolerance": 0
+    },
+    "algebraicEquationSolver": {
+        "tolerance": 1e-4
+    }
+}
