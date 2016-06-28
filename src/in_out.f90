@@ -3,7 +3,8 @@ module in_out
     implicit none
     private
     integer, dimension(:), allocatable :: fi
-    public read_inputs,save_int_header,save_int_step,save_int_close
+    public read_inputs,save_int_header,save_int_step,save_int_close,&
+        load_bubble_growth
 contains
 !********************************BEGINNING*************************************
 ! reads inputs from json file
@@ -87,5 +88,30 @@ subroutine save_int_close
     close(fi(1))
     close(fi(2))
 end subroutine save_int_close
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> loads evolution of bubble growth and
+subroutine load_bubble_growth(matrix)
+    use constants, only: dp
+    use ioutils, only: newunit
+    integer :: i,j,ios,fi
+    real(dp), dimension(:,:), allocatable :: matrix
+    j=0
+    open(newunit(fi),file='bblgr_2_drain.out')
+        do  !find number of points
+            read(fi,*,iostat=ios)
+            if (ios/=0) exit
+            j=j+1
+        enddo
+        allocate(matrix(j-1,3))
+        rewind(fi)
+        read(fi,*)
+        do i=1,j-1
+            read(fi,*) matrix(i,:)
+        enddo
+    close(fi)
+end subroutine load_bubble_growth
 !***********************************END****************************************
 end module in_out

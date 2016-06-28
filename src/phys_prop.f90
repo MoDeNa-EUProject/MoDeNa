@@ -1,8 +1,15 @@
 !auxilliary subroutines for calculation of state properties
 module phys_prop
+    use constants, only: dp
     implicit none
     private
-    public volume_balance,dispress,min_film_thickness
+    integer :: Rb_kx=4,Rb_iknot=0,Rb_inbvx
+    real(dp), dimension(:), allocatable :: Rb_tx,Rb_coef
+    integer :: visc_kx=2,visc_iknot=0,visc_inbvx
+    real(dp), dimension(:), allocatable :: visc_tx,visc_coef
+    real(dp), dimension(:,:), allocatable :: bblgr_res
+    public volume_balance,dispress,min_film_thickness,bblgr_res,Rb_spline_ini,&
+        Rb,Rb_der,visc_spline_ini,visc
 contains
 !********************************BEGINNING*************************************
 !checks whether we are losing some mass or not
@@ -53,5 +60,99 @@ pure subroutine min_film_thickness(y,hmin,hloc)
     hmin=minval(y,dim=1)
     hloc=minloc(y,dim=1)*dr
 end subroutine min_film_thickness
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> time derivation of bubble radius as function of time
+real(dp) function Rb_der(t)
+    use bspline_module
+    real(dp), intent(in) :: t
+    integer :: nx,idx,iflag
+    nx=size(bblgr_res(:,1))
+    idx=1
+    call db1val(t,idx,Rb_tx,nx,Rb_kx,Rb_coef,Rb_der,iflag,Rb_inbvx)
+    if (iflag /= 0) then
+        print*, 'evaluation of bubble radius derivative from spline failed',&
+            iflag
+        stop
+    endif
+endfunction Rb_der
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> bubble radius as function of time
+real(dp) function Rb(t)
+    use bspline_module
+    real(dp), intent(in) :: t
+    integer :: nx,idx,iflag
+    nx=size(bblgr_res(:,1))
+    idx=0
+    call db1val(t,idx,Rb_tx,nx,Rb_kx,Rb_coef,Rb,iflag,Rb_inbvx)
+    if (iflag /= 0) then
+        print*, 'evaluation of bubble radius from spline failed',iflag
+        stop
+    endif
+endfunction Rb
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> initialization of spline for bubble radius
+subroutine Rb_spline_ini
+    use bspline_module
+    integer :: nx,iflag
+    nx=size(bblgr_res(:,1))
+    if (allocated(Rb_tx)) deallocate(Rb_tx)
+    if (allocated(Rb_coef)) deallocate(Rb_coef)
+    allocate(Rb_tx(nx+Rb_kx),Rb_coef(nx))
+    Rb_tx=0
+    call db1ink(bblgr_res(:,1),nx,bblgr_res(:,2),&
+        Rb_kx,Rb_iknot,Rb_tx,Rb_coef,iflag)
+    Rb_inbvx=1
+    if (iflag /= 0) then
+        print*, 'initialization of spline failed'
+        stop
+    endif
+end subroutine Rb_spline_ini
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> bubble radius as function of time
+real(dp) function visc(t)
+    use bspline_module
+    real(dp), intent(in) :: t
+    integer :: nx,idx,iflag
+    nx=size(bblgr_res(:,1))
+    idx=0
+    call db1val(t,idx,visc_tx,nx,visc_kx,visc_coef,visc,iflag,visc_inbvx)
+    if (iflag /= 0) then
+        print*, 'evaluation of viscosity from spline failed',iflag
+        stop
+    endif
+endfunction visc
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> initialization of spline for bubble radius
+subroutine visc_spline_ini
+    use bspline_module
+    integer :: nx,iflag
+    nx=size(bblgr_res(:,1))
+    if (allocated(visc_tx)) deallocate(visc_tx)
+    if (allocated(visc_coef)) deallocate(visc_coef)
+    allocate(visc_tx(nx+visc_kx),visc_coef(nx))
+    visc_tx=0
+    call db1ink(bblgr_res(:,1),nx,bblgr_res(:,3),&
+        visc_kx,visc_iknot,visc_tx,visc_coef,iflag)
+    visc_inbvx=1
+    if (iflag /= 0) then
+        print*, 'initialization of spline failed'
+        stop
+    endif
+end subroutine visc_spline_ini
 !***********************************END****************************************
 end module phys_prop

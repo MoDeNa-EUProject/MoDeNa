@@ -14,7 +14,7 @@ contains
 subroutine odesystem(neq, t, y, ydot)
     use constants, only: pi
     use globals
-    use phys_prop, only: dispress
+    use phys_prop, only: dispress,Rb_der,visc
     integer :: neq,i
     real(dp) :: t, y(neq), ydot(neq)
     real(dp) :: z,ze,zw,zee,zww
@@ -24,6 +24,7 @@ subroutine odesystem(neq, t, y, ydot)
     real(dp) :: fluxe,fluxw
     real(dp) :: vf,vs,vt
     real(dp) :: dispr,dph
+    mu=visc(t)
     rc=rc0+gr*t
     rd=rc-y(neq)/sqrt(3.0_dp)
     dr=rd/neq
@@ -112,8 +113,11 @@ end subroutine odesystem
 !disjoining pressure
 subroutine set_initial_conditions(y)
     use globals
+    use in_out, only: load_bubble_growth
+    use phys_prop, only: bblgr_res,Rb_spline_ini,visc_spline_ini
     real(dp), dimension(:), intent(out) :: y
     integer :: i,neq
+    real(dp) :: tmp
     real(dp), dimension(:), allocatable :: r
     neq=size(y)
     dr=rd/neq
@@ -132,6 +136,9 @@ subroutine set_initial_conditions(y)
     enddo
     rc0=rd+y(neq)/sqrt(3.0_dp)
     rc=rc0
+    call load_bubble_growth(bblgr_res)
+    call Rb_spline_ini
+    call visc_spline_ini
 end subroutine set_initial_conditions
 !***********************************END****************************************
 end module model

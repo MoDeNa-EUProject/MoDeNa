@@ -85,6 +85,10 @@ subroutine integrate
             stop
         endif
         call save_int_step(y,t)
+        if (mu>1.0e3_dp) then
+            print*, 'gel point reached'
+            exit
+        endif
         tout = tout+timestep
     enddo
     call save_int_close
