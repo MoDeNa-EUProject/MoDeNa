@@ -40,6 +40,7 @@ subroutine read_inputs
     call fson_get(json_data, "integration.relativeTolerance", int_reltol)
     call fson_get(json_data, "integration.absoluteTolerance", int_abstol)
     call fson_get(json_data, "algebraicEquationSolver.tolerance", ae_tol)
+    call fson_get(json_data, "strutFilmParameter", strutFilmParameter)
     call fson_destroy(json_data)
 end subroutine read_inputs
 !***********************************END****************************************
@@ -52,9 +53,9 @@ subroutine save_int_header
     allocate(fi(10))
     open (unit=newunit(fi(1)), file = 'filmthickness.csv')
     open (unit=newunit(fi(2)), file = 'results_1d.csv')
-    write(*,'(1x,100a12)') 'time:','dr:','film: ','strut: ','total: ',&
-        'hmin ','hloc '
-    write(unit=fi(2), fmt='(10000a12)') '#time','dr','np','vf','vs','vt',&
+    write(*,'(1x,100a12)') 'time:','dr:','total: ','struts:',&
+        'hmin: ','hloc: '
+    write(unit=fi(2), fmt='(10000a12)') '#time','dr','np','vt','fs',&
         'hmin','hloc'
 end subroutine save_int_header
 !***********************************END****************************************
@@ -69,13 +70,13 @@ subroutine save_int_step(y,t)
     real(dp), intent(in) :: t
     real(dp), dimension(:), intent(in) :: y
     integer :: neq
-    real(dp) :: vf,vs,vt,hmin,hloc
+    real(dp) :: fs,vt,hmin,hloc
     neq=size(y)
-    call volume_balance(y,vf,vs,vt)
+    call volume_balance(y,vt,fs)
     call min_film_thickness(y,hmin,hloc)
-    write(*,'(100es12.3)') t,dr,vf,vs,vt,hmin,hloc
+    write(*,'(100es12.3)') t,dr,vt,fs,hmin,hloc
     write(fi(1),"(10000es12.4)") y(1:neq)
-    write(unit=fi(2), fmt='(10000es12.4)') t,dr,dble(neq),vf,vs,vt,hmin,hloc
+    write(unit=fi(2), fmt='(10000es12.4)') t,dr,dble(neq),vt,fs,hmin,hloc
 end subroutine save_int_step
 !***********************************END****************************************
 

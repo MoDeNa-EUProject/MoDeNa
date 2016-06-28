@@ -1,6 +1,6 @@
 !global variables
 module globals
-    use constants, only: dp
+    use constants
     implicit none
     integer :: &
         maxts,& !maximum inner time steps
@@ -8,6 +8,8 @@ module globals
         meshpoints,&    !number of discretization points in space
         int_method  !type of integration method (see MF in ODEPACK)
     real(dp) :: &
+        strutFilmParameter,&  !parameter determining strut-film boundary
+            !film ends where h(r)>strutFilmParameter*h(r=0)
         timestep,&  !time step (how often are values written)
         hi,&    !film thickness at center
         rs,&    !radius of initial strut curvature

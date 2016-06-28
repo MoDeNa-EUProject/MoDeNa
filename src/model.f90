@@ -1,6 +1,6 @@
 !contains main model
 module model
-    use globals
+    use constants, only: dp
     implicit none
     private
     real(dp), parameter :: &
@@ -13,6 +13,7 @@ contains
 !cylindrical geometry, sin(alpha)=(dh/dr)/(1+(dh/dr)**2)
 subroutine odesystem(neq, t, y, ydot)
     use constants, only: pi
+    use globals
     use phys_prop, only: dispress
     integer :: neq,i
     real(dp) :: t, y(neq), ydot(neq)
@@ -110,6 +111,7 @@ end subroutine odesystem
 !********************************BEGINNING*************************************
 !disjoining pressure
 subroutine set_initial_conditions(y)
+    use globals
     real(dp), dimension(:), intent(out) :: y
     integer :: i,neq
     real(dp), dimension(:), allocatable :: r

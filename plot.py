@@ -14,7 +14,8 @@ path='./'
 plots=[1,1,0,1]
 saveplots=[0,0,0,0]
 data=numpy.loadtxt(path+'filmthickness.csv')
-time,dr,np,vf,vs,vt=numpy.loadtxt(path+'results_1d.csv',skiprows=1,unpack=True)
+time,dr,np,vt,fs,hmin,hloc=\
+    numpy.loadtxt(path+'results_1d.csv',skiprows=1,unpack=True)
 points=int(np[0]) #discretization points
 radius=[]
 for i in range(points):

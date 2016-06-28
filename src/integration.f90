@@ -28,7 +28,7 @@ subroutine preprocess
     use in_out, only: read_inputs
     use phys_prop, only: volume_balance
     use model, only: odesystem,set_initial_conditions
-    real(dp) :: vf,vs,vt
+    real(dp) :: vt,fs
     write(*,*) 'wellcome to wall drainage.'
     call read_inputs
     odesystem_ptr=>odesystem
@@ -54,7 +54,7 @@ subroutine preprocess
     tout =t+timestep
     itol = 1 !don't change, or you must declare atol as atol(neq)
     call set_initial_conditions(y)
-    call volume_balance(y,vf,vs,vt)
+    call volume_balance(y,vt,fs)
     vt0=vt
 end subroutine preprocess
 !***********************************END****************************************
@@ -102,7 +102,7 @@ subroutine drain_residual(n,x,fvec,iflag)
     integer, intent(inout) :: iflag
     real(dp), dimension(n), intent(in) :: x
     real(dp), dimension(n), intent(out) :: fvec
-    real(dp) :: vf,vs,vt
+    real(dp) :: vt,fs
     q=x(1)
     t=told
     y=yold
@@ -112,9 +112,9 @@ subroutine drain_residual(n,x,fvec,iflag)
     rc=rc0+gr*t
     rd=rc-y(neq)/sqrt(3.0_dp)
     dr=rd/neq
-    call volume_balance(y,vf,vs,vt)
+    call volume_balance(y,vt,fs)
     fvec(1)=sqrt((vt-vt0)**2)
-    print*, x(1),fvec(1)
+    ! print*, x(1),fvec(1)
 end subroutine drain_residual
 !***********************************END****************************************
 end module integration

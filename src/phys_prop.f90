@@ -1,24 +1,30 @@
 !auxilliary subroutines for calculation of state properties
 module phys_prop
-    use globals
     implicit none
     private
     public volume_balance,dispress,min_film_thickness
 contains
 !********************************BEGINNING*************************************
 !checks whether we are losing some mass or not
-pure subroutine  volume_balance(y,vf,vs,vt)
-    use constants, only: pi
-    real(dp), intent(out) :: vf,vs,vt
+pure subroutine  volume_balance(y,vt,fs)
+    use globals
+    real(dp), intent(out) :: vt,fs
     real(dp), dimension(:), intent(in) :: y
     integer :: i,neq
+    real(dp) :: vf,vs
     neq=size(y)
     vf=0
+    vs=0
     do i=1,neq
-        vf=vf+2*pi*dr*(0.5_dp+i-1)*y(i)*dr
+        if (y(i)<strutFilmParameter*y(1)) then
+            vf=vf+2*pi*dr*(0.5_dp+i-1)*y(i)*dr
+        else
+            vs=vs+2*pi*dr*(0.5_dp+i-1)*y(i)*dr
+        endif
     enddo
-    vs=pi*y(neq)/3*(rd**2+rc*rd+rc**2)-pi*y(neq)*rd**2
+    vs=vs+pi*y(neq)/3*(rd**2+rc*rd+rc**2)-pi*y(neq)*rd**2
     vt=vf+vs
+    fs=vs/vt
 end subroutine volume_balance
 !***********************************END****************************************
 
@@ -26,6 +32,7 @@ end subroutine volume_balance
 !********************************BEGINNING*************************************
 !disjoining pressure
 pure subroutine dispress(h,dispr,dph)
+    use globals
     real(dp), intent(in) :: h
     real(dp), intent(out) :: dispr !disjoining pressure
     real(dp), intent(out) :: dph !derivative of disjoining pressure
@@ -39,6 +46,7 @@ end subroutine dispress
 !********************************BEGINNING*************************************
 !minimum film thickness and its distance from the center
 pure subroutine min_film_thickness(y,hmin,hloc)
+    use globals
     real(dp), dimension(:), intent(in) :: y
     real(dp), intent(out) :: hmin
     real(dp), intent(out) :: hloc
