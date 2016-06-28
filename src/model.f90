@@ -3,12 +3,16 @@ module model
     use globals
     implicit none
     private
-    public odesystem,set_initial_conditions
+    real(dp), parameter :: &
+        s=1/sqrt(3._dp) !film thickness derivative at outer domain boundary
+    real(dp) :: q !flux into domain from strut
+    public odesystem,set_initial_conditions,q
 contains
 !********************************BEGINNING*************************************
 !fvm, equidistant mesh
 !cylindrical geometry, sin(alpha)=(dh/dr)/(1+(dh/dr)**2)
 subroutine odesystem(neq, t, y, ydot)
+    use constants, only: pi
     use phys_prop, only: dispress
     integer :: neq,i
     real(dp) :: t, y(neq), ydot(neq)

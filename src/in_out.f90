@@ -46,43 +46,36 @@ end subroutine read_inputs
 
 
 !********************************BEGINNING*************************************
-! saves initial condition
-subroutine save_int_header(y,t,dr)
-    use constants, only: dp
+! creates headers for outputs
+subroutine save_int_header
     use ioutils, only: newunit
-    use phys_prop, only: volume_balance
-    real(dp), intent(in) :: t,dr
-    real(dp), dimension(:), intent(in) :: y
-    integer :: neq
-    real(dp) :: vf,vs,vt
-    neq=size(y)
-    call volume_balance(y,vf,vs,vt)
     allocate(fi(10))
     open (unit=newunit(fi(1)), file = 'filmthickness.csv')
     open (unit=newunit(fi(2)), file = 'results_1d.csv')
-    write(*,'(1x,100a12)') 'time:','dr:','film: ','strut: ','total: '
-    write(*,'(100es12.3)') t,dr,vf,vs,vt
-    write(fi(1),"(10000es12.4)") y(1:neq)
-    write(unit=fi(2), fmt='(10000a12)') '#time','dr','np','vf','vs','vt'
-    write(unit=fi(2), fmt='(10000es12.4)') t,dr,dble(neq),vf,vs,vt
+    write(*,'(1x,100a12)') 'time:','dr:','film: ','strut: ','total: ',&
+        'hmin ','hloc '
+    write(unit=fi(2), fmt='(10000a12)') '#time','dr','np','vf','vs','vt',&
+        'hmin','hloc'
 end subroutine save_int_header
 !***********************************END****************************************
 
 
 !********************************BEGINNING*************************************
 ! saves results at current time
-subroutine save_int_step(y,t,dr)
+subroutine save_int_step(y,t)
     use constants, only: dp
-    use phys_prop, only: volume_balance
-    real(dp), intent(in) :: t,dr
+    use globals, only: dr
+    use phys_prop, only: volume_balance,min_film_thickness
+    real(dp), intent(in) :: t
     real(dp), dimension(:), intent(in) :: y
     integer :: neq
-    real(dp) :: vf,vs,vt
+    real(dp) :: vf,vs,vt,hmin,hloc
     neq=size(y)
     call volume_balance(y,vf,vs,vt)
-    write(*,'(100es12.3)') t,dr,vf,vs,vt
+    call min_film_thickness(y,hmin,hloc)
+    write(*,'(100es12.3)') t,dr,vf,vs,vt,hmin,hloc
     write(fi(1),"(10000es12.4)") y(1:neq)
-    write(unit=fi(2), fmt='(10000es12.4)') t,dr,dble(neq),vf,vs,vt
+    write(unit=fi(2), fmt='(10000es12.4)') t,dr,dble(neq),vf,vs,vt,hmin,hloc
 end subroutine save_int_step
 !***********************************END****************************************
 

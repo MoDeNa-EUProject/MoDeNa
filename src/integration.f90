@@ -24,6 +24,7 @@ contains
 !********************************BEGINNING*************************************
 ! prepares integration
 subroutine preprocess
+    use model, only: q
     use in_out, only: read_inputs
     use phys_prop, only: volume_balance
     use model, only: odesystem,set_initial_conditions
@@ -37,7 +38,6 @@ subroutine preprocess
     atol=int_abstol
     rtol=int_reltol
     q=1.0e-15_dp
-    s=1/sqrt(3._dp)
     allocate(y(neq),yold(neq))
     nnz=neq**2 !i really don't know, smaller numbers can make problems
     lenrat=2 !depends on dp
@@ -63,26 +63,28 @@ end subroutine preprocess
 !********************************BEGINNING*************************************
 ! prepares integration
 subroutine integrate
+    use model, only: q
     use Solve_NonLin, only: hbrd
     use in_out, only: save_int_header,save_int_step,save_int_close
     integer :: i,fi,fi2
     integer, parameter :: n=1
     integer :: info
     real (dp), dimension(n) :: x,fvec,diag
-    call save_int_header(y,t,dr)
+    call save_int_header
+    call save_int_step(y,t)
     do i=1,its
         told=t
         yold=y
         x(1)=q
         ! at each time step find the flux, which will preserve total volume
         ! of the system (film + strut)
-        call hbrd(drain_residual,n,x,fvec,epsilon(pi),ae_tol,info,diag)
+        call hbrd(drain_residual,n,x,fvec,epsilon(ae_tol),ae_tol,info,diag)
         if (info /= 1) then
             print*, 'Flux not found.'
             print*, 'Hbrd returned info = ',info
             stop
         endif
-        call save_int_step(y,t,dr)
+        call save_int_step(y,t)
         tout = tout+timestep
     enddo
     call save_int_close
@@ -94,6 +96,7 @@ end subroutine integrate
 !********************************BEGINNING*************************************
 !> residual function for the draininng
 subroutine drain_residual(n,x,fvec,iflag)
+    use model, only: q
     use phys_prop, only: volume_balance
     integer, intent(in) :: n
     integer, intent(inout) :: iflag

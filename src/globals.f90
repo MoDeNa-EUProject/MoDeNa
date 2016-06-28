@@ -1,6 +1,6 @@
 !global variables
 module globals
-    use constants
+    use constants, only: dp
     implicit none
     integer :: &
         maxts,& !maximum inner time steps
@@ -15,8 +15,6 @@ module globals
         rc,&    !total window size (radius)
         rc0,&    !initial total window size (radius)
         dr,&    !mesh points spacing
-        s,& !film thickness derivative at outer domain boundary
-        q,& !flux into domain from strut
         mu,&    !viscosity
         gam,&   !surface tension
         dstr,&  !where strut starts in initial domain

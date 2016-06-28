@@ -3,11 +3,12 @@ module phys_prop
     use globals
     implicit none
     private
-    public volume_balance,dispress
+    public volume_balance,dispress,min_film_thickness
 contains
 !********************************BEGINNING*************************************
 !checks whether we are losing some mass or not
 pure subroutine  volume_balance(y,vf,vs,vt)
+    use constants, only: pi
     real(dp), intent(out) :: vf,vs,vt
     real(dp), dimension(:), intent(in) :: y
     integer :: i,neq
@@ -32,5 +33,17 @@ pure subroutine dispress(h,dispr,dph)
     dph=(bdp*(hdp/h)**mdp*(hdp*mdp+cdp*(h-h*mdp))-&
         bdp*(hdp/h)**ndp*(hdp*ndp+cdp*(h-h*ndp)))/(h*hdp)
 end subroutine dispress
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!minimum film thickness and its distance from the center
+pure subroutine min_film_thickness(y,hmin,hloc)
+    real(dp), dimension(:), intent(in) :: y
+    real(dp), intent(out) :: hmin
+    real(dp), intent(out) :: hloc
+    hmin=minval(y,dim=1)
+    hloc=minloc(y,dim=1)*dr
+end subroutine min_film_thickness
 !***********************************END****************************************
 end module phys_prop
