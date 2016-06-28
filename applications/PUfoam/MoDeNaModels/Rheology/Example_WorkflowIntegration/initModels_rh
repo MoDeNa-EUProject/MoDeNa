@@ -43,6 +43,7 @@ Contributors
 from modena import SurrogateModel, Workflow2, MODENA_PARSED_URI
 from fireworks import LaunchPad
 from fireworks.core.rocket_launcher import rapidfire
+from pymongo import MongoClient
 
 import Rheology_Arrhenius
 
@@ -57,3 +58,44 @@ for m in SurrogateModel.get_instances():
 # store workflow and launch it locally
 launchpad.add_wf(initWfs)
 rapidfire(launchpad)
+
+# Create connections to database
+url = 'mongodb://localhost:27017/'
+client = MongoClient(url)
+collection = client.test.surrogate_model
+# Update the model
+collection.update(
+    {'_id': 'SurfaceTension[A=AIR,B=THF]'},
+    {
+        '$unset': {
+            'outsidePoint': ""
+        }
+    }
+)
+# PCSAFT surface tension model has problems with large temperatures
+doc=collection.find({'_id': 'SurfaceTension[A=AIR,B=THF]'})
+for key in doc:
+    inputs=key['inputs']
+    inputs['T']['max']=450
+collection.update(
+    {'_id': 'SurfaceTension[A=AIR,B=THF]'},
+    {
+        '$set': {
+            'inputs': inputs
+        }
+    }
+)
+# Rheology model has problems with large conversion (beyond gel point)
+doc=collection.find({'_id': 'Rheology'})
+for key in doc:
+    inputs=key['inputs']
+    inputs['T']['max']=450
+    inputs['X']['max']=1.0
+collection.update(
+    {'_id': 'Rheology'},
+    {
+        '$set': {
+            'inputs': inputs
+        }
+    }
+)

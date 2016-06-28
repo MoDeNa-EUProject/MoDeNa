@@ -82,10 +82,22 @@ subroutine createModenaModels
         rhopXOHPos = modena_model_inputs_argPos(rhopModena, &
             c_char_"XOH"//c_null_char);
         call modena_model_argPos_check(rhopModena)
+    elseif (rhop_model==3) then
+        rhopModena = modena_model_new (&
+            c_char_"PolymerDensity[A=AIR,B=PU]"//c_null_char);
+        if (modena_error_occurred()) then
+            call exit(modena_error())
+        endif
+        rhopInputs = modena_inputs_new (rhopModena);
+        rhopOutputs = modena_outputs_new (rhopModena);
+        rhopTpos = modena_model_inputs_argPos(rhopModena, &
+            c_char_"T"//c_null_char);
+        call modena_model_argPos_check(rhopModena)
     endif
     if (itens_model==2) then
         itensModena = modena_model_new (&
-            c_char_"SurfaceTension[A=CO2,B=PU]"//c_null_char);
+            c_char_"SurfaceTension[A=AIR,B=PU]"//c_null_char);
+            ! c_char_"SurfaceTension[A=AIR,B=THF]"//c_null_char);
         if (modena_error_occurred()) then
             call exit(modena_error())
         endif
@@ -107,7 +119,7 @@ subroutine createModenaModels
     do i=1,ngas
         if (diff_model(i)==2) then
             diffModena(i) = modena_model_new (&
-                c_char_"gas_diffusivity[A="//gasname(i)//"]"//c_null_char);
+                c_char_"diffusivityPol[A="//gasname(i)//"]"//c_null_char);
             if (modena_error_occurred()) then
                 call exit(modena_error())
             endif

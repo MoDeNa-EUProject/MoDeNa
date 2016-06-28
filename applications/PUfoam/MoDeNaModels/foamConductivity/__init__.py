@@ -37,5 +37,4 @@ Contributors
 '''
 
 
-from foamConductivity import m_foamConductivity
-from foamConductivity import m_simulation
+from foamConductivity import *

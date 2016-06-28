@@ -1,9 +1,8 @@
 # Veusz saved document (version 1.23.1)
 # Saved at 2016-03-15T09:30:15.624283
 
-AddImportPath(u'/home/pavel/github/MoDeNa/applications/PUfoam/foamingProcess0D')
-ImportFile(u'results/kinetics.out', u'time             Catalyst_1                  CE_A0                  CE_A1                   CE_B                  CE_B2                  CE_I0                  CE_I1                  CE_I2                 CE_PBA               CE_Breac              CE_Areac0              CE_Areac1              CE_Ireac0              CE_Ireac1              CE_Ireac2                   Bulk                    R_1               R_1_mass               R_1_temp                R_1_vol', ignoretext=True, linked=True)
-ImportFileCSV(u'../../../../../programs/Modena/applications/PUfoam/foamingProcess/results/predici_60.csv', linked=True, dssuffix=u'_exp')
+ImportFile(u'results/bubbleGrowth/kinetics.out', u'time             Catalyst_1                  CE_A0                  CE_A1                   CE_B                  CE_B2                  CE_I0                  CE_I1                  CE_I2                 CE_PBA               CE_Breac              CE_Areac0              CE_Areac1              CE_Ireac0              CE_Ireac1              CE_Ireac2                   Bulk                    R_1               R_1_mass               R_1_temp                R_1_vol', ignoretext=True, linked=True)
+#ImportFileCSV(u'results/bubbleGrowth/predici_60.csv', linked=True, dssuffix=u'_exp')
 Add('page', name='page1', autoadd=False)
 To('page1')
 Set('width', u'40cm')

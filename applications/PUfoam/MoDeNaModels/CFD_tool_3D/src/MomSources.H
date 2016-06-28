@@ -202,6 +202,7 @@ if (PBESwitch)
                                 volumeGrowthBA[i] < 0.0
                              || radiusGrowthBA[i] < 0.0
                              || L0 < 1.0e-8
+                             || wBA_l[celli] < 1.0e-8
                             )
                             {
                                 volumeGrowthBA[i] = 0.0;
@@ -211,6 +212,7 @@ if (PBESwitch)
                                 volumeGrowthCO2[i] < 0.0
                              || radiusGrowthCO2[i] < 0.0
                              || CW_0 < 1.0e-8
+                             || wCO2_l[celli] < 1.0e-8
                             )
                             {
                                 volumeGrowthCO2[i] = 0.0;
@@ -274,6 +276,7 @@ if (PBESwitch)
                             volumeGrowthBA[0] < 0.0
                          || G1 < 0.0
                          || L0 < 1.0e-8
+                         || wBA_l[celli] < 1.0e-8
                         )
                         {
                             volumeGrowthBA[0] = 0.0;
@@ -283,6 +286,7 @@ if (PBESwitch)
                             volumeGrowthCO2[0] < 0.0
                          || G2 < 0.0
                          || CW_0 < 1.0e-8
+                         || wCO2_l[celli] < 1.0e-8
                         )
                         {
                             volumeGrowthCO2[0] = 0.0;
@@ -545,6 +549,7 @@ if (PBESwitch)
                             volumeGrowthBA[i] < 0.0
                          || radiusGrowthBA[i] < 0.0
                          || L0 < 1.0e-8
+                         || wBA_l[celli] < 1.0e-8
                         )
                         {
                             volumeGrowthBA[i] = 0.0;
@@ -554,6 +559,7 @@ if (PBESwitch)
                             volumeGrowthCO2[i] < 0.0
                          || radiusGrowthCO2[i] < 0.0
                          || CW_0 < 1.0e-8
+                         || wCO2_l[celli] < 1.0e-8
                         )
                         {
                             volumeGrowthCO2[i] = 0.0;

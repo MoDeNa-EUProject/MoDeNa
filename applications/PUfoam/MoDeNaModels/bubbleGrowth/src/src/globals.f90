@@ -74,7 +74,6 @@ module globals
         rel_tol,& !relative tolerance
         abs_tol,& !absolute tolerance
         eta,& !viscosity
-        maxeta,& !maximum viscosity (for detection of the gel point)
         pamb,& !ambient pressure (in the liquid)
         sigma,& !interfacial tension
         rhop,& !polymer density
@@ -90,6 +89,7 @@ module globals
         vsh,& !shell volume
         temp,& !temperature (K)
         conv,& !conversion of polyol
+        gelpointconv,& !conversion of polyol at gel point
         Rey,& !Reynolds number
         pairst,& !non-dimensional air pressure
         pambst,& !non-dimensional ambient pressure

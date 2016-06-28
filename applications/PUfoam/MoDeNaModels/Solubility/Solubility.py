@@ -220,12 +220,12 @@ indices={
     'B': system
 }
 inputs2={
-    'T': { 'min': 200.0, 'max': 500.0},        #check if boundaries reasonable, from this range, the random values for the DOE are chosen!
+    'T': { 'min': 200.0, 'max': 550.0},        #check if boundaries reasonable, from this range, the random values for the DOE are chosen!
     'xl1': { 'min': 0.0, 'max': 1.0 },
     'xl2': { 'min': 0.0, 'max': 1.0 },
 }
 inputs3={
-    'T': { 'min': 200.0, 'max': 500.0},        #check if boundaries reasonable, from this range, the random values for the DOE are chosen!
+    'T': { 'min': 200.0, 'max': 550.0},        #check if boundaries reasonable, from this range, the random values for the DOE are chosen!
     'xl1': { 'min': 0.0, 'max': 1.0 },
     'xl2': { 'min': 0.0, 'max': 1.0 },
     'xl3': { 'min': 0.0, 'max': 1.0 },
@@ -350,7 +350,7 @@ m_solubilityCyclopentanePU = BackwardMappingModel(
 # below are experimental solubility models
 # they are needed, because we want substitute model for bubble growth model
 inputsExp={
-    'T': { 'min': 200.0, 'max': 500.0}
+    'T': { 'min': 200.0, 'max': 550.0}
 }
 CcodeR11Baser='''
 #include "modena.h"
@@ -643,7 +643,7 @@ outOfBoundsStrategy=Strategy.ExtendSpaceStochasticSampling(
 )
 parameterFittingStrategy=Strategy.NonLinFitWithErrorContol(
     testDataPercentage=0.2,
-    maxError=0.5e-3,
+    maxError=0.05,
     improveErrorStrategy=Strategy.StochasticSampling(
         nNewPoints=2
     ),
@@ -656,7 +656,7 @@ m_solubilityCO2 = BackwardMappingModel(
     substituteModels=[],
     initialisationStrategy=Strategy.InitialPoints(
         initialPoints={
-            'T': [290, 450, 350, 380],
+            'T': [290, 450, 350, 380, 550],
         },
     ),
     outOfBoundsStrategy=outOfBoundsStrategy,
@@ -669,7 +669,7 @@ m_solubilityCyclopentane = BackwardMappingModel(
     substituteModels=[],
     initialisationStrategy=Strategy.InitialPoints(
         initialPoints={
-            'T': [300, 350, 380, 420, 400, 450, 280],
+            'T': [300, 350, 380, 420, 400, 450, 280, 550],
         },
     ),
     outOfBoundsStrategy=outOfBoundsStrategy,

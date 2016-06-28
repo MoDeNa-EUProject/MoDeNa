@@ -143,12 +143,12 @@ void tcfoam_SM
 ''',
     # These are global bounds for the function
     inputs={
-        'eps': {'min': 0, 'max': 1},
+        'eps': {'min': 0, 'max': 0.995},
         'dcell': {'min': 0, 'max': 1e-1},
         'fstrut': {'min': 0, 'max': 1},
         'gasMixtureConductivity': {'min': 0, 'max': 1e-1},
         'polymer_thermal_conductivity': {'min': 0, 'max': 1e0},
-        'T': {'min': 273, 'max': 450},
+        'T': {'min': 273, 'max': 550},
         'x': {'index': gasConductivity.species, 'min': 0, 'max': 1},
     },
     outputs={
@@ -161,25 +161,26 @@ void tcfoam_SM
 )
 
 # use input file to Foam aging application to initialize with reasonable data.
-fname='foamAging.json'
 try:
-    f = open(os.getcwd()+'/../'+fname,'r')
+    with open('foamAging.json','r') as f:
+        inputs=json.load(f)
+        T0=inputs['conductivityTemperature']
+        rhop=inputs['polymerDensity']
+        xAir0=inputs['initialComposition']['Air']
+        xCO20=inputs['initialComposition']['CO2']
+        xCyP0=inputs['initialComposition']['Cyclopentane']
+        dcell0=inputs['cellSize']
+        fstrut0=inputs['strutContent']
+        rho0=inputs['foamDensity']
+        eps0=1-rho0/rhop
 except IOError:
-    try:
-        f = open(os.getcwd()+'/'+fname,'r')
-    except IOError:
-        f = open(os.getcwd()+'/example_inputs/'+fname,'r')
-
-inputs=json.load(f)
-T0=inputs['conductivityTemperature']
-rhop=inputs['polymerDensity']
-xAir0=inputs['initialComposition']['Air']
-xCO20=inputs['initialComposition']['CO2']
-xCyP0=inputs['initialComposition']['Cyclopentane']
-dcell0=inputs['cellSize']
-fstrut0=inputs['strutContent']
-rho0=inputs['foamDensity']
-eps0=1-rho0/rhop
+    eps0=0.96
+    dcell0=300e-6
+    fstrut0=0.8
+    T0=283
+    xCO20=0.0
+    xCyP0=0.99
+    xAir0=0.0
 
 def setIP(a0):
     a=[]
@@ -205,6 +206,30 @@ initialPoints_foamConductivity_auto = {
     'x[N2]': setIP(xAir0*0.79),
 }
 
+foaming_ini={
+    'eps': [0.9,0.0,0.96,0.99,0.7,0.5],
+    'dcell': [200e-6,0.0,300e-6,100e-6,1e-2,200e-6],
+    # 'eps': [0.0,0.1,0.2,0.3,0.4,0.5],
+    # 'dcell': [200e-6,0.0,300e-6,100e-6,100e-6,200e-6],
+    'fstrut': [0.0,1.0,0.7,0.6,0.0,0.9],
+    'T': [280,549,300,350,330,300],
+    'x[CO2]': [0,0,1,1,1,0],
+    'x[CyP]': [1,1,0,0,0,1],
+    'x[O2]': [0,0,0,0,0,0],
+    'x[N2]': [0,0,0,0,0,0],
+}
+try:
+    with open('inputs/unifiedInput.json','r') as f:
+        inputs=json.load(f)
+    initialPoints_foamConductivity_auto = foaming_ini
+except IOError:
+    try:
+        with open('../inputs/unifiedInput.json','r') as f:
+            inputs=json.load(f)
+        initialPoints_foamConductivity_auto = foaming_ini
+    except:
+        pass
+print initialPoints_foamConductivity_auto
 ## Surrogate model for foam conductivity
 #
 # Backward mapping model is used.

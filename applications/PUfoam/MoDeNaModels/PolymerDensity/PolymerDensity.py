@@ -156,27 +156,25 @@ void surroDensity
     const double P0 = parameters[0];
     const double P1 = parameters[1];
     const double P2 = parameters[2];
-    
-   // const double expo = 1.0 + (1.0 - T/P2);
-   // const double pwr  = pow(P1,expo);
 
-   // outputs[0] = P0 / pwr;
+    const double expo = 1.0 + (1.0 - T/P2);
+    const double pwr  = pow(P1,expo);
 
-
-    outputs[0] = P0 + T*P1 + P2*T*T;
+    outputs[0] = P0 / pwr;
+    //outputs[0] = P0 + T*P1 + P2*T*T;
 }
 ''',
     # These are global bounds for the function
     inputs={
-        'T': { 'min': 270.0, 'max': 300.0},
+        'T': { 'min': 270.0, 'max': 550.0},
     },
     outputs={
         'rho': { 'min': 9e99, 'max': -9e99, 'argPos': 0 },
     },
     parameters={
-        'param0': { 'min': -1E10, 'max': 1E10, 'argPos': 0 },    #check if boundaries are reasonable!!!
-        'param1': { 'min': -1E10, 'max': 1E10, 'argPos': 1 },
-        'param2': { 'min': -1E10, 'max': 1E10, 'argPos': 2 },
+        'param0': { 'min': -1E10, 'max': 1E10+2, 'argPos': 0 },    #check if boundaries are reasonable!!!
+        'param1': { 'min': -1E10, 'max': 1E10+2, 'argPos': 1 },
+        'param2': { 'min': -1E10, 'max': 1E10+2, 'argPos': 2 },
     },
     species={
         'A' : blowing_agents,
@@ -185,15 +183,14 @@ void surroDensity
 )
 
 m = BackwardMappingModel(
-    _id= 'PolymerDensity[A=AIR,B=PU]',    
+    _id= 'PolymerDensity[A=AIR,B=PU]',
     surrogateFunction= f,
     exactTask= DensityExactSim(),
     substituteModels= [ ],
-
     initialisationStrategy= Strategy.InitialPoints(
         initialPoints=
         {
-            'T': [270.0, 290.0, 300.0],
+            'T': [270.0, 300.0, 350.0, 400, 450, 500, 550],
                  },
     ),
     outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(
@@ -201,11 +198,10 @@ m = BackwardMappingModel(
     ),
     parameterFittingStrategy= Strategy.NonLinFitWithErrorContol(
         testDataPercentage= 0.2,
-        maxError= 300.0,
+        maxError= 10.0,
         improveErrorStrategy= Strategy.StochasticSampling(
             nNewPoints= 2
         ),
         maxIterations= 5 # Currently not used
     ),
 )
-

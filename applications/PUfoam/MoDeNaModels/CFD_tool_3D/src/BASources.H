@@ -1,7 +1,7 @@
 if (PBESwitch)
 {
-    scalar prsr, tmpt, rho_f, alpha_f, g1_BA_val,
-           QBA, cc1_value, tmptrOld, tmptrOldOld, timeStep, dTdt,
+    scalar prsr, tmpt, alpha_f, g1_BA_val,
+           cc1_value, tmptrOld, timeStep, dTdt,
            dXWdt, g1_CO2_val, XOH_val, rhoPolyS;
     scalar henry_Coefficient, mZero_val, mOne_val,
            bubble_radius, partialPressure_CO2, wCO2_g_val,
@@ -18,10 +18,10 @@ if (PBESwitch)
     {
         tmpt = TS[celli];
         tmptrOld = TS.oldTime()[celli];
-        tmptrOldOld = TS.oldTime().oldTime()[celli];
+        // tmptrOldOld = TS.oldTime().oldTime()[celli];
         timeStep = runTime.deltaTValue();
         prsr = p[celli];
-        rho_f = rho_foam[celli];
+        // rho_f = rho_foam[celli];
         alpha_f = alpha2[celli];
         mZero_val = mZero[celli];
         mOne_val = mOne[celli];
@@ -176,16 +176,16 @@ if (PBESwitch)
 }
 else
 {
-    scalar prsr, tmpt, rho_f, alpha_f,
-           QBA, tmptrOld, tmptOldOld, timeStep, dTdt;
+    scalar prsr, tmpt, alpha_f,
+           QBA, tmptrOld, timeStep, dTdt;
 
     scalar henry_Coefficient,
            bubble_radius, partialPressure_CO2, wCO2_g_val,
-           wBA_g_val, wCO2_Max, wBL_Max, wBA_l_val, c1, XOH_val, rhoPolyS;
+           wBA_g_val, wCO2_Max, wBL_Max, XOH_val, rhoPolyS;
 
     scalar m0_val, m1_val;
     m0_val = m1_val = 0.0;
-    scalar xBL0, xBL_val;
+    scalar xBL_val;
 
     // call surrogate model for density reaction mixture
     size_t T_pos =
@@ -198,14 +198,14 @@ else
     {
         tmpt = TS[celli];
         tmptrOld = TS.oldTime()[celli];
-        tmptOldOld = TS.oldTime().oldTime()[celli];
+        // tmptOldOld = TS.oldTime().oldTime()[celli];
         timeStep = runTime.deltaTValue();
         prsr = p[celli];
-        rho_f = rho_foam[celli];
+        // rho_f = rho_foam[celli];
         alpha_f = alpha2[celli];
         wCO2_g_val = wCO2_g[celli];
         wBA_g_val = wBA_g[celli];
-        wBA_l_val = wBA_l[celli];
+        // wBA_l_val = wBA_l[celli];
         XOH_val = XOH[celli];
 
         if (liquidMixtureDensitySurrogate)

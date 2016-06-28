@@ -11,6 +11,10 @@ modena_model_t *kinetics;
 
 modena_model_t *density_reaction_mixturemodel;
 
+modena_model_t *strutContentmodel;
+
+modena_model_t *thermalConductivitymodel;
+
 modena_inputs_t *inputs_bblgr1;
 modena_outputs_t *outputs_bblgr1;
 
@@ -22,6 +26,12 @@ modena_outputs_t *outputs_kinetics;
 
 modena_inputs_t *inputs_den;
 modena_outputs_t *outputs_den;
+
+modena_inputs_t *inputs_strutContent;
+modena_outputs_t *outputs_strutContent;
+
+modena_inputs_t *inputs_thermalConductivity;
+modena_outputs_t *outputs_thermalConductivity;
 
 size_t Catalyst_1_Pos ;
 size_t CE_A0_Pos;
@@ -63,4 +73,18 @@ size_t source_R_1_Pos;
 size_t source_R_1_mass_Pos;
 size_t source_R_1_temp_RF1_Pos;
 size_t source_R_1_vol_RF1_Pos;
+
+// strut content
+size_t rho_foam_Pos;
+size_t strut_content_Pos;
+
+// thermal conductivity
+size_t porosity_Pos;
+size_t cell_size_Pos;
+size_t strut_c_Pos;
+size_t temp_Pos;
+size_t X_CO2_Pos;
+size_t X_Cyp_Pos;
+size_t X_O2_Pos;
+size_t X_N2_Pos;
 #endif

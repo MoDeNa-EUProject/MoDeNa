@@ -194,7 +194,7 @@ outputs[0] = P0 + T*P1 + P2*T*T;
 ''',
     # These are global bounds for the function
     inputs={
-        'T': { 'min': 270.0, 'max': 310.0 },        #check if boundaries reasonable, from this range, the random values for the DOE are chosen!
+        'T': { 'min': 270.0, 'max': 550.0 },        #check if boundaries reasonable, from this range, the random values for the DOE are chosen!
     },
     outputs={
         'ST': { 'min': 9e99, 'max': -9e99, 'argPos': 0 },
@@ -218,7 +218,7 @@ m = BackwardMappingModel(
     initialisationStrategy= Strategy.InitialPoints(
         initialPoints=
         {
-            'T': [270.0, 290.0, 300.0],
+            'T': [270.0, 290.0, 330.0],
         },
     ),
     outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(
@@ -226,7 +226,7 @@ m = BackwardMappingModel(
     ),
     parameterFittingStrategy= Strategy.NonLinFitWithErrorContol(
         testDataPercentage= 0.2,
-        maxError= 30.0,
+        maxError= 1e-2,
         improveErrorStrategy= Strategy.StochasticSampling(
             nNewPoints= 2
         ),
@@ -235,14 +235,14 @@ m = BackwardMappingModel(
 )
 
 m2 = BackwardMappingModel(
-    _id= 'SurfaceTension[A=CO2,B=PU]',
+    _id= 'SurfaceTension[A=AIR,B=PU]',
     surrogateFunction= f,
     exactTask= SurfaceTensionExactSim(),
     substituteModels= [ ],
     initialisationStrategy= Strategy.InitialPoints(
         initialPoints=
         {
-            'T': [270.0, 290.0, 300.0],
+            'T': [340.0, 350.0, 360.0, 371.0, 380.0],
         },
     ),
     outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(
@@ -250,7 +250,7 @@ m2 = BackwardMappingModel(
     ),
     parameterFittingStrategy= Strategy.NonLinFitWithErrorContol(
         testDataPercentage= 0.2,
-        maxError= 30.0,
+        maxError= 1e-0,
         improveErrorStrategy= Strategy.StochasticSampling(
             nNewPoints= 2
         ),

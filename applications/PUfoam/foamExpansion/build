@@ -13,6 +13,7 @@ cmake -H${CFD_tool_0D} -B${CFD_tool_0D} && \
 CFD_tool_3D="${MODELS_DIR}/CFD_tool_3D/src"
 cd $CFD_tool_3D
 ./makeEigen
+wclean
 wmake
 cd ../../../foamExpansion/
 
@@ -21,3 +22,14 @@ make --directory=${solubility}
 
 surfaceTension="${MODELS_DIR}/SurfaceTension/src"
 make --directory=${surfaceTension} DFT
+
+foamConductivity="${MODELS_DIR}/foamConductivity/src"
+cmake -H${foamConductivity} -B${foamConductivity} && \
+  make --directory=${foamConductivity}
+
+initMoments="${CFD_tool_3D}/initMoments"
+cmake -H${initMoments} -B${initMoments} && make --directory=${initMoments}
+
+PolymerDensity="${MODELS_DIR}/PolymerDensity/src"
+cmake -H${PolymerDensity} -B${PolymerDensity} && \
+    make --directory=${PolymerDensity}

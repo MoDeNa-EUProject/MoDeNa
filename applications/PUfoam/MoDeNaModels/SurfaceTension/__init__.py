@@ -36,4 +36,4 @@ Authors
 Contributors
 '''
 
-from SurfaceTension import m
+from SurfaceTension import *

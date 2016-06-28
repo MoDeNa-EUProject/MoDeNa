@@ -131,11 +131,6 @@ scalar M_NCO =
     (
         kineticsProperties.subDict("GenericConstants").lookup("molecularMassNCO")
     );
-scalar CO2_D =
-    readScalar
-    (
-        kineticsProperties.subDict("GenericConstants").lookup("dissolvedCO2")
-    );
 scalar dxdT =
     readScalar
     (
@@ -145,11 +140,6 @@ scalar L0 =
     readScalar
     (
         kineticsProperties.subDict("GenericConstants").lookup("initBlowingAgent")
-    );
-scalar CO2_0 =
-    readScalar
-    (
-        kineticsProperties.subDict("GenericConstants").lookup("initCO2")
     );
 scalar M_liq =
     readScalar
@@ -189,21 +179,6 @@ scalar C_Poly =
     readScalar
     (
         kineticsProperties.subDict("EnthalpyConstants").lookup("PUspecificHeat")
-    );
-scalar C_CO2 =
-    readScalar
-    (
-        kineticsProperties.subDict("EnthalpyConstants").lookup("CO2specificHeat")
-    );
-scalar C_BG =
-    readScalar
-    (
-        kineticsProperties.subDict("EnthalpyConstants").lookup("BGspecificHeat")
-    );
-scalar C_BL =
-    readScalar
-    (
-        kineticsProperties.subDict("EnthalpyConstants").lookup("BLspecificHeat")
     );
 scalar latenth =
     readScalar
