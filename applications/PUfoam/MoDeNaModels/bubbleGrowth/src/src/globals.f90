@@ -13,7 +13,7 @@ module globals
         outputs_GR,& ! output file for the surrogate model fitting
         outputs_c,& ! output file with concentration profiles
         outputs_kin,& ! output file with variables of detailed kinetic model
-        outputs_drdt ! test output file for box with multiple growing bubbles
+        outputs_drain ! output file for the wall drainage
     logical :: &
         inertial_term,& !include inertial term in equations (t/f)
         solcorr,& !use solubility correction on bubble radius (t/f)

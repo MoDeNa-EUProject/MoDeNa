@@ -118,6 +118,12 @@ par3 = [3.32e-8, 42.9e3, 2.32, 1.4, X_gel]
 ## gel point changed to 0.5 (Baser and Khakhar)
 par4 = [4.1e-8, 38.3e3, 4.0, -2.0, X_gel]
 
+## [literature data](http://doi.wiley.com/10.1002/aic.12002)
+par5 = [3.1e0, 2.24e3, 3.5, -2.0, X_gel]
+
+## [literature data](http://doi.wiley.com/10.1002/pen.760311605)
+par6 = [1.6e-7, 44.9e3, 1.29, 1.86, X_gel]
+
 ## Surrogate model for polymer viscosity
 #
 # Forward mapping model is used.
@@ -125,5 +131,5 @@ m_polymerViscosity = ForwardMappingModel(
     _id='polymerViscosity',
     surrogateFunction=f_polymerViscosity,
     substituteModels=[],
-    parameters=par4,
+    parameters=par6,
 )

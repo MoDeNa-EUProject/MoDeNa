@@ -22,11 +22,13 @@ subroutine set_paths
     outputs_GR='outputs_GR.out'
     outputs_c='outputs_c.out'
     outputs_kin='kinetics.out'
+    outputs_drain='bblgr_2_drain.out'
     inputs=TRIM(ADJUSTL(fileplacein))//TRIM(ADJUSTL(inputs))
     outputs_1d=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_1d))
     outputs_GR=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_GR))
     outputs_c=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_c))
     outputs_kin=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_kin))
+    outputs_drain=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_drain))
 end subroutine set_paths
 !***********************************END****************************************
 !> reads input values from a file
@@ -229,6 +231,8 @@ subroutine save_integration_header
             "R_1_mass","R_1_temp","R_1_vol"
     endif
     open (unit=newunit(fi4), file = outputs_c)
+    open (unit=newunit(fi5), file = outputs_drain)
+    write(fi5,'(1000A24)') '#time','radius','viscosity'
 end subroutine save_integration_header
 !***********************************END****************************************
 
@@ -249,6 +253,7 @@ subroutine save_integration_step(iout)
             Y(kineq(19)),Y(kineq(20))
     endif
     write(fi4,"(1000es23.15)") (Y(fceq+i+1),i=0,ngas*p,ngas)
+    write(fi5,"(1000es24.15e3)") time,radius,eta
     ! save arrays, which are preserved for future use
     etat(iout,1)=time
     etat(iout,2)=eta
@@ -271,6 +276,7 @@ subroutine save_integration_close(iout)
         close(fi3)
     endif
     close(fi4)
+    close(fi5)
     ! reallocate matrices for eta_rm and bub_vf functions
     ! interpolation doesn't work otherwise
     if (iout /= its) then
@@ -295,22 +301,22 @@ end subroutine save_integration_close
 !********************************BEGINNING*************************************
 !> loads old results
 subroutine load_old_results
-    integer :: i,j,ios
+    integer :: i,j,ios,fi
     real(dp), dimension(:,:), allocatable :: matrix
     j=0
-    open(newunit(fi5),file=outputs_1d)
+    open(newunit(fi),file=outputs_1d)
         do  !find number of points
-            read(fi5,*,iostat=ios)
+            read(fi,*,iostat=ios)
             if (ios/=0) exit
             j=j+1
         enddo
         allocate(matrix(j,18))
-        rewind(fi5)
-        read(fi5,*)
+        rewind(fi)
+        read(fi,*)
         do i=2,j
-            read(fi5,*) matrix(i,:)
+            read(fi,*) matrix(i,:)
         enddo
-    close(fi5)
+    close(fi)
     allocate(bub_rad(j-1,2))
     bub_rad(:,1)=matrix(2:j,1)
     bub_rad(:,2)=matrix(2:j,2)
