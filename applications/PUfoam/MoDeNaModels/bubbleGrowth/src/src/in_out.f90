@@ -232,7 +232,7 @@ subroutine save_integration_header
     endif
     open (unit=newunit(fi4), file = outputs_c)
     open (unit=newunit(fi5), file = outputs_drain)
-    write(fi5,'(1000A24)') '#time','radius','viscosity'
+    write(fi5,'(1000A24)') '#time','radius','porosity','viscosity'
 end subroutine save_integration_header
 !***********************************END****************************************
 
@@ -253,7 +253,7 @@ subroutine save_integration_step(iout)
             Y(kineq(19)),Y(kineq(20))
     endif
     write(fi4,"(1000es23.15)") (Y(fceq+i+1),i=0,ngas*p,ngas)
-    write(fi5,"(1000es24.15e3)") time,radius,eta
+    write(fi5,"(1000es24.15e3)") time,radius,porosity,eta
     ! save arrays, which are preserved for future use
     etat(iout,1)=time
     etat(iout,2)=eta
