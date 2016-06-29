@@ -3,13 +3,14 @@ module phys_prop
     use constants, only: dp
     implicit none
     private
-    integer :: Rb_kx=4,Rb_iknot=0,Rb_inbvx
+    integer :: Rb_kx=4,Rb_iknot=0,Rb_inbvx,Rb_nx
     real(dp), dimension(:), allocatable :: Rb_tx,Rb_coef
-    integer :: visc_kx=2,visc_iknot=0,visc_inbvx
+    integer :: por_kx=2,por_iknot=0,por_inbvx,por_nx
+    real(dp), dimension(:), allocatable :: por_tx,por_coef
+    integer :: visc_kx=2,visc_iknot=0,visc_inbvx,visc_nx
     real(dp), dimension(:), allocatable :: visc_tx,visc_coef
-    real(dp), dimension(:,:), allocatable :: bblgr_res
-    public volume_balance,dispress,min_film_thickness,bblgr_res,Rb_spline_ini,&
-        Rb,Rb_der,visc_spline_ini,visc
+    public volume_balance,dispress,min_film_thickness,Rb_spline_ini,&
+        Rb,Rb_der,porosity_spline_ini,porosity,visc_spline_ini,visc
 contains
 !********************************BEGINNING*************************************
 !checks whether we are losing some mass or not
@@ -68,10 +69,9 @@ end subroutine min_film_thickness
 real(dp) function Rb_der(t)
     use bspline_module
     real(dp), intent(in) :: t
-    integer :: nx,idx,iflag
-    nx=size(bblgr_res(:,1))
+    integer :: idx,iflag
     idx=1
-    call db1val(t,idx,Rb_tx,nx,Rb_kx,Rb_coef,Rb_der,iflag,Rb_inbvx)
+    call db1val(t,idx,Rb_tx,Rb_nx,Rb_kx,Rb_coef,Rb_der,iflag,Rb_inbvx)
     if (iflag /= 0) then
         print*, 'evaluation of bubble radius derivative from spline failed',&
             iflag
@@ -86,10 +86,9 @@ endfunction Rb_der
 real(dp) function Rb(t)
     use bspline_module
     real(dp), intent(in) :: t
-    integer :: nx,idx,iflag
-    nx=size(bblgr_res(:,1))
+    integer :: idx,iflag
     idx=0
-    call db1val(t,idx,Rb_tx,nx,Rb_kx,Rb_coef,Rb,iflag,Rb_inbvx)
+    call db1val(t,idx,Rb_tx,Rb_nx,Rb_kx,Rb_coef,Rb,iflag,Rb_inbvx)
     if (iflag /= 0) then
         print*, 'evaluation of bubble radius from spline failed',iflag
         stop
@@ -100,19 +99,20 @@ endfunction Rb
 
 !********************************BEGINNING*************************************
 !> initialization of spline for bubble radius
-subroutine Rb_spline_ini
+subroutine Rb_spline_ini(bblgr_res)
     use bspline_module
-    integer :: nx,iflag
-    nx=size(bblgr_res(:,1))
+    real(dp), dimension(:,:), intent(in) :: bblgr_res
+    integer :: iflag
+    Rb_nx=size(bblgr_res(:,1))
     if (allocated(Rb_tx)) deallocate(Rb_tx)
     if (allocated(Rb_coef)) deallocate(Rb_coef)
-    allocate(Rb_tx(nx+Rb_kx),Rb_coef(nx))
+    allocate(Rb_tx(Rb_nx+Rb_kx),Rb_coef(Rb_nx))
     Rb_tx=0
-    call db1ink(bblgr_res(:,1),nx,bblgr_res(:,2),&
+    call db1ink(bblgr_res(:,1),Rb_nx,bblgr_res(:,2),&
         Rb_kx,Rb_iknot,Rb_tx,Rb_coef,iflag)
     Rb_inbvx=1
     if (iflag /= 0) then
-        print*, 'initialization of spline failed'
+        print*, 'initialization of bubble radius spline failed'
         stop
     endif
 end subroutine Rb_spline_ini
@@ -120,14 +120,51 @@ end subroutine Rb_spline_ini
 
 
 !********************************BEGINNING*************************************
-!> bubble radius as function of time
+!> porosity as function of time
+real(dp) function porosity(t)
+    use bspline_module
+    real(dp), intent(in) :: t
+    integer :: idx,iflag
+    idx=0
+    call db1val(t,idx,por_tx,por_nx,por_kx,por_coef,porosity,iflag,por_inbvx)
+    if (iflag /= 0) then
+        print*, 'evaluation of porosity from spline failed',iflag
+        stop
+    endif
+endfunction porosity
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> initialization of spline for porosity
+subroutine porosity_spline_ini(bblgr_res)
+    use bspline_module
+    real(dp), dimension(:,:), intent(in) :: bblgr_res
+    integer :: iflag
+    por_nx=size(bblgr_res(:,1))
+    if (allocated(por_tx)) deallocate(por_tx)
+    if (allocated(por_coef)) deallocate(por_coef)
+    allocate(por_tx(por_nx+por_kx),por_coef(por_nx))
+    por_tx=0
+    call db1ink(bblgr_res(:,1),por_nx,bblgr_res(:,3),&
+        por_kx,por_iknot,por_tx,por_coef,iflag)
+    por_inbvx=1
+    if (iflag /= 0) then
+        print*, 'initialization of porosity spline failed'
+        stop
+    endif
+end subroutine porosity_spline_ini
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> viscosity as function of time
 real(dp) function visc(t)
     use bspline_module
     real(dp), intent(in) :: t
-    integer :: nx,idx,iflag
-    nx=size(bblgr_res(:,1))
+    integer :: idx,iflag
     idx=0
-    call db1val(t,idx,visc_tx,nx,visc_kx,visc_coef,visc,iflag,visc_inbvx)
+    call db1val(t,idx,visc_tx,visc_nx,visc_kx,visc_coef,visc,iflag,visc_inbvx)
     if (iflag /= 0) then
         print*, 'evaluation of viscosity from spline failed',iflag
         stop
@@ -137,20 +174,21 @@ endfunction visc
 
 
 !********************************BEGINNING*************************************
-!> initialization of spline for bubble radius
-subroutine visc_spline_ini
+!> initialization of spline for viscosity
+subroutine visc_spline_ini(bblgr_res)
     use bspline_module
-    integer :: nx,iflag
-    nx=size(bblgr_res(:,1))
+    real(dp), dimension(:,:), intent(in) :: bblgr_res
+    integer :: iflag
+    visc_nx=size(bblgr_res(:,1))
     if (allocated(visc_tx)) deallocate(visc_tx)
     if (allocated(visc_coef)) deallocate(visc_coef)
-    allocate(visc_tx(nx+visc_kx),visc_coef(nx))
+    allocate(visc_tx(visc_nx+visc_kx),visc_coef(visc_nx))
     visc_tx=0
-    call db1ink(bblgr_res(:,1),nx,bblgr_res(:,3),&
+    call db1ink(bblgr_res(:,1),visc_nx,bblgr_res(:,4),&
         visc_kx,visc_iknot,visc_tx,visc_coef,iflag)
     visc_inbvx=1
     if (iflag /= 0) then
-        print*, 'initialization of spline failed'
+        print*, 'initialization of viscosity spline failed'
         stop
     endif
 end subroutine visc_spline_ini

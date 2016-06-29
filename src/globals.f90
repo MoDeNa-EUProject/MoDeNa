@@ -2,6 +2,9 @@
 module globals
     use constants
     implicit none
+    character(len=1024) :: &
+        viscosityModel,&    !viscosity model (constant, fromFile)
+        growthRateModel !growth rate model (constantGrowth, fromFile)
     integer :: &
         maxts,& !maximum inner time steps
         its,&   !outer time steps (how many times is output written)
@@ -12,7 +15,6 @@ module globals
             !film ends where h(r)>strutFilmParameter*h(r=0)
         timestep,&  !time step (how often are values written)
         hi,&    !film thickness at center
-        rs,&    !radius of initial strut curvature
         rd,&    !computational domain size (radius)
         rc,&    !total window size (radius)
         rc0,&    !initial total window size (radius)

@@ -6,7 +6,8 @@ module model
     real(dp), parameter :: &
         s=1/sqrt(3._dp) !film thickness derivative at outer domain boundary
     real(dp) :: q !flux into domain from strut
-    public odesystem,set_initial_conditions,q
+    real(dp), dimension(:,:), allocatable :: bblgr_res
+    public odesystem,set_initial_conditions,update_domain_size,q
 contains
 !********************************BEGINNING*************************************
 !fvm, equidistant mesh
@@ -14,7 +15,7 @@ contains
 subroutine odesystem(neq, t, y, ydot)
     use constants, only: pi
     use globals
-    use phys_prop, only: dispress,Rb_der,visc
+    use phys_prop, only: dispress,Rb,visc
     integer :: neq,i
     real(dp) :: t, y(neq), ydot(neq)
     real(dp) :: z,ze,zw,zee,zww
@@ -24,10 +25,10 @@ subroutine odesystem(neq, t, y, ydot)
     real(dp) :: fluxe,fluxw
     real(dp) :: vf,vs,vt
     real(dp) :: dispr,dph
-    mu=visc(t)
-    rc=rc0+gr*t
-    rd=rc-y(neq)/sqrt(3.0_dp)
-    dr=rd/neq
+    if (viscosityModel=="fromFile") then
+        mu=visc(t)
+    endif
+    call update_domain_size(t,y)
     do i=1,neq
         if (i==1) then
             z=dr/2
@@ -114,31 +115,67 @@ end subroutine odesystem
 subroutine set_initial_conditions(y)
     use globals
     use in_out, only: load_bubble_growth
-    use phys_prop, only: bblgr_res,Rb_spline_ini,visc_spline_ini
+    use phys_prop, only: Rb_spline_ini,visc_spline_ini,porosity_spline_ini
     real(dp), dimension(:), intent(out) :: y
-    integer :: i,neq
-    real(dp) :: tmp
-    real(dp), dimension(:), allocatable :: r
+    integer :: i,neq,cp_por_ind
+    real(dp) :: rs,ri,cp_por
     neq=size(y)
-    dr=rd/neq
-    rs=rd*sqrt((1+s**2)/s**2)*dstr
-    allocate(r(neq))
-    do i=1,neq
-        r(i)=dr*(0.5_dp+i-1)
-    enddo
-    y=hi
-    do i=1,neq
-        if (i>neq*(1-dstr)) then
-            y(i)=(rs+hi)-sqrt(rs**2-(r(i)-(1-dstr)*rd)**2)
-        endif
-        ! y(i)=s/Rd/2*r(i)**2+hi
-        ! y(i)=s/Rd**2/3*r(i)**3+hi
-    enddo
-    rc0=rd+y(neq)/sqrt(3.0_dp)
-    rc=rc0
-    call load_bubble_growth(bblgr_res)
-    call Rb_spline_ini
-    call visc_spline_ini
+    if (growthRateModel=="fromFile" .or. viscosityModel=="fromFile") then
+        call load_bubble_growth(bblgr_res)
+    endif
+    if (growthRateModel=="constantGrowth") then
+        dr=rd/neq
+        rs=rd*sqrt((1+s**2)/s**2)*dstr
+        y=hi
+        do i=1,neq
+            ri=dr*(0.5_dp+i-1)
+            if (i>neq*(1-dstr)) then
+                y(i)=(rs+hi)-sqrt(rs**2-(ri-(1-dstr)*rd)**2)
+            endif
+            ! y(i)=s/Rd/2*r(i)**2+hi
+            ! y(i)=s/Rd**2/3*r(i)**3+hi
+        enddo
+        rc0=rd+y(neq)/sqrt(3.0_dp)
+        rc=rc0
+    elseif (growthRateModel=="fromFile") then
+        call Rb_spline_ini(bblgr_res)
+        call porosity_spline_ini(bblgr_res)
+        !TODO find starting point more more precisely
+        cp_por_ind=minloc(abs(bblgr_res(:,3)-0.70_dp),dim=1)
+        rs=bblgr_res(cp_por_ind,2)
+        initialTime=bblgr_res(cp_por_ind,1)
+        rd=s*rs/sqrt(1+s**2)
+        dr=rd/neq
+        do i=1,neq
+            ri=dr*(0.5_dp+i-1)
+            y(i)=rs+hi-sqrt(rs**2-ri**2)
+        enddo
+    endif
+    if (viscosityModel=="fromFile") then
+        call visc_spline_ini(bblgr_res)
+    endif
+    q=1.0e-15_dp !some reasonable initial guess
 end subroutine set_initial_conditions
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!recalculates domain size and mesh spacing
+!calculates rc,rd,dr
+subroutine update_domain_size(t,y)
+    use globals
+    use phys_prop, only: Rb
+    real(dp), intent(in) :: t
+    real(dp), dimension(:), intent(in) :: y
+    integer :: neq
+    neq=size(y)
+    if (growthRateModel=="constantGrowth") then
+        rc=rc0+gr*t
+    elseif (growthRateModel=="fromFile") then
+        rc=(Rb(t)+hi)/sqrt(3.0_dp)
+    endif
+    rd=rc-y(neq)/sqrt(3.0_dp)
+    dr=rd/neq
+end subroutine update_domain_size
 !***********************************END****************************************
 end module model

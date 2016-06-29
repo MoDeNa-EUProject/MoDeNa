@@ -15,18 +15,34 @@ subroutine read_inputs
     character(len=1024) :: strval
     type(fson_value), pointer :: json_data
     json_data => fson_parse("./inputs.json")
-    call fson_get(json_data, "initialConditions.hi", hi)
-    call fson_get(json_data, "initialConditions.rd", rd)
-    call fson_get(json_data, "initialConditions.dstr", dstr)
-    call fson_get(json_data, "growthRate", gr)
-    call fson_get(json_data, "physicalProperties.viscosity", mu)
+    call fson_get(json_data, "initialConditions.centerThickness", hi)
+    call fson_get(json_data, "growthRateModel", growthRateModel)
+    if (growthRateModel=="constantGrowth") then
+        call fson_get(json_data, "growthRate", gr)
+        call fson_get(json_data, "initialConditions.domainSize", rd)
+        call fson_get(json_data, "initialConditions.filmReduction", dstr)
+        call fson_get(json_data, "integration.initialTime", initialTime)
+    elseif (growthRateModel=="fromFile") then
+        continue
+    else
+        print*, 'unknown growth rate model'
+        stop
+    endif
+    call fson_get(json_data, "physicalProperties.viscosityModel", viscosityModel)
+    if (viscosityModel=="constant") then
+        call fson_get(json_data, "physicalProperties.viscosity", mu)
+    elseif (viscosityModel=="fromFile") then
+        continue
+    else
+        print*, 'unknown viscosity model'
+        stop
+    endif
     call fson_get(json_data, "physicalProperties.surfaceTension", gam)
     call fson_get(json_data, "physicalProperties.disjoiningPressure.N", ndp)
     call fson_get(json_data, "physicalProperties.disjoiningPressure.M", mdp)
     call fson_get(json_data, "physicalProperties.disjoiningPressure.hst", cdp)
     call fson_get(json_data, "physicalProperties.disjoiningPressure.C", hdp)
     call fson_get(json_data, "physicalProperties.disjoiningPressure.B1", bdp)
-    call fson_get(json_data, "integration.initialTime", initialTime)
     call fson_get(json_data, "integration.timeStep", timestep)
     call fson_get(json_data, "integration.outerTimeSteps", its)
     call fson_get(json_data, "integration.method", strval)
@@ -105,7 +121,8 @@ subroutine load_bubble_growth(matrix)
             if (ios/=0) exit
             j=j+1
         enddo
-        allocate(matrix(j-1,3))
+        if (allocated(matrix)) deallocate(matrix)
+        allocate(matrix(j-1,4))
         rewind(fi)
         read(fi,*)
         do i=1,j-1
