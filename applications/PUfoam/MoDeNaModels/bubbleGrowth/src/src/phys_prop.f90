@@ -73,12 +73,17 @@ subroutine set_initial_physical_properties
     call physical_properties(temp,conv,radius)
     D0=D
     surface_tension=sigma
-    pair0=(pamb+2*sigma/radius)*xgas(1)
-    Sn=(1._dp/(nb0*exp(log(4._dp/3*pi*R0**3)))+1)**(1._dp/3)
-    ! write(*,'(2x,A,2x,e12.6)') 'NN',Sn**(-3)/(1-Sn**(-3))/&
-    !     exp(log(4._dp/3*pi*R0**3))
-    S0=Sn*radius
-    Vsh=4*pi/3*(S0**3-R0**3)
+    if (geometry=="3D") then
+        pair0=(pamb+2*sigma/radius)*xgas(1)
+        Sn=(1._dp/(nb0*4._dp/3*pi*R0**3)+1)**(1._dp/3)
+        S0=Sn*radius
+        Vsh=4*pi/3*(S0**3-R0**3)
+    elseif (geometry=="2D") then
+        pair0=(pamb+sigma/radius)*xgas(1)
+        Sn=(1._dp/(nb0*pi*R0**2)+1)**(1._dp/2)
+        S0=Sn*radius
+        Vsh=pi*(S0**2-R0**2)
+    endif
     gelpoint=.false.
     timestep=(tend-tstart)/its
     if (firstrun) then
@@ -97,7 +102,11 @@ subroutine physical_properties(temp,conv,radius)
     real(dp), intent(in) :: temp,conv,radius
     integer :: i
     real(dp) :: Aeta,Eeta,Cg,AA,B !viscosity model constants
-    if (.not. gelpoint .and. temp<500) then
+    if (temp>500) then
+        print*, 'temperature > 500', temp
+        return
+    endif
+    if (.not. gelpoint) then
         select case(visc_model)
         case(1)
         case(2)
@@ -107,6 +116,7 @@ subroutine physical_properties(temp,conv,radius)
             B=-2.0_dp
             eta=Aeta*exp(Eeta/(Rg*temp))*&
                 (gelpointconv/(gelpointconv-conv))**(AA+B*conv)
+            if (eta>1e10) eta=1.0e10_dp
         case(3)
             !set input vector
             call modena_inputs_set(viscInputs, viscTpos, temp);
@@ -119,11 +129,8 @@ subroutine physical_properties(temp,conv,radius)
             !fetch results
             eta = modena_outputs_get(viscOutputs, 0_c_size_t);
         end select
-        if (conv>gelpointconv) then
+        if (conv>gelpointconv*0.9_dp) then
             gelpoint=.true.
-            write(*,'(2x,A,es8.2,A)') 'gel point reached at time t = ',time,' s'
-            write(*,'(2x,A,es8.2,A)') 'temperature at gel point T = ',temp,' K'
-            write(*,'(2x,A,es8.2)') 'conversion at gel point X = ',conv
         endif
     endif
     select case(itens_model)
@@ -203,7 +210,13 @@ subroutine physical_properties(temp,conv,radius)
         case(8) !constant Baser 10.1002/pen.760340805
         end select
     enddo
-    if (solcorr) KH=KH*exp(2*sigma*Mbl/(rhop*Rg*temp*radius))
+    if (solcorr) then
+        if (geometry=="3D") then
+            KH=KH*exp(2*sigma*Mbl/(rhop*Rg*temp*radius))
+        elseif (geometry=="2D") then
+            KH=KH*exp(sigma*Mbl/(rhop*Rg*temp*radius))
+        endif
+    endif
     cp=cppol+sum(cbl*Mbl*cpbll)/rhop
 end subroutine physical_properties
 !***********************************END****************************************

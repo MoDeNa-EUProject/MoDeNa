@@ -69,6 +69,7 @@
         "ModenaFoamViscosityModel": false
     },
     "bubbleGrowth": {
+        "geometry": "3D",
         "integrator": "dlsodes",
         "method": "stiff",
         "inertialTerm": false,

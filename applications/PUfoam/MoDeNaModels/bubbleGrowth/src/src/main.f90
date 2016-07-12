@@ -1,7 +1,6 @@
 !> @file
 !! simulation of bubble growth;
-!! inspired by [Feng and Bertelo (2004)](http://dx.doi.org/10.1122/1.1645518)
-!! and adapted to polyurethanes
+!! summary in [Ferkl et al., 2016](dx.doi.org/10.1016/j.ces.2016.03.040)
 !! @author    Pavel Ferkl
 !! @ingroup   bblgr
 !! @page deps Dependencies

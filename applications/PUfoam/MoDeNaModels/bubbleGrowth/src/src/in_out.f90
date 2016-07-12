@@ -42,6 +42,7 @@ subroutine read_inputs
     json_data => fson_parse(inputs)
     ngas=2
     co2_pos=2
+    call fson_get(json_data, "bubbleGrowth.geometry", geometry)
     call fson_get(json_data, "bubbleGrowth.integrator", strval)
     if (strval=="dlsode") then
         integrator=1
