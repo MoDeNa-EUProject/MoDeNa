@@ -116,7 +116,7 @@ subroutine load_bubble_growth(matrix)
     integer :: i,j,ios,fi
     real(dp), dimension(:,:), allocatable :: matrix
     j=0
-    open(newunit(fi),file='bblgr_2_drain.out')
+    open(newunit(fi),file='../results/bubbleGrowth/bblgr_2_drain.out')
         do  !find number of points
             read(fi,*,iostat=ios)
             if (ios/=0) exit
