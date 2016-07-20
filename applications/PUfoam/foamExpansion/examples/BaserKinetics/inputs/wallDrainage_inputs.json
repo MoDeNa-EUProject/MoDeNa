@@ -1,0 +1,35 @@
+{
+    "growthRateModel": "fromFile",
+    "growthRate": 1e-6,
+    "initialConditions": {
+        "centerThickness": 3e-6,
+        "domainSize": 100e-6,
+        "filmReduction": 1.0
+    },
+    "physicalProperties": {
+        "viscosityModel": "fromFile",
+        "viscosity": 1e1,
+        "surfaceTension": 25e-3,
+        "disjoiningPressure": {
+            "N": 4.0,
+            "M": 3.0,
+            "hst": 1.0e-7,
+            "C": 0.05,
+            "B1": 0
+        },
+    },
+    "integration": {
+        "initialTime": 30,
+        "timeStep": 1.0,
+        "outerTimeSteps": 100,
+        "method": "stiff",
+        "internalNodes": 200,
+        "maxInnerTimeSteps": 5000,
+        "relativeTolerance": 1e-8,
+        "absoluteTolerance": 0
+    },
+    "algebraicEquationSolver": {
+        "tolerance": 1e-4
+    },
+    "strutFilmParameter": 1.1
+}
