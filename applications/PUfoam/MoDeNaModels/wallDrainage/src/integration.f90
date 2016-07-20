@@ -1,4 +1,7 @@
-!sets up and integrates the models
+!> @file
+!! sets up and integrates the models
+!! @author    Pavel Ferkl
+!! @ingroup   wall_drain
 module integration
     use globals
     implicit none
@@ -22,7 +25,7 @@ module integration
     real(dp), dimension(:), allocatable :: yold
 contains
 !********************************BEGINNING*************************************
-! prepares integration
+!> prepares integration
 subroutine preprocess
     use in_out, only: read_inputs
     use phys_prop, only: volume_balance
@@ -60,7 +63,7 @@ end subroutine preprocess
 
 
 !********************************BEGINNING*************************************
-! prepares integration
+!> integration
 subroutine integrate
     use model, only: q
     use Solve_NonLin, only: hbrd

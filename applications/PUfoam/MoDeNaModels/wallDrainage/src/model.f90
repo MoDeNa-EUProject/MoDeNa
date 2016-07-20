@@ -1,4 +1,7 @@
-!contains main model
+!> @file
+!! contains physical model for wall drainage
+!! @author    Pavel Ferkl
+!! @ingroup   wall_drain
 module model
     use constants, only: dp
     implicit none
@@ -10,8 +13,8 @@ module model
     public odesystem,set_initial_conditions,update_domain_size,q
 contains
 !********************************BEGINNING*************************************
-!fvm, equidistant mesh
-!cylindrical geometry, sin(alpha)=(dh/dr)/(1+(dh/dr)**2)
+!> fvm, equidistant mesh
+!! cylindrical geometry, sin(alpha)=(dh/dr)/(1+(dh/dr)**2)
 subroutine odesystem(neq, t, y, ydot)
     use constants, only: pi
     use globals
@@ -111,7 +114,7 @@ end subroutine odesystem
 
 
 !********************************BEGINNING*************************************
-!disjoining pressure
+!> disjoining pressure
 subroutine set_initial_conditions(y)
     use globals
     use in_out, only: load_bubble_growth
@@ -160,8 +163,8 @@ end subroutine set_initial_conditions
 
 
 !********************************BEGINNING*************************************
-!recalculates domain size and mesh spacing
-!calculates rc,rd,dr
+!> recalculates domain size and mesh spacing
+!! calculates rc,rd,dr
 subroutine update_domain_size(t,y)
     use globals
     use phys_prop, only: Rb

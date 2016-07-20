@@ -1,21 +1,20 @@
-!******************************************************BEGINNING***************************************************************
-!stores parameters and commonly used variables
+!> @file
+!! i/o utilities
+!! @author    Pavel Ferkl
+!! @ingroup   wall_drain
 module ioutils
-!*****************************************************DECLARATION**************************************************************
     implicit none
     private
     public newunit,str
-!*********************************************************BODY*****************************************************************
 contains
-!****************************BEGINNING*******************************
-! returns lowest i/o unit number not in use
+!********************************BEGINNING*************************************
+!> returns lowest i/o unit number not in use
 integer function newunit(unit) result(n)
-!***************************DECLARATION******************************
     integer, intent(out), optional :: unit
     logical inuse
-    integer, parameter :: nmin=10   ! avoid lower numbers which are sometimes reserved
-    integer, parameter :: nmax=999  ! may be system-dependent
-!******************************BODY**********************************
+    integer, parameter :: &
+        nmin=123,&   ! avoid lower numbers which are sometimes reserved
+        nmax=999  ! may be system-dependent
     do n = nmin, nmax
         inquire(unit=n, opened=inuse)
         if (.not. inuse) then
@@ -26,20 +25,17 @@ integer function newunit(unit) result(n)
     write(*,*) "newunit ERROR: available unit not found."
     stop
 end function newunit
-!********************************************************************
-!*******************************END**********************************
+!***********************************END****************************************
 
 
-!****************************BEGINNING*******************************
-! converts integer to string
-character(len=20) function str(k)
-!***************************DECLARATION******************************
+
+!********************************BEGINNING*************************************
+!> converts integer to string
+function str(k)
+    character(len=20) :: str
     integer, intent(in) :: k
-!******************************BODY**********************************
     write (str, *) k
     str = adjustl(str)
 end function str
-!********************************************************************
-!*******************************END**********************************
+!***********************************END****************************************
 end module ioutils
-!**********************************************************END*****************************************************************

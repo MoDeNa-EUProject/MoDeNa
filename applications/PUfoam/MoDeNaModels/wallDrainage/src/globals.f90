@@ -1,4 +1,7 @@
-!global variables
+!> @file
+!! global variables
+!! @author    Pavel Ferkl
+!! @ingroup   wall_drain
 module globals
     use constants
     implicit none

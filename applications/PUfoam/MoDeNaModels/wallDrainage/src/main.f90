@@ -1,7 +1,14 @@
-!simulation of film drainage in foam between growing bubbles
+!> @file
+!! simulation of film drainage in foam between growing bubbles
+!! predicts wall thickness profile and strut size and shape
+!! drainage is caused by capillary forces
+!! additional stretching is caused by bubble growth
+!! @author    Pavel Ferkl
+!! @ingroup   wall_drain
+!! @page deps Dependencies
+!! @section dep_bblgr  Dependencies of Wall drainage model
+!! - NONE
 !TODO add condition for film breakage
-!TODO connect to bubble growth model
-!TODO realistic viscosity evolution
 program drainage
     use integration, only: preprocess,integrate
     implicit none

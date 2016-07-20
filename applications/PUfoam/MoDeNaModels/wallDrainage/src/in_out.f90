@@ -1,4 +1,7 @@
-!handling of input and output
+!> @file
+!! handles input and output
+!! @author    Pavel Ferkl
+!! @ingroup   wall_drain
 module in_out
     implicit none
     private
@@ -7,7 +10,7 @@ module in_out
         load_bubble_growth
 contains
 !********************************BEGINNING*************************************
-! reads inputs from json file
+!> reads inputs from json file
 subroutine read_inputs
     use globals
     use fson
@@ -64,7 +67,7 @@ end subroutine read_inputs
 
 
 !********************************BEGINNING*************************************
-! creates headers for outputs
+!> creates headers for outputs
 subroutine save_int_header
     use ioutils, only: newunit
     allocate(fi(10))
@@ -79,7 +82,7 @@ end subroutine save_int_header
 
 
 !********************************BEGINNING*************************************
-! saves results at current time
+!> saves results at current time
 subroutine save_int_step(y,t)
     use constants, only: dp
     use globals, only: dr
@@ -100,7 +103,7 @@ end subroutine save_int_step
 
 
 !********************************BEGINNING*************************************
-! closes files
+!> closes files
 subroutine save_int_close
     close(fi(1))
     close(fi(2))

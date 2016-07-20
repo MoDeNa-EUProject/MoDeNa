@@ -1,4 +1,7 @@
-!auxilliary subroutines for calculation of state properties
+!> @file
+!! auxilliary subroutines for calculation of state properties
+!! @author    Pavel Ferkl
+!! @ingroup   wall_drain
 module phys_prop
     use constants, only: dp
     implicit none
@@ -13,7 +16,7 @@ module phys_prop
         Rb,Rb_der,porosity_spline_ini,porosity,visc_spline_ini,visc
 contains
 !********************************BEGINNING*************************************
-!checks whether we are losing some mass or not
+!> checks whether we are losing some mass or not
 pure subroutine  volume_balance(y,vt,fs)
     use globals
     real(dp), intent(out) :: vt,fs
@@ -38,7 +41,7 @@ end subroutine volume_balance
 
 
 !********************************BEGINNING*************************************
-!disjoining pressure
+!> disjoining pressure
 pure subroutine dispress(h,dispr,dph)
     use globals
     real(dp), intent(in) :: h
@@ -52,7 +55,7 @@ end subroutine dispress
 
 
 !********************************BEGINNING*************************************
-!minimum film thickness and its distance from the center
+!> minimum film thickness and its distance from the center
 subroutine min_film_thickness(y,hmin,hloc,havg)
     use globals
     real(dp), dimension(:), intent(in) :: y

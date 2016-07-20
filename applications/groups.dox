@@ -40,4 +40,8 @@
   @ingroup  models
   @brief    Creates files describing the morphology of foam with desired
   number of cells, cell size distribution, porosity and strut content.
+
+  @defgroup wall_drain Wall drainage
+  @ingroup  models
+  @brief    Simulates the formation of wall and strut during foaming.
 */
