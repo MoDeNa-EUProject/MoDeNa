@@ -14,7 +14,7 @@ subroutine read_inputs
     use fson_value_m, only: fson_value_get
     character(len=1024) :: strval
     type(fson_value), pointer :: json_data
-    json_data => fson_parse("./inputs.json")
+    json_data => fson_parse("../inputs/wallDrainage_inputs.json")
     call fson_get(json_data, "initialConditions.centerThickness", hi)
     call fson_get(json_data, "growthRateModel", growthRateModel)
     if (growthRateModel=="constantGrowth") then

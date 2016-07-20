@@ -33,3 +33,7 @@ cmake -H${initMoments} -B${initMoments} && make --directory=${initMoments}
 PolymerDensity="${MODELS_DIR}/PolymerDensity/src"
 cmake -H${PolymerDensity} -B${PolymerDensity} && \
     make --directory=${PolymerDensity}
+
+wallDrainage="${MODELS_DIR}/wallDrainage"
+cmake -H${wallDrainage} -B${wallDrainage} && \
+    make --directory=${wallDrainage}
