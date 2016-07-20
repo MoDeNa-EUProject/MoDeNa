@@ -53,13 +53,25 @@ end subroutine dispress
 
 !********************************BEGINNING*************************************
 !minimum film thickness and its distance from the center
-pure subroutine min_film_thickness(y,hmin,hloc)
+subroutine min_film_thickness(y,hmin,hloc,havg)
     use globals
     real(dp), dimension(:), intent(in) :: y
     real(dp), intent(out) :: hmin
     real(dp), intent(out) :: hloc
+    real(dp), intent(out) :: havg
+    integer :: i,n
     hmin=minval(y,dim=1)
     hloc=minloc(y,dim=1)*dr
+    havg=0
+    n=size(y,1)
+    do i=1,n
+        if (y(i)<strutFilmParameter*y(1)) then
+            havg=havg+2*pi*dr*(0.5_dp+i-1)*y(i)*dr
+        else
+            exit
+        endif
+    enddo
+    havg=havg/(pi*(dr*(0.5_dp+i-2))**2)
 end subroutine min_film_thickness
 !***********************************END****************************************
 

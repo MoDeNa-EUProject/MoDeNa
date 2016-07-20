@@ -17,7 +17,7 @@ saveplots=[0,0,0,0]
 fontsize=25
 linewidth=4
 data=numpy.loadtxt(path+'filmthickness.csv')
-time,dr,np,vt,fs,hmin,hloc,hcenter=\
+time,dr,np,vt,fs,hmin,hloc,hcenter,havg=\
     numpy.loadtxt(path+'results_1d.csv',skiprows=1,unpack=True)
 points=int(np[0]) #discretization points
 radius=[]
