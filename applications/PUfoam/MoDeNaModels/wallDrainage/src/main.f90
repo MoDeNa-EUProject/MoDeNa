@@ -6,7 +6,7 @@
 !! @author    Pavel Ferkl
 !! @ingroup   wall_drain
 !! @page deps Dependencies
-!! @section dep_bblgr  Dependencies of Wall drainage model
+!! @section dep_wall_drain  Dependencies of Wall drainage model
 !! - bspline-fortran
 !! - fson
 !TODO add condition for film breakage
