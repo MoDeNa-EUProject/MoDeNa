@@ -7,7 +7,8 @@
 !! @ingroup   wall_drain
 !! @page deps Dependencies
 !! @section dep_bblgr  Dependencies of Wall drainage model
-!! - NONE
+!! - bspline-fortran
+!! - fson
 !TODO add condition for film breakage
 program drainage
     use integration, only: preprocess,integrate

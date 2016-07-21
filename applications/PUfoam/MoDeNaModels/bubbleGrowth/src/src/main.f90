@@ -7,6 +7,8 @@
 !! @section dep_bblgr  Dependencies of Bubble growth model
 !! - LAPACK 3.4.2 or higher
 !! - BLAS 3.4.2 or higher
+!! - bspline-fortran
+!! - fson
 program singlebubblegrowth
     use tests, only:onegrowth,secondgrowth,shooting_method,shooting_method_test
     use foaming_globals_m

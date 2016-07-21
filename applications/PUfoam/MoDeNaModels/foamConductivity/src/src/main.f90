@@ -6,6 +6,7 @@
 !! @section dep_foam_cond  Dependencies of Foam conductivity model
 !! - LAPACK 3.4.2 or higher
 !! - BLAS 3.4.2 or higher
+!! - fson
 program hahtf
     use tests, only: loadParameters,eqcond
     use ioutils, only: newunit

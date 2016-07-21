@@ -79,7 +79,26 @@ cmake .
 make
 sudo make install
 ```
-### 6. Set the environmental variables for MoDeNa
+### 6. Install fson library
+The library is installed to `{HOME}/lib` and `{HOME}/include`
+```
+cd where-you-want-source-files
+git clone https://github.com/josephalevin/fson.git
+cd fson
+make
+make install
+```
+### 7. Install bspline library
+The library is installed to `{HOME}/lib` and `{HOME}/include`
+```
+cd where-you-want-source-files
+git clone https://github.com/japaf/bspline-fortran.git
+cd bspline-fortran
+cmake .
+make
+make install
+```
+### 8. Set the environmental variables for MoDeNa
 ```
 user=$(whoami)
 export LD_LIBRARY_PATH=/home/${user}/OpenFOAM/${user}-2.3.0/platforms/linux64GccDPDebug/lib:$LD_LIBRARY_PATH
@@ -88,13 +107,13 @@ export PYTHONPATH=${PYTHONPATH:-}:${HOME}/lib/python2.7/site-packages
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH:-}:${HOME}/lib/python2.7/site-packages:${HOME}/lib/modena:/usr/local/lib
 
 ```
-### 7. Compile the models
+### 9. Compile the models
 ```
 ./build
 ```
 Please note that the output of build should not contain any error messages.
 Otherwise, the tool cannot work properly.
-### 8. Intall VEUSZ plotting program (Optional)
+### 10. Intall VEUSZ plotting program (Optional)
 Some results can be easily visualized using [VEUSZ](http://home.gna.org/veusz/)
 program. It can be installed in Ubuntu using:
 ```
