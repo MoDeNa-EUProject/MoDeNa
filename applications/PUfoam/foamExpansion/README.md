@@ -50,9 +50,9 @@ cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local ..
 sudo make
 sudo make install
 ```
-### 3. Install boost library
+### 3. Install boost, lapack and blas library
 ```
-sudo apt-get install libboost-dev
+sudo apt-get install libboost-dev liblapack-dev libblas-dev
 ```
 ### 4. Install PETSc globally:
 ```
@@ -99,7 +99,18 @@ cmake .
 make
 make install
 ```
-### 8. Set the environmental variables for MoDeNa
+### 8. Install sundials library
+```
+cd where-you-want-source-files
+git clone https://github.com/luca-heltai/sundials.git
+cd sundials
+mkdir build
+cd build
+cmake -DFCMIX_ENABLE=ON -DLAPACK_ENABLE=ON ..
+make
+sudo make install
+```
+### 9. Set the environmental variables for MoDeNa
 ```
 user=$(whoami)
 export LD_LIBRARY_PATH=/home/${user}/OpenFOAM/${user}-2.3.0/platforms/linux64GccDPDebug/lib:$LD_LIBRARY_PATH
@@ -108,13 +119,13 @@ export PYTHONPATH=${PYTHONPATH:-}:${HOME}/lib/python2.7/site-packages
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH:-}:${HOME}/lib/python2.7/site-packages:${HOME}/lib/modena:/usr/local/lib
 
 ```
-### 9. Compile the models
+### 10. Compile the models
 ```
 ./build
 ```
 Please note that the output of build should not contain any error messages.
 Otherwise, the tool cannot work properly.
-### 10. Intall VEUSZ plotting program (Optional)
+### 11. Intall VEUSZ plotting program (Optional)
 Some results can be easily visualized using [VEUSZ](http://home.gna.org/veusz/)
 program. It can be installed in Ubuntu using:
 ```

@@ -9,6 +9,7 @@
 !! - BLAS 3.4.2 or higher
 !! - bspline-fortran
 !! - fson
+!! - sundials
 program singlebubblegrowth
     use tests, only:onegrowth,secondgrowth,shooting_method,shooting_method_test
     use foaming_globals_m

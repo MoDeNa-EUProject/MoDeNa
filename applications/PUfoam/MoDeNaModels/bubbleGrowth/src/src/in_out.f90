@@ -48,17 +48,27 @@ subroutine read_inputs
         integrator=1
     elseif (strval=="dlsodes") then
         integrator=2
+    elseif (strval=="cvode") then
+        integrator=3
     else
         stop 'unknown integrator'
     endif
     call fson_get(json_data, "bubbleGrowth.method", strval)
     if (strval=="nonstiff") then
-        int_meth=10
+        if (integrator==1 .or. integrator==2) then
+            int_meth=10
+        elseif (integrator==3) then
+            int_meth=1
+        endif
     elseif (strval=="stiff") then
-        if (integrator==1) then
-            int_meth=22
-        elseif (integrator==2) then
-            int_meth=222
+        if (integrator==1 .or. integrator==2) then
+            if (integrator==1) then
+                int_meth=22
+            elseif (integrator==2) then
+                int_meth=222
+            endif
+        elseif (integrator==3) then
+            int_meth=2
         endif
     else
         stop 'method can be either stiff or nonstiff'
