@@ -83,8 +83,9 @@ sudo make install
 The library is installed to `{HOME}/lib` and `{HOME}/include`
 ```
 cd where-you-want-source-files
-git clone https://github.com/josephalevin/fson.git
+git clone https://github.com/japaf/fson.git
 cd fson
+cmake .
 make
 make install
 ```

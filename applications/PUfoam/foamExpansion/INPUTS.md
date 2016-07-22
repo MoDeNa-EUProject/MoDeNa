@@ -69,8 +69,8 @@ The following key-pairs should be defined:
     - `finalTime`: (s)
     - `outerTimeSteps`: number of outputs
     - `maxInnerTimeSteps`: maximum number of internal time steps of integrator
-    - `relativeTolerance`: 0 is recommended
-    - `absoluteTolerance`: 1e-3 is recommended
+    - `relativeTolerance`: 1e-8 is recommended
+    - `absoluteTolerance`: 1e-8 is recommended
 - `QmomKinetics`:
    - `relativeTolerance`: 1e-6 is recommended
    - `absoluteTolerance`: 1e-6 is recommended
