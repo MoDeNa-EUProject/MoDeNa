@@ -147,6 +147,7 @@ subroutine set_initial_conditions(y)
         cp_por_ind=minloc(abs(bblgr_res(:,3)-0.70_dp),dim=1)
         rs=bblgr_res(cp_por_ind,2)
         initialTime=bblgr_res(cp_por_ind,1)
+        its=(bblgr_res(size(bblgr_res(:,1), dim=1),1)-initialTime)/timestep-1
         rd=s*rs/sqrt(1+s**2)
         dr=rd/neq
         do i=1,neq

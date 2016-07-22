@@ -25,6 +25,7 @@ subroutine read_inputs
         call fson_get(json_data, "initialConditions.domainSize", rd)
         call fson_get(json_data, "initialConditions.filmReduction", dstr)
         call fson_get(json_data, "integration.initialTime", initialTime)
+        call fson_get(json_data, "integration.outerTimeSteps", its)
     elseif (growthRateModel=="fromFile") then
         continue
     else
@@ -47,7 +48,6 @@ subroutine read_inputs
     call fson_get(json_data, "physicalProperties.disjoiningPressure.C", hdp)
     call fson_get(json_data, "physicalProperties.disjoiningPressure.B1", bdp)
     call fson_get(json_data, "integration.timeStep", timestep)
-    call fson_get(json_data, "integration.outerTimeSteps", its)
     call fson_get(json_data, "integration.method", strval)
     if (strval=="stiff") then
         int_method=222
