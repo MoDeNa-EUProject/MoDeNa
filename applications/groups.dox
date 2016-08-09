@@ -4,7 +4,7 @@
 */
 
 /**
-  @defgroup app_foaming Foaming process simulation
+  @defgroup app_foaming Foam expansion
   @ingroup  applications
   @brief    Predicts the evolution of PU foam properties using the combination
   of nano-, meso- and macro-scopic models.
@@ -40,4 +40,8 @@
   @ingroup  models
   @brief    Creates files describing the morphology of foam with desired
   number of cells, cell size distribution, porosity and strut content.
+
+  @defgroup wall_drain Wall drainage
+  @ingroup  models
+  @brief    Simulates the formation of wall and strut during foaming.
 */

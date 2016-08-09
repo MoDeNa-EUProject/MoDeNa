@@ -14,6 +14,10 @@ module integration
     use phys_prop, only:set_initial_physical_properties
     implicit none
     private
+    !time integration variables for sundials
+    integer :: meth, itmeth, iatol, jpretype, igstype, maxl, ier!, itask
+    integer(c_long) :: ipar(1), mu, ml, iouts(25), maxtss
+    real(dp) :: rout(10), rpar(1), delt!, tout, atol, rtol, t
     !time integration variables for lsode
     integer :: iout, iopt, istate, itask, itol, liw, lrw, nnz, lenrat, neq, mf
     real(dp) :: jac,tout,rtol,atol,t
@@ -28,7 +32,7 @@ module integration
         end subroutine sub
     end interface
     procedure (sub), pointer :: sub_ptr => odesystem
-    public bblpreproc,bblinteg
+    public bblpreproc,bblinteg,neq
 contains
 !********************************BEGINNING*************************************
 !> prepares integration
@@ -56,6 +60,10 @@ subroutine checks
     case default
         stop 'unknown kinetic model'
     end select
+    if (geometry /= "2D" .and. geometry /= "3D") then
+        print*, 'geometry can be 3D or 2D'
+        stop
+    endif
 end subroutine checks
 !***********************************END****************************************
 
@@ -130,43 +138,103 @@ end subroutine set_equation_order
 !********************************BEGINNING*************************************
 !> choose and set integrator
 subroutine set_integrator
-    mf=int_meth
-    select case(integrator)
-    case(1)
-        select case(mf)
-        case(10)
-            allocate(rwork(20+16*neq),iwork(20))
-        case(22)
-            allocate(rwork(22+9*neq+neq**2),iwork(20+neq))
+    if (integrator==1 .or. integrator==2) then
+        mf=int_meth
+        select case(integrator)
+        case(1)
+            select case(mf)
+            case(10)
+                allocate(rwork(20+16*neq),iwork(20))
+            case(22)
+                allocate(rwork(22+9*neq+neq**2),iwork(20+neq))
+            case default
+                stop 'unknown mf'
+            end select
+        case(2)
+            select case(mf)
+            case(10)
+                allocate(rwork(20+16*neq),iwork(30))
+            case(222)
+                nnz=neq**2 !not sure, smaller numbers make problems for low p
+                lenrat=2 !depends on dp
+                allocate(rwork(int(20+(2+1._dp/lenrat)*nnz+(11+9._dp/lenrat)*neq)),&
+                    iwork(30))
+            case default
+                stop 'unknown mf'
+            end select
         case default
-            stop 'unknown mf'
+            stop 'unknown integrator'
         end select
-    case(2)
-        select case(mf)
-        case(10)
-            allocate(rwork(20+16*neq),iwork(30))
-        case(222)
-            nnz=neq**2 !not sure, smaller numbers make problems for low p
-            lenrat=2 !depends on dp
-            allocate(rwork(int(20+(2+1._dp/lenrat)*nnz+(11+9._dp/lenrat)*neq)),&
-                iwork(30))
-        case default
-            stop 'unknown mf'
-        end select
-    case default
-        stop 'unknown integrator'
-    end select
-    itask = 1
-    istate = 1
-    iopt = 1
-    rwork(5:10)=0
-    iwork(5:10)=0
-    lrw = size(rwork)
-    liw = size(iwork)
-    iwork(6)=maxts
-    itol = 1 !don't change, or you must declare atol as atol(neq)
-    rtol=rel_tol
-    atol=abs_tol
+        itask = 4
+        istate = 1
+        iopt = 1
+        rwork(1)=tend+epsilon(tend)*1.0e3_dp
+        rwork(5:10)=0
+        iwork(5:10)=0
+        lrw = size(rwork)
+        liw = size(iwork)
+        iwork(6)=maxts
+        itol = 1 !don't change, or you must declare atol as atol(neq)
+        rtol=rel_tol
+        atol=abs_tol
+    elseif (integrator==3) then
+        meth = int_meth ! integration method: 1=Adams (nonstiff), 2=BDF (stiff)
+        itmeth = 2 ! nonlinear iteration method: 1=functional, 2=Newton
+        iatol = 1
+        rtol=rel_tol
+        atol=abs_tol
+        itask = 1
+        jpretype=0   ! preconditioner type; 0=no, 1=left, 2=right, 3=both
+        igstype=1 ! gram-schmidt; 1=modified, 2=classical
+        maxl=0 ! maximum krylov subspace dimension
+        delt=0 ! linear tolerence convergence factor
+        ! initialize vector specification
+        call fnvinits(1, neq, ier)
+        if (ier .ne. 0) then
+            write(*,*) ' sundials_error: fnvinits returned ier = ',ier
+            stop
+        endif
+        ! initialize cvode
+        call fcvmalloc(t, y, meth, itmeth, iatol, rtol, atol,&
+            iouts, rout, ipar, rpar, ier)
+        if (ier .ne. 0) then
+            write(*,*) ' sundials_error: fcvmalloc returned ier = ',ier
+            stop
+        endif
+        ! set maximum number of internal steps
+        call fcvsetiin("MAX_NSTEPS",maxts,ier)
+        if (ier .ne. 0) then
+            write(*,*) ' sundials_error: fcvsetiin returned ier = ',ier
+            stop
+        endif
+        ! initialize spgmr solver
+        call fcvspgmr(jpretype, igstype, maxl, delt, ier)
+        if (ier .ne. 0) then
+            write(*,*) ' sundials_error: fcvspgmr returned ier = ',ier
+            stop
+        endif
+        ! ! initialize Scaled Preconditioned Bi-CGStab solver
+        ! call fcvspbcg(jpretype, maxl, delt, ier)
+        ! if (ier .ne. 0) then
+        !     write(*,*) ' sundials_error: fcspbcg returned ier = ',ier
+        !     stop
+        ! endif
+        ! ! initialize Scaled Preconditioned Transpose-Free Quasi-Minimal Residual
+        ! call fcvsptfqmr(jpretype, maxl, delt, ier)
+        ! if (ier .ne. 0) then
+        !     write(*,*) ' sundials_error: fcvsptfqmr returned ier = ',ier
+        !     stop
+        ! endif
+        ! initialize band preconditioner
+        ! may be good for pdes
+        mu = 3
+        ml = 3
+        call fcvbpinit(neq, mu, ml, ier)
+        if (ier .ne. 0) then
+            write(*,*) ' sundials_error: fcvbpinit returned ier = ',ier
+            stop
+        endif
+    endif
 end subroutine set_integrator
 !***********************************END****************************************
 
@@ -244,6 +312,14 @@ subroutine bblinteg
         case(2)
             call dlsodes (sub_ptr, neq, y, t, tout, itol, rtol, atol, itask, &
                 istate, iopt, rwork, lrw, iwork, liw, jac, mf)
+        case(3)
+            call fcvode(tout, t, y, itask, ier)
+            if (ier .ne. 0) then
+                write(*,*) ' sundials_error: fcvode returned ier = ',ier
+                write(*,*) ' linear solver returned ier = ',iouts(15)
+                call fcvfree
+                stop
+            endif
         case default
             stop 'unknown integrator'
         end select
@@ -252,14 +328,18 @@ subroutine bblinteg
         call growth_rate
         if (firstrun) call save_integration_step(iout)
         if (printout) then
-            write(*,'(2x,A4,F8.3,A3,A13,F10.3,A4,A19,F8.3,A4,A9,EN12.3,A4)') &
+            write(*,'(2x,A4,F8.3,A3,A13,F10.3,A4,A19,F8.3,A3)') &
                 't = ', time, ' s,',&
                 'p_b - p_o = ', bub_pres, ' Pa,', &
-                'p_b - p_o - p_L = ', bub_pres-2*sigma/radius, ' Pa,',&
-                'dR/dt = ', (bub_pres-2*sigma/radius)*radius/4/eta, ' m/s'
+                'p_b - p_o - p_L = ', bub_pres-laplace_pres, ' Pa'
         endif
         tout = time+timestep
-        if (gelpoint) exit
+        if (gelpoint) then
+            write(*,'(2x,A,f7.3,A)') 'gel point reached at time t = ',time,' s'
+            write(*,'(2x,A,f6.1,A)') 'temperature at gel point T = ',temp,' K'
+            write(*,'(2x,A,f5.3)') 'conversion at gel point X = ',conv
+            exit
+        endif
     end do
     if (firstrun) call save_integration_close(iout)
     write(*,*) 'done: integration'
@@ -269,3 +349,18 @@ subroutine bblinteg
 end subroutine bblinteg
 !***********************************END****************************************
 end module integration
+
+!********************************beginning*************************************
+!> model interface for sundials
+!! must be outside of module
+subroutine  fcvfun(t, y, ydot, ipar, rpar, ier)
+    use iso_c_binding
+    use constants, only:dp
+    use integration, only:neq
+    use model, only: odesystem
+    integer :: ier
+    integer(c_long) :: ipar(1)
+    real(dp) ::  t, y(neq), ydot(neq), rpar(1)
+    call odesystem(neq, t, y, ydot)
+end subroutine fcvfun
+!***********************************end****************************************

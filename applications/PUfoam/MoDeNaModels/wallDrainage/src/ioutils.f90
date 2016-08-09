@@ -1,7 +1,7 @@
 !> @file
 !! i/o utilities
 !! @author    Pavel Ferkl
-!! @ingroup   bblgr
+!! @ingroup   wall_drain
 module ioutils
     implicit none
     private

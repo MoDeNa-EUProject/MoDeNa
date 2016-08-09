@@ -13,12 +13,14 @@ module globals
         outputs_GR,& ! output file for the surrogate model fitting
         outputs_c,& ! output file with concentration profiles
         outputs_kin,& ! output file with variables of detailed kinetic model
-        outputs_drdt ! test output file for box with multiple growing bubbles
+        outputs_drain,& ! output file for the wall drainage
+        geometry ! geometry 3D=spherical, 2D=cylindrical
     logical :: &
         inertial_term,& !include inertial term in equations (t/f)
         solcorr,& !use solubility correction on bubble radius (t/f)
         gelpoint,& !gel point reached (t/f)
-        dilution !use dilution effect for kinetics
+        dilution,& !use dilution effect for kinetics (t/f)
+        shooting !am I using shooting method (t/f)
     integer :: &
         fi1,fi2,fi3,fi4,fi5,& !file indices
         integrator,& !integrator. 1=dlsode,2=dlsodes
@@ -67,6 +69,7 @@ module globals
         dHW,& !blowing reaction enthalpy
         time,& !time (s)
         radius,& !bubble radius (m)
+        laplace_pres,& !Laplace pressure (Pa)
         eqconc,& !equivalent concentration for first gas
         grrate(2),& !growth rate
         st,& !shell thickness
@@ -85,6 +88,7 @@ module globals
         pair0,& !initial partial pressure of air
         pair,& !partial pressure of air
         timestep,& !timestep
+        goalRadius,& !final radius we want to achieve
         nold(2),& !moles in bubble
         vsh,& !shell volume
         temp,& !temperature (K)

@@ -69,6 +69,7 @@
         "ModenaFoamViscosityModel": false
     },
     "bubbleGrowth": {
+        "geometry": "3D",
         "integrator": "dlsodes",
         "method": "stiff",
         "inertialTerm": false,
@@ -79,8 +80,8 @@
         "finalTime": 100,
         "outerTimeSteps": 200,
         "maxInnerTimeSteps": 5000,
-        "relativeTolerance": 0,
-        "absoluteTolerance": 1e-3
+        "relativeTolerance": 1e-8,
+        "absoluteTolerance": 1e-8
     },
    "QmomKinetics": {
        "relativeTolerance": 1e-6,
