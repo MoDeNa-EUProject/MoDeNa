@@ -883,13 +883,21 @@ class ParameterFitting(FireTaskBase):
 
 
     def run_task(self, fw_spec):
-        print term.cyan + 'Performing parameter fitting' + term.normal
+        try:
+            model=modena.SurrogateModel.load(self['surrogateModelId'])
 
-        model=modena.SurrogateModel.load(self['surrogateModelId'])
+            model.updateFitDataFromFwSpec(fw_spec)
+            print(
+                term.cyan
+             + 'Performing parameter fitting for model %s' % model._id
+             +  term.normal
+            );
 
-        model.updateFitDataFromFwSpec(fw_spec)
+            return model.parameterFittingStrategy().newPointsFWAction(model)
+        except:
+            print term.cyan + 'Performing parameter fitting' + term.normal
+            raise
 
-        return model.parameterFittingStrategy().newPointsFWAction(model)
 
 
 @explicit_serialize
@@ -914,16 +922,14 @@ class InitialDataPoints(FireTaskBase):
 class OutOfBounds(Exception):
     pass
 
+
 class ParametersNotValid(Exception):
     pass
-'''
-    def __init__(self, *args):
-        super(ParametersNotValid, self).__init__(args)
-        print self.args[0]
-        print 'In exception'
-    def __str__(self):
-        return repr(self.value)
-'''
+
+
+class ChildProcessFailed(Exception):
+    pass
+
 
 @explicit_serialize
 class ModenaFireTask(FireTaskBase):
@@ -1005,7 +1011,8 @@ class ModenaFireTask(FireTaskBase):
                 except OutOfBounds:
                     print(
                         term.red
-                      + 'Substituted model out-of-bounds, executing outOfBoundsStrategy.'
+                      + 'Substituted model out-of-bounds, '
+                      + 'executing outOfBoundsStrategy.'
                       + term.normal
                     )
                     return self.outOfBounds()
@@ -1013,10 +1020,20 @@ class ModenaFireTask(FireTaskBase):
                 except ParametersNotValid, e:
                     print(
                         term.red
-                      + 'Substituted model is not initialised, executing initialisationStrategy.'
+                      + 'Substituted model is not initialised, '
+                      + 'executing initialisationStrategy.'
                       + term.normal
                     )
                     return self.parametersNotValid(e.args[1])
+
+                except ChildProcessFailed:
+                    print(
+                        term.red
+                      + 'An error occurred calling exact simulation'
+                      + term.normal
+                    )
+                    return FWAction(defuse_workflow=True)
+
 
             if not len(p) == len(oldP):
                 print(
@@ -1041,8 +1058,12 @@ class ModenaFireTask(FireTaskBase):
                 return self.outOfBounds()
 
             except ParametersNotValid, e:
-                print term.cyan + 'Performing Initialisation' + term.normal
+                print(term.cyan + 'Performing Initialisation' + term.normal)
                 return self.parametersNotValid(e.args[1])
+
+            except ChildProcessFailed:
+                print(term.red + 'An unknow error occurred' + term.normal)
+                return FWAction(defuse_workflow=True)
 
         else:
             try:
@@ -1069,7 +1090,11 @@ class ModenaFireTask(FireTaskBase):
                 )
                 return self.parametersNotValid(e.args[1])
 
-            print('Success - We are done')
+            except ChildProcessFailed:
+                print(term.red + 'An unknow error occurred' + term.normal)
+                return FWAction(defuse_workflow=True)
+
+            print(term.green + 'Success - We are done' + term.normal)
             return FWAction()
 
         return FWAction()
@@ -1088,9 +1113,12 @@ class ModenaFireTask(FireTaskBase):
             model = modena.SurrogateModel.loadFromModule()
             raise ParametersNotValid('Exact task of model returned 201', model)
 
+        elif returnCode == 202:
+            model = modena.SurrogateModel.loadParametersNotValid()
+            raise ParametersNotValid('Exact task of model returned 202', model)
+
         elif returnCode > 0:
-            print('An unknow error occurred')
-            sys.exit(returnCode)
+            raise ChildProcessFailed('An unknow error occurred', returnCode)
 
 
 @explicit_serialize

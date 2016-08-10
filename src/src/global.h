@@ -118,10 +118,20 @@ const char* modena_error_message(int error_code);
 
 void modena_print_backtrace();
 
-#define Modena_PyErr_Print() \
-    PyErr_Print(); \
-    fprintf(stderr, "Error in python catched in %i of %s\n", __LINE__, __FILE__); \
-    modena_print_backtrace(); \
+#define Modena_Info_Print(...)                                                \
+    char Modena_message[256];                                                 \
+    sprintf(Modena_message, __VA_ARGS__);                                     \
+    fprintf(stdout, "%s in line %i of %s\n", Modena_message,  __LINE__, __FILE__);
+
+#define Modena_Error_Print(...)                                               \
+    char Modena_message[256];                                                 \
+    sprintf(Modena_message, __VA_ARGS__);                                     \
+    fprintf(stderr, "%s in line %i of %s\n", Modena_message, __LINE__, __FILE__);
+
+#define Modena_PyErr_Print()                                                  \
+    PyErr_Print();                                                            \
+    Modena_Error_Print("Error in python catched");                            \
+    modena_print_backtrace();
 
 __END_DECLS
 
