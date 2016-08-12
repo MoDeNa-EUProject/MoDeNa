@@ -1,5 +1,5 @@
-#!/usr/bin/python
-'''
+#!/usr/bin/env python
+'''@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -10,7 +10,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014-2016 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -27,21 +27,17 @@ License
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
+@endcond'''
 
-Description
-    Initialisation script for the flowRate model. The script calculates a few
-    data points and fits the surrogate model. Then the model is inserted into
-    the database.
+"""
+@file      Initialisation script for the polymer density model.
+@author    Henrik Rusche
+@copyright 2014-2016, MoDeNa Project. GNU Public License.
+@ingroup   app_foaming
+"""
 
-Authors
-    Henrik Rusche
-
-Contributors
-'''
-
-from modena import SurrogateModel
-from modena.SurrogateModel import Workflow2, MODENA_PARSED_URI
-from fireworks import LaunchPad
+from modena import SurrogateModel, MODENA_PARSED_URI
+from fireworks import LaunchPad, Workflow
 from fireworks.core.rocket_launcher import rapidfire
 
 import PolymerDensity
@@ -50,9 +46,9 @@ import PolymerDensity
 launchpad = LaunchPad(**MODENA_PARSED_URI)
 launchpad.reset('', require_password=False)
 
-initWfs = Workflow2([])
+initWfs = Workflow([])
 for m in SurrogateModel.get_instances():
-    initWfs.addNoLink(m.initialisationStrategy().workflow(m))
+    initWfs.append_wf(m.initialisationStrategy().workflow(m), [])
 
 # store workflow and launch it locally
 launchpad.add_wf(initWfs)

@@ -9,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014-2016 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -21,8 +21,8 @@ License
 
     Modena is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
+    FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+    details.
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
@@ -30,7 +30,6 @@ License
 
 """
 @file
-Python library of FireTasks
 This is the Solubility python module. Basically, it contains the following:
 
 The FireTask which controls the call of the detailed model. This detailed model is called
@@ -56,7 +55,7 @@ which are passed to the numerical solver which performs the actual fitting of th
 surrogate model parameters.
 
 @author    Jonas Mairhofer, Pavel Ferkl
-@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@copyright 2014-2016, MoDeNa Project. GNU Public License.
 @ingroup   app_foaming
 """
 
@@ -97,12 +96,6 @@ class SolubilityExactSim(ModenaFireTask):
     database.
     """
     def task(self, fw_spec):
-        print(
-            term.yellow
-          + "Performing exact simulation (microscopic code recipe)"
-          + term.normal
-        )
-
         # Write input for detailed model
         ff = open('in.txt', 'w')
         Tstr = str(self['point']['T'])
@@ -531,12 +524,6 @@ class SolubilityExactSim2(ModenaFireTask):
     database.
     """
     def task(self, fw_spec):
-        print(
-            term.yellow
-          + "Performing exact simulation (microscopic code recipe)"
-          + term.normal
-        )
-
         # Write input for detailed model
         ff = open('in.txt', 'w')
         Tstr = str(self['point']['T'])

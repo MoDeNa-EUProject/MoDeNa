@@ -9,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014-2016 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -35,7 +35,7 @@ Module providing functions and models
 @author    Henrik Rusche
 @author    Sigve Karolius
 @author    Mandar Thombre
-@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@copyright 2014-2016, MoDeNa Project. GNU Public License.
 """
 
 import os
@@ -1295,7 +1295,7 @@ class ForwardMappingModel(SurrogateModel):
         """
         Return an empty workflow
         """
-        return Workflow2([])
+        return Workflow([])
 
 
 class BackwardMappingModel(SurrogateModel):
@@ -1351,7 +1351,7 @@ class BackwardMappingModel(SurrogateModel):
 
             tl.append(fw)
 
-        return Workflow2(tl, name='exact tasks for new points')
+        return Workflow(tl, name='exact tasks for new points')
 
 
     def parameterFittingStrategy(self):

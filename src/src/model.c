@@ -9,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014-2016 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -341,11 +341,11 @@ size_t modena_model_inputs_argPos(const modena_model_t *self, const char *name)
 
     if(self->argPos_used)
     {
-        Modena_Info_Print
-        (
-            "Mark argPos %zu as used from inputs_argPos\n",
-            argPos
-        );
+        //Modena_Info_Print
+        //(
+        //    "Mark argPos %zu as used from inputs_argPos\n",
+        //    argPos
+        //);
         self->argPos_used[argPos] = true;
     }
 

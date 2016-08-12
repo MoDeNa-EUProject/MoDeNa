@@ -4,7 +4,7 @@
 Python script, which organizes creation of the foam.
 
 @author    Pavel Ferkl
-@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@copyright 2014-2016, MoDeNa Project. GNU Public License.
 @ingroup   foam_constr
 """
 from __future__ import division

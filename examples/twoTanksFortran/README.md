@@ -21,12 +21,15 @@ How to run?
 # Make sure `PYTHONPATH` and `LD_LIBRARY_PATH` are set
 # TODO:
 # Make this easier to use
+    export PKG_CONFIG_PATH=${PKG_CONFIG_PATH:-}:${HOME}/lib/pkgconfig:/usr/local/lib/pkgconfig
+    export PYTHONPATH=${PYTHONPATH:-}:${HOME}/lib/python2.7/site-packages
+    export LD_LIBRARY_PATH=${LD_LIBRARY_PATH:-}:${HOME}/lib/python2.7/site-packages:${HOME}/lib:/usr/local/lib
 
 # Compile project specific sources, i.e. "models":
-flowRate="../models/flowRate/src"
-twoTank="../models/twoTank/src"
-cmake -H${flowRate} -B${flowRate} && make --directory=${flowRate}
-cmake -H${twoTank} -B${twoTank} && make --directory=${twoTank}
+    flowRate="../models/flowRate/src"
+    twoTank="../models/twoTank/src"
+    cmake -H${flowRate} -B${flowRate} && make --directory=${flowRate}
+    cmake -H${twoTank} -B${twoTank} && make --directory=${twoTank}
 
 
 # Compile project specific sources, i.e. "models":
