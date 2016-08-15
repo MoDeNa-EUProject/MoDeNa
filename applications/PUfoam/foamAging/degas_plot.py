@@ -7,12 +7,14 @@ Created on Tue Mar 31 14:44:16 2015
 from __future__ import division
 from numpy import loadtxt,arange
 import matplotlib.pyplot as plt
+import json
 #directory_in='/home/me/workspace/degas/'
 #directory_out='/home/me/workspace/degas/'
 directory_in='./'
 directory_out='results/'
-infile=open(directory_in+'foamAging.in','r')
-l=int(infile.readline().split()[0])
+infile=open(directory_in+'foamAging.json','r')
+decoded=json.load(infile)
+l=decoded['numberOfOutputs']
 infile.close()
 plt.figure(1).clf()
 plt.figure(2).clf()
@@ -34,21 +36,19 @@ for i in arange(0,l+1,int((l-1)/8)):
     line.append(line1)
     infile.close()
 
-# print cair
-print cair[0::6]
 plt.figure(1)
 plt.legend()
 plt.title('Carbon dioxide')
 plt.xlabel('Position')
-plt.ylabel('Concentration')
+plt.ylabel('Partial pressure / Pa')
 plt.figure(2)
 plt.legend()
 plt.title('Air')
 plt.xlabel('Position')
-plt.ylabel('Concentration')
+plt.ylabel('Partial pressure / Pa')
 plt.figure(3)
 plt.legend()
 plt.title('Cyclopentane')
 plt.xlabel('Position')
-plt.ylabel('Concentration')
+plt.ylabel('Partial pressure / Pa')
 plt.show()

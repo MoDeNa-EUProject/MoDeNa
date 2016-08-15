@@ -47,7 +47,8 @@ import json
 import polymerConductivity
 import gasConductivity
 import gasMixtureConductivity
-
+from json import encoder
+encoder.FLOAT_REPR = lambda o: format(o, '.12g')
 
 @explicit_serialize
 class FoamConductivityExactTask(ModenaFireTask):
@@ -205,6 +206,16 @@ initialPoints_foamConductivity_auto = {
     'x[O2]': setIP(xAir0*0.21),
     'x[N2]': setIP(xAir0*0.79),
 }
+initialPoints_foamConductivity_auto2 = {
+    'eps': setIP(eps0),
+    'dcell': setIP(dcell0),
+    'fstrut': setIP(fstrut0),
+    'T': setIP(T0),
+    'x[CO2]': [1,0,0,0],
+    'x[CyP]': [0,1,0,0],
+    'x[O2]': [0,0,0.21,0.21],
+    'x[N2]': [0,0,0.79,0.79],
+}
 
 foaming_ini={
     'eps': [0.9,0.0,0.96,0.99,0.7,0.5],
@@ -229,7 +240,6 @@ except IOError:
         initialPoints_foamConductivity_auto = foaming_ini
     except:
         pass
-print initialPoints_foamConductivity_auto
 ## Surrogate model for foam conductivity
 #
 # Backward mapping model is used.
@@ -242,7 +252,7 @@ m_foamConductivity = BackwardMappingModel(
         polymerConductivity.m_polymer_thermal_conductivity\
     ],
     initialisationStrategy=Strategy.InitialPoints(
-        initialPoints=initialPoints_foamConductivity_auto,
+        initialPoints=initialPoints_foamConductivity_auto2,
     ),
     outOfBoundsStrategy=Strategy.ExtendSpaceStochasticSampling(
         nNewPoints=4
