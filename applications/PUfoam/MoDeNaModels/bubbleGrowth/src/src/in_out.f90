@@ -22,11 +22,13 @@ subroutine set_paths
     outputs_GR='outputs_GR.out'
     outputs_c='outputs_c.out'
     outputs_kin='kinetics.out'
+    outputs_drain='bblgr_2_drain.out'
     inputs=TRIM(ADJUSTL(fileplacein))//TRIM(ADJUSTL(inputs))
     outputs_1d=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_1d))
     outputs_GR=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_GR))
     outputs_c=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_c))
     outputs_kin=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_kin))
+    outputs_drain=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_drain))
 end subroutine set_paths
 !***********************************END****************************************
 !> reads input values from a file
@@ -40,22 +42,33 @@ subroutine read_inputs
     json_data => fson_parse(inputs)
     ngas=2
     co2_pos=2
+    call fson_get(json_data, "bubbleGrowth.geometry", geometry)
     call fson_get(json_data, "bubbleGrowth.integrator", strval)
     if (strval=="dlsode") then
         integrator=1
     elseif (strval=="dlsodes") then
         integrator=2
+    elseif (strval=="cvode") then
+        integrator=3
     else
         stop 'unknown integrator'
     endif
     call fson_get(json_data, "bubbleGrowth.method", strval)
     if (strval=="nonstiff") then
-        int_meth=10
+        if (integrator==1 .or. integrator==2) then
+            int_meth=10
+        elseif (integrator==3) then
+            int_meth=1
+        endif
     elseif (strval=="stiff") then
-        if (integrator==1) then
-            int_meth=22
-        elseif (integrator==2) then
-            int_meth=222
+        if (integrator==1 .or. integrator==2) then
+            if (integrator==1) then
+                int_meth=22
+            elseif (integrator==2) then
+                int_meth=222
+            endif
+        elseif (integrator==3) then
+            int_meth=2
         endif
     else
         stop 'method can be either stiff or nonstiff'
@@ -65,7 +78,7 @@ subroutine read_inputs
     call fson_get(json_data, "bubbleGrowth.meshCoarseningParameter", mshco)
     call fson_get(json_data, "bubbleGrowth.internalNodes", p)
     call fson_get(json_data, "bubbleGrowth.initialTime", tstart)
-    if (firstrun) call fson_get(json_data, "bubbleGrowth.finalTime", tend)
+    if (firstrun .and. .not. shooting) call fson_get(json_data, "bubbleGrowth.finalTime", tend)
     call fson_get(json_data, "bubbleGrowth.outerTimeSteps", its)
     call fson_get(json_data, "bubbleGrowth.maxInnerTimeSteps", maxts)
     call fson_get(json_data, "bubbleGrowth.relativeTolerance", rel_tol)
@@ -86,7 +99,7 @@ subroutine read_inputs
     call fson_get(json_data, "physicalProperties.blowingAgents.CO2.evaporationHeat", dHv(2))
     call fson_get(json_data, "physicalProperties.blowingAgents.PBL.density", rhobl)
     call fson_get(json_data, "initialConditions.temperature", temp0)
-    call fson_get(json_data, "initialConditions.bubbleRadius", R0)
+    if (.not. shooting) call fson_get(json_data, "initialConditions.bubbleRadius", R0)
     call fson_get(json_data, "initialConditions.numberBubbleDensity", nb0)
     call fson_get(json_data, "kinetics.kineticModel", strval)
     if (strval=='Baser') then
@@ -174,15 +187,19 @@ subroutine read_inputs
         sol_model(1)=4
     elseif (strval=="Baser") then
         sol_model(1)=6
+    elseif (strval=="hardcodedWinkler") then
+        sol_model(1)=7
     else
         stop 'unknown solubility model'
     endif
     call fson_get(json_data, "physicalProperties.blowingAgents.CO2.solubilityModel", strval)
     if (strval=="constant") then
         sol_model(2)=1
-        call fson_get(json_data, "physicalProperties.blowingAgents.CO2.solubility", KH(2))
     elseif (strval=="pcsaft") then
         sol_model(2)=2
+    elseif (strval=="hardcodedconstant") then
+        sol_model(2)=8
+        call fson_get(json_data, "physicalProperties.blowingAgents.CO2.solubility", KH(2))
     else
         stop 'unknown solubility model'
     endif
@@ -190,11 +207,14 @@ subroutine read_inputs
     if (strval=="constant") then
         visc_model=1
         call fson_get(json_data, "physicalProperties.polymer.viscosity", eta)
+    elseif (strval=="hardcodedCastroMacosko") then
+        visc_model=2
     elseif (strval=="CastroMacosko") then
         visc_model=3
     else
         stop 'unknown viscosity model'
     endif
+    call fson_destroy(json_data)
     write(*,*) 'done: inputs loaded'
     write(*,*)
 end subroutine read_inputs
@@ -222,6 +242,8 @@ subroutine save_integration_header
             "R_1_mass","R_1_temp","R_1_vol"
     endif
     open (unit=newunit(fi4), file = outputs_c)
+    open (unit=newunit(fi5), file = outputs_drain)
+    write(fi5,'(1000A24)') '#time','radius','porosity','viscosity'
 end subroutine save_integration_header
 !***********************************END****************************************
 
@@ -242,6 +264,7 @@ subroutine save_integration_step(iout)
             Y(kineq(19)),Y(kineq(20))
     endif
     write(fi4,"(1000es23.15)") (Y(fceq+i+1),i=0,ngas*p,ngas)
+    write(fi5,"(1000es24.15e3)") time,radius,porosity,eta
     ! save arrays, which are preserved for future use
     etat(iout,1)=time
     etat(iout,2)=eta
@@ -260,10 +283,11 @@ subroutine save_integration_close(iout)
     real(dp), dimension(:,:), allocatable :: matr
     close(fi1)
     close(fi2)
-    close(fi3)
     if (kin_model==4) then
-        close(fi4)
+        close(fi3)
     endif
+    close(fi4)
+    close(fi5)
     ! reallocate matrices for eta_rm and bub_vf functions
     ! interpolation doesn't work otherwise
     if (iout /= its) then
@@ -288,22 +312,22 @@ end subroutine save_integration_close
 !********************************BEGINNING*************************************
 !> loads old results
 subroutine load_old_results
-    integer :: i,j,ios
+    integer :: i,j,ios,fi
     real(dp), dimension(:,:), allocatable :: matrix
     j=0
-    open(newunit(fi5),file=outputs_1d)
+    open(newunit(fi),file=outputs_1d)
         do  !find number of points
-            read(fi5,*,iostat=ios)
+            read(fi,*,iostat=ios)
             if (ios/=0) exit
             j=j+1
         enddo
         allocate(matrix(j,18))
-        rewind(fi5)
-        read(fi5,*)
+        rewind(fi)
+        read(fi,*)
         do i=2,j
-            read(fi5,*) matrix(i,:)
+            read(fi,*) matrix(i,:)
         enddo
-    close(fi5)
+    close(fi)
     allocate(bub_rad(j-1,2))
     bub_rad(:,1)=matrix(2:j,1)
     bub_rad(:,2)=matrix(2:j,2)

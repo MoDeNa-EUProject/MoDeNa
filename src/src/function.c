@@ -9,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014-2016 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -49,10 +49,9 @@ void modena_function_load_library(modena_function_t* self)
 
     if(!self->handle)
     {
-        fprintf
+        Modena_Error_Print
         (
-           stderr,
-           "lt_dlopen: Could not open library %s\nlt_dlopen: %s\n",
+           "lt_dlopen: Could not open library %s\nlt_dlopen: %s",
            PyString_AsString(pLibraryName),
            lt_dlerror()
         );
@@ -62,10 +61,9 @@ void modena_function_load_library(modena_function_t* self)
     self->function = lt_dlsym(self->handle, PyString_AsString(pFunctionName));
     if(!self->function)
     {
-        fprintf
+        Modena_Error_Print
         (
-            stderr,
-            "lt_dlsym: Could not find function %s in library %s\n"
+            "lt_dlsym: Could not find function %s in library %s"
             "lt_dlsym: %s",
             PyString_AsString(pFunctionName),
             PyString_AsString(pLibraryName),
@@ -143,7 +141,7 @@ modena_function_t *modena_function_new
 
     if(lt_dlinit())
     {
-        fprintf(stderr, "lt_dlinit: %s\n", lt_dlerror());
+        Modena_Error_Print("lt_dlinit: %s", lt_dlerror());
         exit(1);
     }
 
@@ -161,7 +159,7 @@ modena_function_t *modena_function_new_from_model
 
     if(lt_dlinit())
     {
-        fprintf(stderr, "lt_dlinit: %s\n", lt_dlerror());
+        Modena_Error_Print("lt_dlinit: %s", lt_dlerror());
         exit(1);
     }
 

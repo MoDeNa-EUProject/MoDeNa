@@ -9,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014-2016 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -21,8 +21,8 @@ License
 
     Modena is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
+    FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+    details.
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
@@ -34,7 +34,7 @@ Surrogate function, model definition and backward mapping FireTask for
 Foam conductivity model.
 
 @author    Pavel Ferkl
-@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@copyright 2014-2016, MoDeNa Project. GNU Public License.
 @ingroup   app_aging
 """
 
@@ -89,7 +89,9 @@ class FoamConductivityExactTask(ModenaFireTask):
         # Execute the detailed model
         # path to **this** file + /src/...
         # will break if distributed computing
-        os.system(os.path.dirname(os.path.abspath(__file__))+'/src/kfoam')
+        ret = os.system(os.path.dirname(os.path.abspath(__file__))+'/src/kfoam')
+        # This call enables backward mapping capabilities
+        self.handleReturnCode(ret)
         # Analyse output
         # os.getcwd() returns the path to the "launcher" directory
         try:

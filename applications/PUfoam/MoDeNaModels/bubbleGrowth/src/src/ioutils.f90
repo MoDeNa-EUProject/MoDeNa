@@ -1,7 +1,7 @@
 !> @file
 !! i/o utilities
 !! @author    Pavel Ferkl
-!! @ingroup   foam_aging
+!! @ingroup   bblgr
 module ioutils
     implicit none
     private

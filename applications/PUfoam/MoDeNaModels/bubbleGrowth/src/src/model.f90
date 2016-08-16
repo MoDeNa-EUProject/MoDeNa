@@ -62,32 +62,63 @@ subroutine  odesystem (neq, t, y, ydot)
     !temperature (enthalpy balance)
     ydot(teq) = -dHOH*OH0/(rhop*cp)*ydot(xOHeq)-dHW*W0/(rhop*cp)*ydot(xWeq)
     do i=1,ngas
-        ydot(teq) = ydot(teq) - dHv(i)*12*pi*Mbl(i)*D(i)*radius**4/&
-            (rhop*cp*Vsh)*(y(fceq+i-1)-KH(i)*y(fpeq+i-1))/(dz(1)/2)
+        if (geometry=="3D") then
+            ydot(teq) = ydot(teq) - dHv(i)*12*pi*Mbl(i)*D(i)*radius**4/&
+                (rhop*cp*Vsh)*(y(fceq+i-1)-KH(i)*y(fpeq+i-1))/(dz(1)/2)
+        elseif (geometry=="2D") then
+            ydot(teq) = ydot(teq) - dHv(i)*4*pi*Mbl(i)*D(i)*radius**2/&
+                (rhop*cp*Vsh)*(y(fceq+i-1)-KH(i)*y(fpeq+i-1))/(dz(1)/2)
+        endif
     enddo
     if (kin_model==4) then
         ydot(kineq(19))=ydot(teq)
     endif
     if (firstrun) then
         if (inertial_term) then
-            ydot(req) = y(req+1)    !radius (momentum balance)
-            ydot(req+1) = (sum(y(fpeq:lpeq)) + pair - pamb - &
-                2*sigma/radius - 4*eta*y(req+1)/radius - &
-                3._dp/2*y(req+1)**2)/(radius*rhop)
+            if (geometry=="3D") then
+                ydot(req) = y(req+1)    !radius (momentum balance)
+                ydot(req+1) = (sum(y(fpeq:lpeq)) + pair - pamb - &
+                    2*sigma/radius - 4*eta*y(req+1)/radius - &
+                    3._dp/2*y(req+1)**2)/(radius*rhop)
+            elseif (geometry=="2D") then
+                ydot(req) = y(req+1)    !radius (momentum balance)
+                ydot(req+1) = (sum(y(fpeq:lpeq)) + pair - pamb - &
+                    sigma/radius - 2*eta*y(req+1)/radius - &
+                    3._dp/2*y(req+1)**2)/(radius*rhop)
+            endif
         else
-            ydot(req) = (sum(y(fpeq:lpeq)) + pair - pamb - &
-                2*sigma/radius)*radius/(4*eta)   !radius (momentum balance)
+            if (geometry=="3D") then
+                ydot(req) = (sum(y(fpeq:lpeq)) + pair - pamb - &
+                    2*sigma/radius)*radius/(4*eta)   !radius (momentum balance)
+            elseif (geometry=="2D") then
+                ydot(req) = (sum(y(fpeq:lpeq)) + pair - pamb - &
+                    sigma/radius)*radius/(2*eta)   !radius (momentum balance)
+            endif
         endif
+        !partial pressure (molar balance)
         do i=fpeq,lpeq
-            ydot(i) = -3*y(i)*ydot(req)/radius + y(i)/temp*ydot(teq) + &
-                9*Rg*temp*D(i-fpeq+1)*radius*(y(fceq+i-fpeq)-KH(i-fpeq+1)*y(i))/&
-                (dz(1)/2)    !partial pressure (molar balance)
+            if (geometry=="3D") then
+                ydot(i) = -3*y(i)*ydot(req)/radius + y(i)/temp*ydot(teq) + &
+                    9*Rg*temp*D(i-fpeq+1)*radius*&
+                    (y(fceq+i-fpeq)-KH(i-fpeq+1)*y(i))/(dz(1)/2)
+            elseif (geometry=="2D") then
+                ydot(i) = -2*y(i)*ydot(req)/radius + y(i)/temp*ydot(teq) + &
+                    4*Rg*temp*D(i-fpeq+1)*&
+                    (y(fceq+i-fpeq)-KH(i-fpeq+1)*y(i))/(dz(1)/2)
+            endif
         enddo
     else
+        !partial pressure (molar balance)
         do i=fpeq,lpeq
-            ydot(i) = -3*y(i)*Rderiv(time)/radius + y(i)/temp*ydot(teq) + &
-                9*Rg*temp*D(i-fpeq+1)*radius*(y(fceq+i-fpeq)-KH(i-fpeq+1)*y(i))/&
-                (dz(1)/2)    !partial pressure (molar balance)
+            if (geometry=="3D") then
+                ydot(i) = -3*y(i)*Rderiv(time)/radius + y(i)/temp*ydot(teq) + &
+                    9*Rg*temp*D(i-fpeq+1)*radius*&
+                    (y(fceq+i-fpeq)-KH(i-fpeq+1)*y(i))/(dz(1)/2)
+            elseif (geometry=="2D") then
+                ydot(i) = -2*y(i)*Rderiv(time)/radius + y(i)/temp*ydot(teq) + &
+                    4*Rg*temp*D(i-fpeq+1)*&
+                    (y(fceq+i-fpeq)-KH(i-fpeq+1)*y(i))/(dz(1)/2)
+            endif
         enddo
     endif
     do j=1,ngas
@@ -133,10 +164,23 @@ subroutine  odesystem (neq, t, y, ydot)
                 dce=(cee-c)/(zee-z)
             endif
             !concentration (molar balance)
-            ydot(fceq+(i-1)*ngas+j-1) = 9*D(j)*((ze+radius**3)**(4._dp/3)*dce -&
-                (zw+radius**3)**(4._dp/3)*dcw)/dz(i)
-            if (j==co2_pos) ydot(fceq+(i-1)*ngas+j-1) = &
-                ydot(fceq+(i-1)*ngas+j-1) + W0*ydot(xWeq) !reaction source
+            if (geometry=="3D") then
+                ydot(fceq+(i-1)*ngas+j-1) = &
+                    9*D(j)*((ze+radius**3)**(4._dp/3)*dce -&
+                    (zw+radius**3)**(4._dp/3)*dcw)/dz(i)
+                !reaction source
+                if (j==co2_pos) ydot(fceq+(i-1)*ngas+j-1) = &
+                    ydot(fceq+(i-1)*ngas+j-1) + W0*ydot(xWeq)
+            elseif (geometry=="2D") then
+                ydot(fceq+(i-1)*ngas+j-1) = &
+                    4*D(j)*((ze+radius**2)*dce -&
+                    (zw+radius**2)*dcw)/dz(i)
+                !reaction source
+                !WARNING: reaction source exaggerated to provide reasonable
+                !growth
+                if (j==co2_pos) ydot(fceq+(i-1)*ngas+j-1) = &
+                    ydot(fceq+(i-1)*ngas+j-1) + W0*ydot(xWeq)*1e4
+            endif
         enddo
     enddo
 end subroutine odesystem
@@ -156,9 +200,17 @@ subroutine molar_balance(y)
             mb(j)=mb(j)+y(fceq+j-1+(i-1)*ngas)*dz(i)
         enddo
     enddo
-    mb=mb*4*pi/3 !moles in polymer
+    if (geometry=="3D") then
+        mb=mb*4*pi/3 !moles in polymer
+    elseif (geometry=="2D") then
+        mb=mb*pi !moles in polymer
+    endif
     do i=1,ngas
-    	mb2(i)=pressure(i)*radius**3*4*pi/(3*Rg*temp) !moles in bubble
+        if (geometry=="3D") then
+            mb2(i)=pressure(i)*radius**3*4*pi/(3*Rg*temp) !moles in bubble
+        elseif (geometry=="2D") then
+            mb2(i)=pressure(i)*radius**2*pi/(Rg*temp) !moles in bubble
+        endif
     enddo
     mb3=mb+mb2 !total moles
 end subroutine molar_balance
@@ -185,13 +237,21 @@ subroutine dim_var(t,y)
     	pressure(i)=y(fpeq+i-1)
     enddo
     do i=1,ngas
-        wblpol(i)=mb(i)*Mbl(i)/(rhop*4*pi/3*(S0**3-R0**3))
+        wblpol(i)=mb(i)*Mbl(i)/(rhop*Vsh)
     enddo
     avconc=mb/Vsh
-    porosity=radius**3/(radius**3+S0**3-R0**3)
+    if (geometry=="3D") then
+        laplace_pres=2*sigma/radius
+        pair=pair0*R0**3/radius**3*temp/temp0
+        porosity=radius**3/(radius**3+S0**3-R0**3)
+        st=(S0**3+radius**3-R0**3)**(1._dp/3)-radius !thickness of the shell
+    elseif (geometry=="2D") then
+        laplace_pres=sigma/radius
+        pair=pair0*R0**2/radius**2*temp/temp0
+        porosity=radius**2/(radius**2+S0**2-R0**2)
+        st=(S0**2+radius**2-R0**2)**(1._dp/2)-radius !thickness of the shell
+    endif
     rhofoam=(1-porosity)*rhop
-    st=(S0**3+radius**3-R0**3)**(1._dp/3)-radius !thickness of the shell
-    pair=pair0*R0**3/radius**3*temp/temp0
     bub_pres=sum(pressure)+pair-pamb
 end subroutine dim_var
 !***********************************END****************************************
@@ -208,8 +268,6 @@ subroutine kinModel(y)
             call modena_inputs_set(kinInputs, kinInputsPos(i), y(kineq(i)))
         enddo
     endif
-    !TODO: implement temperature
-    ! call modena_inputs_set(kinInputs, kinInputsPos(19), 60.0_dp)
     call modena_inputs_set(kinInputs, kinInputsPos(19), y(teq)-273.15_dp)
     ret = modena_model_call (kinModena, kinInputs, kinOutputs)
     if(ret /= 0) then

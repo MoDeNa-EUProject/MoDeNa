@@ -62,4 +62,4 @@ used to solve the ODEs. Further details on the integration method can be found [
 -------------
 
 @authors Mohsen Karimi, Daniele Marchisio, Pavel Ferkl
-@copyright  2014-2015, MoDeNa Project. GNU Public License.
+@copyright  2014-2016, MoDeNa Project. GNU Public License.

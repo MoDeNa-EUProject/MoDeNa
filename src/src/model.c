@@ -9,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014-2016 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -81,7 +81,7 @@ void modena_substitute_model_calculate_maps
 
 bool modena_model_read_substituteModels(modena_model_t *self)
 {
-    //printf("In modena_model_read_substituteModels\n");
+    //Modena_Info_Print("In %s", __func__);
 
     PyObject *pSubstituteModels = PyObject_GetAttrString
     (
@@ -128,20 +128,45 @@ bool modena_model_read_substituteModels(modena_model_t *self)
                 const char* modelId = PyString_AsString(pModelId);
                 Py_DECREF(pModelId);
 
-                fprintf
+                PyObject *pRet = NULL;
+                if
                 (
-                    stderr,
-                    "Loading model %s failed - Attempting automatic initialisation\n",
-                    modelId
-                );
+                    PyErr_ExceptionMatches(modena_DoesNotExist)
+                )
+                {
+                    fprintf
+                    (
+                        stderr,
+                        "Loading model %s failed - Attempting automatic initialisation\n",
+                        modelId
+                    );
 
-                PyObject *pRet = PyObject_CallMethod
-                (
-                    modena_SurrogateModel,
-                    "exceptionLoad",
-                    "(z)",
-                    modelId
-                );
+                    pRet = PyObject_CallMethod
+                    (
+                        modena_SurrogateModel,
+                        "exceptionLoad",
+                        "(z)",
+                        modelId
+                    );
+                }
+                else
+                {
+                    fprintf
+                    (
+                        stderr,
+                        "Parameters of model %s are invalid - Trying to initialise\n",
+                        modelId
+                    );
+
+                    pRet = PyObject_CallMethod
+                    (
+                        modena_SurrogateModel,
+                        "exceptionParametersNotValid",
+                        "(z)",
+                        modelId
+                    );
+                }
+
                 if(!pRet){ Modena_PyErr_Print(); }
                 int ret = PyInt_AsLong(pRet);
                 Py_DECREF(pRet);
@@ -236,13 +261,6 @@ modena_model_t *modena_model_new
     Py_DECREF(kw);
     if(!pNewObj)
     {
-        fprintf
-        (
-            stderr,
-            "Loading model %s failed - Attempting automatic initialisation\n",
-            modelId
-        );
-
         if
         (
             PyErr_ExceptionMatches(modena_DoesNotExist)
@@ -251,13 +269,47 @@ modena_model_t *modena_model_new
         {
             PyErr_Clear();
 
-            PyObject *pRet = PyObject_CallMethod
+            PyObject *pRet = NULL;
+            if
             (
-                modena_SurrogateModel,
-                "exceptionLoad",
-                "(z)",
-                modelId
-            );
+                PyErr_ExceptionMatches(modena_DoesNotExist)
+            )
+            {
+                fprintf
+                (
+                    stderr,
+                    "Loading model %s failed - "
+                    "Attempting automatic initialisation\n",
+                    modelId
+                );
+
+                pRet = PyObject_CallMethod
+                (
+                    modena_SurrogateModel,
+                    "exceptionLoad",
+                    "(z)",
+                    modelId
+                );
+            }
+            else
+            {
+                fprintf
+                (
+                    stderr,
+                    "Parameters of model %s are invalid - "
+                    "Trying to initialise\n",
+                    modelId
+                );
+
+                pRet = PyObject_CallMethod
+                (
+                    modena_SurrogateModel,
+                    "exceptionParametersNotValid",
+                    "(z)",
+                    modelId
+                );
+            }
+
             if(!pRet){ Modena_PyErr_Print(); }
             int ret = PyInt_AsLong(pRet);
             Py_DECREF(pRet);
@@ -289,7 +341,11 @@ size_t modena_model_inputs_argPos(const modena_model_t *self, const char *name)
 
     if(self->argPos_used)
     {
-        //printf("Mark argPos %zu as used from inputs_argPos\n", argPos);
+        //Modena_Info_Print
+        //(
+        //    "Mark argPos %zu as used from inputs_argPos\n",
+        //    argPos
+        //);
         self->argPos_used[argPos] = true;
     }
 
@@ -322,8 +378,8 @@ void modena_model_argPos_check(const modena_model_t *self)
         if(!self->argPos_used[j])
         {
             //TODO: Replace by call into python
-            //printf("argPos for %s not used\n", self->inputs_names[j]);
-            printf("argPos %zu not used\n", j);
+            //Modena_Info_Print("argPos for %s not used", self->inputs_names[j]);
+            fprintf(stderr, "argPos %zu not used", j);
             allUsed = false;
             break;
         }
@@ -370,7 +426,7 @@ int modena_substitute_model_call
     }
 
     int ret = modena_model_call(sm->model, sm->inputs, sm->outputs);
-    if(ret){ return ret; }	
+    if(ret){ return ret; }
 
     for(j = 0; j < sm->map_outputs_size; j++)
     {
@@ -505,6 +561,8 @@ void modena_model_call_no_check
     modena_outputs_t *outputs
 )
 {
+    //Modena_Info_Print("In %s", __func__);
+
     if
     (
           self->parameters_size == 0
@@ -590,6 +648,8 @@ static PyObject *modena_model_t_call
     PyObject *kwds
 )
 {
+    //Modena_Info_Print("In %s", __func__);
+
     PyObject *pI=NULL, *pCheckBounds=NULL;
     bool checkBounds = true;
 
@@ -698,7 +758,7 @@ static int modena_model_t_init
     PyObject *kwds
 )
 {
-    //printf("In modena_model_t_init\n");
+    //Modena_Info_Print("In %s", __func__);
 
     PyObject *pParameters=NULL, *pModel=NULL;
     char *modelId=NULL;

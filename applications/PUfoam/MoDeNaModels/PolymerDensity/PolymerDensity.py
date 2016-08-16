@@ -1,5 +1,4 @@
-
-'''
+'''@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -10,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014-2016 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -22,20 +21,20 @@ License
 
     Modena is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
+    FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+    details.
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
+@endcond'''
 
-Description
-    Python library of FireTasks
-
-Authors
-    Henrik Rusche
-
-Contributors
-'''
+"""
+@file      Backward mapping FireTask for rheology model.
+@todo      Document
+@author    Jonas Mairhofer
+@copyright 2014-2016, MoDeNa Project. GNU Public License.
+@ingroup   app_foaming
+"""
 
 import os
 import modena
@@ -49,14 +48,6 @@ from jinja2 import Template
 
 # Create terminal for colour output
 term = Terminal()
-
-
-__author__ = 'Henrik Rusche'
-__copyright__ = 'Copyright 2014, MoDeNa Project'
-__version__ = '0.2'
-__maintainer__ = 'Henrik Rusche'
-__email__ = 'h.rusche@wikki.co.uk.'
-__date__ = 'Sep 4, 2014'
 
 
 blowing_agents = IndexSet(
@@ -78,11 +69,6 @@ class DensityExactSim(ModenaFireTask):
     """
 
     def task(self, fw_spec):
-        print(
-            term.yellow
-          + "Performing exact simulation (microscopic code recipe)"
-          + term.normal
-        )
         # Generate input fileblock
         self.generate_inputfile()
 
