@@ -89,7 +89,9 @@ class FoamConductivityExactTask(ModenaFireTask):
         # Execute the detailed model
         # path to **this** file + /src/...
         # will break if distributed computing
-        os.system(os.path.dirname(os.path.abspath(__file__))+'/src/kfoam')
+        ret = os.system(os.path.dirname(os.path.abspath(__file__))+'/src/kfoam')
+        # This call enables backward mapping capabilities
+        self.handleReturnCode(ret)
         # Analyse output
         # os.getcwd() returns the path to the "launcher" directory
         try:

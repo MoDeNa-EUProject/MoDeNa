@@ -137,9 +137,10 @@ class SolubilityExactSim(ModenaFireTask):
         # Execute the detailed model
         # path to **this** file + /src/...
         # will break if distributed computing
-        os.system(os.path.dirname(os.path.abspath(__file__))+\
+        ret = os.system(os.path.dirname(os.path.abspath(__file__))+\
             '/src/pcsaft')
-
+        # This call enables backward mapping capabilities
+        self.handleReturnCode(ret)
         # Analyse output
         # os.getcwd() returns the path to the "launcher" directory
         try:
@@ -571,8 +572,10 @@ class SolubilityExactSim2(ModenaFireTask):
         # Execute the detailed model
         # path to **this** file + /src/...
         # will break if distributed computing
-        os.system(os.path.dirname(os.path.abspath(__file__))+\
+        ret = os.system(os.path.dirname(os.path.abspath(__file__))+\
             '/src/pcsaft')
+        # This call enables backward mapping capabilities
+        self.handleReturnCode(ret)
 
         # Analyse output
         # os.getcwd() returns the path to the "launcher" directory
