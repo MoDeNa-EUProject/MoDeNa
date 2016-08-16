@@ -1,3 +1,5 @@
+project (wallDrainage Fortran)
+cmake_minimum_required(VERSION 2.8)
 set (CMAKE_FORTRAN_FLAGS "-O3")
 file (GLOB _sources *.f*)
 set (CMAKE_Fortran_MODULE_DIRECTORY mod)

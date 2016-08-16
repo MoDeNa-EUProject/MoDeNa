@@ -1,5 +1,5 @@
-/**
-@cond
+/** @cond
+
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
     888b     d'888   .ooooo.   888      888  .ooooo.   8 `88b.    8   .oooo.
@@ -9,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014-2016 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -32,9 +32,9 @@ License
     the MoDeNa interface library to connect different models including nano, and
     meso scale models. The code returns the evolution of foam properties such as
     density, temperature and bubble/cell size distribution.
-@brief macor-scale tool for the foaming process.
+@brief      macro-scale tool for the foaming process.
 @authors    Mohsen Karimi, Daniele Marchisio, Pavel Ferkl
-@copyright  2014-2015, MoDeNa Project. GNU Public License.
+@copyright  2014-2016, MoDeNa Project. GNU Public License.
 @ingroup    app_foaming
 */
 

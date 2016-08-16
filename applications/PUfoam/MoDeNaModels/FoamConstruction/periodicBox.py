@@ -4,7 +4,7 @@ Takes the representative volume element and moves it into a box with
 periodic boundary conditions.
 
 @author    Pavel Ferkl
-@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@copyright 2014-2016, MoDeNa Project. GNU Public License.
 @ingroup   foam_constr
 """
 import vtk

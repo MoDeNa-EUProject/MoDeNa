@@ -9,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014-2016 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -35,14 +35,13 @@ Module providing functions and models
 @author    Henrik Rusche
 @author    Sigve Karolius
 @author    Mandar Thombre
-@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@copyright 2014-2016, MoDeNa Project. GNU Public License.
 """
 
 import os
 import six
 import abc
 import hashlib
-import copy
 import modena
 from modena.Strategy import *
 import weakref
@@ -62,8 +61,12 @@ MODENA_URI = os.environ.get('MODENA_URI', 'mongodb://localhost:27017/test')
 (uri, database) = MODENA_URI.rsplit('/', 1)
 connect(database, host=MODENA_URI)
 
-MODENA_PARSED_URI = pymongo.uri_parser.parse_uri(MODENA_URI, default_port=27017)
-(MODENA_PARSED_URI['host'], MODENA_PARSED_URI['port']) = MODENA_PARSED_URI.pop('nodelist')[0]
+MODENA_PARSED_URI = pymongo.uri_parser.parse_uri(
+    MODENA_URI,
+    default_port=27017
+)
+MODENA_PARSED_URI['host'], MODENA_PARSED_URI['port'] = \
+    MODENA_PARSED_URI.pop('nodelist')[0]
 MODENA_PARSED_URI['name'] = MODENA_PARSED_URI.pop('database')
 del MODENA_PARSED_URI['collection'], MODENA_PARSED_URI['options']
 
@@ -263,6 +266,7 @@ class MinMaxArgPos(EmbeddedDocument):
     def __init__(self, *args, **kwargs):
         super(MinMaxArgPos, self).__init__(*args, **kwargs)
 
+
     def printIndex(self):
         print str(self.index)
 
@@ -286,6 +290,7 @@ class MinMaxArgPosOpt(EmbeddedDocument):
 
     def __init__(self, *args, **kwargs):
         super(MinMaxArgPosOpt, self).__init__(*args, **kwargs)
+
 
     def printIndex(self):
         print str(self.index)
@@ -312,6 +317,7 @@ class IOP(DictField):
 
         return size
 
+
     def iteritems(self):
         for k in self._fields.keys():
             if 'index' in v:
@@ -319,6 +325,7 @@ class IOP(DictField):
                     yield '%s[%s]' % (k, idx), v
             else:
                 yield k, v
+
 
     def keys(self):
         for k, v in self._fields.iteritems():
@@ -368,7 +375,10 @@ class SurrogateFunction(DynamicDocument):
                 nInp = 0;
                 for k, v in kwargs['inputs'].iteritems():
                     if 'argPos' in v:
-                        raise Exception('argPos in function for inputs %s (old format) -- delete argPos from function' % k)
+                        raise Exception(
+                            'argPos in function for inputs %s (old format)' +
+                            ' -- delete argPos from function' % k
+                        )
                     if not 'index' in v:
                         v['argPos'] = nInp
                         nInp += 1
@@ -697,6 +707,7 @@ void {name}
         # Nothing left to parse. Stop recursion.
         else:
             return model
+
 
 class SurrogateModel(DynamicDocument):
     """Base class for surrogate models.
@@ -1092,6 +1103,20 @@ class SurrogateModel(DynamicDocument):
             super(SurrogateModel, self).__setattribute__(name, value)
 
 
+    def exceptionOutOfBounds(self, oPoint):
+        """Method returning exception when a surrogate function is out of
+        bounds.
+
+        @returns (int) error code
+        """
+        oPointDict = {
+            k: oPoint[self.inputs_argPos(k)] for k in self.inputs.keys()
+        }
+        self.outsidePoint = EmbDoc(**oPointDict)
+        self.save()
+        return 200
+
+
     @classmethod
     def exceptionLoad(self, surrogateModelId):
         """Method returning exception when a surrogate function is not
@@ -1112,18 +1137,12 @@ class SurrogateModel(DynamicDocument):
         return 201
 
 
-    def exceptionOutOfBounds(self, oPoint):
-        """Method returning exception when a surrogate function is out of
-        bounds.
-
-        @returns (int) error code
+    @classmethod
+    def exceptionParametersNotValid(self, surrogateModelId):
+        """Method raising a exception when a surrogate model has no valid
+           parameters after loading it
         """
-        oPointDict = {
-            k: oPoint[self.inputs_argPos(k)] for k in self.inputs.keys()
-        }
-        self.outsidePoint = EmbDoc(**oPointDict)
-        self.save()
-        return 200
+        return 202
 
 
     def callModel(self, inputs):
@@ -1210,6 +1229,7 @@ class SurrogateModel(DynamicDocument):
             __raw__={'outsidePoint': { '$exists': True}}
         ).first()
 
+
     @classmethod
     def loadFromModule(self):
         """Method importing a surrogate model module."""
@@ -1223,6 +1243,15 @@ class SurrogateModel(DynamicDocument):
             return (m for m in modena.BackwardMappingModel.get_instances() if m._id == modName).next()
         except ImportError:
             print "MoDeNa framework error: could not find  '%s' " %(modName)
+
+
+    @classmethod
+    def loadParametersNotValid(self):
+        """Method importing a surrogate model module."""
+        return self.objects(
+            __raw__={ 'parameters': { '$size': 0 } }
+        ).first()
+
 
     @classmethod
     def get_instances(self):
@@ -1266,7 +1295,7 @@ class ForwardMappingModel(SurrogateModel):
         """
         Return an empty workflow
         """
-        return Workflow2([])
+        return Workflow([])
 
 
 class BackwardMappingModel(SurrogateModel):
@@ -1283,6 +1312,7 @@ class BackwardMappingModel(SurrogateModel):
 
     def __init__(self, *args, **kwargs):
         super(BackwardMappingModel, self).__init__(*args, **kwargs)
+
 
     def initKwargs(self, kwargs):
         checkAndConvertType(kwargs, 'exactTask', FireTaskBase)
@@ -1321,7 +1351,7 @@ class BackwardMappingModel(SurrogateModel):
 
             tl.append(fw)
 
-        return Workflow2(tl, name='exact tasks for new points')
+        return Workflow(tl, name='exact tasks for new points')
 
 
     def parameterFittingStrategy(self):
@@ -1388,7 +1418,9 @@ class BackwardMappingModel(SurrogateModel):
 
             if outsideValue > v['max']:
                 if outsideValue > inputsMinMax[k].max:
-                    raise OutOfBounds('new value is larger than function min for %s' % k)
+                    raise OutOfBounds(
+                        'new value is larger than function min for %s' % k
+                    )
 
                 value = min(
                     outsideValue*expansion_factor,
@@ -1401,7 +1433,9 @@ class BackwardMappingModel(SurrogateModel):
 
             elif outsideValue < v['min']:
                 if outsideValue < inputsMinMax[k].min:
-                    raise OutOfBounds('new value is smaller than function max for %s' % k)
+                    raise OutOfBounds(
+                        'new value is smaller than function max for %s' % k
+                    )
 
                 value = max(
                     outsideValue/expansion_factor,

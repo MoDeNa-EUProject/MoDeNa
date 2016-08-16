@@ -1,4 +1,3 @@
-#!/usr/bin/python
 '''
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
@@ -10,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014 MoDeNa Consortium, All rights reserved.
+    2014-2016 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -29,7 +28,7 @@ License
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
-    Initialisation script needed to run Bubble growth model.
+    Python package import definition for a MoDeNa surrogate model
 
 Authors
     Henrik Rusche
@@ -40,4 +39,3 @@ Contributors
 
 from polymerViscosity import f_polymerViscosity
 from polymerViscosity import m_polymerViscosity
-

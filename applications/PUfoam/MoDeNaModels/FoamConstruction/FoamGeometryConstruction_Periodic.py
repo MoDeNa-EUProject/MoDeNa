@@ -4,7 +4,7 @@ Packing and tesselation. Prepares representative volume element (RVE) of foam.
 
 @author    Mohammad Marvi-Mashhadi (IMDEA Materials)
 @author    Pavel Ferkl
-@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@copyright 2014-2016, MoDeNa Project. GNU Public License.
 @ingroup   foam_constr
 """
 import os

@@ -9,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014-2016 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -21,8 +21,8 @@ License
 
     Modena is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
+    FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+    details.
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
@@ -30,7 +30,6 @@ License
 
 """
 @file
-Python library of FireTasks
 This is the Surface Tension python module. Basically, it contains the following:
 
 The FireTask which controls the call of the detailed model. This detailed model is called
@@ -57,25 +56,14 @@ surrogate model parameters.
 
 
 @author    Jonas Mairhofer
-@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@copyright 2014-2016, MoDeNa Project. GNU Public License.
 @ingroup   app_foaming
 """
 
 import os
-import modena
-from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, CFunction, IndexSet, ModenaFireTask
-import modena.Strategy as Strategy
-from fireworks import Firework, Workflow, FWAction
+from modena import *
 from fireworks.utilities.fw_utilities import explicit_serialize
 from jinja2 import Template
-
-
-__author__ = 'Henrik Rusche'
-__copyright__ = 'Copyright 2014, MoDeNa Project'
-__version__ = '0.2'
-__maintainer__ = 'Henrik Rusche'
-__email__ = 'h.rusche@wikki.co.uk.'
-__date__ = 'Sep 4, 2014'
 
 
 blowing_agents = IndexSet(
