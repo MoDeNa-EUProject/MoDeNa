@@ -47,7 +47,8 @@ from fireworks.utilities.fw_utilities import explicit_serialize
 from jinja2 import Template
 from numpy.linalg import pinv
 from numpy import sin, cos, pi, matrix, array, dot
-
+import json
+import re
 # ********************************* Class ************************************ #
 @explicit_serialize
 class RheologyExactTask(ModenaFireTask):
@@ -105,7 +106,7 @@ class RheologyExactTask(ModenaFireTask):
     def execute_simulation(self):
         """ Method executing the detailed model
         """
-        return os.system('../src/rheologyexactdummy')
+        return os.system(os.path.dirname(os.path.abspath(__file__))+'/src/rheologyexactdummy')
 
     def task(self, fw_spec):
         """Method executed by FireWorks """
