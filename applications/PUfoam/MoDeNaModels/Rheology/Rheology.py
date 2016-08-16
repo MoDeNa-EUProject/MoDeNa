@@ -45,82 +45,38 @@ from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTas
 from fireworks import Firework, Workflow, FWAction
 from fireworks.utilities.fw_utilities import explicit_serialize
 from jinja2 import Template
-from numpy.linalg import pinv
-from numpy import sin, cos, pi, matrix, array, dot
 import json
-import re
+
 # ********************************* Class ************************************ #
 @explicit_serialize
 class RheologyExactTask(ModenaFireTask):
     """
     A FireTask that starts a microscopic code and updates the database.
     """
-    inputTemplate = Template('''{{ inpt['point']['T'] }}
-                                {{ inpt['point']['shear'] }}
-                                {{ inpt['point']['X'] }}
-	                        {{ inpt['point']['mu'] }}
-	                        {{ inpt['point']['ST'] }}'''.strip())
-
-    def post_processing(self, fname="RheologyExact.out"):
-        """Analyse output
-        """
-        # 1)                                          Read and process raw data
-        fc = tuple(open(fname, 'r'))#                                 Read file
-        DATA =  [[float(n) for n in re.findall(r'-?\d+.?\d+',l)] for l in fc]
-        del fc#                                         Delete raw file content
-
-        # 2)          First line of file contains parameters for the simulation
-        header = ('strain', 'omega', 'dt', 'eta_p', 'Gamma', 'r')
-        params = { k: v for (k, v) in zip(header, DATA.pop(0)) }
-        # DATA structure: [ [t, Gxx, Gxy, Gyy, dt, eta, dot_gamma, gamma]_1 , ... ]
-
-        # 3)                       Remove effects due to the initial conditions
-        Tc = 2*pi/params['omega']/params['dt']
-        tc = int(1*Tc)
-        te = int(6*Tc)
-
-        K = (te-tc)/1
-        indices = random.sample( range(tc, te) , K)
-        DATA = zip(*[ DATA[i] for i in sorted(indices)])
-        # DATA = [ col for col in zip(*DATA) ]#                 Remove entries
-        # DATA structure now transposed: [ [t_0 ... t_n], [Gxx_1 ... Gxx_n], ... ]
-
-        # 4)                               Generate input and response matrices
-        Y = matrix( DATA[2] ).transpose()#                      Response matrix
-
-        si = params['strain']*sin(params['omega']*array(DATA[0]) )#  Sine terms
-        co = params['strain']*cos(params['omega']*array(DATA[0]) )# Cosine term
-        X = matrix( zip(*[si, co]) )#                              Input matrix
-
-        #del si, co#, DATA
-
-        # 5)                                          Perform linear regression
-        b = pinv(X)*Y#                       pinv: Moore-Penrose pseudo-inverse
-
-        # 6)                                  eta_posity = abs(b0 + b1) / omega
-        bsum = dot( b.T, b ).A1[0]#               Inner product sums "b" vector
-        eta = sqrt( bsum )/params['omega']#
-
-        return eta
-
-    def execute_simulation(self):
-        """ Method executing the detailed model
-        """
-        return os.system(os.path.dirname(os.path.abspath(__file__))+'/src/rheologyexactdummy')
-
     def task(self, fw_spec):
-        """Method executed by FireWorks """
-        fout="RheologyExact.out"
-        fin="RheologyExact.in"
+
+        # Write input
+        Template('''{{ s['point']['T'] }}
+                {{ s['point']['shear'] }}
+                {{ s['point']['X'] }}
+                {{ s['point']['m0'] }}
+                {{ s['point']['m1'] }}
+		{{ s['point']['mu'] }}
+		{{ s['point']['ST'] }}'''.strip()).stream(s=self).dump('RheologyExact.in')
+
+
+        # Execute the detailed model
+        ret = os.system(os.path.dirname(os.path.abspath(__file__)) + '/src/rheologyexactdummy')
         # This enables backward mapping capabilities (not needed in this example)
-	self.inputTemplate.stream(inpt=self).dump(fin)
-        # call execution
-        self.handleReturnCode( self.execute_simulation() )
-        # call post processing
-        self['point']['mu_car'] = self.post_processing(fout)
-        self.post_processing(fout)
-        os.remove(fin)
-        os.remove(fout)
+        self.handleReturnCode(ret)
+
+        # Analyse output
+        f=open('RheologyExact.out','r')
+        self['point']['mu_car'] = float(f.readline())
+        f.close()
+
+        os.remove('RheologyExact.in')
+        os.remove('RheologyExact.out')
 
 with open(os.getcwd()+'/inputs/unifiedInput.json') as jsonfile:
     inputs=json.load(jsonfile)
@@ -138,7 +94,7 @@ void rheology_SM
     const double* inputs,
     double *outputs
 )
-{    
+{
     {% block variables %}{% endblock %}
 
     const double lambda = parameters[0];
@@ -152,23 +108,23 @@ void rheology_SM
     const double mu_b = 1;
     const double mu_c = 0;
     const double mu_d = 0.001;
-    const double X_gel = 0.615;
-    const double mu_0_const = 0.195; 
+    const double X_gel = '''+str(X_gel)+''';
+    const double mu_0_const = 0.195;
     const double mu_inf_const = 0.266;
-//    const double lambda = 11.35 ;
-//    const double alpha = 2;
-//    const double n_rh = 0.2;
 
-    double mu_0, mu_inf, f_t;
-    double mu_ap;
+    double mu_0, mu_inf;
+    double mu_car;
 
-    mu_0 = (log(X+mu_d) - log(mu_d) + pow(X_gel / ( X_gel - X ), mu_a + X*mu_b + mu_c*pow(X,2))) * mu_0_const; 
-    mu_inf = (log(X+mu_d) - log(mu_d) + pow(X_gel / ( X_gel - X ), mu_a + X*mu_b + mu_c*pow(X,2)))* mu_inf_const;
-    f_t = A_mu * exp(E_mu / R_rh / T );
+    if (X<X_gel) {
+        mu_0 = (log(X+mu_d) - log(mu_d) + pow(X_gel / ( X_gel - X ), mu_a + X*mu_b + mu_c*pow(X,2))) * mu_0_const;
+        mu_inf = (log(X+mu_d) - log(mu_d) + pow(X_gel / ( X_gel - X ), mu_a + X*mu_b + mu_c*pow(X,2)))* mu_inf_const;
 
-    mu_ap = (mu_inf + (mu_0 - mu_inf)*pow(1 + pow(lambda*shear,alpha), (n_rh - 1) / alpha)) * f_t;
-    //printf("apparent viscosity %f", mu_ap);
-    outputs[0] = mu_ap;
+        mu_car = (mu_inf + (mu_0 - mu_inf)*pow(1 + pow(lambda*shear,alpha), (n_rh - 1) / alpha));
+    } else {
+        mu_car = 1e6;
+    }
+    //    printf("apparent viscosity car %f", mu_car);
+    outputs[0] = mu_car;
 }
 ''',
    # These are global bounds for the function
@@ -176,11 +132,13 @@ void rheology_SM
        'T': {'min': 0, 'max': 9e99 },
        'shear': {'min': 0, 'max': 9e99 },
        'X': {'min': 0, 'max': 1 },
+       'm0': {'min': 0, 'max': 9e99 },
+       'm1': {'min': 0, 'max': 9e99 },
        'mu': {'min': 0, 'max': 1000 },
        'ST': {'min': 0, 'max': 100 },
    },
    outputs={
-       'mu_ap': { 'min': 0, 'max': 9e99, 'argPos': 0 },
+       'mu_car': { 'min': 0, 'max': 9e99, 'argPos': 0 },
    },
    parameters={
        'lamdba': { 'min': 1.35, 'max': 21.35, 'argPos': 0 },
@@ -190,7 +148,7 @@ void rheology_SM
 )
 
 m = BackwardMappingModel(
-    _id= 'Rheology',    
+    _id= 'Rheology',
     surrogateFunction= f,
     exactTask= RheologyExactTask(),
     substituteModels= [ polymerViscosity.m_polymerViscosity, SurfaceTension.m],
@@ -200,7 +158,9 @@ m = BackwardMappingModel(
         {
             'T': [270.0, 330.0], # 330 is the maximum that is supported by Surface Tension Model (Air+THF)
             'shear': [0.01, 0.1],
-            'X': [0.1, 0.3],
+            'X': [0, 0.3],
+            'm0': [1e8, 1e15],
+            'm1': [1e-30, 1e5],
         },
     ),
     outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(
@@ -215,4 +175,3 @@ m = BackwardMappingModel(
         maxIterations= 5 # Currently not used
     ),
 )
-
