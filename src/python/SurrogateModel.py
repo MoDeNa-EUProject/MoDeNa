@@ -1071,7 +1071,7 @@ class SurrogateModel(DynamicDocument):
             #print 'i =', str(i)
 
             # Call the surrogate model
-            out = cModel.call(i, checkBounds= checkBounds)
+            out = cModel(i, checkBounds= checkBounds)
 
             #print '%i %g - %g = %g' % (
             #    idx, out[0], output[idx], out[0] - output[idx]
@@ -1166,7 +1166,7 @@ class SurrogateModel(DynamicDocument):
             i[self.inputs_argPos(k)] = inputs[k]
 
         # Call the surrogate model
-        out = cModel.call(i)
+        out = cModel(i)
 
         outputs = {
             self.expandIndices(k): out[v.argPos]
