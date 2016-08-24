@@ -85,6 +85,7 @@ inputs_thermalConductivity = modena_inputs_new (thermalConductivitymodel);
 outputs_thermalConductivity = modena_outputs_new (thermalConductivitymodel);
 
 // inputs argPos
+kineticTime_Pos  = modena_model_inputs_argPos(kinetics, "'kineticTime'");
 Catalyst_1_Pos   = modena_model_inputs_argPos(kinetics, "'Catalyst_1'");
 CE_A0_Pos        = modena_model_inputs_argPos(kinetics, "'CE_A0'");
 CE_A1_Pos        = modena_model_inputs_argPos(kinetics, "'CE_A1'");
