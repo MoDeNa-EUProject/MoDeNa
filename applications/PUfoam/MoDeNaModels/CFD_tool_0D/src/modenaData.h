@@ -38,6 +38,7 @@ modena_outputs_t *outputs_strutContent;
 modena_inputs_t *inputs_thermalConductivity;
 modena_outputs_t *outputs_thermalConductivity;
 
+size_t kineticTime_Pos;
 size_t Catalyst_1_Pos;
 size_t CE_A0_Pos;
 size_t CE_A1_Pos;
