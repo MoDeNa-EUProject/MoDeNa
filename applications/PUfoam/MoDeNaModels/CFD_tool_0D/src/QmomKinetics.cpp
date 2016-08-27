@@ -202,6 +202,7 @@ void QmomKinetics( const state_type &y , state_type &dydt , double t )
             break;
         case 3:
             // set input vector
+            modena_inputs_set(inputs_kinetics, kineticTime_Pos, t);
             modena_inputs_set(inputs_kinetics, Catalyst_1_Pos, Catalyst_1);
             modena_inputs_set(inputs_kinetics, CE_A0_Pos, CE_A0);
             modena_inputs_set(inputs_kinetics, CE_A1_Pos, CE_A1);

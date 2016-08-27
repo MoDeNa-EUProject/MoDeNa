@@ -140,6 +140,7 @@ if (KineticsModel == "RF-1")
 {
     forAll(mesh.C(), celli)
     {
+        modena_inputs_set(inputs_kinetics, kineticTime_Pos, runTime.value());
         modena_inputs_set(inputs_kinetics, Catalyst_1_Pos, (Catalyst_1[celli]));
         modena_inputs_set(inputs_kinetics, CE_A0_Pos, (CE_A0[celli]));
         modena_inputs_set(inputs_kinetics, CE_A1_Pos, (CE_A1[celli]));
