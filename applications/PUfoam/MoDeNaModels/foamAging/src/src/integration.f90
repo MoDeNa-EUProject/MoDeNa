@@ -15,7 +15,7 @@ subroutine degas
     use physicalProperties
     use ioutils, only: newunit
     use constants
-    use model, only: modelPU,initfield
+    use model, only: modelPU,initfield,ngas
     use inout, only: input,output
 	implicit none
 	integer ipar(20)
@@ -44,11 +44,14 @@ subroutine degas
     real(dp) :: rhop
     real(dp) :: ccyp
 
+    ! model should be general, but physical properties hardcoded for ngas=3
+    ngas=3
+    ! load inputs
 	call input(rpar, ipar)
     tbeg = rpar(24)
     temp=rpar(10)/Rg
 	nroutputs = ipar(1)
-	nFV = ipar(5) != (divwall+1)*ncell	! total number of FV
+	nFV = ipar(5) != (divwall+1)*ncell	! total number of FV TODO
     nEQ = 3*nFV
     solModel=ipar(6:8)
     diffModel = ipar(9:11)
@@ -103,13 +106,32 @@ subroutine degas
 !c -----------------------------------
 !c Allocate memory for working arrays
 !c -----------------------------------
-    allocate( ystate(1:nEQ  + 20)   )
-    allocate( yprime(1:nEQ)   )
-    allocate( rwork (1:LRW) )
-    allocate( iwork (1:LIW) )
+    allocate(ystate(1:nEQ))
+    allocate(yprime(1:nEQ))
+    allocate(rwork (1:LRW))
+    allocate(iwork (1:LIW))
+    allocate(dz(nfv))
+    allocate(dif(neq))
+    allocate(sol(neq))
+    allocate(bc(ngas))
 !c ----------------------------------
 !c pack ystate
 !c ----------------------------------
+    k=1
+    do i = 1, ipar(2) ! ncell
+        dz(k)=rpar(1) != dcell
+        dif(k*(ngas-1)+1)=rpar(13) != Dgas
+        dif(k*(ngas-1)+2)=rpar(13) != Dgas
+        dif(k*(ngas-1)+3)=rpar(13) != Dgas
+        sol(k*(ngas-1)+1)=1 != Sgas
+        sol(k*(ngas-1)+2)=1 != Sgas
+        sol(k*(ngas-1)+3)=1 != Sgas
+        k=k+1
+        do j = 1, ipar(4)-1 ! divwall
+            dz(k)=rpar(2)/(ipar(4)-1) != dwall/divwall
+            k=k+1
+        end do
+    end do
 	ystate(nEQ + 1 ) = rpar(1) != dcell
 	ystate(nEQ + 2 ) = rpar(2) != dwall
 	ystate(nEQ + 3 ) = rpar(3) != tend

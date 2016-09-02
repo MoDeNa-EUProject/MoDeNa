@@ -5,8 +5,16 @@
 !! @ingroup   foam_aging
 module model
     implicit none
+    integer :: &
+        ngas,&    ! number of gases
+        nfv     ! number of finite volumes
+    real(dp), dimension(:), allocatable :: &
+        dz,&    ! size of finite volume
+        dif,&   ! diffusivity
+        sol,&   ! solubility
+        bc      ! boundary condition
     private
-    public modelPU,initfield
+    public modelPU,initfield,ngas,nfv,dz,dif,sol
 contains
 !********************************BEGINNING*************************************
 !> model supplied to the integrator
@@ -34,7 +42,7 @@ subroutine modelPU(neq, time, ystate, yprime)	! ODEPACK call
     real(dp) :: pBCair, pBCCO2, pBCpent 	! boundary conds
     real(dp) :: dcell, dwall, hwall
     real(dp) :: cwg
-    real(dp) :: RT, pressure
+    real(dp) :: RT
 
     real(dp), allocatable :: cAIR(:) , cCO2(:), cPENT(:) !concentrations
     real(dp), allocatable :: dcAIR(:), dcCO2(:), dcPENT(:) ! changes of partial pressures
@@ -47,7 +55,7 @@ subroutine modelPU(neq, time, ystate, yprime)	! ODEPACK call
     DCO2    = ystate(nEQ + 5 ) != rpar(5) != DCO2
     Sair    = ystate(nEQ + 6 ) != rpar(6) !  Sair
     SCO2    = ystate(nEQ + 7 ) != rpar(7) != SCO2
-    pressure= ystate(nEQ + 8 ) != rpar(8) != pressure
+    ! pressure= ystate(nEQ + 8 ) != rpar(8) != pressure
     !ystate(nEQ + 9 ) = rpar(9) != initpressure
     RT      = ystate(nEQ + 10) != rpar(10)!= R*T
 
