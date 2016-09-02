@@ -6,9 +6,9 @@
 !! @ingroup   foam_aging
 module physicalProperties
     use constants
+    use globals, only: solModel,diffModel
     use fmodena
     implicit none
-    integer :: solModel(3),diffModel(3)
     !modena variables
     integer(c_int) :: ret
     type(c_ptr) :: rhopModena = c_null_ptr

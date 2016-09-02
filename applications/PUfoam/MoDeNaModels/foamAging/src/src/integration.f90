@@ -11,84 +11,90 @@ contains
 !********************************BEGINNING*************************************
 !> calculates the evolution of concentrations of gases
 subroutine degas
-    use conductivity, only: equcond
-    use physicalProperties
-    use ioutils, only: newunit
     use constants
-    use model, only: modelPU,initfield
+    use globals
+    use physicalProperties
+    use conductivity, only: equcond
+    use ioutils, only: newunit
+    use model, only: modelPU,initfield,ngas,nfv,dz,dif,sol,bc
     use inout, only: input,output
-	implicit none
-	integer ipar(20)
-
-	integer :: nroutputs, multiplicator
-
-	real(dp) :: rpar(24)
-
+	integer :: multiplicator
     integer :: itol, itask, istate, iopt
-    integer :: MF, ML, MU, LRW, LIW, LENRAT, NNZ, LWM
-    integer :: nFV, nEQ
-    integer :: i, counter, fi
+    integer :: MF, ML, MU, LRW, LIW, LENRAT, NNZ, LWM, NEQ
+    integer :: i, j, k, counter, fi
     integer, allocatable :: IWORK(:)
 
-    real(dp) :: tin, tout, tend, keq, tbeg
+    real(dp) :: tin, tout, keq
     real(dp) :: rtol, atol, jdem
 
     real(dp), allocatable :: ystate(:), yprime(:) ! vector of state
     real(dp), allocatable :: RWORK(:)
+    real(dp), allocatable :: yinit(:)
 
-    real(dp) :: temp,temp_cond
-    real(dp) :: fstrut
-    real(dp) :: rhof
-    real(dp), dimension(3) :: x0
     real(dp) :: eps
-    real(dp) :: rhop
-    real(dp) :: ccyp
+	real(dp) :: pcA, pcB, pcApcB, TcA, TcB, TcATcB
+	real(dp) :: MA, MB, Mterm ,a, b, aToverTcsb
 
-	call input(rpar, ipar)
-    tbeg = rpar(24)
-    temp=rpar(10)/Rg
-	nroutputs = ipar(1)
-	nFV = ipar(5) != (divwall+1)*ncell	! total number of FV
-    nEQ = 3*nFV
-    solModel=ipar(6:8)
-    diffModel = ipar(9:11)
+    ! model should be general, but physical properties hardcoded for ngas=3
+    ngas=3
+    ! load inputs
+	call input
+    if (sheet) then
+        ncell=nint((dfoam-dsheet)/(dcell+dwall))
+    else
+        ncell = nint(dfoam/(dcell+dwall))
+        divsheet=0
+    endif
+    ! gas difusivity accoriding to Bird 1975, p.505, eq. 16.3-1
+    pcA = 33.5e0_dp      !  N2
+    pcB = 72.9e0_dp      ! CO2
+    pcApcB = (pcA*pcB)**(1.0e0_dp/3.0e0_dp) ! CO2, N2, B-1 p. 744
+    TcA = 126.2e0_dp     ! N2
+    TcB = 304.2e0_dp     ! CO2
+    TcATcB = (TcA*TcB)**(5.0e0_dp/12.0e0_dp)
+    MA = 28.02e0_dp
+    MB = 44.01e0_dp
+    Mterm = dsqrt(1/MA + 1/MB)
+    a = 2.7450e-4_dp ! non-polar pairs
+    b = 1.823e0_dp
+    aToverTcsb = a*(temp/dsqrt(TcA*TcB))**b
+    ! pressure in atmospheres, cm2/s
+    Dgas = (aToverTcsb*pcApcB*TcATcB*Mterm)*1.0e5_dp/pressure
+    Dgas = Dgas * 1.0e-4_dp ! m2/s
+	nFV = divsheet+ncell*(divwall+divcell)
+    nEQ = ngas*nFV
 ! -----------------------------------
 ! find out physical properties
 ! -----------------------------------
     call createModels
-    fstrut=rpar(20)
-    rhof=rpar(21)
-    rhop=rpar(23)
     eps=1-rhof/rhop
-    temp_cond=rpar(22)
-    if (ipar(6)==1) then
-        rpar(6)=airSolubility(temp)
+    if (solModel(1)==1) then
+        Sair=airSolubility(temp)
     endif
-    if (ipar(7)==1) then
-        rpar(7)=cdSolubility(temp)
+    if (solModel(2)==1) then
+        SCO2=cdSolubility(temp)
     endif
-    if (ipar(8)==1) then
-        rpar(12)=cypSolubility(temp)
+    if (solModel(3)==1) then
+        Spent=cypSolubility(temp)
     endif
-    if (ipar(9)==1) then
-        rpar(4)=airDiffusivity(temp)
+    if (diffModel(1)==1) then
+        Dair=airDiffusivity(temp)
     endif
-    if (ipar(10)==1) then
-        rpar(5)=cdDiffusivity(temp)
+    if (diffModel(2)==1) then
+        DCO2=cdDiffusivity(temp)
     endif
-    if (ipar(11)==1) then
-        rpar(11)=cypDiffusivity(temp)
+    if (diffModel(3)==1) then
+        Dpent=cypDiffusivity(temp)
     endif
-	write(*,*) 'air solubility',rpar(6)
-    write(*,*) 'CO2 solubility',rpar(7)
-	write(*,*) 'pentane solubility',rpar(12)
-	write(*,*) 'air diffusivity',rpar(4)
-    write(*,*) 'CO2 diffusivity',rpar(5)
-	write(*,*) 'pentane diffusivity',rpar(11)
-	write(*,*) 'air permeability',rpar(6)*rpar(4)
-    write(*,*) 'CO2 permeability',rpar(7)*rpar(5)
-	write(*,*) 'pentane permeability',rpar(12)*rpar(11)
-    ! stop
+	write(*,*) 'air solubility',Sair
+    write(*,*) 'CO2 solubility',SCO2
+	write(*,*) 'pentane solubility',Spent
+	write(*,*) 'air diffusivity',Dair
+    write(*,*) 'CO2 diffusivity',DCO2
+	write(*,*) 'pentane diffusivity',Dpent
+	write(*,*) 'air permeability',Sair*Dair
+    write(*,*) 'CO2 permeability',SCO2*DCO2
+	write(*,*) 'pentane permeability',Spent*Dpent
 !c -----------------------------------
 !c Allocate memory for working arrays
 !c -----------------------------------
@@ -103,41 +109,70 @@ subroutine degas
 !c -----------------------------------
 !c Allocate memory for working arrays
 !c -----------------------------------
-    allocate( ystate(1:nEQ  + 20)   )
-    allocate( yprime(1:nEQ)   )
-    allocate( rwork (1:LRW) )
-    allocate( iwork (1:LIW) )
+    allocate(ystate(1:nEQ))
+    allocate(yprime(1:nEQ))
+    allocate(rwork (1:LRW))
+    allocate(iwork (1:LIW))
+    allocate(dz(nfv))
+    allocate(dif(neq))
+    allocate(sol(neq))
+    allocate(bc(ngas))
+    allocate(yinit(ngas))
 !c ----------------------------------
-!c pack ystate
+!c mesh
 !c ----------------------------------
-	ystate(nEQ + 1 ) = rpar(1) != dcell
-	ystate(nEQ + 2 ) = rpar(2) != dwall
-	ystate(nEQ + 3 ) = rpar(3) != tend
-	ystate(nEQ + 4 ) = rpar(4) != 0.21e0_dp*DO2+0.79e0_dp*DN2      ! average air
-	ystate(nEQ + 5 ) = rpar(5) != DCO2
-	ystate(nEQ + 6 ) = rpar(6) != 0.21e0_dp*SO2+0.79e0_dp*SN2      ! average air
-	ystate(nEQ + 7 ) = rpar(7) != SCO2
-	ystate(nEQ + 8 ) = rpar(8) != pressure
-	! ystate(nEQ + 9 ) = rpar(9) != initpressure
-	ystate(nEQ + 10) = rpar(10)!= R*T
-	ystate(nEQ + 11) = dble(ipar(2))! ncell
-	ystate(nEQ + 12) = dble(ipar(4))  ! onecell
-    ystate(nEQ + 13) = rpar(11) != Dpent
-	ystate(nEQ + 14) = rpar(12) != Spent
-	ystate(nEQ + 15) = rpar(13) != Dgas
-
-	ystate(nEQ + 16) = rpar(14) != pBCair
-    ystate(nEQ + 17) = rpar(15) != pBCCO2
-    ystate(nEQ + 18) = rpar(16) != pBCpent
+    k=1
+    do i=1,divsheet
+        dz(k)=dsheet/divsheet
+        dif(ngas*(k-1)+1)=sheetDair
+        dif(ngas*(k-1)+2)=sheetDCO2
+        dif(ngas*(k-1)+3)=sheetDpent
+        sol(ngas*(k-1)+1)=sheetSair
+        sol(ngas*(k-1)+2)=sheetSCO2
+        sol(ngas*(k-1)+3)=sheetSpent
+        k=k+1
+    enddo
+    do i = 1, ncell
+        do j=1,divwall
+            dz(k)=dwall/divwall
+            dif(ngas*(k-1)+1)=Dair
+            dif(ngas*(k-1)+2)=DCO2
+            dif(ngas*(k-1)+3)=Dpent
+            sol(ngas*(k-1)+1)=Sair
+            sol(ngas*(k-1)+2)=SCO2
+            sol(ngas*(k-1)+3)=Spent
+            k=k+1
+        enddo
+        do j=1,divcell
+            dz(k)=dcell/divcell
+            dif(ngas*(k-1)+1)=Dgas
+            dif(ngas*(k-1)+2)=Dgas
+            dif(ngas*(k-1)+3)=Dgas
+            sol(ngas*(k-1)+1)=1
+            sol(ngas*(k-1)+2)=1
+            sol(ngas*(k-1)+3)=1
+            k=k+1
+        enddo
+    end do
 !c ----------------------------------
 ! initial conditions
 !c ----------------------------------
-    call initfield(ystate, nFV, nEQ, rpar)
+    yinit(1)=pICair*pressure/Sair
+    yinit(2)=pICCO2*pressure/SCO2
+    yinit(3)=pICpent*pressure/Spent
+    call initfield(neq,ystate,yinit) !TODO: wrong in gas and sheet
+    print*, ystate
+    stop
+!c ----------------------------------
+! boundary conditions
+!c ----------------------------------
+    bc(1)=pBCair/Sair
+    bc(2)=pBCCO2/SCO2
+    bc(3)=pBCpent/Spent
 !c ----------------------------------
 ! initialize integration
 !c ----------------------------------
     open(10,file='dcmp_progress.out', status='unknown')
-    tend = rpar(3)
     counter = 1
     itol = 1
     rtol = 0
