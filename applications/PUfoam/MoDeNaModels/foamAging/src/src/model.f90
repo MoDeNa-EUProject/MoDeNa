@@ -3,44 +3,43 @@
 !! @author    Michal Vonka
 !! @author    Pavel Ferkl
 !! @ingroup   foam_aging
-
-!*******************************************************************************************
-!0 pointer allocated,
+module model
+    implicit none
+    private
+    public modelPU,initfield
+contains
+!********************************BEGINNING*************************************
 !> model supplied to the integrator
 subroutine modelPU(neq, time, ystate, yprime)	! ODEPACK call
 ! 12/07/23 - change of model to describe diffusion on H2 and N2 throug PS, wall
-!	is discretized into finite elements, pressure in cell is in equilibrium to the
-!	pressure on the wall, solubility given by Henry's law cpol = H*cgas
+!	is discretized into finite elements, pressure in cell is in equilibrium to
+!	the pressure on the wall, solubility given by Henry's law cpol = H*cgas
 !	- not ordinary definition of H but the definition of H fits
 !	!!!this model is for filling the foam
 ! 2015/03/12 change in model with respect to ODEPACK calling
 ! michal.vonka@seznam.cz
-    implicit none
-    integer neq							! = 1 (X-direction)
+    use constants
+    integer :: neq
+    real(dp) :: time
+    real(dp) :: ystate(*)
+    real(dp) :: yprime(*)
 
-    double precision :: time
-    double precision :: ystate(*)		!
-    double precision :: yprime(*)		!
+    integer :: i, j
+    integer :: nFV, onecell, ncell
 
-    integer i, j
-    integer job
-    integer nFV, onecell, ncell
+    real(dp) :: Dair, DCO2, Dpent     ! difusivities in polymer
+    real(dp) :: Sair, SCO2, Spent     ! solubilities
+    real(dp) :: HHair, HHCO2, HHpent   ! henry law cPOL = S*p*cGAS = H*cGAS
+    real(dp) :: D              ! diffusivity in gas
+    real(dp) :: pBCair, pBCCO2, pBCpent 	! boundary conds
+    real(dp) :: dcell, dwall, hwall
+    real(dp) :: cwg
+    real(dp) :: RT, pressure
 
-    double precision Dair, DCO2, Dpent     ! difusivities in polymer
-    double precision Sair, SCO2, Spent     ! solubilities
-    double precision HHair, HHCO2, HHpent   ! henry law cPOL = S*p*cGAS = H*cGAS
-    double precision D              ! diffusivity in gas
-    double precision pBCair, pBCCO2, pBCpent 	! boundary conds
+    real(dp), allocatable :: cAIR(:) , cCO2(:), cPENT(:) !concentrations
+    real(dp), allocatable :: dcAIR(:), dcCO2(:), dcPENT(:) ! changes of partial pressures
+    real(dp), allocatable :: jAIR(:) , jCO2(:),jPENT(:)  ! fluxes in x, dir
 
-    double precision dcell, dwall, hwall
-    double precision cwg
-    double precision RT, pressure
-
-    double precision, allocatable :: cAIR(:) , cCO2(:), cPENT(:) !concentrations
-    double precision, allocatable :: dcAIR(:), dcCO2(:), dcPENT(:) ! changes of partial pressures
-    double precision, allocatable :: jAIR(:) , jCO2(:),jPENT(:)  ! fluxes in x, dir
-
-    !c
     dcell   = ystate(nEQ + 1 )
     dwall   = ystate(nEQ + 2 )
     !tend    = ystate(nEQ + 3 )
@@ -62,12 +61,9 @@ subroutine modelPU(neq, time, ystate, yprime)	! ODEPACK call
     nFV  = onecell*ncell
 
     ! boundary conditions
-
     pBCair = ystate(nEQ + 16) != rpar(14) != pBCair
     pBCCO2 = ystate(nEQ + 17) != rpar(15) != pBCCO2
     pBCpent= ystate(nEQ + 18) != rpar(16) != pBCpent
-
-    continue
     !c
     !c ------------------------------------------------------------
     !c
@@ -84,24 +80,19 @@ subroutine modelPU(neq, time, ystate, yprime)	! ODEPACK call
     endif
 
     !c        zero fluxes
-    jAIR(0:nFV) = 0.0d0
-    jCO2(0:nFV) = 0.0d0
-    jPENT(0:nFV) = 0.0d0
+    jAIR(0:nFV) = 0.0e0_dp
+    jCO2(0:nFV) = 0.0e0_dp
+    jPENT(0:nFV) = 0.0e0_dp
 
-    dcAIR(1:nFV) = 0.0d0
-    dcCO2(1:nFV) = 0.0d0
-    dcPENT(1:nFV) = 0.0d0
+    dcAIR(1:nFV) = 0.0e0_dp
+    dcCO2(1:nFV) = 0.0e0_dp
+    dcPENT(1:nFV) = 0.0e0_dp
     !c	unpack state vars
-    job = 1
-
     cAIR(1:nFV) = ystate(1:nFV)
     cCO2(1:nFV) = ystate(nFV+1:2*nFV)
     cPENT(1:nFV) = ystate(2*nFV+1:3*nFV)
     !c ************************************************************************
-    !c
-
     hwall = dwall/dfloat(onecell-1)	! size of FV in wall, ocell-1 elements in wall
-
     !c
     !c ************************************************************************
     !c	Diffusion of AIR
@@ -111,24 +102,18 @@ subroutine modelPU(neq, time, ystate, yprime)	! ODEPACK call
         if (mod(j,onecell).eq.0) then   ! from gas to polymer
             HHair = cAIR(j)*RT*Sair     ! H = p * S
             cwg = (D*hwall*cAIR(j) + Dair*dcell*cAIR(j+1))/(D*hwall+Dair*dcell*HHair)
-            jAIR(j) = D*(cAIR(j)-cwg)/dcell*2.0d0
-            continue
+            jAIR(j) = D*(cAIR(j)-cwg)/dcell*2.0e0_dp
         endif
         if ((mod(j,onecell).ne.0).and.(mod(j,onecell).ne.(onecell-1))) then ! through polymer
             jAIR(j) = Dair*(cAIR(j)-cAIR(j+1))/hwall ! j = D*(Left-Right)/h = - D*(Right-Left)/h
-            continue
         endif
         if (mod(j,onecell).eq.(onecell-1)) then ! to gas in cell
             HHair = cAIR(j+1)*RT*Sair   ! H = p * S, p = c(in next cell)* RT
             cwg= (Dair*dcell*cAIR(j)+D*hwall*cAIR(j+1))/(Dair*HHair*dcell+D*hwall)
-            jAIR(j) = D*(cwg-cAIR(j+1))/dcell*2.0d0
-            continue
+            jAIR(j) = D*(cwg-cAIR(j+1))/dcell*2.0e0_dp
         endif
     enddo
-    jAIR(nFV) = 0.0d0		! last cell, zero flux
-    continue
-
-    !
+    jAIR(nFV) = 0.0e0_dp		! last cell, zero flux
     !c BALANCES AIR
     do j = 1, nFV
         if (mod(j,onecell).eq.0) then   ! balance in cells
@@ -139,7 +124,6 @@ subroutine modelPU(neq, time, ystate, yprime)	! ODEPACK call
     enddo
     ! save into the yprime
     yprime(1:nFV) = dcAIR(1:nFV)
-
     !c ************************************************************************
     !!c	Diffusion of CO2
     !!
@@ -148,24 +132,18 @@ subroutine modelPU(neq, time, ystate, yprime)	! ODEPACK call
         if (mod(j,onecell).eq.0) then   ! from gas to polymer
             HHCO2 = cCO2(j)*RT*SCO2     ! H = p * S
             cwg = (D*hwall*cCO2(j) + DCO2*dcell*cCO2(j+1))/(D*hwall+DCO2*dcell*HHCO2)
-            jCO2(j) = D*(cCO2(j)-cwg)/dcell*2.0d0
-            continue
+            jCO2(j) = D*(cCO2(j)-cwg)/dcell*2.0e0_dp
         endif
         if ((mod(j,onecell).ne.0).and.(mod(j,onecell).ne.(onecell-1))) then ! through polymer
             jCO2(j) = DCO2*(cCO2(j)-cCO2(j+1))/hwall ! j = D*(Left-Right)/h = - D*(Right-Left)/h
-            continue
         endif
         if (mod(j,onecell).eq.(onecell-1)) then ! to gas in cell
             HHCO2 = cCO2(j+1)*RT*SCO2     ! H = p * S, p = c(in next cell)* RT
             cwg= (DCO2*dcell*cCO2(j)+D*hwall*cCO2(j+1))/(DCO2*HHCO2*dcell+D*hwall)
-            jCO2(j) = D*(cwg-cCO2(j+1))/dcell*2.0d0
-            continue
+            jCO2(j) = D*(cwg-cCO2(j+1))/dcell*2.0e0_dp
         endif
     enddo
-    jCO2(nFV) = 0.0d0		! last cell, zero flux
-    continue
-
-    !
+    jCO2(nFV) = 0.0e0_dp		! last cell, zero flux
     !c BALANCES AIR
     do j = 1, nFV
         if (mod(j,onecell).eq.0) then   ! balance in cells
@@ -176,8 +154,6 @@ subroutine modelPU(neq, time, ystate, yprime)	! ODEPACK call
     enddo
     ! save into the yprime
     yprime(nFV+1:2*nFV) = dcCO2(1:nFV)
-
-
     !c
     !c ************************************************************************
     !c	Diffusion of PENTANE
@@ -187,24 +163,18 @@ subroutine modelPU(neq, time, ystate, yprime)	! ODEPACK call
         if (mod(j,onecell).eq.0) then   ! from gas to polymer
             HHpent = cPENT(j)*RT*Spent ! H = p * S
             cwg = (D*hwall*cPENT(j) + Dpent*dcell*cPENT(j+1))/(D*hwall+Dpent*dcell*HHpent)
-            jPENT(j) = D*(cPENT(j)-cwg)/dcell*2.0d0
-            continue
+            jPENT(j) = D*(cPENT(j)-cwg)/dcell*2.0e0_dp
         endif
         if ((mod(j,onecell).ne.0).and.(mod(j,onecell).ne.(onecell-1))) then ! through polymer
             jPENT(j) = Dpent*(cPENT(j)-cPENT(j+1))/hwall ! j = D*(Left-Right)/h = - D*(Right-Left)/h
-            continue
         endif
         if (mod(j,onecell).eq.(onecell-1)) then ! to gas in cell
             HHpent = cPENT(j+1)*RT*Spent   ! H = p * S, p = c(in next cell)* RT
             cwg= (Dpent*dcell*cPENT(j)+D*hwall*cPENT(j+1))/(Dpent*HHpent*dcell+D*hwall)
-            jPENT(j) = D*(cwg-cPENT(j+1))/dcell*2.0d0
-            continue
+            jPENT(j) = D*(cwg-cPENT(j+1))/dcell*2.0e0_dp
         endif
     enddo
-    jPENT(nFV) = 0.0d0		! last cell, zero flux
-    continue
-
-    !
+    jPENT(nFV) = 0.0e0_dp		! last cell, zero flux
     !c BALANCES PENTANE
     do j = 1, nFV
         if (mod(j,onecell).eq.0) then   ! balance in cells
@@ -215,64 +185,43 @@ subroutine modelPU(neq, time, ystate, yprime)	! ODEPACK call
     enddo
     ! save into the yprime
     yprime(2*nFV+1:3*nFV) = dcPENT(1:nFV)
+end subroutine modelPU
+!***********************************END****************************************
 
-    continue
-return
-end
+!********************************BEGINNING*************************************
+!> set initial conditions
+subroutine initfield(ystate, nFV, nEQ, rpar)
+    use constants
+    integer i, onecell, nFV, nEQ
+    real(dp) pBCair, pBCCO2, pBCpent, RT, pressure
+        real(dp) pICair, pICCO2, pICpent
+    real(dp) Sair, SCO2, Spent
+    real(dp) ystate(:), rpar(:)
 
+    !ncell = dint(ystate(nEQ + 11))
+    onecell = dint(ystate(nEQ + 12)) != dble(ipar(4))
 
-subroutine jdem (neq, t, y, j, ia, ja, pdj)
-!-----------------------------------------------------------------------
-! Should introduce own sparcity model, must fill
-! be careful about mf for ODE pack
-!-----------------------------------------------------------------------
-!
-integer neq, j, ia, ja
-double precision t, y, pdj
-dimension y(neq), ia(*), ja(*), pdj(neq)
+	RT     = ystate(nEQ + 10) != rpar(10)!= RT
 
-return
-end
+	Spent = rpar(12) != Spent
+	Sair  = rpar(6) != 0.21e0_dp*SO2+0.79e0_dp*SN2      ! average air
+	SCO2  = rpar(7) != SCO2
+	pressure = rpar(8) !=
 
-!do j = 1, ncell			! more complex structure
-!    !c	! CONTINUITY OF FLUXES on wall gas/polymer - expressed by henry s law on side of gas
-!    cwg = (Dair*dcell*cAIR((j-1)*(onecell)+1) + D*hwall*cAIR((j-1)*(onecell)  ))/(D*hwall+Dair*dcell*HHair)
-!    !c
-!    !c	! flux through the gas and wall - constant flux
-!    !c	! flux_intensity = D * (LEFT-RIGHT)
-!    jAIR((j-1)*(onecell)) = D*(cAIR((j-1)*(onecell)) - cwg)/(dcell/2.0d0)
-!
-!    !c	diffusion through the wall
-!    do i = 1, onecell-2	! fluxes through the wall
-!        jAIR((j-1)*(onecell)+i) =                                 &
-!                    Dair/hwall * (cAIR((j-1)*(onecell) + i)      &
-!                                - cAIR((j-1)*(onecell) + i+1))
-!!        write(*,*) (j-1)*(onecell)
-!!        continue
-!    enddo
-!    !c	! CONTINUITY OF FLUXES on wall polymer/gas, GAS SIDE
-!    cwg = (Dair *dcell*cAIR((j-1)*onecell+(onecell-1))        &
-!        +  D*    hwall*cAIR((j-1)*onecell+(onecell  )))      &
-!        /(D*hwall+Dair*dcell*HHair)
-!    !c
-!    jAIR((j-1)*onecell+(onecell-1))=Dair*(cAIR((j-1)*onecell+(onecell-1))  &
-!                                 - cwg*HHair) /(hwall / 2.0d0)
-!enddo
-
-!jAIR(nFV) = 0.0d0		! last cell, zero flux
-!continue
-
-!c	balances in walls
-!do j = 1, ncell
-!    do i = 1, onecell-1
-!        dcAIR((j-1)*onecell+i) = (jAIR((j-1)*onecell + i-1)         &
-!                               -  jAIR((j-1)*onecell + i  ))/hwall
-!    enddo
-!enddo
-!continue
-!!c
-!!c	ballance of the cells
-!do j = 1, ncell
-!    dcAIR((j-1)*onecell + onecell) = (jAIR((j-1)*onecell + onecell-1)      &
-!                                 - jAIR((j-1)*onecell+onecell))/dcell
-!enddo
+    pICair = rpar(17)
+    pICCO2 = rpar(18)
+    pICpent= rpar(19)
+	do i = 1, nFV
+        if (mod(i,onecell).eq.0) then   ! initial concentration in cells
+            ystate(i      ) = pICair /RT
+            ystate(i+  nFV) = pICCO2 /RT
+            ystate(i+2*nFV) = pICpent/RT
+        else                            ! initial concentration in walls
+            ystate(i      ) = pICair /RT * Sair * pressure
+            ystate(i+  nFV) = pICCO2 /RT * SCO2 * pressure
+            ystate(i+2*nFV) = pICpent/RT * Spent* pressure
+        endif
+    enddo
+end subroutine
+!***********************************END****************************************
+end module model

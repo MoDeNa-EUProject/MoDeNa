@@ -3,35 +3,37 @@
 !! @author    Michal Vonka
 !! @author    Pavel Ferkl
 !! @ingroup   foam_aging
-
+module inout
+	implicit none
+	private
+	public input,output
+contains
+!********************************BEGINNING*************************************
 !> reads input file, packs variables to rpar and ipar variables
 subroutine input(rpar, ipar)
+	use constants
 	use fson
     use fson_value_m, only: fson_value_get
-	implicit none
 	type(fson_value), pointer :: json_data
-	integer i
-	integer ipar(*)
-	integer divwall, ncell
-	integer nroutputs
-	integer solModel(3),diffModel(3)
-	double precision dcell, dwall, L
-	double precision pressure ! initial conds
-	double precision pBCair, pBCCO2, pBCpent 	! boundary conds
-	double precision pICair, pICCO2, pICpent 	! initial conds
-	double precision DO2, DN2, DCO2, Dpent, Dair, Dgas
-	double precision SO2, SN2, SCO2, Spent, Sair
-	double precision R, T, temp_cond, rhop
-	double precision pcA, pcB, pcApcB, TcA, TcB, TcATcB
-	double precision MA, MB, Mterm ,a, b, aToverTcsb
-	double precision fstrut,rhof
-	double precision  tend,tbeg
-	double precision rpar(*)					! real param
-	double precision PI
-	parameter (PI = 3.1415926d0)
-	parameter (R = 8.314d0)
+	integer :: i
+	integer :: ipar(:)
+	integer :: divwall, ncell
+	integer :: nroutputs
+	integer :: solModel(3),diffModel(3)
+	real(dp) :: dcell, dwall, L
+	real(dp) :: pressure ! initial conds
+	real(dp) :: pBCair, pBCCO2, pBCpent 	! boundary conds
+	real(dp) :: pICair, pICCO2, pICpent 	! initial conds
+	real(dp) :: DO2, DN2, DCO2, Dpent, Dair, Dgas
+	real(dp) :: SO2, SN2, SCO2, Spent, Sair
+	real(dp) :: T, temp_cond, rhop
+	real(dp) :: pcA, pcB, pcApcB, TcA, TcB, TcATcB
+	real(dp) :: MA, MB, Mterm ,a, b, aToverTcsb
+	real(dp) :: fstrut,rhof
+	real(dp) ::  tend,tbeg
+	real(dp) :: rpar(:)					! real param
 
-!c Read input params - pak module params :)
+	! Read input parameters
 	json_data => fson_parse("../foamAging.json")
 	call fson_get(json_data, "numberOfOutputs", nroutputs)
 	call fson_get(json_data, "wallDiscretization", divwall)
@@ -77,40 +79,23 @@ subroutine input(rpar, ipar)
 		call fson_get(json_data, "diffusivity.Cyclopentane", Dpent)
 	endif
 	ncell = dint(L/(dcell+dwall))
-	! ! computation of diffusivities and solubilities as a function of T
-	! DCO2=12.3d-4*dexp(-51180.0d0/R/T)!/1e0  ! m2/s
-	! DO2 =8.5d-4* dexp(-53300.0d0/R/T)
-	! DN2=3.24d-3*dexp(-6927.0d0/T)
-	! Dpent=1.7d-7*dexp(-4236.0d0/T)!/4e2!/2.5d0
-	! Dair=(0.21d0*DO2+0.79d0*DN2)!/3e1
-	!
-	! ! cm3STP/cm3/Pa
-	! SCO2 =  7.13d-6*T/343.0d0*dexp(-2587.0d0*(1.0d0/343.0d0-1.0d0/T))
-	! Spent = 4.45d-5*T/353.0d0*dexp(-527.45d0*(1.0d0/353.0d0-1.0d0/T))
-	! Sair  = -(5.0d-9 * T**2 - 4.0d-6 * T + 0.0007d0)/10
-	!
-	! write(*,*) 'CO2 permeability',SCO2*DCO2
-	! write(*,*) 'pentane permeability',Spent*Dpent
-	! write(*,*) 'air permeability',Sair*Dair
-
-    continue
     ! gas difusivity accoriding to Bird 1975, p.505, eq. 16.3-1
-    pcA = 33.5d0      !  N2
-    pcB = 72.9d0      ! CO2
-    pcApcB = (pcA*pcB)**(1.0d0/3.0d0) ! CO2, N2, B-1 p. 744
-    TcA = 126.2d0     ! N2
-    TcB = 304.2d0     ! CO2
-    TcATcB = (TcA*TcB)**(5.0d0/12.0d0)
-    MA = 28.02d0
-    MB = 44.01d0
+    pcA = 33.5e0_dp      !  N2
+    pcB = 72.9e0_dp      ! CO2
+    pcApcB = (pcA*pcB)**(1.0e0_dp/3.0e0_dp) ! CO2, N2, B-1 p. 744
+    TcA = 126.2e0_dp     ! N2
+    TcB = 304.2e0_dp     ! CO2
+    TcATcB = (TcA*TcB)**(5.0e0_dp/12.0e0_dp)
+    MA = 28.02e0_dp
+    MB = 44.01e0_dp
     Mterm = dsqrt(1/MA + 1/MB)
-    a = 2.7450d-4 ! non-polar pairs
-    b = 1.823d0
+    a = 2.7450e-4_dp ! non-polar pairs
+    b = 1.823e0_dp
     aToverTcsb = a*(T/dsqrt(TcA*TcB))**b
 
 	! pressure in atmospheres, cm2/s
-    Dgas = (aToverTcsb*pcApcB*TcATcB*Mterm)*1.0d5/pressure
-    Dgas = Dgas * 1.0d-4 ! m2/s
+    Dgas = (aToverTcsb*pcApcB*TcATcB*Mterm)*1.0e5_dp/pressure
+    Dgas = Dgas * 1.0e-4_dp ! m2/s
 
 	ipar(1) = nroutputs
 	ipar(2) = ncell
@@ -129,7 +114,7 @@ subroutine input(rpar, ipar)
 
 	rpar(8) = pressure
 	! rpar(9) = initpressure
-	rpar(10)= R*T
+	rpar(10)= Rg*T
 
 	rpar(11) = Dpent
 	rpar(12) = Spent
@@ -148,25 +133,24 @@ subroutine input(rpar, ipar)
 	rpar(22)=temp_cond
 	rpar(23)=rhop
 	rpar(24)=tbeg
-
-    continue
-
-    return
 end subroutine input
-!c
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
 !> saves results to file
 subroutine output(iprof, time, ystate, neq)
-	implicit none
-	integer i, j, iprof, job
-	integer nFV, onecell, ncell, neq
-	integer divwall
+	use constants
+	integer :: i, j, iprof, job
+	integer :: nFV, onecell, ncell, neq
+	integer :: divwall
 
-	double precision time, test
-	double precision ystate(*)
-	double precision dwall, dcell, hwall
+	real(dp) :: time, test
+	real(dp) :: ystate(:)
+	real(dp) :: dwall, dcell, hwall
 
-	double precision pBCair, pBCCO2, pBCpent, RT 	! boundary conds
-	double precision, allocatable :: length(:)
+	real(dp) :: pBCair, pBCCO2, pBCpent, RT 	! boundary conds
+	real(dp), allocatable :: length(:)
 
 	character(len=1) :: name_1	! one character
 	character(len=2) :: name_2	! two characters
@@ -191,10 +175,10 @@ subroutine output(iprof, time, ystate, neq)
         allocate (length(0:nFV))
     endif
 	! compute lengths
-    length(0:nFV) = 0.0d0
-    do i = 0, nFV
-        if (mod(i,onecell).eq.0) length(i) = length(i-1) + dcell/2.0d0
-        if (mod(i,onecell).eq.1) length(i) = length(i-1) + dcell/2.0d0
+    length(0:nFV) = 0.0e0_dp
+    do i = 1, nFV
+        if (mod(i,onecell).eq.0) length(i) = length(i-1) + dcell/2.0e0_dp
+        if (mod(i,onecell).eq.1) length(i) = length(i-1) + dcell/2.0e0_dp
         if (mod(i,onecell).gt.1) length(i) = length(i-1) + hwall
     enddo
 !     write(*,*) length(1:nFV)
@@ -214,17 +198,17 @@ subroutine output(iprof, time, ystate, neq)
 	open(unit=12,file='../results/ppar_'//trim(name_f)//'.dat')
 
    ! BC
-	write (11,100) time/(3600.0d0*24.0d0),length(0), pBCair/RT,pBCCO2/RT,&
+	write (11,100) time/(3600.0e0_dp*24.0e0_dp),length(0), pBCair/RT,pBCCO2/RT,&
 		pBCpent/RT
-	write (12,101) time/(3600.0d0*24.0d0),length(0), pBCair,pBCCO2,&
+	write (12,101) time/(3600.0e0_dp*24.0e0_dp),length(0), pBCair,pBCCO2,&
 		pBCpent
 	! profiles
 	do i = 1, nFV
-		write (11,100) time/(3600.0d0*24.0d0),length(i),ystate(i),&
+		write (11,100) time/(3600.0e0_dp*24.0e0_dp),length(i),ystate(i),&
 			ystate(nFV+i),ystate(2*nFV+i)
 	enddo
 	do i = onecell, nFV, onecell
-		write (12,101) time/(3600.0d0*24.0d0),length(i),ystate(i)*RT,&
+		write (12,101) time/(3600.0e0_dp*24.0e0_dp),length(i),ystate(i)*RT,&
 			ystate(nFV+i)*RT,ystate(2*nFV+i)*RT
 	enddo
     close(11)
@@ -233,3 +217,5 @@ subroutine output(iprof, time, ystate, neq)
 100   format (f8.2,F12.3,F12.3,F12.3,F12.3)
 101   format (f8.2,F12.3,F12.3,F12.3,F12.3)
 end subroutine output
+!***********************************END****************************************
+end module inout

@@ -196,7 +196,8 @@ real(dp) function lindsayBromley(k,yin,Tb,cp,M,T) result(kmix)
     do i=1,n
         do j=1,n
             x=k(i)/k(j)*cp(j)/cp(i)*(9-5/gam(j))/(9-5/gam(i))
-            A(i,j)=0.25_dp*(1+sqrt(x*(M(j)/M(i))**0.75_dp*(T+S(i))/(T+S(j))))**2*&
+            A(i,j)=&
+                0.25_dp*(1+sqrt(x*(M(j)/M(i))**0.75_dp*(T+S(i))/(T+S(j))))**2*&
                 (T+sqrt(S(i)*S(j)))/(T+S(j))
         enddo
     enddo

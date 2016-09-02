@@ -8,10 +8,21 @@ PU foam is blown by CO2 and cyclo-pentane. In time, CO2 is diffusing out of the 
 Mathematical models in this software simulate the diffusion of gases through the foam and estimate thermal properties of the foam based on its morphology and composition of gases in the cells.
 
 ## Installation
-LAPACK and BLAS libraries are required. You can install them in Ubuntu using:
+### Install LAPACK and BLAS
+You can install them in Ubuntu using:
 ```
 sudo apt-get install liblapack-dev
 sudo apt-get install libblas-dev
+```
+### Install fson library
+The library is installed to `{HOME}/lib` and `{HOME}/include`
+```
+cd where-you-want-source-files
+git clone https://github.com/japaf/fson.git
+cd fson
+cmake .
+make
+make install
 ```
 Compile the detailed models using:
 ```
