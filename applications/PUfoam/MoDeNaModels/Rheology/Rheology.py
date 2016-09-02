@@ -36,6 +36,7 @@ License
 """
 
 import os
+import json
 import modena
 import SurfaceTension
 import polymerViscosity 

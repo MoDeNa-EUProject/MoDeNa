@@ -265,10 +265,11 @@ subroutine kinModel(y)
     integer :: i
     if (kin_model==4) then
         do i=1,size(kineq)
-            call modena_inputs_set(kinInputs, kinInputsPos(i), y(kineq(i)))
+            call modena_inputs_set(kinInputs, kinInputsPos(i+1), y(kineq(i)))
         enddo
     endif
-    call modena_inputs_set(kinInputs, kinInputsPos(19), y(teq)-273.15_dp)
+    call modena_inputs_set(kinInputs, kinInputsPos(1), time)
+    call modena_inputs_set(kinInputs, kinInputsPos(20), y(teq)-273.15_dp)
     ret = modena_model_call (kinModena, kinInputs, kinOutputs)
     if(ret /= 0) then
         call exit(ret)
