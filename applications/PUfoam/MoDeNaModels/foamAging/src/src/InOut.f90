@@ -173,7 +173,6 @@ subroutine output(iprof, time, ystate, neq)
 	character(len=3) :: name_3	! three characters
 	character(len=4) :: name_f	! final name of file
 
-	continue
 	! ipar
     dcell = ystate(nEQ + 1)
     dwall = ystate(nEQ + 2)
@@ -191,21 +190,14 @@ subroutine output(iprof, time, ystate, neq)
     if (.NOT. allocated(length)) then
         allocate (length(0:nFV))
     endif
-
 	! compute lengths
-	continue
-
     length(0:nFV) = 0.0d0
     do i = 0, nFV
         if (mod(i,onecell).eq.0) length(i) = length(i-1) + dcell/2.0d0
         if (mod(i,onecell).eq.1) length(i) = length(i-1) + dcell/2.0d0
         if (mod(i,onecell).gt.1) length(i) = length(i-1) + hwall
     enddo
-
-!    continue
 !     write(*,*) length(1:nFV)
-     continue
-
     if     (iprof <  10) then
         write(name_1,'(I1)') iprof
         name_f = '000' // name_1
@@ -218,8 +210,6 @@ subroutine output(iprof, time, ystate, neq)
     else
         write(name_f,'(I4)') iprof
     endif
-
-    continue
 	open(unit=11,file='../results/H2perm_'//trim(name_f)//'.dat')
 	open(unit=12,file='../results/ppar_'//trim(name_f)//'.dat')
 
@@ -237,11 +227,9 @@ subroutine output(iprof, time, ystate, neq)
 		write (12,101) time/(3600.0d0*24.0d0),length(i),ystate(i)*RT,&
 			ystate(nFV+i)*RT,ystate(2*nFV+i)*RT
 	enddo
-    continue
     close(11)
 	close(12)
 	return
 100   format (f8.2,F12.3,F12.3,F12.3,F12.3)
-101   format (f8.2,E12.3,E12.3,E12.3,E12.3)
+101   format (f8.2,F12.3,F12.3,F12.3,F12.3)
 end subroutine output
-!c

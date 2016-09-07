@@ -603,6 +603,8 @@ void modena_model_call_no_check
     );
 }
 
+/* Destructor, frees the memory block occupied by a model.
+ */
 void modena_model_destroy(modena_model_t *self)
 {
     size_t j;
@@ -632,15 +634,42 @@ void modena_model_destroy(modena_model_t *self)
     self->ob_type->tp_free((PyObject*)self);
 }
 
+/* C-Python: Destructor, exposed as __del__ in Python
+ */
 static void modena_model_t_dealloc(modena_model_t* self)
 {
     modena_model_destroy(self);
 }
 
+/* C-Python: Member-Table
+ *
+ * Structure which describes an attribute of a type which corresponds to a C 
+ * struct member. Its fields are:
+ *
+ * Field  C Type       Meaning
+ * ------ ----------  --------------------------------------------------------
+ * name   char *      name of the member
+ * type   int         the type of the member in the C struct
+ * offset Py_ssize_t  the offset in bytes that the member is located on the
+ *                    type's object struct
+ * flags  int         flag bits indicating if the field should be read-only or 
+ *                    writable
+ * doc    char *      points to the contents of the docstring
+ */
 static PyMemberDef modena_model_t_members[] = {
+    {"outputs_size", T_PYSSIZET,
+       offsetof(modena_model_t, outputs_size), READONLY , "number of putputs"},
+    {"inputs_size", T_PYSSIZET,
+      offsetof(modena_model_t, inputs_size), READONLY , "number of inputs"},
+    {"parameters_size", T_PYSSIZET,
+      offsetof(modena_model_t, parameters_size), READONLY , "number of parameters"},
     {NULL}  /* Sentinel */
 };
 
+/* C-Python: Method exposed in Python as __call__
+ *
+ * TODO: The method is also exposed as "call", but this should be deprecated
+ */
 static PyObject *modena_model_t_call
 (
     modena_model_t* self,
@@ -744,6 +773,19 @@ static PyObject *modena_model_t_call
     return pOutputs;
 }
 
+/* C-Python: Method-Table
+ *
+ * Structure used to describe a method of an extension type. This structure has
+ * four fields:
+ *
+ * Field     C Type       Meaning
+ * -------   -----------  ----------------------------------------------------
+ * ml_name   char *       name of the method
+ * ml_meth   PyCFunction  pointer to the C implementation
+ * ml_flags  int          flag bits indicating how the call should be
+ *                        constructed
+ * ml_doc    char *       points to the contents of the docstring
+ */
 static PyMethodDef modena_model_t_methods[] = {
     {"call", (PyCFunction) modena_model_t_call, METH_KEYWORDS,
         "Call surrogate model and return outputs"
@@ -751,6 +793,63 @@ static PyMethodDef modena_model_t_methods[] = {
     {NULL}  /* Sentinel */
 };
 
+/*
+ */
+PyObject*
+modena_model_t_get_parameters(modena_model_t *self, void *closure)
+{
+    PyObject* pParams = PyList_New(self->parameters_size);
+    size_t i;
+    for(i = 0; i < self->parameters_size; i++)
+    {
+        PyList_SET_ITEM(pParams, i, PyFloat_FromDouble(self->parameters[i]) );
+    }
+    return pParams;
+}
+
+/*
+ */
+static int
+modena_model_t_set_parameters(modena_model_t *self, PyObject *value, void *closure)
+{
+   // TODO: Error checks for the following cases:
+   //       1. len(value) == self->parameters_size
+   //       2. type(value) == list or tuple
+   //       3. value != NULL
+
+    /*if (value == NULL)
+    {
+          PyErr_SetString(PyExc_TypeError, "Cannot delete parameter values");
+          return -1;
+    }
+    if (! PyString_Check(value)) {
+          PyErr_SetString(PyErr_TypeError, "First attribute must be a string");
+          return -1;
+    }*/
+
+    size_t i;
+    for(i = 0; i < self->parameters_size; i++)
+    {
+         self->parameters[i] = PyFloat_AsDouble(PyList_GetItem(value, i));
+    }
+
+    // PyErr_SetString(PyExc_TypeError, "Attribute is read-only!");
+    return 0;
+}
+
+/* C-Python
+ */
+static PyGetSetDef modena_model_t_getset[] = {
+    {"parameters",
+      (getter)modena_model_t_get_parameters,
+      (setter)modena_model_t_set_parameters,
+     "parameters",
+      NULL},
+    {NULL} /* Sentinel */
+};
+
+/* C-Python: Initialiser, exposed in Python as the method: __new__
+ */
 static int modena_model_t_init
 (
     modena_model_t *self,
@@ -897,6 +996,8 @@ static int modena_model_t_init
     return 0;
 }
 
+/* C-Python: Constructor, exposed in Python as the method: __new__
+ */
 static PyObject * modena_model_t_new
 (
     PyTypeObject *type,
@@ -927,45 +1028,47 @@ static PyObject * modena_model_t_new
     return (PyObject *)self;
 }
 
+/* C-Python: The C structure used to describe the modena_model type.
+ */
 PyTypeObject modena_model_tType = {
     PyObject_HEAD_INIT(NULL)
-    0,                         /*ob_size*/
-    "modena.modena_model_t", /*tp_name*/
-    sizeof(modena_model_t), /*tp_basicsize*/
-    0,                         /*tp_itemsize*/
-    (destructor)modena_model_t_dealloc, /*tp_dealloc*/
-    0,                         /*tp_print*/
-    0,                         /*tp_getattr*/
-    0,                         /*tp_setattr*/
-    0,                         /*tp_compare*/
-    0,                         /*tp_repr*/
-    0,                         /*tp_as_number*/
-    0,                         /*tp_as_sequence*/
-    0,                         /*tp_as_mapping*/
-    0,                         /*tp_hash */
-    0,                         /*tp_call*/
-    0,                         /*tp_str*/
-    0,                         /*tp_getattro*/
-    0,                         /*tp_setattro*/
-    0,                         /*tp_as_buffer*/
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /*tp_flags*/
-    "modena_model_t objects", /* tp_doc */
-    0,                       /* tp_traverse */
-    0,                       /* tp_clear */
-    0,                       /* tp_richcompare */
-    0,                       /* tp_weaklistoffset */
-    0,                       /* tp_iter */
-    0,                       /* tp_iternext */
-    modena_model_t_methods, /* tp_methods */
-    modena_model_t_members, /* tp_members */
-    0,                         /* tp_getset */
-    0,                         /* tp_base */
-    0,                         /* tp_dict */
-    0,                         /* tp_descr_get */
-    0,                         /* tp_descr_set */
-    0,                         /* tp_dictoffset */
-    (initproc)modena_model_t_init, /* tp_init */
-    0,                         /* tp_alloc */
-    modena_model_t_new,  /* tp_new */
+    0,                                                              /*ob_size*/
+    "modena.modena_model_t",                                        /*tp_name*/
+    sizeof(modena_model_t),                                    /*tp_basicsize*/
+    0,                                                          /*tp_itemsize*/
+    (destructor)modena_model_t_dealloc,                          /*tp_dealloc*/
+    0,                                                             /*tp_print*/
+    0,                                                           /*tp_getattr*/
+    0,                                                           /*tp_setattr*/
+    0,                                                           /*tp_compare*/
+    0,                                                              /*tp_repr*/
+    0,                                                         /*tp_as_number*/
+    0,                                                       /*tp_as_sequence*/
+    0,                                                        /*tp_as_mapping*/
+    0,                                                             /*tp_hash */
+    (ternaryfunc)modena_model_t_call,                               /*tp_call*/
+    0,                                                               /*tp_str*/
+    0,                                                          /*tp_getattro*/
+    0,                                                          /*tp_setattro*/
+    0,                                                         /*tp_as_buffer*/
+    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,                      /*tp_flags*/
+    "modena_model_t objects",                                      /* tp_doc */
+    0,                                                        /* tp_traverse */
+    0,                                                           /* tp_clear */
+    0,                                                     /* tp_richcompare */
+    0,                                                  /* tp_weaklistoffset */
+    0,                                                            /* tp_iter */
+    0,                                                        /* tp_iternext */
+    modena_model_t_methods,                                    /* tp_methods */
+    modena_model_t_members,                                    /* tp_members */
+    modena_model_t_getset,                                      /* tp_getset */
+    0,                                                            /* tp_base */
+    0,                                                            /* tp_dict */
+    0,                                                       /* tp_descr_get */
+    0,                                                       /* tp_descr_set */
+    0,                                                      /* tp_dictoffset */
+    (initproc)modena_model_t_init,                                /* tp_init */
+    0,                                                           /* tp_alloc */
+    modena_model_t_new,                                            /* tp_new */
 };
 
