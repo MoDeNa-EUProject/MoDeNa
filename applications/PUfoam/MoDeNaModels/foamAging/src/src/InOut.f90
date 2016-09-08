@@ -28,7 +28,7 @@ subroutine input()
 	call fson_get(json_data, "foamCondition.inProtectiveSheet", sheet)
 	if (sheet) then
 		call fson_get(&
-			json_data, "foamCondition.inProtectiveSheet", dsheet)
+			json_data, "foamCondition.sheetThickness", dsheet)
 	endif
 	call fson_get(json_data, "foamCondition.agingTemperature", temp)
 	call fson_get(json_data, "foamCondition.conductivityTemperature", temp_cond)
@@ -104,11 +104,11 @@ end subroutine input
 subroutine output(iprof, time, ystate, neq)
 	use constants
 	use globals
-	use model, only: ngas,dz
+	use model, only: ngas,dz,mor,nfv
 	integer :: i, j, iprof
 	integer :: neq
 
-	real(dp) :: time
+	real(dp) :: time,pos
 	real(dp) :: ystate(:)
 
 	character(len=1) :: name_1	! one character
@@ -129,21 +129,28 @@ subroutine output(iprof, time, ystate, neq)
         write(name_f,'(I4)') iprof
     endif
 	open(unit=11,file='../results/H2perm_'//trim(name_f)//'.dat')
-	! open(unit=12,file='../results/ppar_'//trim(name_f)//'.dat')
+	open(unit=12,file='../results/ppar_'//trim(name_f)//'.dat')
 
 	! profiles
 	do i = 1, neq/ngas
-		write (11,100) time/(3600*24),dz(i),ystate(ngas*(i-1)+1)*Sair,&
+		write (11,100) time/(3600*24),pos,ystate(ngas*(i-1)+1)*Sair,&
 			ystate(ngas*(i-1)+2)*SCO2,ystate(ngas*(i-1)+3)*Spent
 	enddo
-	! do i = onecell, nFV, onecell
-	! 	write (12,101) time/(3600*24),dz(i),ystate(i)*RT,&
-	! 		ystate(nFV+i)*RT,ystate(2*nFV+i)*RT
-	! enddo
+	do i = 1,nfv
+		if (i==1) then
+		    pos=dz(1)
+		else
+			pos=pos+(dz(i-1)+dz(i))/2
+		endif
+		if (mor(i)==1) then
+			write (12,101) time/(3600*24),pos,ystate(ngas*(i-1)+1)*Rg*temp,&
+				ystate(ngas*(i-1)+2)*Rg*temp,ystate(ngas*(i-1)+3)*Rg*temp
+		endif
+	enddo
     close(11)
-	! close(12)
-100   format (f8.2,F12.3,F12.3,F12.3,F12.3)
-101   format (f8.2,F12.3,F12.3,F12.3,F12.3)
+	close(12)
+100   format (f8.2,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3)
+101   format (f8.2,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3)
 end subroutine output
 !***********************************END****************************************
 end module inout

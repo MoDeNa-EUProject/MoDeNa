@@ -13,5 +13,7 @@
 program foam_diffusion
     use integration, only: degas
 	implicit none
+    print*, 'Welcome to Foam aging'
     call degas
+    print*, 'Program Foam aging finished'
 end program

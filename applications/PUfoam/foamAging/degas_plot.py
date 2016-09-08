@@ -14,7 +14,7 @@ directory_in='./'
 directory_out='results/'
 infile=open(directory_in+'foamAging.json','r')
 decoded=json.load(infile)
-l=decoded['numberOfOutputs']
+l=decoded['numerics']['numberOfOutputs']
 infile.close()
 plt.figure(1).clf()
 plt.figure(2).clf()
@@ -35,7 +35,6 @@ for i in arange(0,l+1,int((l-1)/8)):
     line1,=plt.plot(x,ccyp,'o',label='t={0:.1f} days'.format(time[0]))
     line.append(line1)
     infile.close()
-
 plt.figure(1)
 plt.legend()
 plt.title('Carbon dioxide')

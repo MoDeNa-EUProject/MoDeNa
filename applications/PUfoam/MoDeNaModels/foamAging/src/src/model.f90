@@ -9,13 +9,15 @@ module model
     integer :: &
         ngas,&    ! number of gases
         nfv     ! number of finite volumes
+    integer, dimension(:), allocatable :: &
+        mor   ! morphology: 1=cell,2=wall,3=sheet
     real(dp), dimension(:), allocatable :: &
         dz,&    ! size of finite volume
         dif,&   ! diffusivity
         sol,&   ! solubility
         bc      ! boundary condition
     private
-    public modelPU,initfield,ngas,nfv,dz,dif,sol,bc
+    public modelPU,initfield,ngas,nfv,dz,dif,sol,bc,mor
 contains
 !********************************BEGINNING*************************************
 !> model supplied to the integrator
@@ -38,10 +40,10 @@ subroutine modelPU(neq, time, ystate, yprime)	! ODEPACK call
     k=1
     j=1
     do i=1,ngas
-        fluxw=-2*dif(k)*(bc(i)-ystate(k))/(dz(j)*sol(k))
+        fluxw=-2*dif(k)*(ystate(k)-bc(i))/(dz(j)*sol(k))
         fluxe=-2*dif(k)*dif(k+ngas)*(ystate(k+ngas)-ystate(k))/&
             (dif(k+ngas)*dz(j)*sol(k)+dif(k)*dz(j+1)*sol(k+ngas))
-        yprime(k)=(fluxe-fluxw)/dz(j)
+        yprime(k)=(fluxw-fluxe)/dz(j)
         k=k+1
     enddo
     do j=2,nfv-1
@@ -50,7 +52,7 @@ subroutine modelPU(neq, time, ystate, yprime)	! ODEPACK call
                 (dif(k)*dz(j-1)*sol(k-ngas)+dif(k-ngas)*dz(j)*sol(k))
             fluxe=-2*dif(k)*dif(k+ngas)*(ystate(k+ngas)-ystate(k))/&
                 (dif(k+ngas)*dz(j)*sol(k)+dif(k)*dz(j+1)*sol(k+ngas))
-            yprime(k)=(fluxe-fluxw)/dz(j)
+            yprime(k)=(fluxw-fluxe)/dz(j)
             k=k+1
         enddo
     enddo
@@ -59,9 +61,11 @@ subroutine modelPU(neq, time, ystate, yprime)	! ODEPACK call
         fluxw=-2*dif(k-ngas)*dif(k)*(ystate(k)-ystate(k-ngas))/&
             (dif(k)*dz(j-1)*sol(k-ngas)+dif(k-ngas)*dz(j)*sol(k))
         fluxe=0
-        yprime(k)=(fluxe-fluxw)/dz(j)
+        yprime(k)=(fluxw-fluxe)/dz(j)
         k=k+1
     enddo
+    ! print*, yprime
+    ! stop
 end subroutine modelPU
 !***********************************END****************************************
 

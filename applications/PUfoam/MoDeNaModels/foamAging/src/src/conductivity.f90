@@ -14,30 +14,30 @@ module conductivity
 contains
 !********************************BEGINNING*************************************
 !> determine equivalent conductivity of the foam
-subroutine equcond(keq,ystate,neq,eps,fstrut,temp)
+subroutine equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp)
     real(dp), intent(out) :: keq
     real(dp), dimension(:), intent(in) :: ystate
-    integer, intent(in) :: neq
-    real(dp), intent(in) :: temp,eps,fstrut
-    real(dp) :: dcell,ccd,cair,ccyp,xcd,xair,xcyp,kgas
+    integer, intent(in) :: ngas,nfv,mor(:)
+    real(dp), intent(in) :: temp,eps,dcell,fstrut
+    real(dp) :: ccd,cair,ccyp,xcd,xair,xcyp,kgas
     real(dp), dimension(4) :: kg,yg,cpg
-    integer :: i,ncell,onecell,nFV
-    dcell   = ystate(nEQ + 1 )
-    ncell = int(ystate(nEQ + 11))
-    onecell = int(ystate(nEQ + 12)) != dble(ipar(4))
-    nFV  = onecell*ncell
+    integer :: i,j
     !calculate average concentrations
     ccd=0
     cair=0
     ccyp=0
-    do i=1,ncell
-        cair=cair+ystate(i*onecell)
-        ccd=ccd+ystate(nFV+i*onecell)
-        ccyp=ccyp+ystate(2*nFV+i*onecell)
+    j=1
+    do i=1,nfv
+        if (mor(i)==1) then
+            cair=cair+ystate(ngas*(i-1)+1)
+            ccd=ccd+ystate(ngas*(i-1)+2)
+            ccyp=ccyp+ystate(ngas*(i-1)+3)
+            j=j+1
+        endif
     enddo
-    cair=cair/ncell
-    ccd=ccd/ncell
-    ccyp=ccyp/ncell
+    cair=cair/j
+    ccd=ccd/j
+    ccyp=ccyp/j
     xair=cair/(cair+ccd+ccyp)
     xcd=ccd/(cair+ccd+ccyp)
     xcyp=ccyp/(cair+ccd+ccyp)
@@ -90,8 +90,6 @@ subroutine equcond(keq,ystate,neq,eps,fstrut,temp)
         call exit(modena_error())
     endif
     keq = modena_outputs_get(kfoamOutputs, 0_c_size_t); !fetch results
-    ! write(*,*) keq
-    ! stop
 end subroutine equcond
 !***********************************END****************************************
 

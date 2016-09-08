@@ -417,7 +417,6 @@ real(dp) function cdSolubility(temp)
         call exit(ret)
     endif
     cdSolubility=modena_outputs_get(scdOutputs, 0_c_size_t)
-    cdSolubility=cdSolubility*Rg*temp*1100._dp/(1e5*Mg(1))/1e5
 end function cdSolubility
 !***********************************END****************************************
 
@@ -437,8 +436,6 @@ real(dp) function airSolubility(temp)
         call exit(ret)
     endif
     airSolubility=modena_outputs_get(sairOutputs, 0_c_size_t)
-    airSolubility=airSolubility*Rg*temp*1100._dp/(1e5*&
-        (0.21_dp*Mg(2)+0.79_dp*Mg(3)))/1e5
 end function airSolubility
 !***********************************END****************************************
 
@@ -458,7 +455,6 @@ real(dp) function cypSolubility(temp)
         call exit(ret)
     endif
     cypSolubility=modena_outputs_get(scypOutputs, 0_c_size_t)
-    cypSolubility=cypSolubility*Rg*temp*1100._dp/(1e5*Mg(4))/1e5
 end function cypSolubility
 !***********************************END****************************************
 

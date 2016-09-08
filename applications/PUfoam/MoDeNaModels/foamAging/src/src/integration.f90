@@ -16,7 +16,7 @@ subroutine degas
     use physicalProperties
     use conductivity, only: equcond
     use ioutils, only: newunit
-    use model, only: modelPU,initfield,ngas,nfv,dz,dif,sol,bc
+    use model, only: modelPU,initfield,ngas,nfv,dz,dif,sol,bc,mor
     use inout, only: input,output
 	integer :: multiplicator
     integer :: itol, itask, istate, iopt
@@ -61,6 +61,7 @@ subroutine degas
     ! pressure in atmospheres, cm2/s
     Dgas = (aToverTcsb*pcApcB*TcATcB*Mterm)*1.0e5_dp/pressure
     Dgas = Dgas * 1.0e-4_dp ! m2/s
+    Dgas = 1.0e-13_dp !TODO delete
 	nFV = divsheet+ncell*(divwall+divcell)
     nEQ = ngas*nFV
 ! -----------------------------------
@@ -86,15 +87,44 @@ subroutine degas
     if (diffModel(3)==1) then
         Dpent=cypDiffusivity(temp)
     endif
-	write(*,*) 'air solubility',Sair
-    write(*,*) 'CO2 solubility',SCO2
-	write(*,*) 'pentane solubility',Spent
-	write(*,*) 'air diffusivity',Dair
-    write(*,*) 'CO2 diffusivity',DCO2
-	write(*,*) 'pentane diffusivity',Dpent
-	write(*,*) 'air permeability',Sair*Dair
-    write(*,*) 'CO2 permeability',SCO2*DCO2
-	write(*,*) 'pentane permeability',Spent*Dpent
+    print*, 'Foam:'
+    write(*,'(A30,EN12.3,1x,A)') 'foam density:',rhof,'kg/m3'
+    write(*,'(A30,EN12.3)') 'porosity:',eps
+    write(*,'(A30,EN12.3)') 'strut content:',fstrut
+    write(*,'(A30,EN12.3,1x,A)') 'cell size:',dcell,'m'
+    write(*,'(A30,EN12.3,1x,A)') 'wall thickness:',dwall,'m'
+    if (sheet) then
+        write(*,'(A30,EN12.3,1x,A)') 'sheet thickness:',dsheet,'m'
+    endif
+    write(*,'(A30,EN12.3,1x,A)') 'foam thickness:',dfoam,'m'
+    write(*,'(A30,I12)') 'number of cells:',ncell
+    write(*,'(A30,EN12.3,1x,A)') 'aging temperature:',temp,'K'
+    write(*,'(A30,EN12.3,1x,A)') 'conductivity temperature:',temp_cond,'K'
+    print*, 'Physical properties:'
+    write(*,'(A30,EN12.3,1x,A)') 'polymer density:',rhop,'kg/m3'
+	write(*,'(A30,EN12.3,1x,A)') 'air solubility:',Sair,'g/g/bar'
+    write(*,'(A30,EN12.3,1x,A)') 'CO2 solubility:',SCO2,'g/g/bar'
+	write(*,'(A30,EN12.3,1x,A)') 'pentane solubility:',Spent,'g/g/bar'
+	write(*,'(A30,EN12.3,1x,A)') 'air diffusivity:',Dair,'m2/s'
+    write(*,'(A30,EN12.3,1x,A)') 'CO2 diffusivity:',DCO2,'m2/s'
+	write(*,'(A30,EN12.3,1x,A)') 'pentane diffusivity:',Dpent,'m2/s'
+	write(*,'(A30,EN12.3,1x,A)') 'air permeability:',Sair*Dair,'m2/s*g/g/bar'
+    write(*,'(A30,EN12.3,1x,A)') 'CO2 permeability:',SCO2*DCO2,'m2/s*g/g/bar'
+	write(*,'(A30,EN12.3,1x,A)') 'pentane permeability:',Spent*Dpent,&
+        'm2/s*g/g/bar'
+    print*, 'Numerics:'
+    write(*,'(A30,I12)') 'finite volumes in wall:',divwall
+    write(*,'(A30,I12)') 'finite volumes in cell:',divcell
+    if (sheet) then
+        write(*,'(A30,I12)') 'finite volumes in sheet:',divsheet
+    endif
+    write(*,'(A30,I12)') 'finite volumes in total:',nfv
+    write(*,'(A30,EN12.3,1x,A)') 'initial time:',tbeg,'s'
+    write(*,'(A30,EN12.3,1x,A)') 'end time:',tend,'s'
+
+    Sair=Sair*Rg*temp*1100._dp/(1e5*(0.21_dp*Mg(2)+0.79_dp*Mg(3)))
+    SCO2=SCO2*Rg*temp*1100._dp/(1e5*Mg(1))
+    Spent=Spent*Rg*temp*1100._dp/(1e5*Mg(4))
 !c -----------------------------------
 !c Allocate memory for working arrays
 !c -----------------------------------
@@ -114,68 +144,78 @@ subroutine degas
     allocate(rwork (1:LRW))
     allocate(iwork (1:LIW))
     allocate(dz(nfv))
+    allocate(mor(nfv))
     allocate(dif(neq))
     allocate(sol(neq))
     allocate(bc(ngas))
     allocate(yinit(ngas))
 !c ----------------------------------
-!c mesh
+!c mesh and initial conditions
 !c ----------------------------------
     k=1
     do i=1,divsheet
         dz(k)=dsheet/divsheet
+        mor(k)=3
         dif(ngas*(k-1)+1)=sheetDair
         dif(ngas*(k-1)+2)=sheetDCO2
         dif(ngas*(k-1)+3)=sheetDpent
         sol(ngas*(k-1)+1)=sheetSair
         sol(ngas*(k-1)+2)=sheetSCO2
         sol(ngas*(k-1)+3)=sheetSpent
+        ystate(ngas*(k-1)+1)=pICair*pressure/Rg/temp/sol(ngas*(k-1)+1)
+        ystate(ngas*(k-1)+2)=pICCO2*pressure/Rg/temp/sol(ngas*(k-1)+2)
+        ystate(ngas*(k-1)+3)=pICpent*pressure/Rg/temp/sol(ngas*(k-1)+3)
         k=k+1
     enddo
     do i = 1, ncell
-        do j=1,divwall
-            dz(k)=dwall/divwall
-            dif(ngas*(k-1)+1)=Dair
-            dif(ngas*(k-1)+2)=DCO2
-            dif(ngas*(k-1)+3)=Dpent
-            sol(ngas*(k-1)+1)=Sair
-            sol(ngas*(k-1)+2)=SCO2
-            sol(ngas*(k-1)+3)=Spent
-            k=k+1
-        enddo
         do j=1,divcell
             dz(k)=dcell/divcell
+            mor(k)=1
             dif(ngas*(k-1)+1)=Dgas
             dif(ngas*(k-1)+2)=Dgas
             dif(ngas*(k-1)+3)=Dgas
             sol(ngas*(k-1)+1)=1
             sol(ngas*(k-1)+2)=1
             sol(ngas*(k-1)+3)=1
+            ystate(ngas*(k-1)+1)=pICair*pressure/Rg/temp/sol(ngas*(k-1)+1)
+            ystate(ngas*(k-1)+2)=pICCO2*pressure/Rg/temp/sol(ngas*(k-1)+2)
+            ystate(ngas*(k-1)+3)=pICpent*pressure/Rg/temp/sol(ngas*(k-1)+3)
+            k=k+1
+        enddo
+        do j=1,divwall
+            dz(k)=dwall/divwall
+            mor(k)=2
+            dif(ngas*(k-1)+1)=Dair
+            dif(ngas*(k-1)+2)=DCO2
+            dif(ngas*(k-1)+3)=Dpent
+            sol(ngas*(k-1)+1)=Sair
+            sol(ngas*(k-1)+2)=SCO2
+            sol(ngas*(k-1)+3)=Spent
+            ystate(ngas*(k-1)+1)=pICair*pressure/Rg/temp/sol(ngas*(k-1)+1)
+            ystate(ngas*(k-1)+2)=pICCO2*pressure/Rg/temp/sol(ngas*(k-1)+2)
+            ystate(ngas*(k-1)+3)=pICpent*pressure/Rg/temp/sol(ngas*(k-1)+3)
             k=k+1
         enddo
     end do
 !c ----------------------------------
-! initial conditions
-!c ----------------------------------
-    yinit(1)=pICair*pressure/Sair
-    yinit(2)=pICCO2*pressure/SCO2
-    yinit(3)=pICpent*pressure/Spent
-    call initfield(neq,ystate,yinit) !TODO: wrong in gas and sheet
-    print*, ystate
-    stop
-!c ----------------------------------
 ! boundary conditions
 !c ----------------------------------
-    bc(1)=pBCair/Sair
-    bc(2)=pBCCO2/SCO2
-    bc(3)=pBCpent/Spent
+    if (sheet) then
+        bc(1)=pBCair/Rg/temp/sheetSair
+        bc(2)=pBCCO2/Rg/temp/sheetSCO2
+        bc(3)=pBCpent/Rg/temp/sheetSpent
+    else
+        bc(1)=pBCair/Rg/temp
+        bc(2)=pBCCO2/Rg/temp
+        bc(3)=pBCpent/Rg/temp
+    endif
 !c ----------------------------------
 ! initialize integration
 !c ----------------------------------
     open(10,file='dcmp_progress.out', status='unknown')
     counter = 1
     itol = 1
-    rtol = 0
+    rtol = 1.0e-10_dp
     atol = 1.0e-6_dp
 
     itask = 1
@@ -189,10 +229,10 @@ subroutine degas
     open (newunit(fi),file='../results/keq_time.out')
     write(fi,'(10A23)') '#time', 'eq.conductivity'
     call output(0, 0.0_dp, ystate, neq)
-    call equcond(keq,ystate,neq,eps,fstrut,temp_cond)
-    write(fi,'(10es23.15)') tbeg/(3600.0e0_dp*24.0e0_dp),keq*1.0e3_dp
+    ! call equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp_cond)
+    write(fi,'(10es23.15)') tbeg/(3600*24),keq*1.0e3_dp
     do i = 1, nroutputs*multiplicator       ! stabilizing multiplicator
-        tin = dble(i-1)*(tend -tbeg)/dble(nroutputs*multiplicator)+tbeg
+        tin  = dble(i-1)*(tend-tbeg)/dble(nroutputs*multiplicator)+tbeg
         tout = dble(i  )*(tend-tbeg)/dble(nroutputs*multiplicator)+tbeg
 100     continue    ! try to make another run for the initial step simulation
         call dlsodes (modelPU, neq, ystate, tin, tout, itol, rtol, atol, itask,&
@@ -200,18 +240,19 @@ subroutine degas
         ! evaluating the integration
         if (istate.lt.0) then
             write(*,*) 'Something is wrong, look for ISTATE =', istate
-            if (istate.eq.-1) then  ! not enough steps to reach tout
-                istate = 3
-                iopt = 1   ! start to change something
-                RWORK(5:8)=0.0e0_dp
-                IWORK(5) = 0
-                IWORK(6) = counter*1000
-                IWORK(7) = 0
-                counter = counter + 2
-                write(*,*) 'MAXSTEP', IWORK(6)
-                write(10,*) 'MAXSTEP', IWORK(6)
-                goto 100
-            endif
+            ! if (istate.eq.-1) then  ! not enough steps to reach tout
+            !     istate = 3
+            !     iopt = 1   ! start to change something
+            !     RWORK(5:8)=0.0e0_dp
+            !     IWORK(5) = 0
+            !     IWORK(6) = counter*1000
+            !     IWORK(7) = 0
+            !     counter = counter + 2
+            !     write(*,*) 'MAXSTEP', IWORK(6)
+            !     write(10,*) 'MAXSTEP', IWORK(6)
+            !     goto 100
+            ! endif
+            stop
         elseif (counter>3) then
             counter=counter-1
             IWORK(6) = counter*1000
@@ -221,12 +262,12 @@ subroutine degas
         ! some output
         if (mod(i,multiplicator).eq.0) then
             write(*,'(2x,A,1x,f6.1,1x,A)') &
-                'time:', tout/(3600.0e0_dp*24.0e0_dp),'days'
+                'time:', tout/(3600*24),'days'
             write(10,'(2x,A,1x,es9.3,1x,A)') &
-                'time:', tout/(3600.0e0_dp*24.0e0_dp),'days'
+                'time:', tout/(3600*24),'days'
             call output(i/multiplicator, tout, ystate, neq)
-            call equcond(keq,ystate,neq,eps,fstrut,temp_cond)
-            write(fi,'(10es23.15)') tout/(3600.0e0_dp*24.0e0_dp),keq*1e3
+            ! call equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp_cond)
+            write(fi,'(10es23.15)') tout/(3600*24),keq*1e3
         endif
     enddo
     close(10)
