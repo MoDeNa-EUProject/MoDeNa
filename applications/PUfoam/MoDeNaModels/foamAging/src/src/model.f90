@@ -40,17 +40,20 @@ subroutine modelPU(neq, time, ystate, yprime)	! ODEPACK call
     k=1
     j=1
     do i=1,ngas
-        fluxw=-2*dif(k)*(ystate(k)-bc(i))/(dz(j)*sol(k))
-        fluxe=-2*dif(k)*dif(k+ngas)*(ystate(k+ngas)-ystate(k))/&
+        fluxw=-2*dif(k)*sol(k)*(ystate(k)-bc(i))/dz(j)
+        fluxe=-2*dif(k)*dif(k+ngas)*sol(k)*sol(k+ngas)*&
+            (ystate(k+ngas)-ystate(k))/&
             (dif(k+ngas)*dz(j)*sol(k)+dif(k)*dz(j+1)*sol(k+ngas))
         yprime(k)=(fluxw-fluxe)/dz(j)
         k=k+1
     enddo
     do j=2,nfv-1
         do i=1,ngas
-            fluxw=-2*dif(k-ngas)*dif(k)*(ystate(k)-ystate(k-ngas))/&
+            fluxw=-2*dif(k-ngas)*dif(k)*sol(k)*sol(k-ngas)*&
+                (ystate(k)-ystate(k-ngas))/&
                 (dif(k)*dz(j-1)*sol(k-ngas)+dif(k-ngas)*dz(j)*sol(k))
-            fluxe=-2*dif(k)*dif(k+ngas)*(ystate(k+ngas)-ystate(k))/&
+            fluxe=-2*dif(k)*dif(k+ngas)*sol(k)*sol(k+ngas)*&
+                (ystate(k+ngas)-ystate(k))/&
                 (dif(k+ngas)*dz(j)*sol(k)+dif(k)*dz(j+1)*sol(k+ngas))
             yprime(k)=(fluxw-fluxe)/dz(j)
             k=k+1
@@ -58,14 +61,13 @@ subroutine modelPU(neq, time, ystate, yprime)	! ODEPACK call
     enddo
     j=nfv
     do i=1,ngas
-        fluxw=-2*dif(k-ngas)*dif(k)*(ystate(k)-ystate(k-ngas))/&
+        fluxw=-2*dif(k-ngas)*dif(k)*sol(k)*sol(k-ngas)*&
+            (ystate(k)-ystate(k-ngas))/&
             (dif(k)*dz(j-1)*sol(k-ngas)+dif(k-ngas)*dz(j)*sol(k))
         fluxe=0
         yprime(k)=(fluxw-fluxe)/dz(j)
         k=k+1
     enddo
-    ! print*, yprime
-    ! stop
 end subroutine modelPU
 !***********************************END****************************************
 

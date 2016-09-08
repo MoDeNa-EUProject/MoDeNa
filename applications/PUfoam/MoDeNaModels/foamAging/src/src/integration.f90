@@ -61,7 +61,6 @@ subroutine degas
     ! pressure in atmospheres, cm2/s
     Dgas = (aToverTcsb*pcApcB*TcATcB*Mterm)*1.0e5_dp/pressure
     Dgas = Dgas * 1.0e-4_dp ! m2/s
-    Dgas = 1.0e-13_dp !TODO delete
 	nFV = divsheet+ncell*(divwall+divcell)
     nEQ = ngas*nFV
 ! -----------------------------------
@@ -102,12 +101,13 @@ subroutine degas
     write(*,'(A30,EN12.3,1x,A)') 'conductivity temperature:',temp_cond,'K'
     print*, 'Physical properties:'
     write(*,'(A30,EN12.3,1x,A)') 'polymer density:',rhop,'kg/m3'
+    write(*,'(A30,EN12.3,1x,A)') 'diffusivity in gas:',Dgas,'m2/s'
+    write(*,'(A30,EN12.3,1x,A)') 'air diffusivity:',Dair,'m2/s'
+    write(*,'(A30,EN12.3,1x,A)') 'CO2 diffusivity:',DCO2,'m2/s'
+    write(*,'(A30,EN12.3,1x,A)') 'pentane diffusivity:',Dpent,'m2/s'
 	write(*,'(A30,EN12.3,1x,A)') 'air solubility:',Sair,'g/g/bar'
     write(*,'(A30,EN12.3,1x,A)') 'CO2 solubility:',SCO2,'g/g/bar'
 	write(*,'(A30,EN12.3,1x,A)') 'pentane solubility:',Spent,'g/g/bar'
-	write(*,'(A30,EN12.3,1x,A)') 'air diffusivity:',Dair,'m2/s'
-    write(*,'(A30,EN12.3,1x,A)') 'CO2 diffusivity:',DCO2,'m2/s'
-	write(*,'(A30,EN12.3,1x,A)') 'pentane diffusivity:',Dpent,'m2/s'
 	write(*,'(A30,EN12.3,1x,A)') 'air permeability:',Sair*Dair,'m2/s*g/g/bar'
     write(*,'(A30,EN12.3,1x,A)') 'CO2 permeability:',SCO2*DCO2,'m2/s*g/g/bar'
 	write(*,'(A30,EN12.3,1x,A)') 'pentane permeability:',Spent*Dpent,&
@@ -122,9 +122,9 @@ subroutine degas
     write(*,'(A30,EN12.3,1x,A)') 'initial time:',tbeg,'s'
     write(*,'(A30,EN12.3,1x,A)') 'end time:',tend,'s'
 
-    Sair=Sair*Rg*temp*1100._dp/(1e5*(0.21_dp*Mg(2)+0.79_dp*Mg(3)))
-    SCO2=SCO2*Rg*temp*1100._dp/(1e5*Mg(1))
-    Spent=Spent*Rg*temp*1100._dp/(1e5*Mg(4))
+    Sair=Sair*Rg*temp*1100._dp/(1e5*(0.21_dp*Mg(2)+0.79_dp*Mg(3)))!*1e5
+    SCO2=SCO2*Rg*temp*1100._dp/(1e5*Mg(1))!*1e5
+    Spent=Spent*Rg*temp*1100._dp/(1e5*Mg(4))!*1e5
 !c -----------------------------------
 !c Allocate memory for working arrays
 !c -----------------------------------
@@ -240,19 +240,19 @@ subroutine degas
         ! evaluating the integration
         if (istate.lt.0) then
             write(*,*) 'Something is wrong, look for ISTATE =', istate
-            ! if (istate.eq.-1) then  ! not enough steps to reach tout
-            !     istate = 3
-            !     iopt = 1   ! start to change something
-            !     RWORK(5:8)=0.0e0_dp
-            !     IWORK(5) = 0
-            !     IWORK(6) = counter*1000
-            !     IWORK(7) = 0
-            !     counter = counter + 2
-            !     write(*,*) 'MAXSTEP', IWORK(6)
-            !     write(10,*) 'MAXSTEP', IWORK(6)
-            !     goto 100
-            ! endif
-            stop
+            if (istate.eq.-1) then  ! not enough steps to reach tout
+                istate = 3
+                iopt = 1   ! start to change something
+                RWORK(5:8)=0.0e0_dp
+                IWORK(5) = 0
+                IWORK(6) = counter*1000
+                IWORK(7) = 0
+                counter = counter + 2
+                write(*,*) 'MAXSTEP', IWORK(6)
+                write(10,*) 'MAXSTEP', IWORK(6)
+                goto 100
+            endif
+            ! stop
         elseif (counter>3) then
             counter=counter-1
             IWORK(6) = counter*1000
