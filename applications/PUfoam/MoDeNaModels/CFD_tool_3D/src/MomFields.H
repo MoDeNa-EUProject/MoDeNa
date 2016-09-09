@@ -27,12 +27,12 @@ if( !(PBEMethod == "QMOM") )
 }
 
 word bubbleGrowthMode(PBEProperties.lookup("bubbleGrowthMode"));
-if 
+if
 (
     !( bubbleGrowthMode == "twoNodes"
     || bubbleGrowthMode == "meanRadius"
     )
-)    
+)
 {
     FatalErrorIn(args.executable())
     << "Invalid bubble growth mode " << bubbleGrowthMode
@@ -43,8 +43,8 @@ if
 }
 
 scalar nNodes = readScalar(PBEProperties.lookup("nNodes"));
-if 
-( 
+if
+(
     !(nNodes == 2
     || nNodes == 3)
 )
@@ -82,9 +82,6 @@ volVectorField cellcentroid
     dimensionedVector("zero", dimLength, vector::zero)
 );
 
-cellvolume.internalField() = mesh.V();
-cellcentroid.internalField() = mesh.C();        
-
 Info<< "Reading field mZero \n" << endl;
 volScalarField mZero
 (
@@ -96,10 +93,10 @@ volScalarField mZero
          IOobject::MUST_READ,
          IOobject::AUTO_WRITE
     ),
-    mesh     
+    mesh
 );
 
-volScalarField::DimensionedInternalField mZeroSource
+volScalarField::Internal mZeroSource
 (
     IOobject
     (
@@ -110,16 +107,16 @@ volScalarField::DimensionedInternalField mZeroSource
     mesh,
     dimensionedScalar("mZeroSource", dimensionSet(0,0,-1,0,0,0,0), 0.0)
 );
-    
+
 surfaceScalarField phic(mag(phi/mesh.magSf()));
 phic = min(interface.cAlpha()*phic, max(phic));
 surfaceScalarField phir(phic*interface.nHatf());
-    
+
 surfaceScalarField alpha1phir
 (
     fvc::interpolate(alpha1)*phir
-); 
-  
+);
+
 Info<< "Reading field mOne \n" << endl;
 volScalarField mOne
 (
@@ -131,10 +128,10 @@ volScalarField mOne
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     ),
-    mesh     
+    mesh
 );
 
-volScalarField::DimensionedInternalField mOneSource
+volScalarField::Internal mOneSource
 (
     IOobject
     (
@@ -145,7 +142,7 @@ volScalarField::DimensionedInternalField mOneSource
     mesh,
     dimensionedScalar("mOneSource", dimensionSet(0,0,-1,0,0,0,0), 0.0)
 );
-       
+
 Info<< "Reading field mTwo \n" << endl;
 volScalarField mTwo
 (
@@ -157,10 +154,10 @@ volScalarField mTwo
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     ),
-    mesh     
+    mesh
 );
 
-volScalarField::DimensionedInternalField mTwoSource
+volScalarField::Internal mTwoSource
 (
     IOobject
     (
@@ -183,10 +180,10 @@ volScalarField mThree
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     ),
-    mesh     
-);   
+    mesh
+);
 
-volScalarField::DimensionedInternalField mThreeSource
+volScalarField::Internal mThreeSource
 (
     IOobject
     (
@@ -209,10 +206,10 @@ volScalarField mFour
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     ),
-    mesh     
+    mesh
 );
 
-volScalarField::DimensionedInternalField mFourSource
+volScalarField::Internal mFourSource
 (
     IOobject
     (
@@ -235,10 +232,10 @@ volScalarField mFive
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
    ),
-   mesh     
+   mesh
 );
 
-volScalarField::DimensionedInternalField mFiveSource
+volScalarField::Internal mFiveSource
 (
     IOobject
     (
@@ -261,7 +258,7 @@ volScalarField M0
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     ),
-    mesh     
+    mesh
 );
 
 Info<< "Reading field M1 \n" << endl;
@@ -275,7 +272,7 @@ volScalarField M1
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     ),
-    mesh     
+    mesh
 );
 
 Info<< "Reading field M2 \n" << endl;
@@ -289,7 +286,7 @@ volScalarField M2
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     ),
-    mesh     
+    mesh
 );
 
 Info<< "Reading field M3 \n" << endl;
@@ -303,8 +300,8 @@ volScalarField M3
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     ),
-    mesh     
-);  
+    mesh
+);
 
 Info<< "Reading field M4 \n" << endl;
 volScalarField M4
@@ -317,7 +314,7 @@ volScalarField M4
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     ),
-    mesh     
+    mesh
 );
 
 Info<< "Reading field M5 \n" << endl;
@@ -331,8 +328,8 @@ volScalarField M5
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     ),
-    mesh     
-);    
+    mesh
+);
 
 Info<< "Reading fields weights and nodes \n" << endl;
 volScalarField weight0
@@ -345,9 +342,9 @@ volScalarField weight0
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     ),
-    mesh  
+    mesh
 
-);  
+);
 
 volScalarField weight1
 (
@@ -359,8 +356,8 @@ volScalarField weight1
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     ),
-    mesh     
-);   
+    mesh
+);
 
 volScalarField node0
 (
@@ -372,8 +369,8 @@ volScalarField node0
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     ),
-    mesh     
-);  
+    mesh
+);
 
 volScalarField node1
 (
@@ -385,8 +382,8 @@ volScalarField node1
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     ),
-    mesh     
-);  
+    mesh
+);
 
 volScalarField weight2
 (
@@ -398,8 +395,8 @@ volScalarField weight2
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     ),
-    mesh     
-); 
+    mesh
+);
 
 volScalarField node2
 (
@@ -411,7 +408,7 @@ volScalarField node2
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     ),
-    mesh     
-); 
+    mesh
+);
 Info<< "End of \"MomFields\"\n" << endl;
 // End of MomFields
