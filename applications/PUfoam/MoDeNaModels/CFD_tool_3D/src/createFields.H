@@ -38,7 +38,7 @@
 
     volScalarField& p = mixture.p();
     volScalarField& T = mixture.T();
-    
+
     Info<< "Reading field rho_foam \n" << endl;
     volScalarField rho_foam
     (
@@ -52,7 +52,7 @@
         ),
          mesh
     );
- 
+
     Info<< "Reading field rho_gas \n" << endl;
     volScalarField rho_gas
     (
@@ -64,7 +64,7 @@
 	     IOobject::MUST_READ,
 	     IOobject::AUTO_WRITE
         ),
-         mesh     
+         mesh
     );
     volScalarField rho
     (
@@ -163,7 +163,7 @@
 
 
     // Construct interface from alpha1 distribution
-    interfaceProperties interface(alpha1, U, mixture); 
+    interfaceProperties interface(alpha1, U, mixture);
     #include "MomFields.H"
     #include "KineticsFields.H"
     #include "rheologyFields.H"
@@ -179,9 +179,9 @@
     volScalarField K("K", 0.5*magSqr(U));
 
     dimensionedScalar densityDimension ("densityDimension", dimensionSet(1,-3,0,0,0,0,0), 1.0);
-    dimensionedScalar initialFoamMass = 
+    dimensionedScalar initialFoamMass =
         (
-            fvc::domainIntegrate(rho_foam*alpha2) 
+            fvc::domainIntegrate(rho_foam*alpha2)
             + densityDimension*L0*rhoPoly*fvc::domainIntegrate(alpha2)
         );
-    dimensionedScalar cumulativeContinuityError = 0.0; 
+    dimensionedScalar cumulativeContinuityError = 0.0;

@@ -1,6 +1,6 @@
-if 
+if
 (
-    PBESwitch 
+    PBESwitch
  && PBEMethod == "QMOM"
  && nNodes == 2
 )
@@ -11,7 +11,7 @@ if
       + fvm::div(phi,mZero)
       + fvm::SuSp(expImpSource,mZero)
       - fvm::div(alpha1phir,mZero)
-     == mZeroSource 
+     == mZeroSource
     );
     mZeroEqn.relax();
 
@@ -21,8 +21,8 @@ if
       + fvm::div(phi,mOne)
       + fvm::SuSp(expImpSource,mOne)
       - fvm::div(alpha1phir,mOne)
-     == mOneSource  
-    );  
+     == mOneSource
+    );
     mOneEqn.relax();
 
     fvScalarMatrix mTwoEqn
@@ -31,7 +31,7 @@ if
       + fvm::div(phi,mTwo)
       + fvm::SuSp(expImpSource,mTwo)
       - fvm::div(alpha1phir,mTwo)
-     == mTwoSource  
+     == mTwoSource
     );
     mTwoEqn.relax();
 
@@ -41,10 +41,10 @@ if
       + fvm::div(phi,mThree)
       + fvm::SuSp(expImpSource,mThree)
       - fvm::div(alpha1phir,mThree)
-     == mThreeSource  
+     == mThreeSource
     );
     mThreeEqn.relax();
-    
+
     Info<< "\nSolving Moments Equations. " << endl;
     mZeroEqn.solve();
     mOneEqn.solve();
@@ -52,7 +52,7 @@ if
     mThreeEqn.solve();
 }
 
-if 
+if
 (
     PBESwitch
  && PBEMethod == "QMOM"
@@ -65,7 +65,7 @@ if
       + fvm::div(phi,mZero)
       + fvm::SuSp(expImpSource,mZero)
       - fvm::div(alpha1phir,mZero)
-     == mZeroSource 
+     == mZeroSource
     );
     mZeroEqn.relax();
 
@@ -75,8 +75,8 @@ if
       + fvm::div(phi,mOne)
       + fvm::SuSp(expImpSource,mOne)
       - fvm::div(alpha1phir,mOne)
-     == mOneSource  
-    );  
+     == mOneSource
+    );
     mOneEqn.relax();
 
     fvScalarMatrix mTwoEqn
@@ -85,7 +85,7 @@ if
       + fvm::div(phi,mTwo)
       + fvm::SuSp(expImpSource,mTwo)
       - fvm::div(alpha1phir,mTwo)
-     == mTwoSource  
+     == mTwoSource
     );
     mTwoEqn.relax();
 
@@ -95,7 +95,7 @@ if
       + fvm::div(phi,mThree)
       + fvm::SuSp(expImpSource,mThree)
       - fvm::div(alpha1phir,mThree)
-     == mThreeSource  
+     == mThreeSource
     );
     mThreeEqn.relax();
 
@@ -105,17 +105,17 @@ if
       + fvm::div(phi,mFour)
       + fvm::SuSp(expImpSource,mFour)
       - fvm::div(alpha1phir,mFour)
-     == mFourSource 
+     == mFourSource
     );
     mFourEqn.relax();
-  
+
     fvScalarMatrix mFiveEqn
     (
         fvm::ddt(mFive)
       + fvm::div(phi,mFive)
       + fvm::SuSp(expImpSource,mFive)
       - fvm::div(alpha1phir,mFive)
-     == mFiveSource 
+     == mFiveSource
     );
     mFiveEqn.relax();
 

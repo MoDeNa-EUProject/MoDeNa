@@ -87,7 +87,7 @@ R_1_Pos = modena_model_inputs_argPos(kinetics, "'R_1'");
 R_1_mass_Pos = modena_model_inputs_argPos(kinetics, "'R_1_mass'");
 R_1_temp_RF1_Pos = modena_model_inputs_argPos(kinetics, "'R_1_temp'");
 R_1_vol_RF1_Pos = modena_model_inputs_argPos(kinetics, "'R_1_vol'");
-source_Catalyst_1_Pos = 
+source_Catalyst_1_Pos =
     modena_model_outputs_argPos(kinetics, "source_Catalyst_1");
 source_CE_A0_Pos =
     modena_model_outputs_argPos(kinetics, "source_CE_A0");
