@@ -104,7 +104,7 @@ end subroutine input
 subroutine output(iprof, time, ystate, neq)
 	use constants
 	use globals
-	use model, only: ngas,dz,mor,nfv
+	use model, only: ngas,dz,mor,nfv,sol
 	integer :: i, j, iprof
 	integer :: neq
 
@@ -133,8 +133,10 @@ subroutine output(iprof, time, ystate, neq)
 
 	! profiles
 	do i = 1, neq/ngas
-		write (11,100) time/(3600*24),pos,ystate(ngas*(i-1)+1)*Sair,&
-			ystate(ngas*(i-1)+2)*SCO2,ystate(ngas*(i-1)+3)*Spent
+		write (11,100) time/(3600*24),pos,&
+			ystate(ngas*(i-1)+1)*sol(ngas*(i-1)+1),&
+			ystate(ngas*(i-1)+2)*sol(ngas*(i-1)+2),&
+			ystate(ngas*(i-1)+3)*sol(ngas*(i-1)+3)
 	enddo
 	do i = 1,nfv
 		if (i==1) then

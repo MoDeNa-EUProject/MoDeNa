@@ -46,6 +46,11 @@ subroutine equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp)
     kg(3)=oxyConductivity(temp)
     kg(4)=cypConductivity(temp)
     yg=(/xcd,0.79_dp*xair,0.21_dp*xair,xcyp/)
+    do i=1,4
+        if (abs(yg(i))<1e-6_dp) then
+            yg(i)=0
+        endif
+    enddo
     ! write(*,*) yg
     ! write(*,*) 'x argPos:', kfoamXCO2pos, kfoamXCyPpos, kfoamXO2pos, kfoamXN2pos
     ! yg=(/0.0_dp,0.79_dp*0.5_dp,0.21_dp*0.5_dp,0.5_dp/)
@@ -81,10 +86,10 @@ subroutine equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp)
     call modena_inputs_set(kfoamInputs, kfoamFstrutpos, fstrut)
     ! call modena_inputs_set(kfoamInputs, kfoamKgaspos, kgas)
     call modena_inputs_set(kfoamInputs, kfoamTemppos, temp)
-    call modena_inputs_set(kfoamInputs, kfoamXCO2pos, xcd)
-    call modena_inputs_set(kfoamInputs, kfoamXCyPpos, xCyP)
-    call modena_inputs_set(kfoamInputs, kfoamXO2pos, xAir*0.21_dp)
-    call modena_inputs_set(kfoamInputs, kfoamXN2pos, xAir*0.79_dp)
+    call modena_inputs_set(kfoamInputs, kfoamXCO2pos, yg(1))
+    call modena_inputs_set(kfoamInputs, kfoamXCyPpos, yg(4))
+    call modena_inputs_set(kfoamInputs, kfoamXO2pos, yg(3))
+    call modena_inputs_set(kfoamInputs, kfoamXN2pos, yg(2))
     ret = modena_model_call (kfoamModena, kfoamInputs, kfoamOutputs)
     if (modena_error_occurred()) then
         call exit(modena_error())
@@ -105,8 +110,11 @@ real(dp) function weightedAverage(k,yin) result(kmix)
     n=size(k)
     allocate(y(n))
     y=yin
-    if (minval(y)<0) stop 'Input molar fractions to weightedAverage &
-        cannot be negative.'
+    if (minval(y)<0) then
+        print*,  'Input molar fractions to weightedAverage cannot be negative.'
+        print*, y
+        stop
+    endif
     y=y/sum(y)
     kmix=0
     do i=1,size(k)
@@ -135,8 +143,11 @@ real(dp) function extWassiljewa(k,yin,Tc,pc,M,T,eps) result(kmix)
     n=size(k)
     allocate(y(n),gam(n),ktr(n,n),A(n,n))
     y=yin
-    if (minval(y)<0) stop 'Input molar fractions to extWassiljewa &
-        cannot be negative.'
+    if (minval(y)<0) then
+        print*,  'Input molar fractions to extWassiljewa cannot be negative.'
+        print*, y
+        stop
+    endif
     y=y/sum(y)
     gam=210*(Tc*M**3/pc**4)**(1/6._dp)
     do i=1,n
@@ -183,8 +194,11 @@ real(dp) function lindsayBromley(k,yin,Tb,cp,M,T) result(kmix)
     n=size(k)
     allocate(y(n),cv(n),S(n),gam(n),A(n,n))
     y=yin
-    if (minval(y)<0) stop 'Input molar fractions to lindsayBromley &
-        cannot be negative.'
+    if (minval(y)<0) then
+        print*,  'Input molar fractions to lindsayBromley cannot be negative.'
+        print*, y
+        stop
+    endif
     y=y/sum(y)
     do i=1,n
         S(i)=1.5_dp*Tb(i)
@@ -232,8 +246,11 @@ real(dp) function pandeyPrajapati(k,yin,Tb,M,T) result(kmix)
     n=size(k)
     allocate(y(n),S(n),A(n,n))
     y=yin
-    if (minval(y)<0) stop 'Input molar fractions to pandeyPrajapati &
-        cannot be negative.'
+    if (minval(y)<0) then
+        print*,  'Input molar fractions to pandeyPrajapati cannot be negative.'
+        print*, y
+        stop
+    endif
     y=y/sum(y)
     do i=1,n
         S(i)=1.5_dp*Tb(i)

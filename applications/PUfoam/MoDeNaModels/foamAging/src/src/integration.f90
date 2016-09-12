@@ -122,9 +122,15 @@ subroutine degas
     write(*,'(A30,EN12.3,1x,A)') 'initial time:',tbeg,'s'
     write(*,'(A30,EN12.3,1x,A)') 'end time:',tend,'s'
 
-    Sair=Sair*Rg*temp*1100._dp/(1e5*(0.21_dp*Mg(2)+0.79_dp*Mg(3)))!*1e5
-    SCO2=SCO2*Rg*temp*1100._dp/(1e5*Mg(1))!*1e5
-    Spent=Spent*Rg*temp*1100._dp/(1e5*Mg(4))!*1e5
+    Sair=Sair*Rg*temp*1100._dp/(1e5*(0.21_dp*Mg(2)+0.79_dp*Mg(3)))
+    SCO2=SCO2*Rg*temp*1100._dp/(1e5*Mg(1))
+    Spent=Spent*Rg*temp*1100._dp/(1e5*Mg(4))
+    sheetSair=sheetSair*Rg*temp*1100._dp/(1e5*(0.21_dp*Mg(2)+0.79_dp*Mg(3)))
+    sheetSCO2=sheetSCO2*Rg*temp*1100._dp/(1e5*Mg(1))
+    sheetSpent=sheetSpent*Rg*temp*1100._dp/(1e5*Mg(4))
+    print*, sheetSair
+    print*, sheetSCO2
+    print*, sheetSpent
 !c -----------------------------------
 !c Allocate memory for working arrays
 !c -----------------------------------
@@ -162,9 +168,9 @@ subroutine degas
         sol(ngas*(k-1)+1)=sheetSair
         sol(ngas*(k-1)+2)=sheetSCO2
         sol(ngas*(k-1)+3)=sheetSpent
-        ystate(ngas*(k-1)+1)=pICair*pressure/Rg/temp/sol(ngas*(k-1)+1)
-        ystate(ngas*(k-1)+2)=pICCO2*pressure/Rg/temp/sol(ngas*(k-1)+2)
-        ystate(ngas*(k-1)+3)=pICpent*pressure/Rg/temp/sol(ngas*(k-1)+3)
+        ystate(ngas*(k-1)+1)=pICair* pressure/Rg/temp
+        ystate(ngas*(k-1)+2)=pICCO2* pressure/Rg/temp
+        ystate(ngas*(k-1)+3)=pICpent*pressure/Rg/temp
         k=k+1
     enddo
     do i = 1, ncell
@@ -177,9 +183,9 @@ subroutine degas
             sol(ngas*(k-1)+1)=1
             sol(ngas*(k-1)+2)=1
             sol(ngas*(k-1)+3)=1
-            ystate(ngas*(k-1)+1)=pICair*pressure/Rg/temp/sol(ngas*(k-1)+1)
-            ystate(ngas*(k-1)+2)=pICCO2*pressure/Rg/temp/sol(ngas*(k-1)+2)
-            ystate(ngas*(k-1)+3)=pICpent*pressure/Rg/temp/sol(ngas*(k-1)+3)
+            ystate(ngas*(k-1)+1)=pICair* pressure/Rg/temp
+            ystate(ngas*(k-1)+2)=pICCO2* pressure/Rg/temp
+            ystate(ngas*(k-1)+3)=pICpent*pressure/Rg/temp
             k=k+1
         enddo
         do j=1,divwall
@@ -191,9 +197,9 @@ subroutine degas
             sol(ngas*(k-1)+1)=Sair
             sol(ngas*(k-1)+2)=SCO2
             sol(ngas*(k-1)+3)=Spent
-            ystate(ngas*(k-1)+1)=pICair*pressure/Rg/temp/sol(ngas*(k-1)+1)
-            ystate(ngas*(k-1)+2)=pICCO2*pressure/Rg/temp/sol(ngas*(k-1)+2)
-            ystate(ngas*(k-1)+3)=pICpent*pressure/Rg/temp/sol(ngas*(k-1)+3)
+            ystate(ngas*(k-1)+1)=pICair* pressure/Rg/temp
+            ystate(ngas*(k-1)+2)=pICCO2* pressure/Rg/temp
+            ystate(ngas*(k-1)+3)=pICpent*pressure/Rg/temp
             k=k+1
         enddo
     end do
@@ -201,9 +207,9 @@ subroutine degas
 ! boundary conditions
 !c ----------------------------------
     if (sheet) then
-        bc(1)=pBCair/Rg/temp/sheetSair
-        bc(2)=pBCCO2/Rg/temp/sheetSCO2
-        bc(3)=pBCpent/Rg/temp/sheetSpent
+        bc(1)=pBCair/ Rg/temp
+        bc(2)=pBCCO2/ Rg/temp
+        bc(3)=pBCpent/Rg/temp
     else
         bc(1)=pBCair/Rg/temp
         bc(2)=pBCCO2/Rg/temp
@@ -229,14 +235,14 @@ subroutine degas
     open (newunit(fi),file='../results/keq_time.out')
     write(fi,'(10A23)') '#time', 'eq.conductivity'
     call output(0, 0.0_dp, ystate, neq)
-    ! call equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp_cond)
+    call equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp_cond)
     write(fi,'(10es23.15)') tbeg/(3600*24),keq*1.0e3_dp
     do i = 1, nroutputs*multiplicator       ! stabilizing multiplicator
         tin  = dble(i-1)*(tend-tbeg)/dble(nroutputs*multiplicator)+tbeg
         tout = dble(i  )*(tend-tbeg)/dble(nroutputs*multiplicator)+tbeg
 100     continue    ! try to make another run for the initial step simulation
-        call dlsodes (modelPU, neq, ystate, tin, tout, itol, rtol, atol, itask,&
-                             istate, iopt, rwork, lrw, iwork, liw, jdem, mf)
+        call dlsodes(modelPU, neq, ystate, tin, tout, itol, rtol, atol, itask,&
+            istate, iopt, rwork, lrw, iwork, liw, jdem, mf)
         ! evaluating the integration
         if (istate.lt.0) then
             write(*,*) 'Something is wrong, look for ISTATE =', istate
@@ -261,12 +267,10 @@ subroutine degas
         endif
         ! some output
         if (mod(i,multiplicator).eq.0) then
-            write(*,'(2x,A,1x,f6.1,1x,A)') &
-                'time:', tout/(3600*24),'days'
-            write(10,'(2x,A,1x,es9.3,1x,A)') &
-                'time:', tout/(3600*24),'days'
+            write(*,'(2x,A,1x,f6.1,1x,A)') 'time:', tout/(3600*24),'days'
+            write(10,'(2x,A,1x,es9.3,1x,A)') 'time:', tout/(3600*24),'days'
             call output(i/multiplicator, tout, ystate, neq)
-            ! call equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp_cond)
+            call equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp_cond)
             write(fi,'(10es23.15)') tout/(3600*24),keq*1e3
         endif
     enddo

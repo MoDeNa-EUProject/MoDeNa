@@ -215,8 +215,8 @@ test=False
 if test:
     initialPoints_foamConductivity_auto['x[CO2]']=[1,0,0,0]
     initialPoints_foamConductivity_auto['x[CyP]']=[0,1,0,0]
-    initialPoints_foamConductivity_auto['x[O2]']=[0,0,0.21,0.21]
-    initialPoints_foamConductivity_auto['x[N2]']=[0,0,0.79,0.79]
+    initialPoints_foamConductivity_auto['x[O2]']=[0,0,1,0]
+    initialPoints_foamConductivity_auto['x[N2]']=[0,0,0,1]
 # When initializing for Foam expansion
 # use dummy data to initialize to avoid getting out of bounds
 foaming_ini={
