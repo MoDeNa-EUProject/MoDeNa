@@ -14,11 +14,11 @@ module globals
 	real(dp) :: dcell, dwall, dfoam, dsheet
 	real(dp) :: temp, temp_cond
 	real(dp) :: pressure ! initial conds
-	real(dp) :: pBCair, pBCCO2, pBCpent 	! boundary conds
-	real(dp) :: pICair, pICCO2, pICpent 	! initial conds
-	real(dp) :: fstrut,rhof,rhop
-	real(dp) :: DCO2, Dpent, Dair, Dgas
-	real(dp) :: SCO2, Spent, Sair
-	real(dp) :: sheetDCO2, sheetDpent, sheetDair
-	real(dp) :: sheetSCO2, sheetSpent, sheetSair
+	real(dp) :: pBCair, pBCCO2, pBCcyp 	! boundary conds
+	real(dp) :: pICair, pICCO2, pICcyp 	! initial conds
+	real(dp) :: fstrut,rhof,rhop,eps
+	real(dp) :: DCO2, Dcyp, Dair, Dgas
+	real(dp) :: SCO2, Scyp, Sair
+	real(dp) :: sheetDCO2, sheetDcyp, sheetDair
+	real(dp) :: sheetSCO2, sheetScyp, sheetSair
 end module globals

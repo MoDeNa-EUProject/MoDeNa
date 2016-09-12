@@ -509,6 +509,33 @@ end function airDiffusivity
 
 
 !********************************BEGINNING*************************************
+!> diffusivity of gases in gas phase
+!! accoriding to Bird 1975, p.505, eq. 16.3-1
+real(dp) function gasDiffusivity(temp)
+    use globals, only: pressure
+    real(dp), intent(in) :: temp
+	real(dp) :: pcA, pcB, pcApcB, TcA, TcB, TcATcB
+	real(dp) :: MA, MB, Mterm ,a, b, aToverTcsb
+    pcA = 33.5e0_dp      !  N2
+    pcB = 72.9e0_dp      ! CO2
+    pcApcB = (pcA*pcB)**(1.0e0_dp/3.0e0_dp) ! CO2, N2, B-1 p. 744
+    TcA = 126.2e0_dp     ! N2
+    TcB = 304.2e0_dp     ! CO2
+    TcATcB = (TcA*TcB)**(5.0e0_dp/12.0e0_dp)
+    MA = 28.02e0_dp
+    MB = 44.01e0_dp
+    Mterm = dsqrt(1/MA + 1/MB)
+    a = 2.7450e-4_dp ! non-polar pairs
+    b = 1.823e0_dp
+    aToverTcsb = a*(temp/dsqrt(TcA*TcB))**b
+    ! pressure in atmospheres, cm2/s
+    gasDiffusivity = (aToverTcsb*pcApcB*TcATcB*Mterm)*1.0e5_dp/pressure
+    gasDiffusivity = gasDiffusivity * 1.0e-4_dp ! m2/s
+end function gasDiffusivity
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
 !> heat capacity of carbon dioxide at constant pressure (J/mol/K)
 !! [link](http://webbook.nist.gov/cgi/cbook.cgi?ID=C124389&Units=SI&Mask=1#Thermo-Gas)
 real(dp) function cdHeatCapacity(temp)

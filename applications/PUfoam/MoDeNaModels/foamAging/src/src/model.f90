@@ -1,5 +1,5 @@
 !> @file
-!! Main algorithm of for diffusion of gases in the foam.
+!! Model subroutines for diffusion of gases in the foam.
 !! @author    Michal Vonka
 !! @author    Pavel Ferkl
 !! @ingroup   foam_aging
@@ -17,7 +17,7 @@ module model
         sol,&   ! solubility
         bc      ! boundary condition
     private
-    public modelPU,initfield,ngas,nfv,dz,dif,sol,bc,mor
+    public modelPU,ngas,nfv,dz,dif,sol,bc,mor
 contains
 !********************************BEGINNING*************************************
 !> model supplied to the integrator
@@ -69,23 +69,5 @@ subroutine modelPU(neq, time, ystate, yprime)	! ODEPACK call
         k=k+1
     enddo
 end subroutine modelPU
-!***********************************END****************************************
-
-
-!********************************BEGINNING*************************************
-!> set initial conditions
-subroutine initfield(neq,ystate,yinit)
-    use constants
-    integer :: neq
-    real(dp) :: ystate(:), yinit(:)
-    integer :: i,j,k
-    k=1
-    do j=1,nfv
-        do i=1,ngas
-            ystate(k) = yinit(i)
-            k=k+1
-        enddo
-    enddo
-end subroutine
 !***********************************END****************************************
 end module model
