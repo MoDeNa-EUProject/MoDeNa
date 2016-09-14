@@ -45,7 +45,7 @@ from jinja2 import Template
 
 ## Wall drainage simulation
 m_simulation = Strategy.BackwardMappingScriptTask(
-    script=os.path.dirname(os.path.abspath(__file__))+'/wallDrainage' +
+    script=os.path.dirname(os.path.abspath(__file__))+'/src/wallDrainage' +
         ' && cp filmthickness.csv ../results/wallDrainage/' +
         ' && cp results_1d.csv ../results/wallDrainage/'
 )
