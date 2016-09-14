@@ -10,7 +10,7 @@ if (viscosityModel == "constant")
 // Castro-Macosko model (Newtonian)
 if (viscosityModel == "castro-macosko")
 {
-    double muTemp,alphacell,CXOH,CXW;   
+    double muTemp,alphacell,CXOH,CXW;
     double muinf = 10.3*1e-8;
     double XNCOGel = 1.0;
     double EnuR = 4970.0;
@@ -19,7 +19,7 @@ if (viscosityModel == "castro-macosko")
     double nuc = 0.0;
 
     forAll(mesh.C(), celli)
-    {   
+    {
         muTemp = TS[celli];
         alphacell = alpha2[celli];
         CXOH = XOH[celli];
@@ -28,20 +28,20 @@ if (viscosityModel == "castro-macosko")
         if (alphacell > 0.5)
         {
             XNCO[celli] = (CNCO_0 - (CNCO_0 - CXOH*COH_0 - 2*CXW*CW_0))/CNCO_0;
-            muFoamCorr[celli] = 
+            muFoamCorr[celli] =
                 (
                 (muinf*Foam::exp(EnuR/(muTemp)) *
                 Foam::pow((XNCOGel/max((XNCOGel - XNCO[celli]),ROOTVSMALL)),
                 (nua + nub*XNCO[celli] + nuc*XNCO[celli]*XNCO[celli])))
                 );
         }
-    } 
+    }
 }
 
 // Modified Bird-Carreau model (non-Newtonian)
 if (viscosityModel == "bird-carreau")
 {
-    
+
     double coeffalpha,coeffn,muTemp,lambdaBC,XOHC,alphacell,a,b,c,d,mu0l,muinfl;
     scalar Amu = 0.0387;
     scalar EmuR = 10000.0;
@@ -57,31 +57,31 @@ if (viscosityModel == "bird-carreau")
     coeffn = 0.2;
 
     forAll(mesh.C(), celli)
-    {   
+    {
         alphacell = alpha2[celli];
         if (alphacell > 0.5)
         {
-            muTemp = TS[celli];        
+            muTemp = TS[celli];
             XOHC = XOH[celli];
 
             volScalarField shearRate = Foam::mag(fvc::grad(U));
-        
-            mu0[celli] = 
+
+            mu0[celli] =
             (
-                (Foam::log(XOHC+d) - Foam::log(d) + 
+                (Foam::log(XOHC+d) - Foam::log(d) +
                 Foam::pow((XOH_Gel/max((XOH_Gel - XOHC),0.00001)),
                 ((a+b*XOHC+c*XOHC*XOHC))))*mu0l
             );
             muinf[celli] =
-            ( 
-                (Foam::log(XOHC + d) - Foam::log(d) + 
+            (
+                (Foam::log(XOHC + d) - Foam::log(d) +
                 Foam::pow((XOH_Gel/max((XOH_Gel - XOHC),0.00001)),
                 ((a + b*XOHC + c*XOHC*XOHC))))*muinfl
             );
 
-            muFoam[celli] = 
+            muFoam[celli] =
             (
-                ((muinf[celli] + (mag((mu0[celli] - muinf[celli]))* 
+                ((muinf[celli] + (mag((mu0[celli] - muinf[celli]))*
                 Foam::pow((1.0 + Foam::pow((shearRate[celli]*lambdaBC),coeffalpha)),
                 ((coeffn - 1)/coeffalpha)))))
             );

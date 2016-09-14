@@ -53,6 +53,7 @@ Description
 #include "twoPhaseMixture.H"
 #include "twoPhaseMixtureThermo.H"
 #include "turbulenceModel.H"
+#include "turbulentFluidThermoModel.H"
 #include "pimpleControl.H"
 #include "fixedFluxPressureFvPatchScalarField.H"
 
@@ -74,10 +75,11 @@ extern "C"{void dsteqr_(char &, int *, double *, double *, double *, int *, doub
 int main(int argc, char *argv[])
 {
     #include "modenaCalls.h"
-
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"
+    #include "createTimeControls.H"
+
     #include "readGravitationalAcceleration.H"
 
     pimpleControl pimple(mesh);
@@ -89,7 +91,6 @@ int main(int argc, char *argv[])
     #include "setInitialDeltaT.H"
     bool gellingPoint = false;
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    // #include "modenaCalls.h"
 
     Info<< "\nStarting time loop\n" << endl;
     Info<< "initialFoamMass : " << initialFoamMass << endl;
