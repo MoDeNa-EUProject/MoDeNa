@@ -64,7 +64,10 @@ subroutine equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp)
     case (2)
         kgas = extWassiljewa(kg,yg,Tc,pc,Mg,temp,1._dp)
     case (3)
+        yg=(/0.0_dp,0.79_dp*0.5_dp,0.21_dp*0.5_dp,0.5_dp/)
         kgas = lindsayBromley(kg,yg,Tb,cpg,Mg,temp)
+        print*, kgas
+        stop
     case (4)
         kgas = pandeyPrajapati(kg,yg,Tb,Mg,temp)
     case default
@@ -126,7 +129,8 @@ end function weightedAverage
 
 !********************************BEGINNING*************************************
 !> determine thermal conductivity of a mixture
-!! extended Wassiljewa model, parameters calculated according to Mason and Saxena
+!! extended Wassiljewa model (Dohrn)
+!! parameters calculated according to Mason and Saxena
 !! [link](http://dx.doi.org/10.1016/j.fluid.2007.07.059)
 real(dp) function extWassiljewa(k,yin,Tc,pc,M,T,eps) result(kmix)
     real(dp), dimension(:), intent(in) :: k !thermal conductivities
@@ -213,6 +217,9 @@ real(dp) function lindsayBromley(k,yin,Tb,cp,M,T) result(kmix)
                 (T+sqrt(S(i)*S(j)))/(T+S(j))
         enddo
     enddo
+    print*, y
+    print*, k
+    print*, gam
     kmix=0
     do i=1,n
         x=0
