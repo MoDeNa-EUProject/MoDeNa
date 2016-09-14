@@ -8,7 +8,7 @@ module conductivity
     use fmodena
     use physicalProperties
     implicit none
-    integer :: gasModel=3
+    integer :: gasModel=2
     private
     public equcond
 contains
@@ -51,9 +51,6 @@ subroutine equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp)
             yg(i)=0
         endif
     enddo
-    ! write(*,*) yg
-    ! write(*,*) 'x argPos:', kfoamXCO2pos, kfoamXCyPpos, kfoamXO2pos, kfoamXN2pos
-    ! yg=(/0.0_dp,0.79_dp*0.5_dp,0.21_dp*0.5_dp,0.5_dp/)
     cpg(1)=cdHeatCapacity(temp)
     cpg(2)=nitrHeatCapacity(temp)
     cpg(3)=oxyHeatCapacity(temp)
@@ -64,26 +61,12 @@ subroutine equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp)
     case (2)
         kgas = extWassiljewa(kg,yg,Tc,pc,Mg,temp,1._dp)
     case (3)
-        yg=(/0.0_dp,0.79_dp*0.5_dp,0.21_dp*0.5_dp,0.5_dp/)
         kgas = lindsayBromley(kg,yg,Tb,cpg,Mg,temp)
-        print*, kgas
-        stop
     case (4)
         kgas = pandeyPrajapati(kg,yg,Tb,Mg,temp)
     case default
         stop 'unknown gas conductivity model'
     end select
-    ! write(*,*) yg
-    ! write(*,*) kg
-    ! write(*,*) "kgas: ", kgas
-    ! stop
-    ! write(*,*) 'eps: ',eps
-    ! write(*,*) 'dcell: ',dcell
-    ! write(*,*) 'fstrut: ',fstrut
-    ! write(*,*) 'temp: ',temp
-    ! write(*,*) 'xcd: ',xcd
-    ! write(*,*) 'xair: ',xair
-    ! write(*,*) 'xcyp: ',xcyp
     call modena_inputs_set(kfoamInputs, kfoamEpspos, eps)
     call modena_inputs_set(kfoamInputs, kfoamDcellpos, dcell)
     call modena_inputs_set(kfoamInputs, kfoamFstrutpos, fstrut)
@@ -217,9 +200,6 @@ real(dp) function lindsayBromley(k,yin,Tb,cp,M,T) result(kmix)
                 (T+sqrt(S(i)*S(j)))/(T+S(j))
         enddo
     enddo
-    print*, y
-    print*, k
-    print*, gam
     kmix=0
     do i=1,n
         x=0

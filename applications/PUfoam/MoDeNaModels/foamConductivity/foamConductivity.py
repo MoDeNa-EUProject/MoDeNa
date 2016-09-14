@@ -211,7 +211,7 @@ initialPoints_foamConductivity_auto = {
 }
 # when testing,
 # initialize for any composition to avoid getting out of bounds too many times
-test=True
+test=False
 if test:
     initialPoints_foamConductivity_auto['x[CO2]']=[1,0,0,0]
     initialPoints_foamConductivity_auto['x[CyP]']=[0,1,0,0]
