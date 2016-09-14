@@ -14,9 +14,9 @@ word viscosityModel(rheologyProperties.lookup("viscosityModel"));
 
 if
 (
-    !(viscosityModel == "constant" 
+    !(viscosityModel == "constant"
    || viscosityModel == "castro-macosko"
-   || viscosityModel == "bird-carreau") 
+   || viscosityModel == "bird-carreau")
 )
 {
     FatalErrorIn(args.executable())
@@ -37,7 +37,7 @@ volScalarField muFoam
         mesh,
         IOobject::READ_IF_PRESENT,
         IOobject::AUTO_WRITE
-    ), 
+    ),
     mesh,
     dimensionedScalar("muFoam", dimensionSet(1,-1,-1,0,0,0,0), 1e-5)
    );
@@ -50,7 +50,7 @@ volScalarField muAir
         mesh,
         IOobject::READ_IF_PRESENT,
         IOobject::AUTO_WRITE
-    ), 
+    ),
     mesh,
     dimensionedScalar("muAir", dimensionSet(1,-1,-1,0,0,0,0), 1e-5)
    );
@@ -63,7 +63,7 @@ volScalarField muMixture
         mesh,
         IOobject::READ_IF_PRESENT,
         IOobject::AUTO_WRITE
-    ), 
+    ),
     mesh,
     dimensionedScalar("muMixture", dimensionSet(1,-1,-1,0,0,0,0), 1e-5)
    );
@@ -78,7 +78,7 @@ volScalarField XNCO
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE
     ),
-    mesh     
+    mesh
 );
 volScalarField mu0
 (
@@ -89,7 +89,7 @@ volScalarField mu0
         mesh,
         IOobject::READ_IF_PRESENT,
         IOobject::AUTO_WRITE
-    ), 
+    ),
     mesh,
     dimensionedScalar("mu0", dimensionSet(1,-1,-1,0,0,0,0), 1e-5)
 );
@@ -102,7 +102,7 @@ volScalarField muinf
         mesh,
         IOobject::READ_IF_PRESENT,
         IOobject::AUTO_WRITE
-    ), 
+    ),
     mesh,
     dimensionedScalar("muinf", dimensionSet(1,-1,-1,0,0,0,0), 1e-5)
 );
@@ -115,7 +115,7 @@ volScalarField muFoamCorr
         mesh,
         IOobject::READ_IF_PRESENT,
         IOobject::AUTO_WRITE
-    ), 
+    ),
     mesh,
     dimensionedScalar("muFoamCorr", dimensionSet(1,-1,-1,0,0,0,0), 1e-5)
 );

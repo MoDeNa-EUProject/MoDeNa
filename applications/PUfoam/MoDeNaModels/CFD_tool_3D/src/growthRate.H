@@ -31,8 +31,8 @@ double growthRateCO2(double &CO2_l, double &wCO2_Max)
 double growthRateBA(double &L_l, double &LMAX)
 {
     double G0 = 1.0e-14;
-    
-    if (LMAX != 0.0 && L_l > LMAX) 
+
+    if (LMAX != 0.0 && L_l > LMAX)
     {
         return (G0*(L_l - LMAX)/LMAX);
     }
@@ -40,4 +40,4 @@ double growthRateBA(double &L_l, double &LMAX)
     {
         return (0.0);
     }
-}   
+}

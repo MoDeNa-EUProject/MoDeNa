@@ -18,22 +18,21 @@ The [following steps](https://github.com/MoDeNa-EUProject/MoDeNa) describe how
 to install MoDeNa framework.
 
 ### 1. Install OpenFOAM
-The model is tested for OpenFOAM 2.3.0 and 2.4.0. In order to install OpenFOAM,
-you can either follow the steps in [OpenFOAM]
-(http://openfoam.org/archive/2.3.0/download/ubuntu.php) official website or
-copy/paste the commands below which install OpenFOAM and paraview:
+The CFD solver is compiled with OpenFOAM 4.0 on Ubuntu 16.04. In order to install OpenFOAM, you can either follow the steps in [OpenFOAM](http://openfoam.org/download/4-0-ubuntu/) website or
+copy/paste the commands below which install OpenFOAM and ParaView:
 
 ```
-cd $HOME
-wget http://rheologic.net/sites/default/files/downloads/RheologicRemix-2.3.0-Ubuntu-12.04-LTS.tgz
-tar -xvf RheologicRemix-2.3.0-Ubuntu-12.04-LTS.tgz
-cat bashrc-OpenFOAM-2.3.0 >> .bashrc
+sudo add-apt-repository http://dl.openfoam.org/ubuntu
+sudo sh -c "wget -O - http://dl.openfoam.org/gpg.key | apt-key add -"
+sudo apt-get update
+sudo apt-get -y install openfoam4
 mkdir -p $FOAM_RUN
 mkdir -p $FOAM_USER_APPBIN
 mkdir -p $FOAM_USER_LIBBIN
 ```
-*Note*: For Ubuntu 16.04 you need to compile OpenFOAM 2.4.0 following
-[this guide line](https://openfoamwiki.net/index.php/Installation/Linux/OpenFOAM-2.4.0/Ubuntu#Ubuntu_16.04).
+*Note 1*: This [video](https://www.youtube.com/watch?v=x6BWTEcuh38) demonstrates the installation process.
+
+*Note 2*: Consult with [official webpage](http://openfoam.org/download/4-0-ubuntu/) for installation problems.
 
 ### 2. Install MongoDB C++ Driver
 ```
