@@ -6,9 +6,9 @@
 !! @ingroup   foam_aging
 module physicalProperties
     use constants
+    use globals, only: solModel,diffModel
     use fmodena
     implicit none
-    integer :: solModel(3),diffModel(3)
     !modena variables
     integer(c_int) :: ret
     type(c_ptr) :: rhopModena = c_null_ptr
@@ -85,11 +85,6 @@ contains
 !********************************BEGINNING*************************************
 !> creates Modena models
 subroutine createModels
-!    rhopModena = modena_model_new (client, c_char_"polymerDensity"//c_null_char);
-!    rhopInputs = modena_inputs_new (rhopModena);
-!    rhopOutputs = modena_outputs_new (rhopModena);
-!    rhopTemppos = modena_model_inputs_argPos(rhopModena, c_char_"T"//c_null_char);
-!    call modena_model_argPos_check(rhopModena)
     kfoamModena = modena_model_new (c_char_"foamConductivity"//c_null_char);
     if (modena_error_occurred()) then
         call exit(modena_error())
@@ -140,7 +135,8 @@ subroutine createModels
     endif
     kcdInputs = modena_inputs_new (kcdModena);
     kcdOutputs = modena_outputs_new (kcdModena);
-    kcdTemppos = modena_model_inputs_argPos(kcdModena, c_char_"T"//c_null_char);
+    kcdTemppos = modena_model_inputs_argPos(&
+        kcdModena, c_char_"T"//c_null_char);
     call modena_model_argPos_check(kcdModena)
     kairModena = modena_model_new (&
         c_char_"gas_thermal_conductivity[A=Air]"//c_null_char);
@@ -149,7 +145,8 @@ subroutine createModels
     endif
     kairInputs = modena_inputs_new (kairModena);
     kairOutputs = modena_outputs_new (kairModena);
-    kairTemppos = modena_model_inputs_argPos(kairModena, c_char_"T"//c_null_char);
+    kairTemppos = modena_model_inputs_argPos(&
+        kairModena, c_char_"T"//c_null_char);
     call modena_model_argPos_check(kairModena)
     kcypModena = modena_model_new (&
         c_char_"gas_thermal_conductivity[A=CyP]"//c_null_char);
@@ -158,7 +155,8 @@ subroutine createModels
     endif
     kcypInputs = modena_inputs_new (kcypModena);
     kcypOutputs = modena_outputs_new (kcypModena);
-    kcypTemppos = modena_model_inputs_argPos(kcypModena, c_char_"T"//c_null_char);
+    kcypTemppos = modena_model_inputs_argPos(&
+        kcypModena, c_char_"T"//c_null_char);
     call modena_model_argPos_check(kcypModena)
     if (solModel(1)==1) then
         sairModena = modena_model_new (&
@@ -258,9 +256,6 @@ end subroutine createModels
 !********************************BEGINNING*************************************
 !> destroys Modena models
 subroutine destroyModels
-!    call modena_inputs_destroy (rhopInputs);
-!    call modena_outputs_destroy (rhopOutputs);
-!    call modena_model_destroy (rhopModena);
     call modena_inputs_destroy (kfoamInputs);
     call modena_outputs_destroy (kfoamOutputs);
     call modena_model_destroy (kfoamModena);
@@ -276,27 +271,39 @@ subroutine destroyModels
     call modena_inputs_destroy (kcypInputs);
     call modena_outputs_destroy (kcypOutputs);
     call modena_model_destroy (kcypModena);
-    call modena_inputs_destroy (scdInputs);
-    call modena_outputs_destroy (scdOutputs);
-    call modena_model_destroy (scdModena);
-    call modena_inputs_destroy (sairInputs);
-    call modena_outputs_destroy (sairOutputs);
-    call modena_model_destroy (sairModena);
-    call modena_inputs_destroy (scypInputs);
-    call modena_outputs_destroy (scypOutputs);
-    call modena_model_destroy (scypModena);
-    call modena_inputs_destroy (dcdInputs);
-    call modena_outputs_destroy (dcdOutputs);
-    call modena_model_destroy (dcdModena);
-    call modena_inputs_destroy (dcypInputs);
-    call modena_outputs_destroy (dcypOutputs);
-    call modena_model_destroy (dcypModena);
-    call modena_inputs_destroy (do2Inputs);
-    call modena_outputs_destroy (do2Outputs);
-    call modena_model_destroy (do2Modena);
-    call modena_inputs_destroy (dn2Inputs);
-    call modena_outputs_destroy (dn2Outputs);
-    call modena_model_destroy (dn2Modena);
+    if (solModel(1)==1) then
+        call modena_inputs_destroy (sairInputs);
+        call modena_outputs_destroy (sairOutputs);
+        call modena_model_destroy (sairModena);
+    endif
+    if (solModel(2)==1) then
+        call modena_inputs_destroy (scdInputs);
+        call modena_outputs_destroy (scdOutputs);
+        call modena_model_destroy (scdModena);
+    endif
+    if (solModel(3)==1) then
+        call modena_inputs_destroy (scypInputs);
+        call modena_outputs_destroy (scypOutputs);
+        call modena_model_destroy (scypModena);
+    endif
+    if (diffModel(1)==1) then
+        call modena_inputs_destroy (do2Inputs);
+        call modena_outputs_destroy (do2Outputs);
+        call modena_model_destroy (do2Modena);
+        call modena_inputs_destroy (dn2Inputs);
+        call modena_outputs_destroy (dn2Outputs);
+        call modena_model_destroy (dn2Modena);
+    endif
+    if (diffModel(2)==1) then
+        call modena_inputs_destroy (dcdInputs);
+        call modena_outputs_destroy (dcdOutputs);
+        call modena_model_destroy (dcdModena);
+    endif
+    if (diffModel(3)==1) then
+        call modena_inputs_destroy (dcypInputs);
+        call modena_outputs_destroy (dcypOutputs);
+        call modena_model_destroy (dcypModena);
+    endif
 end subroutine destroyModels
 !***********************************END****************************************
 
@@ -410,7 +417,6 @@ real(dp) function cdSolubility(temp)
         call exit(ret)
     endif
     cdSolubility=modena_outputs_get(scdOutputs, 0_c_size_t)
-    cdSolubility=cdSolubility*Rg*temp*1100._dp/(1e5*Mg(1))/1e5
 end function cdSolubility
 !***********************************END****************************************
 
@@ -430,8 +436,6 @@ real(dp) function airSolubility(temp)
         call exit(ret)
     endif
     airSolubility=modena_outputs_get(sairOutputs, 0_c_size_t)
-    airSolubility=airSolubility*Rg*temp*1100._dp/(1e5*&
-        (0.21_dp*Mg(2)+0.79_dp*Mg(3)))/1e5
 end function airSolubility
 !***********************************END****************************************
 
@@ -451,7 +455,6 @@ real(dp) function cypSolubility(temp)
         call exit(ret)
     endif
     cypSolubility=modena_outputs_get(scypOutputs, 0_c_size_t)
-    cypSolubility=cypSolubility*Rg*temp*1100._dp/(1e5*Mg(4))/1e5
 end function cypSolubility
 !***********************************END****************************************
 
@@ -502,6 +505,33 @@ real(dp) function airDiffusivity(temp)
     airDiffusivity=&
         airDiffusivity+0.79_dp*modena_outputs_get(dn2Outputs, 0_c_size_t)
 end function airDiffusivity
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> diffusivity of gases in gas phase
+!! accoriding to Bird 1975, p.505, eq. 16.3-1
+real(dp) function gasDiffusivity(temp)
+    use globals, only: pressure
+    real(dp), intent(in) :: temp
+	real(dp) :: pcA, pcB, pcApcB, TcA, TcB, TcATcB
+	real(dp) :: MA, MB, Mterm ,a, b, aToverTcsb
+    pcA = 33.5e0_dp      !  N2
+    pcB = 72.9e0_dp      ! CO2
+    pcApcB = (pcA*pcB)**(1.0e0_dp/3.0e0_dp) ! CO2, N2, B-1 p. 744
+    TcA = 126.2e0_dp     ! N2
+    TcB = 304.2e0_dp     ! CO2
+    TcATcB = (TcA*TcB)**(5.0e0_dp/12.0e0_dp)
+    MA = 28.02e0_dp
+    MB = 44.01e0_dp
+    Mterm = dsqrt(1/MA + 1/MB)
+    a = 2.7450e-4_dp ! non-polar pairs
+    b = 1.823e0_dp
+    aToverTcsb = a*(temp/dsqrt(TcA*TcB))**b
+    ! pressure in atmospheres, cm2/s
+    gasDiffusivity = (aToverTcsb*pcApcB*TcATcB*Mterm)*1.0e5_dp/pressure
+    gasDiffusivity = gasDiffusivity * 1.0e-4_dp ! m2/s
+end function gasDiffusivity
 !***********************************END****************************************
 
 
