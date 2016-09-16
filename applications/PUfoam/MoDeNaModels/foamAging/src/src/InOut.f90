@@ -16,6 +16,7 @@ subroutine input()
 	use fson
     use fson_value_m, only: fson_value_get
 	type(fson_value), pointer :: json_data
+	character(len=1024) :: strval
 	! Read input parameters
 	json_data => fson_parse("../foamAging.json")
 	call fson_get(json_data, "numerics.timeStart", tbeg)
@@ -47,11 +48,32 @@ subroutine input()
 	call fson_get(json_data, "morphology.wallThickness", dwall)
 	call fson_get(json_data, "physicalProperties.polymerDensity", rhop)
 	call fson_get(json_data, &
-		"physicalProperties.foam.solubilityModel.Air", solModel(1))
+		"physicalProperties.foam.solubilityModel.Air", strval)
+	if (strval=="constant") then
+		solModel(1)=0
+	elseif ( strval=="modena" ) then
+		solModel(1)=1
+	else
+		print*, "Solubility model must be constant or modena"
+	endif
 	call fson_get(json_data, &
-		"physicalProperties.foam.solubilityModel.CO2", solModel(2))
+		"physicalProperties.foam.solubilityModel.CO2", strval)
+	if (strval=="constant") then
+		solModel(2)=0
+	elseif ( strval=="modena" ) then
+		solModel(2)=1
+	else
+		print*, "Solubility model must be constant or modena"
+	endif
 	call fson_get(json_data, &
-		"physicalProperties.foam.solubilityModel.Cyclopentane", solModel(3))
+		"physicalProperties.foam.solubilityModel.Cyclopentane", strval)
+	if (strval=="constant") then
+		solModel(3)=0
+	elseif ( strval=="modena" ) then
+		solModel(3)=1
+	else
+		print*, "Solubility model must be constant or modena"
+	endif
 	if (solModel(1)==0) then
 		call fson_get(json_data, "physicalProperties.foam.solubility.Air", Sair)
 	endif
@@ -63,11 +85,32 @@ subroutine input()
 			json_data, "physicalProperties.foam.solubility.Cyclopentane", Scyp)
 	endif
 	call fson_get(json_data, &
-		"physicalProperties.foam.diffusivityModel.Air", diffModel(1))
+		"physicalProperties.foam.diffusivityModel.Air", strval)
+	if (strval=="constant") then
+	    diffModel(1)=0
+	elseif ( strval=="modena" ) then
+		diffModel(1)=1
+	else
+		print*, "Diffusivity model must be constant or modena"
+	endif
 	call fson_get(json_data, &
-		"physicalProperties.foam.diffusivityModel.CO2", diffModel(2))
+		"physicalProperties.foam.diffusivityModel.CO2",strval)
+	if (strval=="constant") then
+		diffModel(2)=0
+	elseif ( strval=="modena" ) then
+		diffModel(2)=1
+	else
+		print*, "Diffusivity model must be constant or modena"
+	endif
 	call fson_get(json_data, &
-		"physicalProperties.foam.diffusivityModel.Cyclopentane", diffModel(3))
+		"physicalProperties.foam.diffusivityModel.Cyclopentane", strval)
+	if (strval=="constant") then
+		diffModel(3)=0
+	elseif ( strval=="modena" ) then
+		diffModel(3)=1
+	else
+		print*, "Diffusivity model must be constant or modena"
+	endif
 	if (diffModel(1)==0) then
 		call fson_get(json_data, &
 			"physicalProperties.foam.diffusivity.Air", Dair)
