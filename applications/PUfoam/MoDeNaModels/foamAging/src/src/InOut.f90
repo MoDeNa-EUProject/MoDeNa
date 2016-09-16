@@ -1,138 +1,143 @@
 !> @file
-!! subroutines for calculation of equivalent conductivity of the foam
+!! subroutines for file input and output
 !! @author    Michal Vonka
 !! @author    Pavel Ferkl
 !! @ingroup   foam_aging
 module inout
 	implicit none
 	private
-	public input,output
+	public input,output,print_header
 contains
 !********************************BEGINNING*************************************
 !> reads input file, packs variables to rpar and ipar variables
-subroutine input(rpar, ipar)
+subroutine input()
 	use constants
+	use globals
 	use fson
     use fson_value_m, only: fson_value_get
 	type(fson_value), pointer :: json_data
-	integer :: i
-	integer :: ipar(:)
-	integer :: divwall, ncell
-	integer :: nroutputs
-	integer :: solModel(3),diffModel(3)
-	real(dp) :: dcell, dwall, L
-	real(dp) :: pressure ! initial conds
-	real(dp) :: pBCair, pBCCO2, pBCpent 	! boundary conds
-	real(dp) :: pICair, pICCO2, pICpent 	! initial conds
-	real(dp) :: DO2, DN2, DCO2, Dpent, Dair, Dgas
-	real(dp) :: SO2, SN2, SCO2, Spent, Sair
-	real(dp) :: T, temp_cond, rhop
-	real(dp) :: pcA, pcB, pcApcB, TcA, TcB, TcATcB
-	real(dp) :: MA, MB, Mterm ,a, b, aToverTcsb
-	real(dp) :: fstrut,rhof
-	real(dp) ::  tend,tbeg
-	real(dp) :: rpar(:)					! real param
-
+	character(len=1024) :: strval
 	! Read input parameters
 	json_data => fson_parse("../foamAging.json")
-	call fson_get(json_data, "numberOfOutputs", nroutputs)
-	call fson_get(json_data, "wallDiscretization", divwall)
-	call fson_get(json_data, "timeStart", tbeg)
-	call fson_get(json_data, "timeEnd", tend)
-	call fson_get(json_data, "agingTemperature", T)
-	call fson_get(json_data, "conductivityTemperature", temp_cond)
-	call fson_get(json_data, "polymerDensity", rhop)
-	call fson_get(json_data, "initialPressure", pressure)
-	call fson_get(json_data, "boundaryPressure.Air", pBCair)
-	call fson_get(json_data, "boundaryPressure.CO2", pBCCO2)
-	call fson_get(json_data, "boundaryPressure.Cyclopentane", pBCpent)
-	call fson_get(json_data, "initialComposition.Air", pICair)
-	call fson_get(json_data, "initialComposition.CO2", pICCO2)
-	call fson_get(json_data, "initialComposition.Cyclopentane", pICpent)
-	call fson_get(json_data, "foamHalfThickness", L)
-	call fson_get(json_data, "wallThickness", dwall)
-	call fson_get(json_data, "cellSize", dcell)
-	call fson_get(json_data, "strutContent", fstrut)
-	call fson_get(json_data, "foamDensity", rhof)
-	call fson_get(json_data, "solubilityModel.Air", solModel(1))
-	call fson_get(json_data, "solubilityModel.CO2", solModel(2))
-	call fson_get(json_data, "solubilityModel.Cyclopentane", solModel(3))
+	call fson_get(json_data, "numerics.timeStart", tbeg)
+	call fson_get(json_data, "numerics.timeEnd", tend)
+	call fson_get(json_data, "numerics.numberOfOutputs", nroutputs)
+	call fson_get(json_data, "numerics.wallDiscretization", divwall)
+	call fson_get(json_data, "numerics.cellDiscretization", divcell)
+	call fson_get(json_data, "numerics.sheetDiscretization", divsheet)
+	call fson_get(json_data, "foamCondition.foamHalfThickness", dfoam)
+	call fson_get(json_data, "foamCondition.inProtectiveSheet", sheet)
+	if (sheet) then
+		call fson_get(&
+			json_data, "foamCondition.sheetThickness", dsheet)
+	endif
+	call fson_get(json_data, "foamCondition.agingTemperature", temp)
+	call fson_get(json_data, "foamCondition.conductivityTemperature", temp_cond)
+	call fson_get(json_data, "foamCondition.initialPressure", pressure)
+	call fson_get(json_data, "foamCondition.boundaryPressure.Air", pBCair)
+	call fson_get(json_data, "foamCondition.boundaryPressure.CO2", pBCCO2)
+	call fson_get(&
+		json_data, "foamCondition.boundaryPressure.Cyclopentane", pBCcyp)
+	call fson_get(json_data, "foamCondition.initialComposition.Air", pICair)
+	call fson_get(json_data, "foamCondition.initialComposition.CO2", pICCO2)
+	call fson_get(&
+		json_data, "foamCondition.initialComposition.Cyclopentane", pICcyp)
+	call fson_get(json_data, "morphology.foamDensity", rhof)
+	call fson_get(json_data, "morphology.cellSize", dcell)
+	call fson_get(json_data, "morphology.strutContent", fstrut)
+	call fson_get(json_data, "morphology.wallThickness", dwall)
+	call fson_get(json_data, "physicalProperties.polymerDensity", rhop)
+	call fson_get(json_data, &
+		"physicalProperties.foam.solubilityModel.Air", strval)
+	if (strval=="constant") then
+		solModel(1)=0
+	elseif ( strval=="modena" ) then
+		solModel(1)=1
+	else
+		print*, "Solubility model must be constant or modena"
+	endif
+	call fson_get(json_data, &
+		"physicalProperties.foam.solubilityModel.CO2", strval)
+	if (strval=="constant") then
+		solModel(2)=0
+	elseif ( strval=="modena" ) then
+		solModel(2)=1
+	else
+		print*, "Solubility model must be constant or modena"
+	endif
+	call fson_get(json_data, &
+		"physicalProperties.foam.solubilityModel.Cyclopentane", strval)
+	if (strval=="constant") then
+		solModel(3)=0
+	elseif ( strval=="modena" ) then
+		solModel(3)=1
+	else
+		print*, "Solubility model must be constant or modena"
+	endif
 	if (solModel(1)==0) then
-		call fson_get(json_data, "solubility.Air", Sair)
+		call fson_get(json_data, "physicalProperties.foam.solubility.Air", Sair)
 	endif
 	if (solModel(2)==0) then
-		call fson_get(json_data, "solubility.CO2", SCO2)
+		call fson_get(json_data, "physicalProperties.foam.solubility.CO2", SCO2)
 	endif
 	if (solModel(3)==0) then
-		call fson_get(json_data, "solubility.Cyclopentane", Spent)
+		call fson_get(&
+			json_data, "physicalProperties.foam.solubility.Cyclopentane", Scyp)
 	endif
-	call fson_get(json_data, "diffusivityModel.Air", diffModel(1))
-	call fson_get(json_data, "diffusivityModel.CO2", diffModel(2))
-	call fson_get(json_data, "diffusivityModel.Cyclopentane", diffModel(3))
+	call fson_get(json_data, &
+		"physicalProperties.foam.diffusivityModel.Air", strval)
+	if (strval=="constant") then
+	    diffModel(1)=0
+	elseif ( strval=="modena" ) then
+		diffModel(1)=1
+	else
+		print*, "Diffusivity model must be constant or modena"
+	endif
+	call fson_get(json_data, &
+		"physicalProperties.foam.diffusivityModel.CO2",strval)
+	if (strval=="constant") then
+		diffModel(2)=0
+	elseif ( strval=="modena" ) then
+		diffModel(2)=1
+	else
+		print*, "Diffusivity model must be constant or modena"
+	endif
+	call fson_get(json_data, &
+		"physicalProperties.foam.diffusivityModel.Cyclopentane", strval)
+	if (strval=="constant") then
+		diffModel(3)=0
+	elseif ( strval=="modena" ) then
+		diffModel(3)=1
+	else
+		print*, "Diffusivity model must be constant or modena"
+	endif
 	if (diffModel(1)==0) then
-		call fson_get(json_data, "diffusivity.Air", Dair)
+		call fson_get(json_data, &
+			"physicalProperties.foam.diffusivity.Air", Dair)
 	endif
 	if (diffModel(2)==0) then
-		call fson_get(json_data, "diffusivity.CO2", DCO2)
+		call fson_get(json_data, &
+			"physicalProperties.foam.diffusivity.CO2", DCO2)
 	endif
 	if (diffModel(3)==0) then
-		call fson_get(json_data, "diffusivity.Cyclopentane", Dpent)
+		call fson_get(json_data, &
+			"physicalProperties.foam.diffusivity.Cyclopentane", Dcyp)
 	endif
-	ncell = dint(L/(dcell+dwall))
-    ! gas difusivity accoriding to Bird 1975, p.505, eq. 16.3-1
-    pcA = 33.5e0_dp      !  N2
-    pcB = 72.9e0_dp      ! CO2
-    pcApcB = (pcA*pcB)**(1.0e0_dp/3.0e0_dp) ! CO2, N2, B-1 p. 744
-    TcA = 126.2e0_dp     ! N2
-    TcB = 304.2e0_dp     ! CO2
-    TcATcB = (TcA*TcB)**(5.0e0_dp/12.0e0_dp)
-    MA = 28.02e0_dp
-    MB = 44.01e0_dp
-    Mterm = dsqrt(1/MA + 1/MB)
-    a = 2.7450e-4_dp ! non-polar pairs
-    b = 1.823e0_dp
-    aToverTcsb = a*(T/dsqrt(TcA*TcB))**b
-
-	! pressure in atmospheres, cm2/s
-    Dgas = (aToverTcsb*pcApcB*TcATcB*Mterm)*1.0e5_dp/pressure
-    Dgas = Dgas * 1.0e-4_dp ! m2/s
-
-	ipar(1) = nroutputs
-	ipar(2) = ncell
-	ipar(4) = divwall+1		! FV in one cell
-	ipar(5) = (divwall+1)*ncell	! total number of FV
-	ipar(6:8) = solModel
-	ipar(9:11) = diffModel
-
-	rpar(1) = dcell
-	rpar(2) = dwall
-	rpar(3) = tend
-	rpar(4) = Dair      ! average air
-	rpar(5) = DCO2
-	rpar(6) = Sair      ! average air
-	rpar(7) = SCO2
-
-	rpar(8) = pressure
-	! rpar(9) = initpressure
-	rpar(10)= Rg*T
-
-	rpar(11) = Dpent
-	rpar(12) = Spent
-	rpar(13) = Dgas
-
-    rpar(14) = pBCair
-    rpar(15) = pBCCO2
-    rpar(16) = pBCpent
-
-    rpar(17) = pICair*pressure
-    rpar(18) = pICCO2*pressure
-    rpar(19) = pICpent*pressure
-
-	rpar(20)=fstrut
-	rpar(21)=rhof
-	rpar(22)=temp_cond
-	rpar(23)=rhop
-	rpar(24)=tbeg
+	if (sheet) then
+		call fson_get(json_data, &
+			"physicalProperties.sheet.solubility.Air", sheetSair)
+		call fson_get(json_data, &
+			"physicalProperties.sheet.solubility.CO2", sheetSCO2)
+		call fson_get(json_data, &
+			"physicalProperties.sheet.solubility.Cyclopentane", sheetScyp)
+		call fson_get(json_data, &
+			"physicalProperties.sheet.diffusivity.Air", sheetDair)
+		call fson_get(json_data, &
+			"physicalProperties.sheet.diffusivity.CO2", sheetDCO2)
+		call fson_get(json_data, &
+			"physicalProperties.sheet.diffusivity.Cyclopentane", sheetDcyp)
+	endif
+	call fson_destroy(json_data)
 end subroutine input
 !***********************************END****************************************
 
@@ -141,47 +146,19 @@ end subroutine input
 !> saves results to file
 subroutine output(iprof, time, ystate, neq)
 	use constants
-	integer :: i, j, iprof, job
-	integer :: nFV, onecell, ncell, neq
-	integer :: divwall
+	use globals
+	use model, only: ngas,dz,mor,nfv,sol
+	integer :: i, j, iprof
+	integer :: neq
 
-	real(dp) :: time, test
+	real(dp) :: time,pos
 	real(dp) :: ystate(:)
-	real(dp) :: dwall, dcell, hwall
-
-	real(dp) :: pBCair, pBCCO2, pBCpent, RT 	! boundary conds
-	real(dp), allocatable :: length(:)
 
 	character(len=1) :: name_1	! one character
 	character(len=2) :: name_2	! two characters
 	character(len=3) :: name_3	! three characters
 	character(len=4) :: name_f	! final name of file
 
-	! ipar
-    dcell = ystate(nEQ + 1)
-    dwall = ystate(nEQ + 2)
-    ncell   = dint(ystate(nEQ + 11))
-    onecell = dint(ystate(nEQ + 12))    != dble(ipar(4))
-    divwall = onecell-1
-	nFV     = ncell*onecell
-    hwall   = dwall/dble(divwall)
-
-	pBCair = ystate(nEQ + 16) != rpar(14) != pBCair
-    pBCCO2 = ystate(nEQ + 17) != rpar(15) != pBCCO2
-    pBCpent= ystate(nEQ + 18) != rpar(16) != pBCpent
-    RT     = ystate(nEQ + 10)
-
-    if (.NOT. allocated(length)) then
-        allocate (length(0:nFV))
-    endif
-	! compute lengths
-    length(0:nFV) = 0.0e0_dp
-    do i = 1, nFV
-        if (mod(i,onecell).eq.0) length(i) = length(i-1) + dcell/2.0e0_dp
-        if (mod(i,onecell).eq.1) length(i) = length(i-1) + dcell/2.0e0_dp
-        if (mod(i,onecell).gt.1) length(i) = length(i-1) + hwall
-    enddo
-!     write(*,*) length(1:nFV)
     if     (iprof <  10) then
         write(name_1,'(I1)') iprof
         name_f = '000' // name_1
@@ -197,25 +174,71 @@ subroutine output(iprof, time, ystate, neq)
 	open(unit=11,file='../results/H2perm_'//trim(name_f)//'.dat')
 	open(unit=12,file='../results/ppar_'//trim(name_f)//'.dat')
 
-   ! BC
-	write (11,100) time/(3600.0e0_dp*24.0e0_dp),length(0), pBCair/RT,pBCCO2/RT,&
-		pBCpent/RT
-	write (12,101) time/(3600.0e0_dp*24.0e0_dp),length(0), pBCair,pBCCO2,&
-		pBCpent
 	! profiles
-	do i = 1, nFV
-		write (11,100) time/(3600.0e0_dp*24.0e0_dp),length(i),ystate(i),&
-			ystate(nFV+i),ystate(2*nFV+i)
+	do i = 1, neq/ngas
+		write (11,100) time/(3600*24),pos,&
+			ystate(ngas*(i-1)+1)*sol(ngas*(i-1)+1),&
+			ystate(ngas*(i-1)+2)*sol(ngas*(i-1)+2),&
+			ystate(ngas*(i-1)+3)*sol(ngas*(i-1)+3)
 	enddo
-	do i = onecell, nFV, onecell
-		write (12,101) time/(3600.0e0_dp*24.0e0_dp),length(i),ystate(i)*RT,&
-			ystate(nFV+i)*RT,ystate(2*nFV+i)*RT
+	do i = 1,nfv
+		if (i==1) then
+		    pos=dz(1)
+		else
+			pos=pos+(dz(i-1)+dz(i))/2
+		endif
+		if (mor(i)==1) then
+			write (12,101) time/(3600*24),pos,ystate(ngas*(i-1)+1)*Rg*temp,&
+				ystate(ngas*(i-1)+2)*Rg*temp,ystate(ngas*(i-1)+3)*Rg*temp
+		endif
 	enddo
     close(11)
 	close(12)
-	return
-100   format (f8.2,F12.3,F12.3,F12.3,F12.3)
-101   format (f8.2,F12.3,F12.3,F12.3,F12.3)
+100   format (f8.2,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3)
+101   format (f8.2,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3)
 end subroutine output
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+subroutine print_header
+	use globals
+	use model, only: nfv
+    print*, 'Foam:'
+    write(*,'(A30,EN12.3,1x,A)') 'foam density:',rhof,'kg/m3'
+    write(*,'(A30,EN12.3)') 'porosity:',eps
+    write(*,'(A30,EN12.3)') 'strut content:',fstrut
+    write(*,'(A30,EN12.3,1x,A)') 'cell size:',dcell,'m'
+    write(*,'(A30,EN12.3,1x,A)') 'wall thickness:',dwall,'m'
+    if (sheet) then
+        write(*,'(A30,EN12.3,1x,A)') 'sheet thickness:',dsheet,'m'
+    endif
+    write(*,'(A30,EN12.3,1x,A)') 'foam thickness:',dfoam,'m'
+    write(*,'(A30,I12)') 'number of cells:',ncell
+    write(*,'(A30,EN12.3,1x,A)') 'aging temperature:',temp,'K'
+    write(*,'(A30,EN12.3,1x,A)') 'conductivity temperature:',temp_cond,'K'
+    print*, 'Physical properties:'
+    write(*,'(A30,EN12.3,1x,A)') 'polymer density:',rhop,'kg/m3'
+    write(*,'(A30,EN12.3,1x,A)') 'diffusivity in gas:',Dgas,'m2/s'
+    write(*,'(A30,EN12.3,1x,A)') 'air diffusivity:',Dair,'m2/s'
+    write(*,'(A30,EN12.3,1x,A)') 'CO2 diffusivity:',DCO2,'m2/s'
+    write(*,'(A30,EN12.3,1x,A)') 'pentane diffusivity:',Dcyp,'m2/s'
+	write(*,'(A30,EN12.3,1x,A)') 'air solubility:',Sair,'g/g/bar'
+    write(*,'(A30,EN12.3,1x,A)') 'CO2 solubility:',SCO2,'g/g/bar'
+	write(*,'(A30,EN12.3,1x,A)') 'pentane solubility:',Scyp,'g/g/bar'
+	write(*,'(A30,EN12.3,1x,A)') 'air permeability:',Sair*Dair,'m2/s*g/g/bar'
+    write(*,'(A30,EN12.3,1x,A)') 'CO2 permeability:',SCO2*DCO2,'m2/s*g/g/bar'
+	write(*,'(A30,EN12.3,1x,A)') 'pentane permeability:',Scyp*Dcyp,&
+        'm2/s*g/g/bar'
+    print*, 'Numerics:'
+    write(*,'(A30,I12)') 'finite volumes in wall:',divwall
+    write(*,'(A30,I12)') 'finite volumes in cell:',divcell
+    if (sheet) then
+        write(*,'(A30,I12)') 'finite volumes in sheet:',divsheet
+    endif
+    write(*,'(A30,I12)') 'finite volumes in total:',nfv
+    write(*,'(A30,EN12.3,1x,A)') 'initial time:',tbeg,'s'
+    write(*,'(A30,EN12.3,1x,A)') 'end time:',tend,'s'
+end subroutine print_header
 !***********************************END****************************************
 end module inout

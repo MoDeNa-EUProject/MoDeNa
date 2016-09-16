@@ -1,45 +1,71 @@
 {
-    "numberOfOutputs": 100,
-    "wallDiscretization": 5,
-    "timeStart": 8.64e4,
-    "timeEnd": 5.184e6,
-    "agingTemperature": 343.0,
-    "conductivityTemperature": 283.0,
-    "polymerDensity": 1.1e3,
-    "initialPressure": 101325.0,
-    "boundaryPressure": {
-        "Air": 101325.0,
-        "CO2": 0.0,
-        "Cyclopentane": 0.0
+    "numerics": {
+        "timeStart": 0,
+        "timeEnd": 1e6,
+        "numberOfOutputs": 100,
+        "wallDiscretization": 5,
+        "cellDiscretization": 1,
+        "sheetDiscretization": 20
     },
-    "initialComposition": {
-        "Air": 0.0,
-        "CO2": 0.99,
-        "Cyclopentane": 0.0
+    "foamCondition": {
+        "foamHalfThickness": 1.5e-2,
+        "inProtectiveSheet": false,
+        "sheetThickness": 10e-6,
+        "agingTemperature": 343.0,
+        "conductivityTemperature": 283.0,
+        "initialPressure": 101325.0,
+        "initialComposition": {
+            "Air": 0.0,
+            "CO2": 0.99,
+            "Cyclopentane": 0.0
+        },
+        "boundaryPressure": {
+            "Air": 101325.0,
+            "CO2": 0.0,
+            "Cyclopentane": 0.0
+        }
     },
-    "foamHalfThickness": 1.5e-2,
-    "wallThickness": 2.04e-6,
-    "cellSize": 380e-6,
-    "strutContent": 0.62,
-    "foamDensity": 37.2,
-    "solubilityModel": {
-        "Air": 0,
-        "CO2": 0,
-        "Cyclopentane": 0
+    "morphology": {
+        "foamDensity": 37.2,
+        "cellSize": 380e-6,
+        "strutContent": 0.62,
+        "wallThickness": 2e-6
     },
-    "solubility": {
-        "Air": 4.75460825687e-07,
-        "CO2": 7.77088795e-06,
-        "Cyclopentane": 6.4163295e-05
-    },
-    "diffusivityModel": {
-        "Air": 1,
-        "CO2": 1,
-        "Cyclopentane": 1
-    },
-    "diffusivity": {
-        "Air": 2.86627521885e-13,
-        "CO2": 1.31384643981e-12,
-        "Cyclopentane": 1.14039387641e-13
+    "physicalProperties": {
+        "polymerDensity": 1.1e3,
+        "foam": {
+            "solubilityModel": {
+                "Air": "modena",
+                "CO2": "modena",
+                "Cyclopentane": "modena"
+            },
+            "solubility": {
+                "Air": 1e-00,
+                "CO2": 1e-00,
+                "Cyclopentane": 1e-00
+            },
+            "diffusivityModel": {
+                "Air": "modena",
+                "CO2": "modena",
+                "Cyclopentane": "modena"
+            },
+            "diffusivity": {
+                "Air": 2.86627521885e-13,
+                "CO2": 1.31384643981e-12,
+                "Cyclopentane": 1.14039387641e-13
+            }
+        },
+        "sheet": {
+            "solubility": {
+                "Air": 67.472E-06,
+                "CO2": 709.408E-06,
+                "Cyclopentane": 9.649E-03
+            },
+            "diffusivity": {
+                "Air": 2.86627521885e-13,
+                "CO2": 1.31384643981e-12,
+                "Cyclopentane": 1.14039387641e-13
+            }
+        }
     }
 }

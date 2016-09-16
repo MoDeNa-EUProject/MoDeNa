@@ -11,7 +11,9 @@
 !c   6.3.2015 - MV, application to PU foams solved by CO2 penetrating air
 !   3.4.2015 PF (pavel.ferkl@vscht.cz), calculation of conductivity
 program foam_diffusion
-    use integration, only: degas
+    use integration, only: integrate
 	implicit none
-    call degas
+    print*, 'Welcome to Foam aging'
+    call integrate
+    print*, 'Program Foam aging finished'
 end program

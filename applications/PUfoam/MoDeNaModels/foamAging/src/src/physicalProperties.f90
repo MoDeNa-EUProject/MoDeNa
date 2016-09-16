@@ -6,9 +6,9 @@
 !! @ingroup   foam_aging
 module physicalProperties
     use constants
+    use globals, only: solModel,diffModel
     use fmodena
     implicit none
-    integer :: solModel(3),diffModel(3)
     !modena variables
     integer(c_int) :: ret
     type(c_ptr) :: rhopModena = c_null_ptr
@@ -417,7 +417,6 @@ real(dp) function cdSolubility(temp)
         call exit(ret)
     endif
     cdSolubility=modena_outputs_get(scdOutputs, 0_c_size_t)
-    cdSolubility=cdSolubility*Rg*temp*1100._dp/(1e5*Mg(1))/1e5
 end function cdSolubility
 !***********************************END****************************************
 
@@ -437,8 +436,6 @@ real(dp) function airSolubility(temp)
         call exit(ret)
     endif
     airSolubility=modena_outputs_get(sairOutputs, 0_c_size_t)
-    airSolubility=airSolubility*Rg*temp*1100._dp/(1e5*&
-        (0.21_dp*Mg(2)+0.79_dp*Mg(3)))/1e5
 end function airSolubility
 !***********************************END****************************************
 
@@ -458,7 +455,6 @@ real(dp) function cypSolubility(temp)
         call exit(ret)
     endif
     cypSolubility=modena_outputs_get(scypOutputs, 0_c_size_t)
-    cypSolubility=cypSolubility*Rg*temp*1100._dp/(1e5*Mg(4))/1e5
 end function cypSolubility
 !***********************************END****************************************
 
@@ -509,6 +505,33 @@ real(dp) function airDiffusivity(temp)
     airDiffusivity=&
         airDiffusivity+0.79_dp*modena_outputs_get(dn2Outputs, 0_c_size_t)
 end function airDiffusivity
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> diffusivity of gases in gas phase
+!! accoriding to Bird 1975, p.505, eq. 16.3-1
+real(dp) function gasDiffusivity(temp)
+    use globals, only: pressure
+    real(dp), intent(in) :: temp
+	real(dp) :: pcA, pcB, pcApcB, TcA, TcB, TcATcB
+	real(dp) :: MA, MB, Mterm ,a, b, aToverTcsb
+    pcA = 33.5e0_dp      !  N2
+    pcB = 72.9e0_dp      ! CO2
+    pcApcB = (pcA*pcB)**(1.0e0_dp/3.0e0_dp) ! CO2, N2, B-1 p. 744
+    TcA = 126.2e0_dp     ! N2
+    TcB = 304.2e0_dp     ! CO2
+    TcATcB = (TcA*TcB)**(5.0e0_dp/12.0e0_dp)
+    MA = 28.02e0_dp
+    MB = 44.01e0_dp
+    Mterm = dsqrt(1/MA + 1/MB)
+    a = 2.7450e-4_dp ! non-polar pairs
+    b = 1.823e0_dp
+    aToverTcsb = a*(temp/dsqrt(TcA*TcB))**b
+    ! pressure in atmospheres, cm2/s
+    gasDiffusivity = (aToverTcsb*pcApcB*TcATcB*Mterm)*1.0e5_dp/pressure
+    gasDiffusivity = gasDiffusivity * 1.0e-4_dp ! m2/s
+end function gasDiffusivity
 !***********************************END****************************************
 
 

@@ -168,14 +168,14 @@ void tcfoam_SM
 try:
     with open('foamAging.json','r') as f:
         inputs=json.load(f)
-        T0=inputs['conductivityTemperature']
-        rhop=inputs['polymerDensity']
-        xAir0=inputs['initialComposition']['Air']
-        xCO20=inputs['initialComposition']['CO2']
-        xCyP0=inputs['initialComposition']['Cyclopentane']
-        dcell0=inputs['cellSize']
-        fstrut0=inputs['strutContent']
-        rho0=inputs['foamDensity']
+        T0=inputs['foamCondition']['conductivityTemperature']
+        rhop=inputs['physicalProperties']['polymerDensity']
+        xAir0=inputs['foamCondition']['initialComposition']['Air']
+        xCO20=inputs['foamCondition']['initialComposition']['CO2']
+        xCyP0=inputs['foamCondition']['initialComposition']['Cyclopentane']
+        dcell0=inputs['morphology']['cellSize']
+        fstrut0=inputs['morphology']['strutContent']
+        rho0=inputs['morphology']['foamDensity']
         eps0=1-rho0/rhop
 except IOError: # set some dummy values when not initializing
     eps0=0.96
@@ -215,8 +215,8 @@ test=False
 if test:
     initialPoints_foamConductivity_auto['x[CO2]']=[1,0,0,0]
     initialPoints_foamConductivity_auto['x[CyP]']=[0,1,0,0]
-    initialPoints_foamConductivity_auto['x[O2]']=[0,0,0.21,0.21]
-    initialPoints_foamConductivity_auto['x[N2]']=[0,0,0.79,0.79]
+    initialPoints_foamConductivity_auto['x[O2]']=[0,0,1,0]
+    initialPoints_foamConductivity_auto['x[N2]']=[0,0,0,1]
 # When initializing for Foam expansion
 # use dummy data to initialize to avoid getting out of bounds
 foaming_ini={
