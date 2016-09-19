@@ -93,4 +93,32 @@ if (viscosityModel == "bird-carreau")
         }
     }
 }
+
+if (viscosityModel == "MoDeNaRheology")
+{
+    forAll(mesh.C(), celli)
+    {
+        if (alpha2[celli] > 0.5)
+        {
+            volScalarField shearRate = Foam::mag(fvc::grad(U));
+                // set input vector
+            modena_inputs_set(inputs_rheo, temp_rheopos, TS[celli]);
+            modena_inputs_set(inputs_rheo, conv_rheopos, XOH[celli]);
+            modena_inputs_set(inputs_rheo, shear_rheopos, shearRate[celli]);
+            modena_inputs_set(inputs_rheo, m0_rheopos, mZero[celli]);
+            modena_inputs_set(inputs_rheo, m1_rheopos, mOne[celli]);
+            // call the model
+            int ret_rheo = modena_model_call (rheologymodel, inputs_rheo, outputs_rheo);
+            if (modena_error_occurred())
+            {
+                modena_inputs_destroy (inputs_rheo);
+                modena_outputs_destroy (outputs_rheo);
+                modena_model_destroy (rheologymodel);
+                Info<< "MoDeNa Error: " << (modena_error()) << endl;
+                // exit(modena_error());
+            }
+            muFoamCorr[celli] = modena_outputs_get(outputs_rheo, 0);
+        }
+    }
+}
 muMixture = alpha1*muAir + alpha2*muFoamCorr;

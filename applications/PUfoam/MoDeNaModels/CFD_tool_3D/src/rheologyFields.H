@@ -16,7 +16,8 @@ if
 (
     !(viscosityModel == "constant"
    || viscosityModel == "castro-macosko"
-   || viscosityModel == "bird-carreau")
+   || viscosityModel == "bird-carreau"
+   || viscosityModel == "MoDeNaRheology")
 )
 {
     FatalErrorIn(args.executable())
@@ -24,7 +25,8 @@ if
     << "\nValid viscosity models are: "
     << "\nconstant,"
     << "\ncastro-macosko,"
-    << "\nbird-carreau"
+    << "\nbird-carreau,"
+    << "\nMoDeNaRheology"
     << exit(FatalError);
 }
 
