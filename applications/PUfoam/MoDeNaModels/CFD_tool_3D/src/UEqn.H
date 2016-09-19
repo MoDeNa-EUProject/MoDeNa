@@ -4,7 +4,7 @@ fvVectorMatrix UEqn
     fvm::ddt(rho, U)
   + fvm::div(rhoPhi, U) 
   - fvm::laplacian(muMixture, U) 
-  - (fvc::grad(U) & fvc::grad(muMixture))
+  // - (fvc::grad(U) & fvc::grad(muMixture))
 );
 
 UEqn.relax();
