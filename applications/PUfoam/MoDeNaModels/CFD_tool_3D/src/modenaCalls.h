@@ -36,6 +36,12 @@ if (modena_error_occurred())
     return modena_error();
 }
 
+rheologymodel = modena_model_new("Rheology_Arrhenius");
+if (modena_error_occurred())
+{
+    return modena_error();
+}
+
 strutContentmodel = modena_model_new("strutContent");
 if (modena_error_occurred())
 {
@@ -59,6 +65,9 @@ outputs_kinetics = modena_outputs_new(kinetics);
 
 inputs_den = modena_inputs_new (density_reaction_mixturemodel);
 outputs_den = modena_outputs_new (density_reaction_mixturemodel);
+
+inputs_rheo = modena_inputs_new (rheologymodel);
+outputs_rheo = modena_outputs_new (rheologymodel);
 
 inputs_strutContent = modena_inputs_new (strutContentmodel);
 outputs_strutContent = modena_outputs_new (strutContentmodel);
@@ -146,4 +155,10 @@ X_N2_Pos = modena_model_inputs_argPos(thermalConductivitymodel, "x[N2]");
 X_Cyp_Pos = modena_model_inputs_argPos(thermalConductivitymodel, "x[CyP]");
 modena_model_argPos_check(thermalConductivitymodel);
 
+temp_rheopos = modena_model_inputs_argPos(rheologymodel, "T");
+shear_rheopos = modena_model_inputs_argPos(rheologymodel, "shear");
+conv_rheopos = modena_model_inputs_argPos(rheologymodel, "X");
+m0_rheopos = modena_model_inputs_argPos(rheologymodel, "m0");
+m1_rheopos = modena_model_inputs_argPos(rheologymodel, "m1");
+// modena_model_argPos_check(rheologymodel);
 #endif
