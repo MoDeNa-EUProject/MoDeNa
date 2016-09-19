@@ -47,7 +47,7 @@ def porOpt(vx):
                 solidVoxel,totalVoxel=\
                     [int(s) for s in line.split() if s.isdigit()]
                 eps=1-solidVoxel/totalVoxel
-                print "dimension: {0:f}, porosity: {1:f}".format(vx,eps)
+                print "dimension: {0:4d}, porosity: {1:f}".format(vx,eps)
                 return (eps-porosity)**2
 ## Objective function for finding size of box, which
 #
@@ -105,7 +105,7 @@ def porfsOpt(x):
     dedge=float(f.readline())
     f.close()
     resid=((eps-porosity)/porosity)**2
-    print "dimension: {0:f}, porosity: {1:f}".format(vx,eps)+\
+    print "dimension: {0:4d}, porosity: {1:f}".format(vx,eps)+\
         ", strut content: {0:f}".format(fs)
     return resid
 ts = datetime.datetime.now()

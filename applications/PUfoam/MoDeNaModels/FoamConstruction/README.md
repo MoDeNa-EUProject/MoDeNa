@@ -10,7 +10,7 @@ The code depends on several third-party applications:
 To install all of these on Ubuntu, do:
 ```
 sudo apt-get install libmatheval-dev gmsh gsl-bin libgsl0-dev python-vtk \
-    lib3ds-1-3 libjpeg62 freeglut3
+    lib3ds-1-3 libjpeg62 freeglut3 libnlopt-dev
 ```
 Then download and install `neper` from http://neper.sourceforge.net/downloads.html.
 You will need to unpack `neper`, go to its `src` folder and then:
@@ -21,13 +21,13 @@ cmake ..
 make
 sudo make install
 ```
-Download `meshconv` from http://www.cs.princeton.edu/~min/meshconv/, download
-`binvox` from http://www.cs.princeton.edu/~min/binvox/ and copy `meshconv` and `binvox` to `$PATH`. You can do this manually or in terminal using
+Download `meshconv` from http://www.patrickmin.com/meshconv/, download
+`binvox` from http://www.patrickmin.com/binvox/ and copy `meshconv` and `binvox` to `$PATH`. You can do this manually or in terminal using
 ```
-wget http://www.cs.princeton.edu/~min/meshconv/linux64/meshconv
+wget http://www.patrickmin.com/meshconv/linux64/meshconv
 chmod +x meshconv
 sudo mv meshconv /usr/local/bin/meshconv
-wget http://www.cs.princeton.edu/~min/binvox/linux64/binvox
+wget http://www.patrickmin.com/binvox/linux64/binvox
 chmod +x binvox
 sudo mv binvox /usr/local/bin/binvox
 ```
