@@ -579,7 +579,8 @@ END FUNCTION isofugacity
  REAL                                   :: start_xv(0:40),start_xl(0:40),x_sav,dg_dx2
 ! ----------------------------------------------------------------------
 
-
+start_xl = 0.0
+start_xv = 0.0
 
 j = 0
 k = 0
