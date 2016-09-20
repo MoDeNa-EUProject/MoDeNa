@@ -11,6 +11,8 @@ modena_model_t *kinetics;
 
 modena_model_t *density_reaction_mixturemodel;
 
+modena_model_t *rheologymodel;
+
 modena_model_t *strutContentmodel;
 
 modena_model_t *thermalConductivitymodel;
@@ -26,6 +28,9 @@ modena_outputs_t *outputs_kinetics;
 
 modena_inputs_t *inputs_den;
 modena_outputs_t *outputs_den;
+
+modena_inputs_t *inputs_rheo;
+modena_outputs_t *outputs_rheo;
 
 modena_inputs_t *inputs_strutContent;
 modena_outputs_t *outputs_strutContent;
@@ -88,4 +93,11 @@ size_t X_CO2_Pos;
 size_t X_Cyp_Pos;
 size_t X_O2_Pos;
 size_t X_N2_Pos;
+
+// rheology MoDeNa
+size_t temp_rheopos;
+size_t shear_rheopos;
+size_t conv_rheopos;
+size_t m0_rheopos;
+size_t m1_rheopos;
 #endif
