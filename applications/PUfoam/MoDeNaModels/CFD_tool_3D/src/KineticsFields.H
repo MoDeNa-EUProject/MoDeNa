@@ -772,7 +772,7 @@ Info<< "Reading field R_1_vol_RF1 \n" << endl;
     );
 // source terms for the RF-1 kinetics surrogate models
 Info<< "Creating source term source_Catalyst_1" << endl;
-volScalarField::Internal source_Catalyst_1
+volScalarField source_Catalyst_1
     (
          IOobject
         (
@@ -784,7 +784,7 @@ volScalarField::Internal source_Catalyst_1
         dimensionedScalar("source_Catalyst_1", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_CE_A0" << endl;
-volScalarField::Internal source_CE_A0
+volScalarField source_CE_A0
     (
          IOobject
         (
@@ -796,7 +796,7 @@ volScalarField::Internal source_CE_A0
         dimensionedScalar("source_CE_A0", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_CE_A1" << endl;
-volScalarField::Internal source_CE_A1
+volScalarField source_CE_A1
     (
          IOobject
         (
@@ -808,7 +808,7 @@ volScalarField::Internal source_CE_A1
         dimensionedScalar("source_CE_A1", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_CE_B" << endl;
-volScalarField::Internal source_CE_B
+volScalarField source_CE_B
     (
          IOobject
         (
@@ -820,7 +820,7 @@ volScalarField::Internal source_CE_B
         dimensionedScalar("source_CE_B", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_CE_B2" << endl;
-volScalarField::Internal source_CE_B2
+volScalarField source_CE_B2
     (
          IOobject
         (
@@ -832,7 +832,7 @@ volScalarField::Internal source_CE_B2
         dimensionedScalar("source_CE_B2", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_CE_I0" << endl;
-volScalarField::Internal source_CE_I0
+volScalarField source_CE_I0
     (
          IOobject
         (
@@ -844,7 +844,7 @@ volScalarField::Internal source_CE_I0
         dimensionedScalar("source_CE_I0", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_CE_I1" << endl;
-volScalarField::Internal source_CE_I1
+volScalarField source_CE_I1
     (
          IOobject
         (
@@ -856,7 +856,7 @@ volScalarField::Internal source_CE_I1
         dimensionedScalar("source_CE_I1", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_CE_I2" << endl;
-volScalarField::Internal source_CE_I2
+volScalarField source_CE_I2
     (
          IOobject
         (
@@ -868,7 +868,7 @@ volScalarField::Internal source_CE_I2
         dimensionedScalar("source_CE_I2", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_CE_PBA" << endl;
-volScalarField::Internal source_CE_PBA
+volScalarField source_CE_PBA
     (
          IOobject
         (
@@ -880,7 +880,7 @@ volScalarField::Internal source_CE_PBA
         dimensionedScalar("source_CE_PBA", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_CE_Breac" << endl;
-volScalarField::Internal source_CE_Breac
+volScalarField source_CE_Breac
     (
          IOobject
         (
@@ -892,7 +892,7 @@ volScalarField::Internal source_CE_Breac
         dimensionedScalar("source_CE_Breac", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_CE_Areac0" << endl;
-volScalarField::Internal source_CE_Areac0
+volScalarField source_CE_Areac0
     (
          IOobject
         (
@@ -904,7 +904,7 @@ volScalarField::Internal source_CE_Areac0
         dimensionedScalar("source_CE_Areac0", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_CE_Areac1" << endl;
-volScalarField::Internal source_CE_Areac1
+volScalarField source_CE_Areac1
     (
          IOobject
         (
@@ -916,7 +916,7 @@ volScalarField::Internal source_CE_Areac1
         dimensionedScalar("source_CE_Areac1", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_CE_Ireac0" << endl;
-volScalarField::Internal source_CE_Ireac0
+volScalarField source_CE_Ireac0
     (
          IOobject
         (
@@ -928,7 +928,7 @@ volScalarField::Internal source_CE_Ireac0
         dimensionedScalar("source_CE_Ireac0", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_CE_Ireac1" << endl;
-volScalarField::Internal source_CE_Ireac1
+volScalarField source_CE_Ireac1
     (
          IOobject
         (
@@ -940,7 +940,7 @@ volScalarField::Internal source_CE_Ireac1
         dimensionedScalar("source_CE_Ireac1", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_CE_Ireac2" << endl;
-volScalarField::Internal source_CE_Ireac2
+volScalarField source_CE_Ireac2
     (
          IOobject
         (
@@ -952,7 +952,7 @@ volScalarField::Internal source_CE_Ireac2
         dimensionedScalar("source_CE_Ireac2", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_Bulk" << endl;
-volScalarField::Internal source_Bulk
+volScalarField source_Bulk
     (
          IOobject
         (
@@ -964,7 +964,7 @@ volScalarField::Internal source_Bulk
         dimensionedScalar("source_Bulk", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_R_1" << endl;
-volScalarField::Internal source_R_1
+volScalarField source_R_1
     (
          IOobject
         (
@@ -976,7 +976,7 @@ volScalarField::Internal source_R_1
         dimensionedScalar("source_R_1", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_R_1_mass" << endl;
-volScalarField::Internal source_R_1_mass
+volScalarField source_R_1_mass
     (
          IOobject
         (
@@ -988,7 +988,7 @@ volScalarField::Internal source_R_1_mass
         dimensionedScalar("source_R_1_mass", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_R_1_temp_RF1" << endl;
-volScalarField::Internal source_R_1_temp_RF1
+volScalarField source_R_1_temp_RF1
     (
          IOobject
         (
@@ -1000,7 +1000,7 @@ volScalarField::Internal source_R_1_temp_RF1
         dimensionedScalar("sourceR_1_temp_RF1", dimensionSet(0,0,-1,0,0,0,0), 0.0)
     );
 Info<< "Creating source term source_R_1_vol_RF1" << endl;
-volScalarField::Internal source_R_1_vol_RF1
+volScalarField source_R_1_vol_RF1
     (
          IOobject
         (

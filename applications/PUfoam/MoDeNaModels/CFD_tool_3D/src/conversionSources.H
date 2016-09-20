@@ -225,4 +225,24 @@ if (KineticsModel == "RF-1")
                                (source_CE_A0[celli] + source_CE_A1[celli])/
                                ((COH_0))*scalar(1000.0);
     }
+    source_Catalyst_1.correctBoundaryConditions();
+    source_CE_A0.correctBoundaryConditions();
+    source_CE_A1.correctBoundaryConditions();
+    source_CE_B.correctBoundaryConditions();
+    source_CE_B2.correctBoundaryConditions();
+    source_CE_I0.correctBoundaryConditions();
+    source_CE_I1.correctBoundaryConditions();
+    source_CE_I2.correctBoundaryConditions();
+    source_CE_PBA.correctBoundaryConditions();
+    source_CE_Breac.correctBoundaryConditions();
+    source_CE_Areac0.correctBoundaryConditions();
+    source_CE_Areac1.correctBoundaryConditions();
+    source_CE_Ireac0.correctBoundaryConditions();
+    source_CE_Ireac1.correctBoundaryConditions();
+    source_CE_Ireac2.correctBoundaryConditions();
+    source_Bulk.correctBoundaryConditions();
+    source_R_1.correctBoundaryConditions();
+    source_R_1_mass.correctBoundaryConditions();
+    source_R_1_temp_RF1.correctBoundaryConditions();
+    source_R_1_vol_RF1.correctBoundaryConditions();
 }

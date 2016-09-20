@@ -54,6 +54,7 @@ forAll(mesh.C(), celli)
         rhoPolySM[celli] = rhoPoly;
     }
 }
+rhoPolySM.correctBoundaryConditions();
 
 if (PBESwitch)
 {
