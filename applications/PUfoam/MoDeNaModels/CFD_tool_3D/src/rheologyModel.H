@@ -122,3 +122,5 @@ if (viscosityModel == "MoDeNaRheology")
     }
 }
 muMixture = alpha1*muAir + alpha2*muFoamCorr;
+muMixture.correctBoundaryConditions();
+

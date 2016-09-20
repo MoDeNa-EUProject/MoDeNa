@@ -1025,4 +1025,6 @@ if (KineticsModel == "RF-1")
             break;
         }
     }
+    reduce(CW_0,maxOp<scalar>());
+    reduce(COH_0,maxOp<scalar>());
 }
