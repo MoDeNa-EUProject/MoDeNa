@@ -12,6 +12,19 @@ instantiate the surrogate models:
     - simpleKinetics
 */
 
+
+
+for(label pid=0; pid < Pstream::nProcs();++pid) {
+  if(Pstream::myProcNo()==pid) {
+    Pout << "Allocating modena models for process " << Pstream::myProcNo() << "..." << endl;
+    kinetics = modena_model_new("RF-1-public");
+    Pout << " finished. " << endl;
+  }
+
+  label tmp = Pstream::myProcNo();
+  reduce(tmp,sumOp<label>());
+}
+
 bblgr1 = modena_model_new("bubbleGrowth1");
 if (modena_error_occurred())
 {
