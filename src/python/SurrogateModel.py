@@ -1232,15 +1232,28 @@ class SurrogateModel(DynamicDocument):
 
     @classmethod
     def loadFromModule(self):
-        """Method importing a surrogate model module."""
+        """ Method importing a surrogate model module.
+            @brief Locates models that are referenced in the database, but NOT
+                   populated. This happens when the database is queried for an
+                   '_id' that does not exist, i.e. when a detailed model tries
+                   to use a SurrogateModel that has not been imported.
+                   The solution is to locate any SurrogateModels that have not
+                   yet been instantiated, i.e. the document is missing the
+                   '_cls' field, and return it to the framework.
+        """
+        # Obtain a SurrogateModel entry whose '_cls' field is missing.
         collection = self._get_collection()
         doc = collection.find_one({ '_cls': { '$exists': False}})
-        modName = re.search('(.*)(\[.*\])?', doc['_id']).group(1)
-        # TODO:
-        # Give a better name to the variable a model is imported from
+
+        # Obtain the name using regular expression matching on the '_id'.
+        regex = r'(?:(.*)?(?=\[.*\])(\[.*\])|.*[^\[\]])'
+        match = re.match(regex, doc['_id']).groups()#    list: [Name, indexset]
+        _id = "".join(match)#                               Surrogate Model _id
+
+        # Attempt to import the module and return the correct SurrogateModel
         try:
-            mod = __import__(modName)
-            return (m for m in modena.BackwardMappingModel.get_instances() if m._id == modName).next()
+            mod = __import__(match[0])
+            return (m for m in self.get_instances() if m._id == _id).next()
         except ImportError:
             print "MoDeNa framework error: could not find  '%s' " %(modName)
 
@@ -1248,6 +1261,10 @@ class SurrogateModel(DynamicDocument):
     @classmethod
     def loadParametersNotValid(self):
         """Method importing a surrogate model module."""
+        print([ m._id for m in self.get_instances()])
+        print(self.objects(
+            __raw__={ 'parameters': { '$size': 0 } }
+        ).first()._id)
         return self.objects(
             __raw__={ 'parameters': { '$size': 0 } }
         ).first()

@@ -856,7 +856,7 @@ class ModenaFireTask(FireTaskBase):
                 % (text, model._id)
               + term.normal
             )
-            
+
             # Continue with exact tasks, parameter estimation and (finally) this
             # task in order to resume normal operation
             wf = model.outOfBoundsStrategy().workflow(
@@ -950,7 +950,7 @@ class ModenaFireTask(FireTaskBase):
         # Analyse return code and raise appropriate exception
         if returnCode > 0:
             print(term.red + 'return code = %i' % returnCode + term.normal)
-            
+
         if returnCode == 200:
             try:
                 # TODO
