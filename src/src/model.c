@@ -270,49 +270,6 @@ modena_model_t *modena_model_new
             PyErr_Clear();
 
             PyObject *pRet = NULL;
-
-            if
-            (
-                PyErr_ExceptionMatches(modena_ParametersNotValid)
-            )
-            {
-                fprintf
-                (
-                    stderr,
-                    "Parameters of model %s are invalid - "
-                    "Trying to initialise\n",
-                    modelId
-                );
-
-                pRet = PyObject_CallMethod
-                (
-                    modena_SurrogateModel,
-                    "exceptionParametersNotValid",
-                    "(z)",
-                    modelId
-                );
-            }
-            else
-            {
-                fprintf
-                (
-                    stderr,
-                    "Loading model %s failed - "
-                    "Attempting automatic initialisation\n",
-                    modelId
-                );
-
-                pRet = PyObject_CallMethod
-                (
-                    modena_SurrogateModel,
-                    "exceptionLoad",
-                    "(z)",
-                    modelId
-                );
-            }
-
-
-            /*
             if
             (
                 PyErr_ExceptionMatches(modena_DoesNotExist)
@@ -352,7 +309,6 @@ modena_model_t *modena_model_new
                     modelId
                 );
             }
-            */
 
             if(!pRet){ Modena_PyErr_Print(); }
             int ret = PyInt_AsLong(pRet);

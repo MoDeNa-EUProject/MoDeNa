@@ -10,11 +10,11 @@ forAll(mesh.C(), celli)
     }
     if (alpha2[celli] < 0.5)
     {
-        XOH[celli] = ROOTVSMALL;           
-        XW[celli] = ROOTVSMALL;       
+        XOH[celli] = ROOTVSMALL;
+        XW[celli] = ROOTVSMALL;
     }
     if (XOH[celli] > XOH_Gel)
     {
         XOH[celli] = XOH_Gel;
-    }   
+    }
 }

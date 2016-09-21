@@ -2,7 +2,7 @@
 
 # delete everything but the good stuff!
 ls > list
-egrep -v 'constant|system|results|0$|getMeReady.sh|workflow.py|log*|README|run.sh|prep.sh|case.foam' list > list2
+egrep -v 'constant|system|results|0$|getMeReady.sh|workflow.py|log*|README|run.sh|prep.sh|case.foam|unifiedInput.json|wallDrainage_inputs.json' list > list2
 mv list2 list
 rm -rf $(<list)
 

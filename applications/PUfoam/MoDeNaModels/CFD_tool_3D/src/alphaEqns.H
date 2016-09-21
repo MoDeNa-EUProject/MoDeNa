@@ -6,7 +6,7 @@
 
     for (int gCorr=0; gCorr<nAlphaCorr; gCorr++)
     {
-        volScalarField::DimensionedInternalField Sp
+        volScalarField::Internal Sp
         (
             IOobject
             (
@@ -18,7 +18,7 @@
             dimensionedScalar("Sp", dgdt.dimensions(), 0.0)
         );
 
-        volScalarField::DimensionedInternalField Su
+        volScalarField::Internal Su
         (
             IOobject
             (
@@ -28,7 +28,7 @@
             ),
             // Divergence term is handled explicitly to be
             // consistent with the explicit transport solution
-            divU*min(alpha1, scalar(1)) 
+            divU*min(alpha1, scalar(1))
         );
 
         forAll(dgdt, celli)

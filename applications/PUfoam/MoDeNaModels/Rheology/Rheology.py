@@ -158,7 +158,7 @@ m = BackwardMappingModel(
         initialPoints=
         {
             'T': [270.0, 330.0], # 330 is the maximum that is supported by Surface Tension Model (Air+THF)
-            'shear': [0.01, 0.1],
+            'shear': [0, 10000],
             'X': [0, 0.3],
             'm0': [1e8, 1e15],
             'm1': [1e-30, 1e5],

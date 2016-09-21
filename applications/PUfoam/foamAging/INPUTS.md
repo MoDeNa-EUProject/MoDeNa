@@ -1,0 +1,88 @@
+@ingroup app_aging
+
+The input file should be located in the root of the Foam aging application. `foamAging.json` controls aging simulation, whereas `foamConductivity.json` controls foam conductivity simulation.
+
+### Preparing foamAging.json
+The following key-pairs should be defined:
+- `numerics`:
+    - `timeStart`: starting time (s)
+    - `timeEnd`: end time (s)
+    - `numberOfOutputs`: how many times should the intermediate results be written
+    - `wallDiscretization`: number of finite volumes in each wall
+    - `cellDiscretization`: number of finite volumes in each cell
+    - `sheetDiscretization`: number of finite volumes in sheet, if it is used
+- `foamCondition`:
+    - `foamHalfThickness`: half of foam thickness (m)
+    - `inProtectiveSheet`: is foam enclosed in a sheet [true,false]
+    - `sheetThickness`: thickness of the sheet, if it is used (m)
+    - `agingTemperature`: temperature of aging (K)
+    - `conductivityTemperature`: temperature of conductivity measurements (K)
+    - `initialPressure`: initial pressure in foam (Pa)
+    - `initialComposition`:
+        - `Air`: molar fraction of air in initial foam
+        - `CO2`: molar fraction of CO2 in initial foam
+        - `Cyclopentane`: molar fraction of cyclopentane in initial foam
+    - `boundaryPressure`:
+        - `Air`: pressure of air at the outer boundary (Pa)
+        - `CO2`: pressure of CO2 at the outer boundary (Pa)
+        - `Cyclopentane`: pressure of cyclopentane at the outer boundary (Pa)
+- `morphology`:
+    - `foamDensity`: foam density (kg/m3)
+    - `cellSize`: cell size (m)
+    - `strutContent`: strut content
+    - `wallThickness`: wall thickness (m)
+- `physicalProperties`:
+    - `polymerDensity`: polymer density (kg/m3)
+    - `foam`:
+        - `solubilityModel`:
+            - `Air`: solubility model ["constant","modena"]
+            - `CO2`: solubility model ["constant","modena"]
+            - `Cyclopentane`: solubility model ["constant","modena"]
+        - `solubility`:
+            - `Air`: solubility of air, if "constant" model is used (g/g/bar)
+            - `CO2`: solubility of CO2, if "constant" model is used (g/g/bar)
+            - `Cyclopentane`: solubility of cyclopentane, if "constant" model is used (g/g/bar)
+        - `diffusivityModel`:
+            - `Air`: diffusivity model ["constant","modena"]
+            - `CO2`: diffusivity model ["constant","modena"]
+            - `Cyclopentane`: diffusivity model ["constant","modena"]
+        - `diffusivity`:
+            - `Air`: diffusivity of air, if "constant" model is used (m2/s)
+            - `CO2`: diffusivity of CO2, if "constant" model is used (m2/s)
+            - `Cyclopentane`: diffusivity of cyclopentane, if "constant" model is used (m2/s)
+    - `sheet`:
+        - `solubility`:
+            - `Air`: solubility of air, if "constant" model is used (g/g/bar)
+            - `CO2`: solubility of CO2, if "constant" model is used (g/g/bar)
+            - `Cyclopentane`: solubility of cyclopentane, if "constant" model is used (g/g/bar)
+        - `diffusivity`:
+            - `Air`: diffusivity of air, if "constant" model is used (m2/s)
+            - `CO2`: diffusivity of CO2, if "constant" model is used (m2/s)
+            - `Cyclopentane`: diffusivity of cyclopentane, if "constant" model is used (m2/s)
+
+### Preparing foamConductivity.json
+- `lowerBoundary`:
+    - `emittance`: numer 0-1, 0.9 recommended
+    - `temperature`: temperature (K)
+- `gasComposition`:
+    - `Cyclopentane`: molar fraction of cyclopentane
+    - `CO2`: molar fraction of CO2
+    - `Air`: molar fraction of air
+- `useWallThicknessDistribution`: [true,false]
+- `spatialDiscretization`: number of finite volumes for conduction-radiation simulation
+- `upperBoundary`:
+    - `emittance`: numer 0-1, 0.9 recommended
+    - `temperature`: temperature (K)
+- `wallThicknessStandardDeviation`: if wall thickness distribution is used
+- `solidDensity`: polymer density (kg/m3)
+- `morphologyInput`: 2 is recommended (strut content is specified, wall thickness and strut size is calculated)
+- `foamThickness`: foam thickness (m)
+- `porosity`: foam porosity
+- `numericalEffectiveConductivity`: [true,false]
+- `testMode`: [true,false]
+- `numberOfGrayBoxes`: 10 is recommended
+- `strutContent`: strut content
+- `cellSize`: cell size (m)
+- `gasDensity`: gas density (kg/m3)
+- `strutSize`: initial guess of strut size
+- `wallThickness`: initial guess of wall thickness

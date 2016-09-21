@@ -18,21 +18,15 @@
     surfaceScalarField phig
     (
         (
-            fvc::interpolate(interface.sigmaK())*fvc::snGrad(alpha1)
+            interface.surfaceTensionForce()
+            //fvc::interpolate(interface.sigmaK())*fvc::snGrad(alpha1)
           - ghf*fvc::snGrad(rho)
         )*rAUf*mesh.magSf()
     );
 
     phiHbyA += phig;
-    // Update the fixedFluxPressure BCs to ensure flux consistency
-    setSnGrad<fixedFluxPressureFvPatchScalarField>
-    (
-        p_rgh.boundaryField(),
-        (
-            phiHbyA.boundaryField()
-          - (mesh.Sf().boundaryField() & U.boundaryField())
-        )/(mesh.magSf().boundaryField()*rAUf.boundaryField())
-    );
+    // Update the pressure BCs to ensure flux consistency
+    constrainPressure(p_rgh, U, phiHbyA, rAUf);
 
     tmp<fvScalarMatrix> p_rghEqnComp1;
     tmp<fvScalarMatrix> p_rghEqnComp2;
@@ -50,42 +44,42 @@
                 Psi1*fvm::ddt(p_rgh)
               + fvm::div(phid1, p_rgh) - fvm::Sp(fvc::div(phid1), p_rgh)
             );
-        deleteDemandDrivenData(p_rghEqnComp1().faceFluxCorrectionPtr());
-        p_rghEqnComp1().relax();
+        deleteDemandDrivenData(p_rghEqnComp1.ref().faceFluxCorrectionPtr());
+        p_rghEqnComp1.ref().relax();
 
         p_rghEqnComp2 =
-            fvc::ddt(rho_foam) + fvc::div(phi, rho_foam) 
+            fvc::ddt(rho_foam) + fvc::div(phi, rho_foam)
           - fvc::Sp(fvc::div(phi), rho_foam)
           + correction
             (
                 Psi2*fvm::ddt(p_rgh)
               + fvm::div(phid2, p_rgh) - fvm::Sp(fvc::div(phid2), p_rgh)
             );
-        deleteDemandDrivenData(p_rghEqnComp2().faceFluxCorrectionPtr());
-        p_rghEqnComp2().relax();
+        deleteDemandDrivenData(p_rghEqnComp2.ref().faceFluxCorrectionPtr());
+        p_rghEqnComp2.ref().relax();
     }
 
     else
     {
         p_rghEqnComp1 =
         (
-            fvc::ddt(alpha1, rho_gas) 
+            fvc::ddt(alpha1, rho_gas)
           + fvc::div(fvc::interpolate(alpha1)*phi, rho_gas)
-          - fvc::Sp(fvc::ddt(alpha1) 
+          - fvc::Sp(fvc::ddt(alpha1)
           + fvc::div(fvc::interpolate(alpha1)*phi), rho_gas)
         )/rho_gas
       + (alpha1*Psi1/rho_gas)*correction(fvm::ddt(p_rgh));
 
         p_rghEqnComp2 =
         (
-            fvc::ddt(alpha2, rho_foam) 
+            fvc::ddt(alpha2, rho_foam)
           + fvc::div(fvc::interpolate(alpha2)*phi, rho_foam)
-          - fvc::Sp(fvc::ddt(alpha2) 
+          - fvc::Sp(fvc::ddt(alpha2)
           + fvc::div(fvc::interpolate(alpha2)*phi), rho_foam)
         )/rho_foam
       + (alpha2*Psi2/rho_foam)*correction(fvm::ddt(p_rgh));
     }
-    
+
     // Cache p_rgh prior to solve for density update
     volScalarField p_rgh_0(p_rgh);
 
