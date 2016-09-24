@@ -1,6 +1,6 @@
 /*! \page deps Dependencies
 \section dep_foam_constr Dependencies of Foam construction
-- Neper
+- Neper 2.0
 - voro++
 - gmsh
 - VTK 5.8.0
@@ -12,4 +12,5 @@
 - NLOpt
 - meshconv
 - binvox
+- POV-Ray
 */

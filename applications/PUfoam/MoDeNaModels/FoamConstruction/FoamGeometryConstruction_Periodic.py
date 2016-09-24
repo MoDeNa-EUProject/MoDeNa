@@ -21,8 +21,9 @@ mypath=os.getcwd()
 #  Tessellation by NEPER.
 #  Saves `.geo` and `.gnu` files with tessellation for later voxelization.
 #  Prepares input file for Hypermesh.
-def main(MU,SIGMA,NumOfCells,filenameOut,packing,tesselation,geometry,
-    statistics,hypermesh,deleteFiles,dx,dy,dz):
+def main(MU,SIGMA,NumOfCells,filenameOut,packing,alternativePackingAlgorithm,
+    tesselation,visualizeTesselation,geometry,statistics,hypermesh,deleteFiles,
+    dx,dy,dz):
     #####To create input file for SpherePack
     if packing:
         NumSpheres=NumOfCells
@@ -87,9 +88,7 @@ def main(MU,SIGMA,NumOfCells,filenameOut,packing,tesselation,geometry,
             math.ceil(MAXcenters[1]-Mincenters[1]),
             math.ceil(MAXcenters[2]-Mincenters[2])]
         EdgeRVESize=int(3.0*max(EdgeCubeSize)) #For NEPER: Size of edge of RVE
-        alternativePacking=True
-        alternativePacking=False
-        if alternativePacking:
+        if alternativePackingAlgorithm:
             os.system('./spherepack')
     if tesselation:
         myfile12=os.path.join(mypath,'Project01.rco')
@@ -132,9 +131,7 @@ def main(MU,SIGMA,NumOfCells,filenameOut,packing,tesselation,geometry,
             -statver x".format((27*NumSpheres),EdgeRVESize,EdgeRVESize,
             EdgeRVESize)
         os.system(commandTessellation)
-        visualize=True
-        visualize=False
-        if visualize: # needs POV-RAY
+        if visualizeTesselation: # needs POV-Ray
             commandVisualization="neper -V RVE27.tess -datacellcol ori \
                 -datacelltrs 0.5 -showseed all -dataseedrad @Rads.txt \
                 -dataseedtrs 1.0 -print RVE27"
@@ -337,3 +334,4 @@ def main(MU,SIGMA,NumOfCells,filenameOut,packing,tesselation,geometry,
         os.remove('RVE27.stedge')
         os.remove('RVE27.stface')
         os.remove('RVE27.stver')
+        os.remove('RVE27.tess')

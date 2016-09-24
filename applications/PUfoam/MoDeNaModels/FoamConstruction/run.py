@@ -115,8 +115,9 @@ print(
     "Create periodic RVE of foam" +
     term.normal
 )
-FoamGeometryConstruction_Periodic.main(MU,SIGMA,NumOfCells,filename,packing,\
-    tesselation,geometry,statistics,hypermesh,deleteFiles,dx,dy,dz)
+FoamGeometryConstruction_Periodic.main(MU,SIGMA,NumOfCells,filename,packing,
+    alternativePackingAlgorithm,tesselation,visualizeTesselation,geometry,
+    statistics,hypermesh,deleteFiles,dx,dy,dz)
 if moveToPeriodicBox:
     ########## Convert .geo to .stl
     print(
