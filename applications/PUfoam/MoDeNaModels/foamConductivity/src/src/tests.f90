@@ -86,12 +86,16 @@ subroutine eqcond_por
     pormax=0.995_dp
     npoints=20
     dpor=(pormax-pormin)/(npoints-1)
-    open(newunit(fi),file='eqcond_por.out')
-    write(fi,'(1000A23)') '#porosity','eq. conductivity','Ross. eq. cond.'
+    open(newunit(fi),file='eqcond_por.csv')
+    write(fi,*) 'porosity,foam_density,eq_cond,Ross_eq_cond,&
+        kgas,ksol,krad'
     do i=1,npoints
         por=pormin+(i-1)*dpor
         call eqcond(1)
-        write(fi,'(1000es23.15)') por,eqc,eqc_ross
+        write(fi,'(1x,es23.15,7(",",es23.15))') &
+            por,rhof,eqc,eqc_ross,kgas,ksol,krad
+        write(*,*)
+        write(mfi,*)
     enddo
     close(fi)
 end subroutine eqcond_por
