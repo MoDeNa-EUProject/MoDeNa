@@ -1,0 +1,17 @@
+# Backups
+*~
+*bak
+
+# Various intermediate files and directories generated CMAKE
+CMakeFiles/
+build/
+Makefile
+CMakeCache.txt
+cmake_install.cmake
+
+# locate results (executables and libraries)
+*.so*
+*.l[ao]
+*.mod
+
+twoTanksMacroscopicProblemCxx
