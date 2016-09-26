@@ -61,7 +61,7 @@ module constants
         albedo,&              !<scattering albedo
         effn,&                !<effective index of refraction (real part)
         por,&                 !<porosity
-        rho,&                 !<foam density
+        rhof,&                !<foam density
         dcell,&               !<cell size
         dwall,&               !<wall thickness
         fs,&                  !<strut content

@@ -17,3 +17,6 @@
 *.out
 *.gnu
 *.in
+*.png
+*.tess
+spherepack
