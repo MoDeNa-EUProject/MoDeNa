@@ -120,7 +120,7 @@ class RheologyExactTask_dummy(ModenaFireTask):
                 {{ s['point']['m0'] }}
                 {{ s['point']['m1'] }}
 		{{ s['point']['mu'] }}
-		{{ s['point']['ST'] }}'''.strip()).stream(s=self).dump(self.INPUT_FILE)
+		{{ s['point']['ST'] * 0,001 }}'''.strip()).stream(s=self).dump(self.INPUT_FILE)
 
 
         # Execute the detailed model
@@ -331,6 +331,8 @@ void rheology_SM
        'T': {'min': 0, 'max': 9e99 },
        'shear': {'min': 0, 'max': 9e99 },
        'X': {'min': 0, 'max': 1 },
+       'm0' : {'min': 0, 'max' : 9e99},
+       'm1' : {'min': 0, 'max' : 9e99},
        'mu': {'min': 0, 'max': 1000 },
        'ST': {'min': 0, 'max': 100 },
    },
@@ -359,8 +361,8 @@ m = BackwardMappingModel(
             'T': [270.0, 330.0],
             'shear': [0, 10000],
             'X': [0, 0.3],
-            'm0': [1e8, 1e15],
-            'm1': [1e-30, 1e5],
+            'm0': [ 2.5e10, 1.1e10],
+            'm1': [ 0.1, 0.1],
         },
     ),
     outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(
