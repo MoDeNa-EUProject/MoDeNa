@@ -7,11 +7,13 @@
     "filename": "PeriodicRVE",
     "deleteFiles": 0,
     "packing": 1,
+    "alternativePackingAlgorithm": 0,
     "tesselation": 1,
+    "visualizeTesselation": 0,
     "geometry": 1,
     "statistics": 0,
     "hypermesh": 0,
     "moveToPeriodicBox": 1,
     "renderBox": 0,
-    "binarizeBox": 1
+    "binarizeBox": 0
 }

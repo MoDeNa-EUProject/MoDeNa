@@ -54,6 +54,9 @@ subroutine equcond
     rcontr=sum(qrad)/sum(qtot)
     gcontr=(1-rcontr)*kgas/(kgas+ksol)
     scontr=(1-rcontr)*ksol/(kgas+ksol)
+    kgas=gcontr*eqc
+    ksol=scontr*eqc
+    krad=rcontr*eqc
     write(*,fmt) 'equivalent conductivity:',eqc*1e3_dp,'mW/m/K'
     write(*,fmt) 'contribution of gas:',gcontr*1e2_dp,'%'
     write(*,fmt) 'contribution of solid:',scontr*1e2_dp,'%'

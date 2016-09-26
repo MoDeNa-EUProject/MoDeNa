@@ -1,6 +1,6 @@
 /*! \page deps Dependencies
 \section dep_foam_constr Dependencies of Foam construction
-- Neper
+- Neper 2.0
 - voro++
 - gmsh
 - VTK 5.8.0
@@ -9,6 +9,8 @@
 - lib3ds 1.3
 - libjpeg 6.2
 - freeglut 3
+- NLOpt
 - meshconv
 - binvox
+- POV-Ray
 */
