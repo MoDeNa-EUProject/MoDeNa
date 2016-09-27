@@ -36,4 +36,4 @@ Authors
 Contributors
 '''
 
-from Rheology import m
+from Rheology import *

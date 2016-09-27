@@ -35,11 +35,14 @@ License
 @ingroup   app_foaming
 """
 
-from os import getcwd, makedirs, remove, system, symlink
+from os import getcwd, makedirs, remove, system, symlink, walk
 from os.path import abspath, dirname, isfile, join, relpath
 from shutil import copy2
 from glob import glob
+import re
 import json
+from numpy.linalg import pinv
+from numpy import sin, cos, pi, matrix, array, dot
 
 import modena
 import SurfaceTension
@@ -61,19 +64,20 @@ with open(getcwd()+'/inputs/unifiedInput.json') as jsonfile:
 
 # ------------------------- Utility functions ------------------------------- #
 def link_files(src, dst):
+    """ Function symlinking all files and directories from directory "src"
+        to the directory "dst".
     """
-    """
-    for dirpath,_,filenames in os.walk(src):
-        dstpath = join(dst, dirpath[len(src)+1:])
-        relpath = relpath(dirpath, dstpath)
+    for dirpath,_,filenames in walk(src):
+        dstpth = join(dst, dirpath[len(src)+1:])
+        relpth = relpath(dirpath, dstpth)
     
         #print "In ", dirpath
-        #print "dstPath = ", dstpath
-        #print "relpath = ", relpath
+        #print "dstPth = ", dstpth
+        #print "relpath = ", relpth
         #print filenames
     
         try:
-            makedirs(dstpath)
+            makedirs(dstpth)
         except:
             pass
     
@@ -86,14 +90,14 @@ def link_files(src, dst):
     
         for fn in filenames:
             if any(fnmatch.fnmatch(fn, gl) for gl in lines):
-                dstfn = join(dstpath, fn)
+                dstfn = join(dstpth, fn)
                 srcfn = join(dirpath, fn)
                 if not isfile(dstfn):
                     #print "copying", fn
                     copy2(srcfn, dstfn)
             else:
-                dstfn = join(dstpath, fn)
-                srcfn = join(relpath, fn)
+                dstfn = join(dstpth, fn)
+                srcfn = join(relpth, fn)
                 if not isfile(dstfn):
                     #print "linking", fn
                     symlink(srcfn, dstfn)
@@ -142,7 +146,7 @@ f_dummy = CFunction(
 #include "math.h"
 #include <stdio.h>
 
-void rheology_SM
+void rheology_dummy_SM
 (
     const modena_model_t* model,
     const double* inputs,
@@ -248,7 +252,7 @@ class RheologyExactTask_tFEM(ModenaFireTask):
         co = params['strain']*cos(params['omega']*array(DATA[0]) )# Cosine term
         X = matrix( zip(*[si, co]) )#                              Input matrix
 
-        del si, co#, DATA
+        del si, co, DATA
 
         # 5)                                          Perform linear regression
         b = pinv(X)*Y#                       pinv: Moore-Penrose pseudo-inverse
@@ -277,7 +281,7 @@ class RheologyExactTask_tFEM(ModenaFireTask):
         self.handleReturnCode( self.execute_simulation() )
 
         # call post processing
-        self['point']['mu_ap'] = self.post_processing()
+        self['point']['mu_car'] = self.post_processing()
 
 
 
@@ -287,7 +291,7 @@ f_tFEM = CFunction(
 #include "math.h"
 #include <stdio.h>
 
-void rheology_SM
+void rheology_tFEM_SM
 (
     const modena_model_t* model,
     const double* inputs,
@@ -328,7 +332,7 @@ void rheology_SM
 ''',
    # These are global bounds for the function
    inputs={
-       'T': {'min': 0, 'max': 9e99 },
+       'T': {'min': 0, 'max': 550 },
        'shear': {'min': 0, 'max': 9e99 },
        'X': {'min': 0, 'max': 1 },
        'm0' : {'min': 0, 'max' : 9e99},
