@@ -150,7 +150,8 @@ class SurfaceTensionExactSim(ModenaFireTask):
             pass
 
     def analyse_output(self):
-        """Method analysing the output of the file.
+        """Method        'A' : blowing_agents,
+        'B' : monomers analysing the output of the file.
              @TODO consider adding check for empty file
         """
         with open('out.txt', 'r') as FILE:
@@ -194,7 +195,7 @@ outputs[0] = P0 + T*P1 + P2*T*T;
     },
     species = {
         'A' : blowing_agents,
-        'B' : monomers
+        'B' : monomers,
     }
 )
 
@@ -245,3 +246,4 @@ m2 = BackwardMappingModel(
         maxIterations= 5 # Currently not used
     ),
 )
+
