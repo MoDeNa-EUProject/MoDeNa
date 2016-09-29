@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-'''
-
+'''@cond
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
     888b     d'888   .ooooo.   888      888  .ooooo.   8 `88b.    8   .oooo.
@@ -8,60 +6,39 @@
     8  `888'   888  888   888  888      888 888ooo888  8     `88b.8   .oP"888
     8    Y     888  888   888  888     d88' 888    .o  8       `888  d8(  888
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
-
 Copyright
     2014-2016 MoDeNa Consortium, All rights reserved.
-
 License
     This file is part of Modena.
-
     Modena is free software; you can redistribute it and/or modify it under
     the terms of the GNU General Public License as published by the Free
     Software Foundation, either version 3 of the License, or (at your option)
     any later version.
-
     Modena is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
     FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
     details.
-
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
+@endcond'''
 
-Description
-    Initialisation script needed to run Bubble growth model.
 
-Authors
-    Henrik Rusche
-    Pavel Ferkl
+import re
+import modena
 
-Contributors
-'''
+# File names (convenience)
+files = ["BSDMean","BSDVariance"]
 
-from modena import SurrogateModel, MODENA_PARSED_URI
-from fireworks import LaunchPad, Workflow
-from fireworks.core.rocket_launcher import rapidfire
-from pymongo import MongoClient
+# Lambda function which extracts the decimal numbers from the last line of the file "fname"
+lastline = lambda fname: [ float(num) for num in re.findall(r"([0-9]+\.[0-9]+)", tuple(open(fname, "r"))[-1])]
 
-import polymerViscosity # imported by Rheology_Arrhenius
-import SurfaceTension # imported by Rheology_Arrhenius
-import PolymerDensity
-import Solubility
-import PolymerDensity_units
-import Kinetics
-import StrutContent
-import foamConductivity
-import diffusivity
-import Rheology_Arrhenius
+# Extract Mu and Var from the CFD output files
+Mu = lastline(files[0])
+Va = lastline(files[1])
 
-# set up the LaunchPad and reset it
-launchpad = LaunchPad(**MODENA_PARSED_URI)
-launchpad.reset('', require_password=False)
 
-initWfs = Workflow([])
-for m in SurrogateModel.get_instances():
-    initWfs.append_wf(m.initialisationStrategy().workflow(m), [])
 
-# store workflow and launch it locally
-launchpad.add_wf(initWfs)
-rapidfire(launchpad)
+print Mu
+print Va
+
+

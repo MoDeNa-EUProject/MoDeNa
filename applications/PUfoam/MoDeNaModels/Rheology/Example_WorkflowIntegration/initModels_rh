@@ -41,7 +41,8 @@ from fireworks import LaunchPad, Workflow
 from fireworks.core.rocket_launcher import rapidfire
 from pymongo import MongoClient
 
-import Rheology_Arrhenius
+import SurfaceTension
+import Rheology
 
 # set up the LaunchPad and reset it
 launchpad = LaunchPad(**MODENA_PARSED_URI)
@@ -51,9 +52,16 @@ initWfs = Workflow([])
 for m in SurrogateModel.get_instances():
     initWfs.append_wf(m.initialisationStrategy().workflow(m), [])
 
+
+for m in SurrogateModel.get_instances():
+    initWfs.append_wf(m.initialisationStrategy().workflow(m), [])
+
+
 # store workflow and launch it locally
 launchpad.add_wf(initWfs)
+
 rapidfire(launchpad)
+
 
 # Create connections to database
 url = 'mongodb://localhost:27017/'

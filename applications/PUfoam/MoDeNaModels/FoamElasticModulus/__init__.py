@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 '''
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
@@ -29,39 +28,12 @@ License
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
-    Initialisation script needed to run Bubble growth model.
+    Python package import definition for a MoDeNa surrogate model
 
 Authors
     Henrik Rusche
-    Pavel Ferkl
 
 Contributors
 '''
 
-from modena import SurrogateModel, MODENA_PARSED_URI
-from fireworks import LaunchPad, Workflow
-from fireworks.core.rocket_launcher import rapidfire
-from pymongo import MongoClient
-
-import polymerViscosity # imported by Rheology_Arrhenius
-import SurfaceTension # imported by Rheology_Arrhenius
-import PolymerDensity
-import Solubility
-import PolymerDensity_units
-import Kinetics
-import StrutContent
-import foamConductivity
-import diffusivity
-import Rheology_Arrhenius
-
-# set up the LaunchPad and reset it
-launchpad = LaunchPad(**MODENA_PARSED_URI)
-launchpad.reset('', require_password=False)
-
-initWfs = Workflow([])
-for m in SurrogateModel.get_instances():
-    initWfs.append_wf(m.initialisationStrategy().workflow(m), [])
-
-# store workflow and launch it locally
-launchpad.add_wf(initWfs)
-rapidfire(launchpad)
+from ElasticModulus import *
