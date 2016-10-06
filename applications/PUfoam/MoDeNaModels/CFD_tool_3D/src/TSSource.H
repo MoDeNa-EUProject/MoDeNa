@@ -262,3 +262,4 @@ forAll(mesh.C(), celli)
         alpha1[celli]*thermalDiff_gas[celli]
       + alpha2[celli]*thermalDiff_foam[celli];
 }
+thermalDiffusivity.correctBoundaryConditions();

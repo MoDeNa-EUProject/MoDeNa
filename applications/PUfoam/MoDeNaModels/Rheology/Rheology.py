@@ -54,6 +54,9 @@ from fireworks.utilities.fw_utilities import explicit_serialize
 from jinja2 import Template
 import json
 
+from math import pi,sqrt
+import numpy as np
+
 # ----------------------- Convenience variables ----------------------------- #
 MODULE_DIR = dirname(abspath(__file__))
 EXECUTION_DIR = getcwd()
@@ -246,19 +249,19 @@ class RheologyExactTask_tFEM(ModenaFireTask):
         # DATA structure now transposed: [[t_0 ... t_n], [Gxx_1 ... Gxx_n],...]
 
         # 4)                               Generate input and response matrices
-        Y = matrix( DATA[2] ).transpose()#                      Response matrix
+        Y = np.matrix( DATA[2] ).transpose()#                      Response matrix
 
-        si = params['strain']*sin(params['omega']*array(DATA[0]) )#  Sine terms
-        co = params['strain']*cos(params['omega']*array(DATA[0]) )# Cosine term
-        X = matrix( zip(*[si, co]) )#                              Input matrix
+        si = params['strain']*np.sin(params['omega']*np.array(DATA[0]) )#  Sine terms
+        co = params['strain']*np.cos(params['omega']*np.array(DATA[0]) )# Cosine term
+        X = np.matrix( zip(*[si, co]) )#                              Input matrix
 
         del si, co, DATA
 
         # 5)                                          Perform linear regression
-        b = pinv(X)*Y#                       pinv: Moore-Penrose pseudo-inverse
+        b = np.linalg.pinv(X)*Y#                       pinv: Moore-Penrose pseudo-inverse
 
         # 6)                                  eta_posity = abs(b0 + b1) / omega
-        bsum = dot( b.T, b ).A1[0]#               Inner product sums "b" vector
+        bsum = np.dot( b.T, b ).A1[0]#               Inner product sums "b" vector
         eta = sqrt( bsum )/params['omega']#
 
         return eta
