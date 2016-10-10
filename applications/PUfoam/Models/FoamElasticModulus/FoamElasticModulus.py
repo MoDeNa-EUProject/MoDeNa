@@ -702,7 +702,6 @@ q.write('{0}{1}{2}\n'.format("x1 = session.xyDataObjects['U:U2 PI: PART-1-1 N: "
 q.write('{0}\n'.format("session.xyReportOptions.setValues()"))
 q.write('{0}\n'.format("session.writeXYReport(fileName='XYdataRF2U2.rpt', xyData=(x0, x1))"))
 q.close()
-print(etwr)
 ########################################################################################################################
 ########################################### Output Data Base (ODB of ABAQUS) ###########################################
 ########################################################################################################################
