@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -19,17 +19,15 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM. If not, see <http://www.gnu.org/licenses/>.
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    meanVarFoam
+    postProcessBSD
 
 Description
-    For each time: calculate the mean and variance of bubble size distribution
+    This is a post-processing application to analyze the results of population balance equation. It calcualtes the mean and variance of bubble size distribution at each time step and write the results as field variables in each time directory. They can be further processed using "postProcess -func probe" to probe the values on the required points.
 
 \*---------------------------------------------------------------------------*/
-
-#include "calc.H"
 #include "twoPhaseMixtureThermo.H"
 #include "fvCFD.H"
 
@@ -45,10 +43,10 @@ private:
     const fvMesh& mesh;
 
 public:
-    // constructors  
+    // constructors
     BSDProperties
     (
-        volScalarField &M0_, volScalarField &M1_, 
+        volScalarField &M0_, volScalarField &M1_,
         volScalarField &M2_, volScalarField &alpha1_,
         const fvMesh &mesh_
     )
@@ -93,12 +91,12 @@ public:
             M0 = Foam::max(M0, dimensionedScalar("M0min", M0.dimensions(), SMALL));
             M1 = Foam::max(M1, dimensionedScalar("M1min", M1.dimensions(), SMALL));
             M2 = Foam::max(M2, dimensionedScalar("M2min", M2.dimensions(), SMALL));
-            mean_[celli] = scalar(2.0)*Foam::log(M1[celli]/M2[celli]) - 
+            mean_[celli] = scalar(2.0)*Foam::log(M1[celli]/M2[celli]) -
                            scalar(0.5)*Foam::log(M2[celli]/M0[celli]);
         }
         return (insideFoam*mean_);
     }
-    
+
     volScalarField varianceBSD()
     {
         volScalarField alphaCutOff
@@ -131,11 +129,11 @@ public:
             M0 = Foam::max(M0, dimensionedScalar("M0min", M0.dimensions(), SMALL));
             M1 = Foam::max(M1, dimensionedScalar("M1min", M1.dimensions(), SMALL));
             M2 = Foam::max(M2, dimensionedScalar("M2min", M2.dimensions(), SMALL));
-            variance_[celli] = 
+            variance_[celli] =
                 (
                     scalar(2.0)*(
-                    scalar(0.5)*Foam::log(M2[celli]/M0[celli]) 
-                  - Foam::log(M1[celli]/M0[celli])     
+                    scalar(0.5)*Foam::log(M2[celli]/M0[celli])
+                  - Foam::log(M1[celli]/M0[celli])
                     )
                 );
             if (variance_[celli] < 0.0)
@@ -147,8 +145,23 @@ public:
     }
 };
 
-void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
+int main(int argc, char *argv[])
 {
+        timeSelector::addOptions();
+
+#   include "setRootCase.H"
+#   include "createTime.H"
+
+    instantList timeDirs = timeSelector::select0(runTime, args);
+
+#   include "createMesh.H"
+
+    forAll(timeDirs, timeI)
+    {
+        runTime.setTime(timeDirs[timeI], timeI);
+
+        Info<< "Time = " << runTime.timeName() << endl;
+
         IOobject M0header
         (
             "M0",
@@ -156,7 +169,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
             mesh,
             IOobject::MUST_READ
         );
-        
+
         IOobject M1header
         (
             "M1",
@@ -172,16 +185,16 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
             mesh,
             IOobject::MUST_READ
         );
-        
+
         // Check M0, M1 and M2 exist
-        if 
+        if
         (
             M0header.headerOk()
          && M1header.headerOk()
          && M2header.headerOk()
         )
         {
-            //mesh.readUpdate();
+            mesh.readUpdate();
 
             Info<< "    Reading M0" << endl;
             volScalarField M0(M0header, mesh);
@@ -192,11 +205,11 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
             Info<< "    Reading M2" << endl;
             volScalarField M2(M2header, mesh);
 
-            Info<< "    Calculating BSD properties: " << endl;
+            Info<< "    Calculating BSD properties ... " << endl;
 
             twoPhaseMixtureThermo mixture(mesh);
             volScalarField& alpha1(mixture.alpha1());
-            
+
             BSDProperties mu(M0, M1, M2, alpha1, mesh);
             volScalarField BSDMean
             (
@@ -210,7 +223,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
                     ),
                     mu.meanBSD()
             );
-            Info<< "BSDMean = " << BSDMean.internalField() << endl;
+            // Info<< "BSDMean = " << BSDMean.internalField() << endl;
             BSDMean.write();
 
             BSDProperties sigmaTwo(M0, M1, M2, alpha1, mesh);
@@ -226,7 +239,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
                     ),
                     sigmaTwo.varianceBSD()
             );
-            Info<< "BSDVariance = " << BSDVariance.internalField() << endl;
+            // Info<< "BSDVariance = " << BSDVariance.internalField() << endl;
             BSDVariance.write();
         }
         else
@@ -234,6 +247,16 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
             Info<< "    Moments are not available." << endl;
         }
 
-        Info<< "\nEnd\n" << endl;
+        Info<< endl;
+    }
+    Info<< nl << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
+        << "  ClockTime = " << runTime.elapsedClockTime() << " s"
+        << nl << endl;
+
+    Info<< "End\n" << endl;
+
+    return 0;
 }
 
+
+// ************************************************************************* //
