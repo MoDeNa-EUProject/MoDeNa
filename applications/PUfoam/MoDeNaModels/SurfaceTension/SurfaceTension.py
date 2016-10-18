@@ -102,12 +102,11 @@ class SurfaceTensionExactSim(ModenaFireTask):
         run_command = os.path.dirname(os.path.abspath(__file__))+'/src/PCSAFT_SurfaceTension -snes_monitor_short -ksp_monitor_short \
                    -nx 800 -rc 9.0 -box 300 -erel 1e-08 -init_pert 0 \
                    -snes_type newtonls  -snes_converged_reason  \
-                   -snes_atol 1e-07 -snes_rtol 1e-07 -snes_stol 1e-07 -snes_max_it 20 \
-                   -ksp_max_it 15 -ksp_gmres_restart 50 \
+                   -snes_atol 1e-07 -snes_rtol 1e-07 -snes_stol 1e-07 -snes_max_it 15 \
+                   -ksp_max_it 10 -ksp_gmres_restart 50 \
                    -snes_linesearch_type l2 -snes_linesearch_damping 0.3 -snes_linesearch_monitor \
                    -snes_max_fail 1 -snes_max_linear_solve_fail 100 \
                    -ksp_gmres_cgs_refinement_type refine_always \
-                   -snes_ksp_ew -snes_ksp_ew_version 1 -snes_ksp_ew_rtol0 0.5 -snes_ksp_ew_rtolmax 0.9 -snes_ksp_ew_threshold 0.1 \
                    -jac 0 -pc_type none > log'
 
 

@@ -57,8 +57,8 @@ CUTOFF    = 9.0
 BOXSIZE   = 300.0 
 
 #Solver Settings
-ITS_SNES = 20
-ITS_KSP  = 15
+ITS_SNES = 15
+ITS_KSP  = 10
 E_REL    = 1e-08
 
 #Its for Anderson Mixing

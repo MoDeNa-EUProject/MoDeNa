@@ -53,61 +53,7 @@ type (userctx)         user
  CHARACTER (LEN=50)                      :: filename
 ! ----------------------------------------------------------------------
 
-converg = 0
-
-! CALL RACHFORD_RICE (converg)
-! CALL Heidemann_Khalil
-
-! ----------------------------------------------------------------------
-! This first condition (eos >= 4) is for LJ models, not for PC-SAFT
-! ----------------------------------------------------------------------
-
-IF (eos >= 4) THEN
-  
-  ncomp = 2                   ! set number of components to 2
-  n_unkw = ncomp              ! number of quantities to be iterated
-  it(1) = 'x11'               ! iteration of mol fraction of comp.1 phase 1
-  it(2) = 'x21'               ! iteration of mol fraction of comp.1 phase 2
-  sum_rel(1) = 'x12'          ! summation relation: x12 = 1 - sum(x1j)
-  sum_rel(2) = 'x22'          ! summation relation: x22 = 1 - sum(x2j)
-  
-  filename = 'LJ_START_VAL.INC'
-  CALL file_open(filename,84)
-  READ (84,*) den1,den2
-  READ (84,*) x_1,x_2
-  CLOSE (84)
-  
-  xi(1,1) = x_1
-  xi(2,1) = x_2
-  xi(1,2) = 1.0 - xi(1,1)
-  xi(2,2) = 1.0 - xi(2,1)
-  lnx(1,1) = LOG(xi(1,1))
-  lnx(2,1) = LOG(xi(2,1))
-  lnx(1,2) = LOG(xi(1,2))
-  lnx(2,2) = LOG(xi(2,2))
-  
-  val_init(1) = den1
-  val_init(2) = den2
-  val_init(3) = t
-  val_init(4) = p
-  DO ph = 1,nphas
-    DO k = 1,ncomp
-      val_init(4+k+(ph-1)*ncomp) = LOG(xi(ph,k))
-    END DO
-  END DO
-  
-  CALL objective_ctrl (converg)
- 
- IF(user%rank == 0) THEN
-   IF (converg == 1) WRITE (*,*) t, p/1.0E5, xi(1,1), xi(2,1)
-   IF (converg == 0) WRITE (*,*) ' weak starting values'
- END IF 
-
-! ----------------------------------------------------------------------
-! ELSE: PC-SAFT equation of state
-! ----------------------------------------------------------------------
-
-ELSE
+ converg = 0
   
   renormalize = .false.       ! for renormalization group theory (RGT)
   IF (num == 2) renormalize = .true.
@@ -117,11 +63,6 @@ ELSE
   IF (xif(1) /= 0.0) flashcase = .true.
 
   lle_check = .true.
-
-! ----------------------------------------------------------------------
-! IF: non-polymeric system
-! ----------------------------------------------------------------------
-  IF (mm(1) < 2000.0) THEN
     
     DO i=1,ncomp              ! setting mole-fractions for the case that
                               ! anything goes wrong in the coming routines
@@ -135,9 +76,9 @@ ELSE
     ! ------------------------------------------------------------------
     IF( ncomp == 2 .AND. .NOT.flashcase ) THEN
       CALL vle_min( lle_check )
-      IF(user%rank == 0) THEN
-      WRITE(*,*)' INITIAL FEED-COMPOSITION',(xi(1,i), i=1,ncomp),converg
-      END IF   
+      !IF(user%rank == 0) THEN
+      !WRITE(*,*)' INITIAL FEED-COMPOSITION',(xi(1,i), i=1,ncomp),converg
+      !END IF   
    END IF
     
     ! ------------------------------------------------------------------
@@ -145,9 +86,9 @@ ELSE
     ! ------------------------------------------------------------------
     ph_split = 0
     CALL phase_stability ( .false., flashcase, ph_split,user )
-    IF(user%rank == 0) THEN
-     write (*,*) 'stability analysis I indicates phase-split is:',ph_split
-    END IF
+    !IF(user%rank == 0) THEN
+    ! write (*,*) 'stability analysis I indicates phase-split is:',ph_split
+    !END IF
 
     ! ------------------------------------------------------------------
     ! determine species i, for which x(i) is calc from summation relation
@@ -178,9 +119,9 @@ ELSE
       ! --- do full phase equilibr. calculation ------------------------
       n_unkw = ncomp       ! number of quantities to be iterated
       CALL objective_ctrl (converg)
-      IF(user%rank == 0) THEN
-       IF (converg == 1 ) write (*,*) ' converged (maybe a VLE)',dense(1),dense(2)
-      END IF
+      !IF(user%rank == 0) THEN
+      ! IF (converg == 1 ) write (*,*) ' converged (maybe a VLE)',dense(1),dense(2)
+      !END IF
     END IF
 
     ! ------------------------------------------------------------------
@@ -189,17 +130,17 @@ ELSE
     ph_split = 0
 
     IF (lle_check) CALL phase_stability (lle_check,flashcase,ph_split)
-    IF(user%rank == 0) THEN
-     IF (lle_check) write (*,*) 'stability analysis II, phase-split is:',ph_split
-    END IF
+    !IF(user%rank == 0) THEN
+    ! IF (lle_check) write (*,*) 'stability analysis II, phase-split is:',ph_split
+    !END IF
 
     ! ------------------------------------------------------------------
     ! if two phases (LLE)
     ! ------------------------------------------------------------------
     IF (ph_split == 1) THEN
-      IF(user%rank == 0) THEN
-       write (*,*) ' LLE-stability test indicates 2 phases (VLE or LLE)'
-      END IF
+     ! IF(user%rank == 0) THEN
+     !  write (*,*) ' LLE-stability test indicates 2 phases (VLE or LLE)'
+     ! END IF
 
       ! ---  perform tangent plane minimization ------------------------
       IF (flashcase) CALL select_sum_rel (1,0,1)
@@ -219,9 +160,9 @@ ELSE
       n_unkw = ncomp       ! number of quantities to be iterated
       val_conv(2) = 0.0
       CALL objective_ctrl (converg)
-      IF(user%rank == 0) THEN
-       IF (converg == 1 ) write (*,*) ' converged (maybe an LLE)',dense(1),dense(2)
-      END IF
+      !IF(user%rank == 0) THEN
+      ! IF (converg == 1 ) write (*,*) ' converged (maybe an LLE)',dense(1),dense(2)
+      !END IF
     END IF
 
     ! ------------------------------------------------------------------
@@ -236,44 +177,11 @@ ELSE
         END DO
         dense(1:2) = val_conv(1:2)
     ELSE
-      IF(user%rank == 0) THEN
-      WRITE (*,*) 'Surface Tension Code, Phase equilibrium calculation: NO SOLUTION FOUND FOR THE STARTING VALUES'
-      END IF
-      STOP 5
+      !IF(user%rank == 0) THEN
+      !WRITE (*,*) 'Surface Tension Code, Phase equilibrium calculation: NO SOLUTION FOUND FOR THE STARTING VALUES'
+      !END IF
+      !STOP 5
     END IF
-
-
- ! ---------------------------------------------------------------------
- ! ELSE: for systems with polymers
- ! ---------------------------------------------------------------------
-
-  ELSE
-
-    ncompsav = ncomp
-    ncomp = 2            ! set number of components to 2
-    n_unkwsav = n_unkw
-    
-    CALL poly_sta_var(converg)
-    
-    IF (converg == 1) THEN
-        val_init = val_conv
-    ELSE
-
-      IF(user%rank == 0) THEN
-      WRITE (*,*) 'Surface Tension Code, Phase equilibrium calculation: NO SOLUTION FOUND FOR THE STARTING VALUES'
-      END IF
-      STOP 5
-    END IF
-    
-    ncomp = ncompsav
-    n_unkw = n_unkwsav   ! number of quantities to be iterated
-    
-  END IF
-
-! --- for RGT: set flag back to num=2 indicating an RGT calculation ----
-  IF (renormalize) num = 2
-
-END IF
 
 END SUBROUTINE start_var
 
@@ -597,6 +505,10 @@ END FUNCTION isofugacity
  REAL                                   :: start_xv(0:40),start_xl(0:40),x_sav,dg_dx2
 ! ----------------------------------------------------------------------
 
+
+
+start_xl = 0.
+start_xv = 0.
 
 
 j = 0
