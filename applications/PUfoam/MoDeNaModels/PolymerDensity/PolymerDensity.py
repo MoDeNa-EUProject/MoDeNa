@@ -57,7 +57,7 @@ blowing_agents = IndexSet(
 
 monomers = IndexSet(
     name = 'monomers',
-    names = ['PU', 'THF', 'hexane']
+    names = ['PU', 'THF', 'hexane', 'surfactant']
 )
 
 
