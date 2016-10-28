@@ -132,5 +132,5 @@ m_polymerViscosity = ForwardMappingModel(
     _id='polymerViscosity',
     surrogateFunction=f_polymerViscosity,
     substituteModels=[],
-    parameters=par6,
+    parameters=par1,
 )
