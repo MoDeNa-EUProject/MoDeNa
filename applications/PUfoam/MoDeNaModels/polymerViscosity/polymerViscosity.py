@@ -122,6 +122,12 @@ par5 = [3.1e0, 2.24e3, 3.5, -2.0, X_gel]
 ## [literature data](http://doi.wiley.com/10.1002/pen.760311605)
 par6 = [1.6e-7, 44.9e3, 1.29, 1.86, X_gel]
 
+## based on BASF data for 100 s^-1 shear rate, you must use 0.5 for gel point
+par7 = [2.49707805e-13, 6.88758966e+04, 1.03553549e+01, -1.46554648e+01, 0.5]
+
+## based on BASF data for 1 s^-1 shear rate, you must use 0.5 for gel point
+par8 = [7.03759789e-17, 8.91382466e+04, 1.32209736e+01, -1.82153953e+01, 0.5]
+
 ## Surrogate model for polymer viscosity
 #
 # Forward mapping model is used.
@@ -129,5 +135,5 @@ m_polymerViscosity = ForwardMappingModel(
     _id='polymerViscosity',
     surrogateFunction=f_polymerViscosity,
     substituteModels=[],
-    parameters=par6,
+    parameters=par,
 )
