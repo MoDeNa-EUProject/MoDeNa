@@ -42,13 +42,19 @@ MoDeNa C++ interface library
 
 #include <exception>
 #include <string>
+
 #include "modena.h"
 
-using namespace std;
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Modena
+{
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 class modenaException
 :
-    public exception
+    public std::exception
 {
     // Private data
 
@@ -61,12 +67,12 @@ public:
         errorCode_(errorCode)
     {}
 
-    int errorCode () const
+    int errorCode() const
     {
         return errorCode_;
     }
 
-    virtual const char * what () const throw ()
+    virtual const char*  what() const throw()
     {
         return "Modena Exception";
     }
@@ -90,7 +96,7 @@ public:
         //- Construct from model name
         modenaModel
         (
-            const string& name
+            const std::string& name
         )
         {
             // Instantiate a model
@@ -117,22 +123,22 @@ public:
 
     // Member Functions
 
-        inline size_t inputs_argPos(const string& name) const
+        inline size_t inputs_argPos(const std::string& name) const
         {
             return modena_model_inputs_argPos(model_, name.c_str());
         }
 
-        inline size_t outputs_argPos(const string& name) const
+        inline size_t outputs_argPos(const std::string& name) const
         {
             return modena_model_outputs_argPos(model_, name.c_str());
         }
 
-        inline size_t inputs_set(const size_t i, double x) const
+        inline void inputs_set(const size_t i, double x) const
         {
             modena_inputs_set(inputs_, i, x);
         }
 
-        double outputs_get(const size_t i) const
+        inline double outputs_get(const size_t i) const
         {
            return modena_outputs_get(outputs_, i);
         }
@@ -154,4 +160,10 @@ public:
 
 };
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Modena
+
 #endif /* __MODENAMODEL_H__ */
+
+// ************************************************************************* //

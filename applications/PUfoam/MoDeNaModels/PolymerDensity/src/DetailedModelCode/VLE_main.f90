@@ -28,7 +28,7 @@ SUBROUTINE VLE_MIX(rhob,density,chemPot_total,compID)
  INTEGER                               :: converg
  CHARACTER(LEN=4)                      :: char_ncomp 
  REAL                                  :: Polymer_density
- INTEGER                               :: i
+ INTEGER                               :: i, maxits, its
  CHARACTER (LEN=50)                    :: filename
  
 
@@ -41,13 +41,22 @@ SUBROUTINE VLE_MIX(rhob,density,chemPot_total,compID)
 
    nphas  = 2
    outp = 0                      ! output to terminal
-
-   CALL START_VAR (converg)      ! gets starting values, sets "val_init"
-
-   IF ( converg /= 1 ) THEN
-      WRITE (*,*) 'no VLE found'
-      RETURN
-   END IF
+   converg = 0
+   maxits  = 800
+   its     = 0
+   
+   Do while(converg == 0)
+   
+         CALL START_VAR (converg)      ! gets starting values, sets "val_init"
+         If(converg == 1) exit
+         If(its > maxits) exit
+   
+         !increase pressure until VLE is found
+         p = 1.01 * p
+         its = its + 1
+   End Do
+   
+    If(its > maxits) Stop 'Polymer_density tool: no liquid density could be found.'
 
    ! rhob(phase,0): molecular density
     rhob(1,0) = dense(1) / (  PI/6.0* SUM( xi(1,1:ncomp) * parame(1:ncomp,1) * dhs(1:ncomp)**3 )  )
@@ -97,7 +106,7 @@ SUBROUTINE VLE_MIX(rhob,density,chemPot_total,compID)
   write(*,*)'  '
   write(*,*)'--------------------------------------------'
   write(*,*)'Output detailed model:'
-  write(*,*)'T /K:',t,'p/bar:',p/1.E5
+  !write(*,*)'T /K:',t,'p/bar:',p/1.E5
   write(*,*)'Liquid density /kg/m3:', max(density(1),density(2))
   write(*,*)'--------------------------------------------'
   write(*,*)'  '

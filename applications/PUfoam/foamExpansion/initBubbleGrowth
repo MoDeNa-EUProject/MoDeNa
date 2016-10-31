@@ -143,7 +143,7 @@ void bblgr_SM
     //initial bubble and shell size are hardcoded
     double h=pow(pow(27*5e-7,3)+pow(R,3)-pow(5e-7,3),1.0/3.0)-R;
     kl=alpha;
-    //kl=alpha*pow(R,beta);
+    kl=alpha*pow(R,beta);
     //kl=alpha*pow(c,beta);
     //kl=alpha*pow(R,beta)*pow(c,gamma);
     //kl=alpha*pow(h,beta);

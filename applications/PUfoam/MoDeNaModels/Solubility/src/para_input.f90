@@ -117,6 +117,14 @@ SUBROUTINE pcsaft_par
       parame(i,1) = 4.35923557
       parame(i,2) = 3.02947364
       parame(i,3) = 197.11998863
+      
+   CASE ('surfactant') 
+     mm(i) =  2655.24078
+     parame(i,1) = 78.5859962
+     parame(i,2) = 4.17006833
+     parame(i,3) = 230.284526
+     parame(i,6) = 17.9645
+      
 
     CASE('mdi')
       mm(i) =  2.50252E+02

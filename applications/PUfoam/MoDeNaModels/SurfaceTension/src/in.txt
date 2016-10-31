@@ -1,6 +1,15 @@
 260.0 
 2
 air
+surfactant
+0.
+0.
+
+
+
+260.0 
+2
+air
 thf
 0.
 0.

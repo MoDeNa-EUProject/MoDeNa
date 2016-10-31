@@ -31,7 +31,7 @@ SUBROUTINE VLE_MIX(rhob,density,chemPot_total,user)
 !local
  REAL, DIMENSION(nc)                    :: dhs_star
  REAL                                   :: w(np,nc), lnphi(np,nc)
- INTEGER                                :: converg
+ INTEGER                                :: converg, maxits, its
 
  !> ---------------------------------------------------------------------
  !! prepare for phase equilibrium calculation for given T
@@ -43,15 +43,26 @@ SUBROUTINE VLE_MIX(rhob,density,chemPot_total,user)
   nphas  = 2
   outp = 0                      ! output to terminal
 
-  CALL START_VAR (converg,user)      ! gets starting values, sets "val_init"
+   maxits  = 800
+   its     = 0
 
-  IF ( converg /= 1 ) THEN
-    IF(user%rank == 0) THEN
-    WRITE (*,*) 'no VLE found'
-    END IF
-    RETURN
-  END IF
-
+   converg = 0
+   
+   Do while(converg == 0)
+   
+         CALL START_VAR (converg,user)      ! gets starting values, sets "val_init"
+         If(converg == 1) exit
+         If(its > maxits) exit
+   
+         !increase pressure until VLE is found
+         p = 1.01 * p
+         its = its + 1
+   End Do
+   
+    If(its > maxits) Stop 'SurfaceTension tool: no vapor-liquid equilibrium could be found.'
+  
+  
+  
 ! rhob(phase,0): molecular density
  rhob(1,0) = dense(1) / (  PI/6.0* SUM( xi(1,1:ncomp) * parame(1:ncomp,1) * dhs(1:ncomp)**3 )  )
  rhob(2,0) = dense(2) / (  PI/6.0* SUM( xi(2,1:ncomp) * parame(1:ncomp,1) * dhs(1:ncomp)**3 )  )
