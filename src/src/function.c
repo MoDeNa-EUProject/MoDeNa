@@ -89,6 +89,8 @@ modena_function_t *modena_function_new
     const char *functionId
 )
 {
+    //Modena_Info_Print("In %s", __func__);
+
     // Initialize the Python Interpreter
     if(!Py_IsInitialized())
     {
@@ -155,6 +157,8 @@ modena_function_t *modena_function_new_from_model
     const modena_model_t *m
 )
 {
+    //Modena_Info_Print("In %s", __func__);
+
     modena_function_t *self = malloc(sizeof(modena_function_t));
 
     if(lt_dlinit())

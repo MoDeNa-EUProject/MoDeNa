@@ -102,7 +102,7 @@ main(int argc, char *argv[])
             {
                 // Set input vector
                 model.inputs_set(Dpos, D);
-                model.inputs_set(rho0Pos, rho0);
+                model.inputs_set(rho0Pos, rho1);
                 model.inputs_set(p0Pos, p1);
                 model.inputs_set(p1Byp0Pos, p0/p1);
 
