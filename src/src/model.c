@@ -247,6 +247,8 @@ modena_model_t *modena_model_new
     const char *modelId
 )
 {
+    //Modena_Info_Print("In %s", __func__);
+
     PyObject *args = PyTuple_New(0);
     PyObject *kw = Py_BuildValue("{s:s}", "modelId", modelId);
 
