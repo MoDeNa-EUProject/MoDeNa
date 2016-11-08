@@ -75,7 +75,7 @@ term = Terminal()
 
 species = IndexSet(
     name= 'solubility_pol_species',
-    names= [ 'Air', 'CO2', 'CyP' ]
+    names= [ 'Air', 'CO2', 'CyP', 'O2', 'N2' ]
 )
 system = IndexSet(
     name= 'solubility_num_of_components',
@@ -108,6 +108,10 @@ class SolubilityExactSim(ModenaFireTask):
                 ff.write('air \n')
             elif (self['indices']['A']=='CyP'):
                 ff.write('cyclopentane \n')
+            elif (self['indices']['A']=='O2'):
+                ff.write('o2 \n')
+            elif (self['indices']['A']=='N2'):
+                ff.write('n2 \n')
             #pass molar liquid composition
             x1l_str = str(self['point']['xl1'])
             x2l_str = str(self['point']['xl2'])
@@ -121,6 +125,10 @@ class SolubilityExactSim(ModenaFireTask):
                 ff.write('air \n')
             elif (self['indices']['A']=='CyP'):
                 ff.write('cyclopentane \n')
+            elif (self['indices']['A']=='O2'):
+                ff.write('o2 \n')
+            elif (self['indices']['A']=='N2'):
+                ff.write('n2 \n')
             #pass molar liquid composition
             x1l_str = str(self['point']['xl1'])
             x2l_str = str(self['point']['xl2'])
@@ -293,6 +301,43 @@ m_solubilityCyclopentanePU = BackwardMappingModel(
     outOfBoundsStrategy=outOfBoundsStrategy,
     parameterFittingStrategy=parameterFittingStrategy
 )
+m_solubilityO2PU = BackwardMappingModel(
+    _id='Solubility[A=O2,B=2]',
+    surrogateFunction=f2,
+    exactTask=SolubilityExactSim(),
+    substituteModels=[],
+    initialisationStrategy=Strategy.InitialPoints(
+        initialPoints={
+            'T': [290, 320, 350, 380],
+            'xl1': [1.1e-3, 1.0e-3, 1.0e-3, 1.0e-4],
+            'xl2': [0.9989, 0.999, 0.999, 0.9999],
+        },
+    ),
+    outOfBoundsStrategy=outOfBoundsStrategy,
+    parameterFittingStrategy=parameterFittingStrategy
+)
+m_solubilityN2PU = BackwardMappingModel(
+    _id='Solubility[A=N2,B=2]',
+    surrogateFunction=f2,
+    exactTask=SolubilityExactSim(),
+    substituteModels=[],
+    initialisationStrategy=Strategy.InitialPoints(
+        initialPoints={
+            'T': [290, 320, 350, 380],
+            'xl1': [1.1e-3, 1.0e-3, 1.0e-3, 1.0e-4],
+            'xl2': [0.9989, 0.999, 0.999, 0.9999],
+        },
+    ),
+    outOfBoundsStrategy=outOfBoundsStrategy,
+    parameterFittingStrategy=parameterFittingStrategy
+)
+
+
+
+
+
+
+
 # m_solubilityCO2 = BackwardMappingModel(
 #     _id='Solubility[A=CO2,B=3]',
 #     surrogateFunction=f3,
@@ -537,6 +582,10 @@ class SolubilityExactSim2(ModenaFireTask):
                 ff.write('air \n')
             elif (self['indices']['A']=='CyP'):
                 ff.write('cyclopentane \n')
+            elif (self['indices']['A']=='O2'):
+                ff.write('o2 \n')
+            elif (self['indices']['A']=='N2'):
+                ff.write('n2 \n')
             #pass molar liquid composition
             x1l_str = str(self['point']['xl1'])
             x2l_str = str(self['point']['xl2'])
@@ -550,6 +599,10 @@ class SolubilityExactSim2(ModenaFireTask):
                 ff.write('air \n')
             elif (self['indices']['A']=='CyP'):
                 ff.write('cyclopentane \n')
+            elif (self['indices']['A']=='O2'):
+                ff.write('o2 \n')
+            elif (self['indices']['A']=='N2'):
+                ff.write('n2 \n')
             #pass molar liquid composition
             # x1l_str = str(self['point']['xl1'])
             # x2l_str = str(self['point']['xl2'])
