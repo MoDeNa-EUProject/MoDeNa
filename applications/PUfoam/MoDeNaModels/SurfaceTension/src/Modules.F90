@@ -133,6 +133,11 @@ Module BASIC_VARIABLES
   character*3, dimension(10)                    :: it, sum_rel
   character*3                                   :: running
 
+  
+!for surfactant
+Real :: wif_surfactant
+LOGICAL :: surfactant  
+  
 
 End Module BASIC_VARIABLES
 

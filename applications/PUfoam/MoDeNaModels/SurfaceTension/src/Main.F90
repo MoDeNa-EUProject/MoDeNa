@@ -59,7 +59,8 @@
 Program DFT
 
 Use PARAMETERS, Only: np,nc,KBOL
-Use BASIC_VARIABLES, Only: ncomp,t,p,ensemble_flag,num,parame,eos,pol,xif,compna
+Use BASIC_VARIABLES, Only: ncomp,t,p,ensemble_flag,num,parame,eos,pol,xif,compna,mm, &
+                           surfactant, wif_surfactant  
 Use EOS_VARIABLES, Only: dhs,mseg,eta,dd_term,dq_term,qq_term
 Use EOS_CONSTANTS, Only: ap,bp,dnm
 Use mod_DFT, Only: box,dzp,fa,zp,fa_disp,ab_disp,pbulk
@@ -89,6 +90,8 @@ REAL               :: zges(np)
 REAL               :: dhs_save(nc)
 REAL               :: cif(nc)
 REAL               :: psi_factor
+REAL               :: x_surfactant
+INTEGER            :: position_surfactant  
 
 !external subroutines associated with Solver
 external FormInitialGuess
@@ -117,6 +120,43 @@ external FormFunction
        READ (77,*) xif(i)
      End Do
  
+     !check whether surfactant present in system
+     surfactant = .false.
+     If(ncomp > 1) Then
+        Do i = 1,ncomp
+          If(trim(compna(i)) == 'surfactant') Then
+             surfactant = .true.
+             !reduce number of components
+             ncomp = ncomp - 1
+             x_surfactant = xif(i)
+             position_surfactant = i
+          End If
+        End Do
+     End If   
+        
+     If(surfactant) Then   
+        !calculate new molar concentrations without surfactant
+        If(position_surfactant == 1) Then
+            Do i = 2,ncomp+1
+               xif(i-1) = xif(i)
+               compna(i-1) = compna(i)
+            End Do
+            xif(1:ncomp) = xif(1:ncomp) / sum(xif(1:ncomp))
+        Else If(position_surfactant == ncomp + 1) Then    
+            xif(1:ncomp) = xif(1:ncomp) / sum(xif(1:ncomp))
+        Else 
+            Do i = 1,ncomp+1
+              If(i>position_surfactant) Then
+                  xif(i-1) = xif(i)
+                  compna(i-1) = compna(i)
+              End If    
+            End Do
+            xif(1:ncomp) = xif(1:ncomp) / sum(xif(1:ncomp))
+        End If
+        
+     End If
+ 
+ 
 !       !calculate molar fractions from molar concentrations
 !       xif(1:ncomp) =cif(1:ncomp) / sum(cif(1:ncomp))
       
@@ -140,7 +180,10 @@ external FormFunction
   ensemble_flag = 'tp'        ! this specifies, whether the eos-subroutines 
                               ! are executed for constant 'tp' or for constant 'tv'
 
-  
+
+                              
+!calculate feed mass fraction of surfactant
+If(surfactant) wif_surfactant = x_surfactant*2655.24078 / (sum( xif(1:ncomp)*mm(1:ncomp) ) + x_surfactant*2655.24078 )             
   
 !> - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !!  Start phase equilibrium calculation and determine critical point
