@@ -13,7 +13,7 @@ module tests
     implicit none
     private
     public loadParameters,eqcond,eqcond_por,eqcond_dcell,eqcond_strut
-    character(len=99) :: fileplacein_par='./'   !modena
+    character(len=99) :: fileplacein_par='./inputs/'   !modena
     character(len=99) :: fileplacein_ref='../spectra/'  !modena
     character(len=99) :: fileplaceout='./'  !modena
     character(len=99) :: inputs='foamConductivity.json',spectra='spectra.out'
