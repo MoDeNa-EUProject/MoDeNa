@@ -87,6 +87,8 @@ class FoamConductivityExactTask(ModenaFireTask):
         inputs["testMode"]=False
         with open('foamConductivity.json','w') as f:
             json.dump(inputs, f, indent=4)
+        os.mkdir('inputs')
+        os.rename('foamConductivity.json','inputs/foamConductivity.json')
         # Execute the detailed model
         # path to **this** file + /src/...
         # will break if distributed computing
