@@ -179,14 +179,16 @@ subroutine loadParameters
         open(unit=newunit(fi),file=after_foaming)
         read(fi,*)
         read(fi,*) matr(1:4)
-        por=matr(1)
+        rhof=matr(1)
+        por=1-rhof/rhos
         close(fi)
     elseif (string=="Qmom0D") then
         after_foaming=TRIM(ADJUSTL(qmom0D_res))//TRIM(ADJUSTL(after_foaming0))
         open(unit=newunit(fi),file=after_foaming)
         read(fi,*)
         read(fi,*) matr(1:5)
-        por=matr(1)
+        rhof=matr(1)
+        por=1-rhof/rhos
         close(fi)
     elseif (string=="DirectInput") then
         call fson_get(json_data, "porosity", por)

@@ -674,13 +674,13 @@ int main(int argc, char **argv)
 	br_var=bubbleRadius_variance(y[7],y[8],y[9]);
     file2.open("after_foaming.txt");
     file2.setf(ios::scientific | ios::showpoint);
-	file2 << setw(24) << "#porosity"
+	file2 << setw(24) << "#foam_density"
 		<< setw(24) << "mean_cell_diameter"
 		<< setw(24) << "cell_diameter_variance"
 		<< setw(24) << "pressure1"
 		<< setw(24) << "pressure2"
 		<< endl;
-	file2 << setw(24) << 1-rho_foam/rhoPoly
+	file2 << setw(24) << rho_foam
 		<< setw(24) << 2*bubble_radius
 		<< setw(24) << br_var
 		<< setw(24) << pBA

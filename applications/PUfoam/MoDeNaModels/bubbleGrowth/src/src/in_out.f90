@@ -291,9 +291,9 @@ subroutine save_integration_close(iout)
     close(fi4)
     close(fi5)
     open(unit=newunit(fi1),file=outputs_af)
-    write(fi1,'(1000A24)') '#porosity', 'bubble_diameter','pressure1',&
+    write(fi1,'(1000A24)') '#foam_density', 'bubble_diameter','pressure1',&
         'pressure2'
-    write(fi1,"(1000es24.15e3)") porosity,2*radius,pressure
+    write(fi1,"(1000es24.15e3)") rhofoam,2*radius,pressure
     close(fi1)
     ! reallocate matrices for eta_rm and bub_vf functions
     ! interpolation doesn't work otherwise
