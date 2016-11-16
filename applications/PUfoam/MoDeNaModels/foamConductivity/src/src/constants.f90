@@ -24,7 +24,8 @@ module constants
     logical  :: &
         wdist,&               !<use wall thickness distribution
         testMode,&            !<true disables calculation of radiation
-        numcond               !<calcualte effective conductivity numerically
+        numcond,&             !<calcualte effective conductivity numerically
+        useSimulatedProperties!<use foam properties predicted by other tools
     character(len=80) :: &
         structureName         !<name of the file with morphology
     integer  :: &

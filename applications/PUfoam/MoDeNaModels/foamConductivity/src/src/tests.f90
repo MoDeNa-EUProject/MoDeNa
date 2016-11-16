@@ -20,6 +20,8 @@ module tests
     character(len=99) :: nspec='spec_n.in'
     character(len=99) :: kspec='spec_k.in'
     character(len=99) :: gasspec='gasspec.in'
+    character(len=99) :: after_foaming,after_foaming0='after_foaming.txt'
+    character(len=99) :: bg_res='../results/bubbleGrowth/'
 contains
 !********************************BEGINNING*************************************
 !> calculate equivalent conductivity for one specific foam
@@ -153,7 +155,8 @@ subroutine loadParameters
     type(fson_value), pointer :: json_data
     integer :: fi,ios,i,j
     logical :: file_exists
-    real(dp) :: xCO2,xAir,xCyP
+    real(dp) :: xCO2,xAir,xCyP,matr(7)
+    character(len=80) :: string !name of the file with morphology
     inputs=TRIM(ADJUSTL(fileplacein_par))//TRIM(ADJUSTL(inputs))
     inquire(file=inputs,exist=file_exists) !first try current folder
     if (.not. file_exists) then
@@ -167,13 +170,62 @@ subroutine loadParameters
     call fson_get(json_data, "lowerBoundary.temperature", temp2)
     call fson_get(json_data, "upperBoundary.emittance", emi1)
     call fson_get(json_data, "lowerBoundary.emittance", emi2)
-    call fson_get(json_data, "gasComposition.CO2", xCO2)
-    call fson_get(json_data, "gasComposition.Air", xAir)
-    call fson_get(json_data, "gasComposition.Cyclopentane", xCyP)
     call fson_get(json_data, "gasDensity", rhog)
     call fson_get(json_data, "solidDensity", rhos)
-    call fson_get(json_data, "porosity", por)
-    call fson_get(json_data, "cellSize", dcell)
+    call fson_get(json_data, "useSimulatedProperties", useSimulatedProperties)
+    if (useSimulatedProperties) then
+        call fson_get(json_data, "simulatedProperties.porosity", string)
+        if (string=="BubbleGrowth") then
+            after_foaming=TRIM(ADJUSTL(bg_res))//TRIM(ADJUSTL(after_foaming0))
+            open(unit=newunit(fi),file=after_foaming)
+            read(fi,*)
+            read(fi,*) matr(1:4)
+            por=matr(1)
+            close(fi)
+        elseif (string=="UserInput") then
+            call fson_get(json_data, "porosity", por)
+        else
+            write(*,*) 'unknown source for porosity'
+        endif
+        call fson_get(json_data, "simulatedProperties.cellSize", string)
+        if (string=="BubbleGrowth") then
+            after_foaming=TRIM(ADJUSTL(bg_res))//TRIM(ADJUSTL(after_foaming0))
+            open(unit=newunit(fi),file=after_foaming)
+            read(fi,*)
+            read(fi,*) matr(1:4)
+            dcell=matr(2)
+            close(fi)
+        elseif (string=="UserInput") then
+            call fson_get(json_data, "cellSize", dcell)
+        else
+            write(*,*) 'unknown source for cell size'
+        endif
+        call fson_get(json_data, "simulatedProperties.gasComposition", string)
+        if (string=="BubbleGrowth") then
+            after_foaming=TRIM(ADJUSTL(bg_res))//TRIM(ADJUSTL(after_foaming0))
+            open(unit=newunit(fi),file=after_foaming)
+            read(fi,*)
+            read(fi,*) matr(1:4)
+            xAir=0
+            xCyP=matr(3)
+            xCO2=matr(4)
+            xCyP=xCyP/(xCyP+xCO2)
+            xCO2=xCO2/(xCyP+xCO2)
+            close(fi)
+        elseif (string=="UserInput") then
+            call fson_get(json_data, "gasComposition.CO2", xCO2)
+            call fson_get(json_data, "gasComposition.Air", xAir)
+            call fson_get(json_data, "gasComposition.Cyclopentane", xCyP)
+        else
+            write(*,*) 'unknown source for gas composition'
+        endif
+    else
+        call fson_get(json_data, "gasComposition.CO2", xCO2)
+        call fson_get(json_data, "gasComposition.Air", xAir)
+        call fson_get(json_data, "gasComposition.Cyclopentane", xCyP)
+        call fson_get(json_data, "porosity", por)
+        call fson_get(json_data, "cellSize", dcell)
+    endif
     call fson_get(json_data, "morphologyInput", morph_input)
     call fson_get(json_data, "wallThickness", dwall)
     call fson_get(json_data, "strutContent", fs)
