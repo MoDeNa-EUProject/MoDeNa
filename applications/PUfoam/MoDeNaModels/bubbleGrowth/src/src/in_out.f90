@@ -23,12 +23,14 @@ subroutine set_paths
     outputs_c='outputs_c.out'
     outputs_kin='kinetics.out'
     outputs_drain='bblgr_2_drain.out'
+    outputs_af='after_foaming.txt'
     inputs=TRIM(ADJUSTL(fileplacein))//TRIM(ADJUSTL(inputs))
     outputs_1d=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_1d))
     outputs_GR=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_GR))
     outputs_c=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_c))
     outputs_kin=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_kin))
     outputs_drain=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_drain))
+    outputs_af=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_af))
 end subroutine set_paths
 !***********************************END****************************************
 !> reads input values from a file
@@ -288,6 +290,11 @@ subroutine save_integration_close(iout)
     endif
     close(fi4)
     close(fi5)
+    open(unit=newunit(fi1),file=outputs_af)
+    write(fi1,'(1000A24)') '#porosity', 'bubble_diameter','pressure1',&
+        'pressure2'
+    write(fi1,"(1000es24.15e3)") porosity,2*radius,pressure
+    close(fi1)
     ! reallocate matrices for eta_rm and bub_vf functions
     ! interpolation doesn't work otherwise
     if (iout /= its) then

@@ -43,5 +43,5 @@ from modena.Strategy import BackwardMappingScriptTask
 
 m = BackwardMappingScriptTask(
     script=os.path.dirname(os.path.abspath(__file__))+'/src/bblgrExact' +
-        ' && cp *.out ../results/bubbleGrowth/'
+        ' && cp *.out *.txt ../results/bubbleGrowth/'
 )
