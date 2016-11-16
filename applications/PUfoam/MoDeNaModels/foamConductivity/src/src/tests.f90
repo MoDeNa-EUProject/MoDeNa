@@ -22,6 +22,7 @@ module tests
     character(len=99) :: gasspec='gasspec.in'
     character(len=99) :: after_foaming,after_foaming0='after_foaming.txt'
     character(len=99) :: bg_res='../results/bubbleGrowth/'
+    character(len=99) :: qmom0D_res='../results/CFD0D/'
 contains
 !********************************BEGINNING*************************************
 !> calculate equivalent conductivity for one specific foam
@@ -180,6 +181,13 @@ subroutine loadParameters
         read(fi,*) matr(1:4)
         por=matr(1)
         close(fi)
+    elseif (string=="Qmom0D") then
+        after_foaming=TRIM(ADJUSTL(qmom0D_res))//TRIM(ADJUSTL(after_foaming0))
+        open(unit=newunit(fi),file=after_foaming)
+        read(fi,*)
+        read(fi,*) matr(1:5)
+        por=matr(1)
+        close(fi)
     elseif (string=="DirectInput") then
         call fson_get(json_data, "porosity", por)
     else
@@ -193,6 +201,13 @@ subroutine loadParameters
         open(unit=newunit(fi),file=after_foaming)
         read(fi,*)
         read(fi,*) matr(1:4)
+        dcell=matr(2)
+        close(fi)
+    elseif (string=="Qmom0D") then
+        after_foaming=TRIM(ADJUSTL(qmom0D_res))//TRIM(ADJUSTL(after_foaming0))
+        open(unit=newunit(fi),file=after_foaming)
+        read(fi,*)
+        read(fi,*) matr(1:5)
         dcell=matr(2)
         close(fi)
     elseif (string=="DirectInput") then
@@ -210,6 +225,17 @@ subroutine loadParameters
         xAir=0
         xCyP=matr(3)
         xCO2=matr(4)
+        xCyP=xCyP/(xCyP+xCO2)
+        xCO2=xCO2/(xCyP+xCO2)
+        close(fi)
+    elseif (string=="Qmom0D") then
+        after_foaming=TRIM(ADJUSTL(qmom0D_res))//TRIM(ADJUSTL(after_foaming0))
+        open(unit=newunit(fi),file=after_foaming)
+        read(fi,*)
+        read(fi,*) matr(1:5)
+        xAir=0
+        xCyP=matr(4)
+        xCO2=matr(5)
         xCyP=xCyP/(xCyP+xCO2)
         xCO2=xCO2/(xCyP+xCO2)
         close(fi)
