@@ -180,7 +180,7 @@ subroutine loadParameters
         read(fi,*) matr(1:4)
         por=matr(1)
         close(fi)
-    elseif (string=="UserInput") then
+    elseif (string=="DirectInput") then
         call fson_get(json_data, "porosity", por)
     else
         write(*,*) 'unknown source for porosity'
@@ -195,7 +195,7 @@ subroutine loadParameters
         read(fi,*) matr(1:4)
         dcell=matr(2)
         close(fi)
-    elseif (string=="UserInput") then
+    elseif (string=="DirectInput") then
         call fson_get(json_data, "cellSize", dcell)
     else
         write(*,*) 'unknown source for cell size'
@@ -213,7 +213,7 @@ subroutine loadParameters
         xCyP=xCyP/(xCyP+xCO2)
         xCO2=xCO2/(xCyP+xCO2)
         close(fi)
-    elseif (string=="UserInput") then
+    elseif (string=="DirectInput") then
         call fson_get(json_data, "gasComposition.CO2", xCO2)
         call fson_get(json_data, "gasComposition.Air", xAir)
         call fson_get(json_data, "gasComposition.Cyclopentane", xCyP)
@@ -224,7 +224,7 @@ subroutine loadParameters
     call fson_get(json_data, "sourceOfProperty.strutContent", string)
     if (string=="StrutContent") then
         call strutContent(fs,rhof)
-    elseif (string=="UserInput") then
+    elseif (string=="DirectInput") then
         call fson_get(json_data, "strutContent", fs)
     else
         write(*,*) 'unknown source for strut content'

@@ -71,6 +71,12 @@ class FoamConductivityExactTask(ModenaFireTask):
         inputs["gasComposition"]={"CO2": xCO2,"Air": xAir,"Cyclopentane": xCyP}
         inputs["gasDensity"]=1.2
         inputs["solidDensity"]=1.1e3
+        inputs["sourceOfProperty"]={
+            "porosity": "DirectInput",
+            "cellSize": "DirectInput",
+            "gasComposition": "DirectInput",
+            "strutContent": "DirectInput"
+        }
         inputs["porosity"]=eps
         inputs["cellSize"]=dcell
         inputs["morphologyInput"]=2
