@@ -44,20 +44,20 @@ subroutine eqcond(regions)
             krad=2e-3_dp
             call effcond
             open(newunit(fi),file='foamConductivity.out')
-            write(fi,*) effc
+            write(fi,*) eqc_ross
             close(fi)
-            stop
+            return
         endif
         call foam_morpholgy
         if (testMode) then
             write(*,*) 'TESTING: radiative properties not calculated.'
-            write(*,*) 'Ask Pavel if you want more reasonable results.'
+            write(*,*) 'Disable test mode if you want more reasonable results.'
             krad=2e-3_dp
             call effcond
             open(newunit(fi),file='foamConductivity.out')
-            write(fi,*) effc
+            write(fi,*) eqc_ross
             close(fi)
-            stop
+            return
         endif
         call effrad(spectra)
         call effcond
