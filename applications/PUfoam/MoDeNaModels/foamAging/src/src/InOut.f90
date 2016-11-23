@@ -13,12 +13,20 @@ contains
 subroutine input()
 	use constants
 	use globals
+	use physicalProperties
+	use ioutils
 	use fson
     use fson_value_m, only: fson_value_get
 	type(fson_value), pointer :: json_data
 	character(len=1024) :: strval
+    character(len=99) :: after_foaming,after_foaming0='after_foaming.txt'
+    character(len=99) :: bg_res='../results/bubbleGrowth/'
+    character(len=99) :: qmom0D_res='../results/CFD0D/'
+    character(len=99) :: qmom3D_res='../results/CFD3D/'
+	real(dp) :: matr(7)
+	integer :: fi
 	! Read input parameters
-	json_data => fson_parse("../foamAging.json")
+	json_data => fson_parse("../inputs/foamAging.json")
 	call fson_get(json_data, "numerics.timeStart", tbeg)
 	call fson_get(json_data, "numerics.timeEnd", tend)
 	call fson_get(json_data, "numerics.numberOfOutputs", nroutputs)
@@ -38,14 +46,121 @@ subroutine input()
 	call fson_get(json_data, "foamCondition.boundaryPressure.CO2", pBCCO2)
 	call fson_get(&
 		json_data, "foamCondition.boundaryPressure.Cyclopentane", pBCcyp)
-	call fson_get(json_data, "foamCondition.initialComposition.Air", pICair)
-	call fson_get(json_data, "foamCondition.initialComposition.CO2", pICCO2)
-	call fson_get(&
-		json_data, "foamCondition.initialComposition.Cyclopentane", pICcyp)
-	call fson_get(json_data, "morphology.foamDensity", rhof)
-	call fson_get(json_data, "morphology.cellSize", dcell)
-	call fson_get(json_data, "morphology.strutContent", fstrut)
-	call fson_get(json_data, "morphology.wallThickness", dwall)
+	call fson_get(json_data, "sourceOfProperty.gasComposition", strval)
+    if (strval=="BubbleGrowth") then
+        after_foaming=TRIM(ADJUSTL(bg_res))//TRIM(ADJUSTL(after_foaming0))
+        open(unit=newunit(fi),file=after_foaming)
+        read(fi,*)
+        read(fi,*) matr(1:4)
+        xAir=0
+        xCyP=matr(3)
+        xCO2=matr(4)
+        xCyP=xCyP/(xCyP+xCO2)
+        xCO2=1-xCyP
+        close(fi)
+    elseif (strval=="Qmom0D") then
+        after_foaming=TRIM(ADJUSTL(qmom0D_res))//TRIM(ADJUSTL(after_foaming0))
+        open(unit=newunit(fi),file=after_foaming)
+        read(fi,*)
+        read(fi,*) matr(1:5)
+        xAir=0
+        xCyP=matr(4)
+        xCO2=matr(5)
+        xCyP=xCyP/(xCyP+xCO2)
+        xCO2=1-xCyP
+        close(fi)
+    elseif (strval=="Qmom3D") then
+        after_foaming=TRIM(ADJUSTL(qmom3D_res))//TRIM(ADJUSTL(after_foaming0))
+        open(unit=newunit(fi),file=after_foaming)
+        read(fi,*)
+        read(fi,*) matr(1:4)
+        xAir=0
+        xCyP=matr(3)
+        xCO2=matr(4)
+        xCyP=xCyP/(xCyP+xCO2)
+        xCO2=1-xCyP
+        close(fi)
+    elseif (strval=="DirectInput") then
+		call fson_get(json_data, "foamCondition.initialComposition.Air", xAir)
+		call fson_get(json_data, "foamCondition.initialComposition.CO2", xCO2)
+		call fson_get(&
+			json_data, "foamCondition.initialComposition.Cyclopentane", xCyP)
+    else
+        write(*,*) 'unknown source for gas composition'
+        stop
+    endif
+	call fson_get(json_data, "sourceOfProperty.foamDensity", strval)
+    if (strval=="BubbleGrowth") then
+        after_foaming=TRIM(ADJUSTL(bg_res))//TRIM(ADJUSTL(after_foaming0))
+        open(unit=newunit(fi),file=after_foaming)
+        read(fi,*)
+        read(fi,*) matr(1:4)
+        rhof=matr(1)
+        close(fi)
+    elseif (strval=="Qmom0D") then
+        after_foaming=TRIM(ADJUSTL(qmom0D_res))//TRIM(ADJUSTL(after_foaming0))
+        open(unit=newunit(fi),file=after_foaming)
+        read(fi,*)
+        read(fi,*) matr(1:5)
+        rhof=matr(1)
+        close(fi)
+    elseif (strval=="Qmom3D") then
+        after_foaming=TRIM(ADJUSTL(qmom3D_res))//TRIM(ADJUSTL(after_foaming0))
+        open(unit=newunit(fi),file=after_foaming)
+        read(fi,*)
+        read(fi,*) matr(1:4)
+        rhof=matr(1)
+        close(fi)
+    elseif (strval=="DirectInput") then
+		call fson_get(json_data, "morphology.foamDensity", rhof)
+    else
+        write(*,*) 'unknown source for foam density'
+        stop
+    endif
+	call fson_get(json_data, "sourceOfProperty.cellSize", strval)
+    if (strval=="BubbleGrowth") then
+        after_foaming=TRIM(ADJUSTL(bg_res))//TRIM(ADJUSTL(after_foaming0))
+        open(unit=newunit(fi),file=after_foaming)
+        read(fi,*)
+        read(fi,*) matr(1:4)
+        dcell=matr(2)
+        close(fi)
+    elseif (strval=="Qmom0D") then
+        after_foaming=TRIM(ADJUSTL(qmom0D_res))//TRIM(ADJUSTL(after_foaming0))
+        open(unit=newunit(fi),file=after_foaming)
+        read(fi,*)
+        read(fi,*) matr(1:5)
+        dcell=matr(2)
+        close(fi)
+    elseif (strval=="Qmom3D") then
+        after_foaming=TRIM(ADJUSTL(qmom3D_res))//TRIM(ADJUSTL(after_foaming0))
+        open(unit=newunit(fi),file=after_foaming)
+        read(fi,*)
+        read(fi,*) matr(1:4)
+        dcell=matr(2)
+        close(fi)
+    elseif (strval=="DirectInput") then
+		call fson_get(json_data, "morphology.cellSize", dcell)
+    else
+        write(*,*) 'unknown source for cell size'
+        stop
+    endif
+	call fson_get(json_data, "sourceOfProperty.strutContent", strval)
+    if (strval=="StrutContent") then
+        call strutContent(fstrut,rhof)
+    elseif (strval=="DirectInput") then
+		call fson_get(json_data, "morphology.strutContent", fstrut)
+    else
+        write(*,*) 'unknown source for strut content'
+        stop
+    endif
+	call fson_get(json_data, "sourceOfProperty.wallThickness", strval)
+    if (strval=="DirectInput") then
+		call fson_get(json_data, "morphology.wallThickness", dwall)
+    else
+        write(*,*) 'unknown source for wall thickness'
+        stop
+    endif
 	call fson_get(json_data, "physicalProperties.polymerDensity", rhop)
 	call fson_get(json_data, &
 		"physicalProperties.foam.solubilityModel.Air", strval)
@@ -171,8 +286,8 @@ subroutine output(iprof, time, ystate, neq)
     else
         write(name_f,'(I4)') iprof
     endif
-	open(unit=11,file='../results/H2perm_'//trim(name_f)//'.dat')
-	open(unit=12,file='../results/ppar_'//trim(name_f)//'.dat')
+	open(unit=11,file='H2perm_'//trim(name_f)//'.dat')
+	open(unit=12,file='ppar_'//trim(name_f)//'.dat')
 
 	! profiles
 	do i = 1, neq/ngas

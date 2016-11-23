@@ -15,7 +15,7 @@ module globals
 	real(dp) :: temp, temp_cond
 	real(dp) :: pressure ! initial conds
 	real(dp) :: pBCair, pBCCO2, pBCcyp 	! boundary conds
-	real(dp) :: pICair, pICCO2, pICcyp 	! initial conds
+	real(dp) :: xAir, xCO2, xCyP 	! initial conds
 	real(dp) :: fstrut,rhof,rhop,eps
 	real(dp) :: DCO2, Dcyp, Dair, Dgas
 	real(dp) :: SCO2, Scyp, Sair

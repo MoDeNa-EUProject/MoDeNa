@@ -158,7 +158,7 @@ subroutine loadParameters
     integer :: fi,ios,i,j
     logical :: file_exists
     real(dp) :: xCO2,xAir,xCyP,matr(7)
-    character(len=80) :: string !name of the file with morphology
+    character(len=80) :: strval !name of the file with morphology
     inputs=TRIM(ADJUSTL(fileplacein_par))//TRIM(ADJUSTL(inputs))
     inquire(file=inputs,exist=file_exists) !first try current folder
     if (.not. file_exists) then
@@ -174,8 +174,8 @@ subroutine loadParameters
     call fson_get(json_data, "lowerBoundary.emittance", emi2)
     call fson_get(json_data, "gasDensity", rhog)
     call fson_get(json_data, "solidDensity", rhos)
-    call fson_get(json_data, "sourceOfProperty.porosity", string)
-    if (string=="BubbleGrowth") then
+    call fson_get(json_data, "sourceOfProperty.porosity", strval)
+    if (strval=="BubbleGrowth") then
         after_foaming=TRIM(ADJUSTL(bg_res))//TRIM(ADJUSTL(after_foaming0))
         open(unit=newunit(fi),file=after_foaming)
         read(fi,*)
@@ -183,7 +183,7 @@ subroutine loadParameters
         rhof=matr(1)
         por=1-rhof/rhos
         close(fi)
-    elseif (string=="Qmom0D") then
+    elseif (strval=="Qmom0D") then
         after_foaming=TRIM(ADJUSTL(qmom0D_res))//TRIM(ADJUSTL(after_foaming0))
         open(unit=newunit(fi),file=after_foaming)
         read(fi,*)
@@ -191,7 +191,7 @@ subroutine loadParameters
         rhof=matr(1)
         por=1-rhof/rhos
         close(fi)
-    elseif (string=="Qmom3D") then
+    elseif (strval=="Qmom3D") then
         after_foaming=TRIM(ADJUSTL(qmom3D_res))//TRIM(ADJUSTL(after_foaming0))
         open(unit=newunit(fi),file=after_foaming)
         read(fi,*)
@@ -199,43 +199,43 @@ subroutine loadParameters
         rhof=matr(1)
         por=1-rhof/rhos
         close(fi)
-    elseif (string=="DirectInput") then
+    elseif (strval=="DirectInput") then
         call fson_get(json_data, "porosity", por)
     else
         write(*,*) 'unknown source for porosity'
         stop
     endif
     rhof=(1-por)*rhos
-    call fson_get(json_data, "sourceOfProperty.cellSize", string)
-    if (string=="BubbleGrowth") then
+    call fson_get(json_data, "sourceOfProperty.cellSize", strval)
+    if (strval=="BubbleGrowth") then
         after_foaming=TRIM(ADJUSTL(bg_res))//TRIM(ADJUSTL(after_foaming0))
         open(unit=newunit(fi),file=after_foaming)
         read(fi,*)
         read(fi,*) matr(1:4)
         dcell=matr(2)
         close(fi)
-    elseif (string=="Qmom0D") then
+    elseif (strval=="Qmom0D") then
         after_foaming=TRIM(ADJUSTL(qmom0D_res))//TRIM(ADJUSTL(after_foaming0))
         open(unit=newunit(fi),file=after_foaming)
         read(fi,*)
         read(fi,*) matr(1:5)
         dcell=matr(2)
         close(fi)
-    elseif (string=="Qmom3D") then
+    elseif (strval=="Qmom3D") then
         after_foaming=TRIM(ADJUSTL(qmom3D_res))//TRIM(ADJUSTL(after_foaming0))
         open(unit=newunit(fi),file=after_foaming)
         read(fi,*)
         read(fi,*) matr(1:4)
         dcell=matr(2)
         close(fi)
-    elseif (string=="DirectInput") then
+    elseif (strval=="DirectInput") then
         call fson_get(json_data, "cellSize", dcell)
     else
         write(*,*) 'unknown source for cell size'
         stop
     endif
-    call fson_get(json_data, "sourceOfProperty.gasComposition", string)
-    if (string=="BubbleGrowth") then
+    call fson_get(json_data, "sourceOfProperty.gasComposition", strval)
+    if (strval=="BubbleGrowth") then
         after_foaming=TRIM(ADJUSTL(bg_res))//TRIM(ADJUSTL(after_foaming0))
         open(unit=newunit(fi),file=after_foaming)
         read(fi,*)
@@ -246,7 +246,7 @@ subroutine loadParameters
         xCyP=xCyP/(xCyP+xCO2)
         xCO2=1-xCyP
         close(fi)
-    elseif (string=="Qmom0D") then
+    elseif (strval=="Qmom0D") then
         after_foaming=TRIM(ADJUSTL(qmom0D_res))//TRIM(ADJUSTL(after_foaming0))
         open(unit=newunit(fi),file=after_foaming)
         read(fi,*)
@@ -257,7 +257,7 @@ subroutine loadParameters
         xCyP=xCyP/(xCyP+xCO2)
         xCO2=1-xCyP
         close(fi)
-    elseif (string=="Qmom3D") then
+    elseif (strval=="Qmom3D") then
         after_foaming=TRIM(ADJUSTL(qmom3D_res))//TRIM(ADJUSTL(after_foaming0))
         open(unit=newunit(fi),file=after_foaming)
         read(fi,*)
@@ -268,7 +268,7 @@ subroutine loadParameters
         xCyP=xCyP/(xCyP+xCO2)
         xCO2=1-xCyP
         close(fi)
-    elseif (string=="DirectInput") then
+    elseif (strval=="DirectInput") then
         call fson_get(json_data, "gasComposition.CO2", xCO2)
         call fson_get(json_data, "gasComposition.Air", xAir)
         call fson_get(json_data, "gasComposition.Cyclopentane", xCyP)
@@ -276,30 +276,30 @@ subroutine loadParameters
         write(*,*) 'unknown source for gas composition'
         stop
     endif
-    call fson_get(json_data, "sourceOfProperty.strutContent", string)
-    if (string=="StrutContent") then
+    call fson_get(json_data, "sourceOfProperty.strutContent", strval)
+    if (strval=="StrutContent") then
         call strutContent(fs,rhof)
-    elseif (string=="DirectInput") then
+    elseif (strval=="DirectInput") then
         call fson_get(json_data, "strutContent", fs)
     else
         write(*,*) 'unknown source for strut content'
         stop
     endif
-    call fson_get(json_data, "sourceOfProperty.wallThickness", string)
-    if (string=="DirectInput") then
+    call fson_get(json_data, "sourceOfProperty.wallThickness", strval)
+    if (strval=="DirectInput") then
         call fson_get(json_data, "wallThickness", dwall)
     else
         write(*,*) 'unknown source for wall thickness'
         stop
     endif
-    call fson_get(json_data, "morphologyInput", string)
-    if (string=="wallThickness") then
+    call fson_get(json_data, "morphologyInput", strval)
+    if (strval=="wallThickness") then
         morph_input=1
-    elseif (string=="strutContent") then
+    elseif (strval=="strutContent") then
         morph_input=2
-    elseif (string=="strutSize") then
+    elseif (strval=="strutSize") then
         morph_input=3
-    elseif (string=="strutContent2") then
+    elseif (strval=="strutContent2") then
         morph_input=4
     else
         write(*,*) 'unknown choice of morphologyInput'
