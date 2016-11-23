@@ -172,84 +172,18 @@ void tcfoam_SM
     },
 )
 
-# When initializing for Foam aging
-# use input file to Foam aging application to initialize with reasonable data.
-try:
-    with open('foamAging.json','r') as f:
-        inputs=json.load(f)
-        T0=inputs['foamCondition']['conductivityTemperature']
-        rhop=inputs['physicalProperties']['polymerDensity']
-        xAir0=inputs['foamCondition']['initialComposition']['Air']
-        xCO20=inputs['foamCondition']['initialComposition']['CO2']
-        xCyP0=inputs['foamCondition']['initialComposition']['Cyclopentane']
-        dcell0=inputs['morphology']['cellSize']
-        fstrut0=inputs['morphology']['strutContent']
-        rho0=inputs['morphology']['foamDensity']
-        eps0=1-rho0/rhop
-except IOError: # set some dummy values when not initializing
-    eps0=0.96
-    dcell0=300e-6
-    fstrut0=0.8
-    T0=283
-    xCO20=0.0
-    xCyP0=0.99
-    xAir0=0.0
-# set initial points so that they are close to one value
-def setIP(a0):
-    a=[]
-    for i in xrange(4):
-        a.append(a0)
-    upar=1-1e-4
-    opar=1+1e-4
-    a[0]=a[0]*upar
-    if a0==0:
-        a[1]=1e-4
-    else:
-        a[1]=a[1]*opar
-    return a
-
-initialPoints_foamConductivity_auto = {
-    'eps': setIP(eps0),
-    'dcell': setIP(dcell0),
-    'fstrut': setIP(fstrut0),
-    'T': setIP(T0),
-    'x[CO2]': setIP(xCO20),
-    'x[CyP]': setIP(xCyP0),
-    'x[O2]': setIP(xAir0*0.21),
-    'x[N2]': setIP(xAir0*0.79),
-}
-# when testing,
-# initialize for any composition to avoid getting out of bounds too many times
-test=False
-if test:
-    initialPoints_foamConductivity_auto['x[CO2]']=[1,0,0,0]
-    initialPoints_foamConductivity_auto['x[CyP]']=[0,1,0,0]
-    initialPoints_foamConductivity_auto['x[O2]']=[0,0,1,0]
-    initialPoints_foamConductivity_auto['x[N2]']=[0,0,0,1]
-# When initializing for Foam expansion
 # use dummy data to initialize to avoid getting out of bounds
 foaming_ini={
     'eps': [0.9,0.0,0.96,0.99,0.7,0.5],
     'dcell': [200e-6,0.0,300e-6,100e-6,1e-2,200e-6],
     'fstrut': [0.0,1.0,0.7,0.6,0.0,0.9],
     'T': [280,549,300,350,330,300],
-    'x[CO2]': [0,0,1,1,1,0],
-    'x[CyP]': [1,1,0,0,0,1],
-    'x[O2]': [0,0,0,0,0,0],
-    'x[N2]': [0,0,0,0,0,0],
+    'x[CO2]': [1,0,0,0,1,0],
+    'x[CyP]': [0,1,0,0,0,1],
+    'x[O2]': [0,0,1,0,0,0],
+    'x[N2]': [0,0,0,1,0,0],
 }
-# we are initializing for Foam expansion if unifiedInput.json exists
-try:
-    with open('inputs/unifiedInput.json','r') as f:
-        inputs=json.load(f)
-    initialPoints_foamConductivity_auto = foaming_ini
-except IOError:
-    try:
-        with open('../inputs/unifiedInput.json','r') as f:
-            inputs=json.load(f)
-        initialPoints_foamConductivity_auto = foaming_ini
-    except:
-        pass
+
 ## Surrogate model for foam conductivity
 #
 # Backward mapping model is used.
@@ -262,7 +196,7 @@ m_foamConductivity = BackwardMappingModel(
         polymerConductivity.m_polymer_thermal_conductivity\
     ],
     initialisationStrategy=Strategy.InitialPoints(
-        initialPoints=initialPoints_foamConductivity_auto,
+        initialPoints=foaming_ini,
     ),
     outOfBoundsStrategy=Strategy.ExtendSpaceStochasticSampling(
         nNewPoints=4
