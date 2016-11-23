@@ -285,8 +285,26 @@ subroutine loadParameters
         write(*,*) 'unknown source for strut content'
         stop
     endif
-    call fson_get(json_data, "morphologyInput", morph_input)
-    call fson_get(json_data, "wallThickness", dwall)
+    call fson_get(json_data, "sourceOfProperty.wallThickness", string)
+    if (string=="DirectInput") then
+        call fson_get(json_data, "wallThickness", dwall)
+    else
+        write(*,*) 'unknown source for wall thickness'
+        stop
+    endif
+    call fson_get(json_data, "morphologyInput", string)
+    if (string=="wallThickness") then
+        morph_input=1
+    elseif (string=="strutContent") then
+        morph_input=2
+    elseif (string=="strutSize") then
+        morph_input=3
+    elseif (string=="strutContent2") then
+        morph_input=4
+    else
+        write(*,*) 'unknown choice of morphologyInput'
+        stop
+    endif
     call fson_get(json_data, "strutSize", dstrut)
     call fson_get(json_data, "foamThickness", dfoam)
     call fson_get(json_data, "spatialDiscretization", nz)

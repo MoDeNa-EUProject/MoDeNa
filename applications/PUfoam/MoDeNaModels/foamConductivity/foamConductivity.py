@@ -75,11 +75,12 @@ class FoamConductivityExactTask(ModenaFireTask):
             "porosity": "DirectInput",
             "cellSize": "DirectInput",
             "gasComposition": "DirectInput",
-            "strutContent": "DirectInput"
+            "strutContent": "DirectInput",
+            "wallThickness": "DirectInput"
         }
         inputs["porosity"]=eps
         inputs["cellSize"]=dcell
-        inputs["morphologyInput"]=2
+        inputs["morphologyInput"]="strutContent"
         inputs["wallThickness"]=0.5e-6
         inputs["strutContent"]=fstrut
         inputs["strutSize"]=1e-6
