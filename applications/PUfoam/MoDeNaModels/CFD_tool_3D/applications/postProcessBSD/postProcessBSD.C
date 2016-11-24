@@ -91,7 +91,7 @@ public:
             M0 = Foam::max(M0, dimensionedScalar("M0min", M0.dimensions(), SMALL));
             M1 = Foam::max(M1, dimensionedScalar("M1min", M1.dimensions(), SMALL));
             M2 = Foam::max(M2, dimensionedScalar("M2min", M2.dimensions(), SMALL));
-            mean_[celli] = scalar(2.0)*Foam::log(M1[celli]/M2[celli]) -
+            mean_[celli] = scalar(2.0)*Foam::log(M1[celli]/M0[celli]) -
                            scalar(0.5)*Foam::log(M2[celli]/M0[celli]);
         }
         return (insideFoam*mean_);
