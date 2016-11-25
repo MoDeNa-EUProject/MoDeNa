@@ -21,8 +21,8 @@ module tests
     character(len=99) :: kspec='spec_k.in'
     character(len=99) :: gasspec='gasspec.in'
     character(len=99) :: after_foaming,after_foaming0='after_foaming.txt'
-    character(len=99) :: bg_res='../results/bubbleGrowth/'
-    character(len=99) :: qmom0D_res='../results/CFD0D/'
+    character(len=99) :: bg_res='../../foamExpansion/results/bubbleGrowth/'
+    character(len=99) :: qmom0D_res='../../foamExpansion/results/CFD0D/'
     character(len=99) :: qmom3D_res='../../foamExpansion/results/CFD3D/'
 contains
 !********************************BEGINNING*************************************
@@ -187,7 +187,7 @@ subroutine loadParameters
         after_foaming=TRIM(ADJUSTL(qmom0D_res))//TRIM(ADJUSTL(after_foaming0))
         open(unit=newunit(fi),file=after_foaming)
         read(fi,*)
-        read(fi,*) matr(1:5)
+        read(fi,*) matr(1:4)
         rhof=matr(1)
         por=1-rhof/rhos
         close(fi)
@@ -218,7 +218,7 @@ subroutine loadParameters
         after_foaming=TRIM(ADJUSTL(qmom0D_res))//TRIM(ADJUSTL(after_foaming0))
         open(unit=newunit(fi),file=after_foaming)
         read(fi,*)
-        read(fi,*) matr(1:5)
+        read(fi,*) matr(1:4)
         dcell=matr(2)
         close(fi)
     elseif (strval=="Qmom3D") then
@@ -250,10 +250,10 @@ subroutine loadParameters
         after_foaming=TRIM(ADJUSTL(qmom0D_res))//TRIM(ADJUSTL(after_foaming0))
         open(unit=newunit(fi),file=after_foaming)
         read(fi,*)
-        read(fi,*) matr(1:5)
+        read(fi,*) matr(1:4)
         xAir=0
-        xCyP=matr(4)
-        xCO2=matr(5)
+        xCyP=matr(3)
+        xCO2=matr(4)
         xCyP=xCyP/(xCyP+xCO2)
         xCO2=1-xCyP
         close(fi)
