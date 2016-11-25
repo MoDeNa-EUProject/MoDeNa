@@ -22,7 +22,7 @@ subroutine input()
     character(len=99) :: after_foaming,after_foaming0='after_foaming.txt'
     character(len=99) :: bg_res='../results/bubbleGrowth/'
     character(len=99) :: qmom0D_res='../results/CFD0D/'
-    character(len=99) :: qmom3D_res='../results/CFD3D/'
+    character(len=99) :: qmom3D_res='../../foamExpansion/results/CFD3D/'
 	real(dp) :: matr(7)
 	integer :: fi
 	! Read input parameters

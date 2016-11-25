@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import sys
+import os
 import json
 from numpy import loadtxt
 from modena import SurrogateModel
@@ -44,6 +45,9 @@ def setIP(a0):
     return a
 def foamAging():
     "create initial points from foamAging.json"
+    if os.getcwd().split(os.path.sep)[-1] != 'foamAging':
+        raise Exception("you can initialize for foamAging only from foamAging "
+            +"folder")
     results='../foamExpansion/results/'
     with open("./inputs/foamAging.json") as fl:
         inputs=json.load(fl)
@@ -102,6 +106,10 @@ def foamAging():
             fstrut0=outputs['fs']
         else:
             raise Exception("unknown source for strut content")
+    s=xAir0+xCO20+xCyP0
+    xAir0=xAir0/s
+    xCO20=xCO20/s
+    xCyP0=xCyP0/s
     eps0=1-rho0/rhop
     ini = {
         'eps': setIP(eps0),
