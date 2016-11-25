@@ -10,10 +10,10 @@
     "gasDensity": 1.2,
     "solidDensity": 1.1e3,
     "sourceOfProperty": {
-        "porosity": "Qmom3D",
-        "cellSize": "Qmom3D",
-        "gasComposition": "Qmom3D",
-        "strutContent": "StrutContent",
+        "porosity": "DirectInput",
+        "cellSize": "DirectInput",
+        "gasComposition": "DirectInput",
+        "strutContent": "DirectInput",
         "wallThickness": "DirectInput"
     },
     "gasComposition": {

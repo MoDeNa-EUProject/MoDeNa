@@ -8,10 +8,10 @@
         "sheetDiscretization": 20
     },
     "sourceOfProperty": {
-        "foamDensity": "Qmom3D",
-        "cellSize": "Qmom3D",
-        "gasComposition": "Qmom3D",
-        "strutContent": "StrutContent",
+        "foamDensity": "DirectInput",
+        "cellSize": "DirectInput",
+        "gasComposition": "DirectInput",
+        "strutContent": "DirectInput",
         "wallThickness": "DirectInput"
     },
     "foamCondition": {
