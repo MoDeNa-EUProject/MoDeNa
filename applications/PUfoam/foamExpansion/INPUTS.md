@@ -168,3 +168,13 @@ The following key-pairs should be defined:
 - `strutFilmParameter`: parameter for detection of wall/strut 1.1 is recommended
 
 [1]: http://dx.doi.org/10.1016/S0021-9797(03)00425-9
+
+### Preparing init_foamConductivity.json
+- `T`: list of temperatures (K)
+- `dcell`: list of cell sizes (m)
+- `eps`: list of porosities
+- `fstrut`: list of strut contents
+- `x[CO2]`: list of CO2 molar fractions
+- `x[CyP]`: list of cyclopentane molar fractions
+- `x[N2]`: list of nitrogen molar fractions
+- `x[O2]`: list of carbon dioxide molar fractions
