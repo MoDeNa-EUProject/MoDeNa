@@ -47,8 +47,8 @@ import json
 import polymerConductivity
 import gasConductivity
 import gasMixtureConductivity
-from json import encoder
-encoder.FLOAT_REPR = lambda o: format(o, '.12g')
+import json
+json.encoder.FLOAT_REPR = lambda o: format(o, '.12g')
 
 @explicit_serialize
 class FoamConductivityExactTask(ModenaFireTask):
@@ -172,17 +172,12 @@ void tcfoam_SM
     },
 )
 
-# use dummy data to initialize to avoid getting out of bounds
-foaming_ini={
-    'eps': [0.9,0.0,0.96,0.99,0.7,0.5],
-    'dcell': [200e-6,0.0,300e-6,100e-6,1e-2,200e-6],
-    'fstrut': [0.0,1.0,0.7,0.6,0.0,0.9],
-    'T': [280,549,300,350,330,300],
-    'x[CO2]': [1,0,0,0,1,0],
-    'x[CyP]': [0,1,0,0,0,1],
-    'x[O2]': [0,0,1,0,0,0],
-    'x[N2]': [0,0,0,1,0,0],
-}
+try: #initialization by initModels
+    with open("./inputs/init_foamConductivity.json") as fl:
+        foaming_ini=json.load(fl)
+except IOError: #automatic initialization
+    with open("../inputs/init_foamConductivity.json") as fl:
+        foaming_ini=json.load(fl)
 
 ## Surrogate model for foam conductivity
 #
