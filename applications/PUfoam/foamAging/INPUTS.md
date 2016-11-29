@@ -1,6 +1,6 @@
 @ingroup app_aging
 
-The input file should be located in the root of the Foam aging application. `foamAging.json` controls aging simulation, whereas `foamConductivity.json` controls foam conductivity simulation.
+The input files should be located in the `inputs` folder. `foamAging.json` controls aging simulation, whereas `foamConductivity.json` controls foam conductivity simulation. `init_foamConductivity.json` provides initial points for the initialization of foamConductivity.
 
 ### Preparing foamAging.json
 The following key-pairs should be defined:
@@ -11,6 +11,12 @@ The following key-pairs should be defined:
     - `wallDiscretization`: number of finite volumes in each wall
     - `cellDiscretization`: number of finite volumes in each cell
     - `sheetDiscretization`: number of finite volumes in sheet, if it is used
+- `sourceOfProperty`: when "DirectInput" is used, the property must be given in this file. Otherwise, it will be loaded from the results of the specified given tool.
+    - `foamDensity`: ["DirectInput","BubbleGrowth","Qmom0D","Qmom3D"]
+    - `cellSize`: ["DirectInput","BubbleGrowth","Qmom0D","Qmom3D"]
+    - `gasComposition`: ["DirectInput","BubbleGrowth","Qmom0D","Qmom3D"]
+    - `strutContent`: ["DirectInput","StrutContent"]
+    - `wallThickness`: ["DirectInput"]
 - `foamCondition`:
     - `foamHalfThickness`: half of foam thickness (m)
     - `inProtectiveSheet`: is foam enclosed in a sheet [true,false]
@@ -61,20 +67,27 @@ The following key-pairs should be defined:
             - `Cyclopentane`: diffusivity of cyclopentane, if "constant" model is used (m2/s)
 
 ### Preparing foamConductivity.json
+- `upperBoundary`:
+    - `emittance`: numer 0-1, 0.9 recommended
+    - `temperature`: temperature (K)
 - `lowerBoundary`:
     - `emittance`: numer 0-1, 0.9 recommended
     - `temperature`: temperature (K)
+- `gasDensity`: gas density (kg/m3)
+- `solidDensity`: polymer density (kg/m3)
+- `sourceOfProperty`: when "DirectInput" is used, the property must be given in this file. Otherwise, it will be loaded from the results of the specified given tool.
+    - `porosity`: ["DirectInput","BubbleGrowth","Qmom0D","Qmom3D"]
+    - `cellSize`: ["DirectInput","BubbleGrowth","Qmom0D","Qmom3D"]
+    - `gasComposition`: ["DirectInput","BubbleGrowth","Qmom0D","Qmom3D"]
+    - `strutContent`: ["DirectInput","StrutContent"]
+    - `wallThickness`: ["DirectInput"]
 - `gasComposition`:
     - `Cyclopentane`: molar fraction of cyclopentane
     - `CO2`: molar fraction of CO2
     - `Air`: molar fraction of air
 - `useWallThicknessDistribution`: [true,false]
 - `spatialDiscretization`: number of finite volumes for conduction-radiation simulation
-- `upperBoundary`:
-    - `emittance`: numer 0-1, 0.9 recommended
-    - `temperature`: temperature (K)
 - `wallThicknessStandardDeviation`: if wall thickness distribution is used
-- `solidDensity`: polymer density (kg/m3)
 - `morphologyInput`: 2 is recommended (strut content is specified, wall thickness and strut size is calculated)
 - `foamThickness`: foam thickness (m)
 - `porosity`: foam porosity
@@ -83,6 +96,15 @@ The following key-pairs should be defined:
 - `numberOfGrayBoxes`: 10 is recommended
 - `strutContent`: strut content
 - `cellSize`: cell size (m)
-- `gasDensity`: gas density (kg/m3)
 - `strutSize`: initial guess of strut size
 - `wallThickness`: initial guess of wall thickness
+
+### Preparing init_foamConductivity.json
+- `T`: list of temperatures (K)
+- `dcell`: list of cell sizes (m)
+- `eps`: list of porosities
+- `fstrut`: list of strut contents
+- `x[CO2]`: list of CO2 molar fractions
+- `x[CyP]`: list of cyclopentane molar fractions
+- `x[N2]`: list of nitrogen molar fractions
+- `x[O2]`: list of carbon dioxide molar fractions

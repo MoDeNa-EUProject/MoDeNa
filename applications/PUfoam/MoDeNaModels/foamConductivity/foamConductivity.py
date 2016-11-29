@@ -47,8 +47,8 @@ import json
 import polymerConductivity
 import gasConductivity
 import gasMixtureConductivity
-from json import encoder
-encoder.FLOAT_REPR = lambda o: format(o, '.12g')
+import json
+json.encoder.FLOAT_REPR = lambda o: format(o, '.12g')
 
 @explicit_serialize
 class FoamConductivityExactTask(ModenaFireTask):
@@ -71,9 +71,16 @@ class FoamConductivityExactTask(ModenaFireTask):
         inputs["gasComposition"]={"CO2": xCO2,"Air": xAir,"Cyclopentane": xCyP}
         inputs["gasDensity"]=1.2
         inputs["solidDensity"]=1.1e3
+        inputs["sourceOfProperty"]={
+            "porosity": "DirectInput",
+            "cellSize": "DirectInput",
+            "gasComposition": "DirectInput",
+            "strutContent": "DirectInput",
+            "wallThickness": "DirectInput"
+        }
         inputs["porosity"]=eps
         inputs["cellSize"]=dcell
-        inputs["morphologyInput"]=2
+        inputs["morphologyInput"]="strutContent"
         inputs["wallThickness"]=0.5e-6
         inputs["strutContent"]=fstrut
         inputs["strutSize"]=1e-6
@@ -87,6 +94,8 @@ class FoamConductivityExactTask(ModenaFireTask):
         inputs["testMode"]=False
         with open('foamConductivity.json','w') as f:
             json.dump(inputs, f, indent=4)
+        os.mkdir('inputs')
+        os.rename('foamConductivity.json','inputs/foamConductivity.json')
         # Execute the detailed model
         # path to **this** file + /src/...
         # will break if distributed computing
@@ -163,84 +172,13 @@ void tcfoam_SM
     },
 )
 
-# When initializing for Foam aging
-# use input file to Foam aging application to initialize with reasonable data.
-try:
-    with open('foamAging.json','r') as f:
-        inputs=json.load(f)
-        T0=inputs['foamCondition']['conductivityTemperature']
-        rhop=inputs['physicalProperties']['polymerDensity']
-        xAir0=inputs['foamCondition']['initialComposition']['Air']
-        xCO20=inputs['foamCondition']['initialComposition']['CO2']
-        xCyP0=inputs['foamCondition']['initialComposition']['Cyclopentane']
-        dcell0=inputs['morphology']['cellSize']
-        fstrut0=inputs['morphology']['strutContent']
-        rho0=inputs['morphology']['foamDensity']
-        eps0=1-rho0/rhop
-except IOError: # set some dummy values when not initializing
-    eps0=0.96
-    dcell0=300e-6
-    fstrut0=0.8
-    T0=283
-    xCO20=0.0
-    xCyP0=0.99
-    xAir0=0.0
-# set initial points so that they are close to one value
-def setIP(a0):
-    a=[]
-    for i in xrange(4):
-        a.append(a0)
-    upar=1-1e-4
-    opar=1+1e-4
-    a[0]=a[0]*upar
-    if a0==0:
-        a[1]=1e-4
-    else:
-        a[1]=a[1]*opar
-    return a
+try: #initialization by initModels
+    with open("./inputs/init_foamConductivity.json") as fl:
+        foaming_ini=json.load(fl)
+except IOError: #automatic initialization
+    with open("../inputs/init_foamConductivity.json") as fl:
+        foaming_ini=json.load(fl)
 
-initialPoints_foamConductivity_auto = {
-    'eps': setIP(eps0),
-    'dcell': setIP(dcell0),
-    'fstrut': setIP(fstrut0),
-    'T': setIP(T0),
-    'x[CO2]': setIP(xCO20),
-    'x[CyP]': setIP(xCyP0),
-    'x[O2]': setIP(xAir0*0.21),
-    'x[N2]': setIP(xAir0*0.79),
-}
-# when testing,
-# initialize for any composition to avoid getting out of bounds too many times
-test=False
-if test:
-    initialPoints_foamConductivity_auto['x[CO2]']=[1,0,0,0]
-    initialPoints_foamConductivity_auto['x[CyP]']=[0,1,0,0]
-    initialPoints_foamConductivity_auto['x[O2]']=[0,0,1,0]
-    initialPoints_foamConductivity_auto['x[N2]']=[0,0,0,1]
-# When initializing for Foam expansion
-# use dummy data to initialize to avoid getting out of bounds
-foaming_ini={
-    'eps': [0.9,0.0,0.96,0.99,0.7,0.5],
-    'dcell': [200e-6,0.0,300e-6,100e-6,1e-2,200e-6],
-    'fstrut': [0.0,1.0,0.7,0.6,0.0,0.9],
-    'T': [280,549,300,350,330,300],
-    'x[CO2]': [0,0,1,1,1,0],
-    'x[CyP]': [1,1,0,0,0,1],
-    'x[O2]': [0,0,0,0,0,0],
-    'x[N2]': [0,0,0,0,0,0],
-}
-# we are initializing for Foam expansion if unifiedInput.json exists
-try:
-    with open('inputs/unifiedInput.json','r') as f:
-        inputs=json.load(f)
-    initialPoints_foamConductivity_auto = foaming_ini
-except IOError:
-    try:
-        with open('../inputs/unifiedInput.json','r') as f:
-            inputs=json.load(f)
-        initialPoints_foamConductivity_auto = foaming_ini
-    except:
-        pass
 ## Surrogate model for foam conductivity
 #
 # Backward mapping model is used.
@@ -253,7 +191,7 @@ m_foamConductivity = BackwardMappingModel(
         polymerConductivity.m_polymer_thermal_conductivity\
     ],
     initialisationStrategy=Strategy.InitialPoints(
-        initialPoints=initialPoints_foamConductivity_auto,
+        initialPoints=foaming_ini,
     ),
     outOfBoundsStrategy=Strategy.ExtendSpaceStochasticSampling(
         nNewPoints=4
@@ -273,6 +211,6 @@ m_foamConductivity = BackwardMappingModel(
 # For the case, when only foam conductivity and no aging is needed.
 m_simulation = Strategy.BackwardMappingScriptTask(
     script=os.path.dirname(os.path.abspath(__file__))+'/src/kfoam' +
-        ' && cp foamConductivity.out ../results/' +
-        ' && cp hahtf.out ../results/'
+        ' && cp foamConductivity.out ../results/foamConductivity' +
+        ' && cp hahtf.out ../results/foamConductivity'
 )

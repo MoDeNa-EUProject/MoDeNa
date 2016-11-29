@@ -8,7 +8,7 @@ module physicalProperties
     use fmodena
     implicit none
     private
-    public polymerConductivity,gasConductivity
+    public polymerConductivity,gasConductivity,strutContent
 contains
 !********************************BEGINNING*************************************
 !> calculation of thermal conductivity of polymer
@@ -95,5 +95,41 @@ subroutine gasConductivity(kgas,temp,xCO2,xAir,xCyP)
     call modena_outputs_destroy (kgasOutputs)
     call modena_model_destroy (kgasModena)
 end subroutine gasConductivity
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> calculation of strut content
+subroutine strutContent(strut_content,foam_density)
+    real(dp), intent(out) :: strut_content
+    real(dp), intent(in) :: foam_density
+    !modena variables
+    integer(c_size_t) :: fspos
+    integer(c_size_t) :: rhopos
+
+    integer(c_int) :: ret
+
+    type(c_ptr) :: fsModena = c_null_ptr
+    type(c_ptr) :: fsInputs = c_null_ptr
+    type(c_ptr) :: fsOutputs = c_null_ptr
+    fsModena = modena_model_new (c_char_"strutContent"//c_null_char)
+    if (modena_error_occurred()) then
+        call exit(modena_error())
+    endif
+    fsInputs = modena_inputs_new (fsModena)
+    fsOutputs = modena_outputs_new (fsModena)
+    rhopos = modena_model_inputs_argPos(&
+        fsModena, c_char_"rho"//c_null_char)
+    call modena_model_argPos_check(fsModena)
+    call modena_inputs_set(fsInputs, rhopos, foam_density)
+    ret = modena_model_call (fsModena, fsInputs, fsOutputs)
+    if(ret /= 0) then
+        call exit(ret)
+    endif
+    strut_content=modena_outputs_get(fsOutputs, 0_c_size_t)
+    call modena_inputs_destroy (fsInputs)
+    call modena_outputs_destroy (fsOutputs)
+    call modena_model_destroy (fsModena)
+end subroutine strutContent
 !***********************************END****************************************
 end module physicalProperties

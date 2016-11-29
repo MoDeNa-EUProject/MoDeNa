@@ -42,5 +42,7 @@ import os
 from modena.Strategy import BackwardMappingScriptTask
 
 m = BackwardMappingScriptTask(
-    script = os.path.dirname(os.path.abspath(__file__))+'/src/degas'
+    script = os.path.dirname(os.path.abspath(__file__))+'/src/degas' +
+        ' && cp *.dat ../results/foamAging/' +
+        ' && cp *.out ../results/foamAging/'
 )

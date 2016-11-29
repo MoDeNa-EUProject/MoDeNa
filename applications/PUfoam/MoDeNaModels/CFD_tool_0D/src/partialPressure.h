@@ -6,7 +6,7 @@
     @param  const double t - time
     @param  double *dpdt - time derivative of pressure
     @param  double *pOld - pressure values at the previous time step
-    @param  const double p_1 - partial pressure of blowing agent   
+    @param  const double p_1 - partial pressure of blowing agent
     @param  const double p_2 - partial pressure of CO2
     @param  const double R - bubble radius
     @return void
@@ -16,7 +16,7 @@
     @return partial pressure of the physical blowing agent
     @fn double partialPressureCO2(const state_type &y)
     @brief partial pressure of CO2
-    @param const state_type &y - vector of all the variables 
+    @param const state_type &y - vector of all the variables
     @return partial pressure of CO2
 */
 void 	ddtpartialPressure(const state_type &y , const double t , const double dt , double *dpdt , double *pOld, const double p_1, const double p_2, const double R);

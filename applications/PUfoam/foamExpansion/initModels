@@ -45,9 +45,14 @@ from pymongo import MongoClient
 
 # import polymerViscosity # imported by Rheology_Arrhenius
 # import SurfaceTension # imported by Rheology_Arrhenius
-# import PolymerDensity_units
-# import Kinetics
-import Rheology_Arrhenius
+import PolymerDensity
+import Solubility
+import PolymerDensity_units
+import Kinetics
+import StrutContent
+import foamConductivity
+import diffusivity
+# import Rheology_Arrhenius
 
 # set up the LaunchPad and reset it
 launchpad = LaunchPad(**MODENA_PARSED_URI)

@@ -590,7 +590,7 @@ int main(int argc, char **argv)
     // moments initialization
     int nOfmom 		= 4;
     double momz[nOfmom];
-    double pBA, pCO2, bubble_radius;
+    double pBA, pCO2, bubble_radius, rho_foam;
     mom_init(momz, init_size, nOfmom, sig, NN);
 
     if(momentsPositivite(momz,nOfmom))
@@ -669,6 +669,20 @@ int main(int argc, char **argv)
         bubble_radius = bubbleRadius(y[7], y[8]);
         ddtpartialPressure(y, t, dt, dpdt, pOld, pBA, pCO2, bubble_radius);
     }
+	ofstream file2;
+	rho_foam=rhoPoly*(1.0 - (y[8]/(1.0+y[8])));
+    file2.open("after_foaming.txt");
+    file2.setf(ios::scientific | ios::showpoint);
+	file2 << setw(24) << "#foam_density"
+		<< setw(24) << "mean_cell_diameter"
+		<< setw(24) << "pressure1"
+		<< setw(24) << "pressure2"
+		<< endl;
+	file2 << setw(24) << rho_foam
+		<< setw(24) << 2*bubble_radius
+		<< setw(24) << pBA
+		<< setw(24) << pCO2
+		<< endl;
 }
 
 /*

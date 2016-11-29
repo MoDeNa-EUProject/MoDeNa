@@ -14,8 +14,8 @@ rm -fv log
 echo "MODENAFoam is running..."
 ${FOAM_USER_APPBIN}/MODENAFoam >& log
 echo "Post-processing..."
-postProcess -func 'probes(TS, XOH, XW, M0, M1, rho_foam)'
-cd postProcessing/probes\(TS,XOH,XW,M0,M1,rho_foam\)/0/
+postProcess -func 'probes(TS, XOH, XW, M0, M1, M2, rho_foam, wBA_g, wCO2_g)'
+cd postProcessing/probes\(TS,XOH,XW,M0,M1,M2,rho_foam,wBA_g,wCO2_g\)/0/
 for file in $(ls *);
         do
                 sed '/^#/d' $file > $file.txt;
@@ -24,5 +24,6 @@ ls > list
 egrep -v '*txt' list > list2
 mv list2 list
 rm -rf $(<list)
+../../../processResults.py
 cp *.txt ../../../../results/CFD3D/
 echo "Done."

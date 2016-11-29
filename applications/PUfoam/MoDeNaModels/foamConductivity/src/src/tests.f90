@@ -13,13 +13,17 @@ module tests
     implicit none
     private
     public loadParameters,eqcond,eqcond_por,eqcond_dcell,eqcond_strut
-    character(len=99) :: fileplacein_par='./'   !modena
+    character(len=99) :: fileplacein_par='./inputs/'   !modena
     character(len=99) :: fileplacein_ref='../spectra/'  !modena
     character(len=99) :: fileplaceout='./'  !modena
     character(len=99) :: inputs='foamConductivity.json',spectra='spectra.out'
     character(len=99) :: nspec='spec_n.in'
     character(len=99) :: kspec='spec_k.in'
     character(len=99) :: gasspec='gasspec.in'
+    character(len=99) :: after_foaming,after_foaming0='after_foaming.txt'
+    character(len=99) :: bg_res='../../foamExpansion/results/bubbleGrowth/'
+    character(len=99) :: qmom0D_res='../../foamExpansion/results/CFD0D/'
+    character(len=99) :: qmom3D_res='../../foamExpansion/results/CFD3D/'
 contains
 !********************************BEGINNING*************************************
 !> calculate equivalent conductivity for one specific foam
@@ -40,20 +44,20 @@ subroutine eqcond(regions)
             krad=2e-3_dp
             call effcond
             open(newunit(fi),file='foamConductivity.out')
-            write(fi,*) effc
+            write(fi,*) eqc_ross
             close(fi)
-            stop
+            return
         endif
         call foam_morpholgy
         if (testMode) then
             write(*,*) 'TESTING: radiative properties not calculated.'
-            write(*,*) 'Ask Pavel if you want more reasonable results.'
+            write(*,*) 'Disable test mode if you want more reasonable results.'
             krad=2e-3_dp
             call effcond
             open(newunit(fi),file='foamConductivity.out')
-            write(fi,*) effc
+            write(fi,*) eqc_ross
             close(fi)
-            stop
+            return
         endif
         call effrad(spectra)
         call effcond
@@ -153,7 +157,8 @@ subroutine loadParameters
     type(fson_value), pointer :: json_data
     integer :: fi,ios,i,j
     logical :: file_exists
-    real(dp) :: xCO2,xAir,xCyP
+    real(dp) :: xCO2,xAir,xCyP,matr(7)
+    character(len=80) :: strval !name of the file with morphology
     inputs=TRIM(ADJUSTL(fileplacein_par))//TRIM(ADJUSTL(inputs))
     inquire(file=inputs,exist=file_exists) !first try current folder
     if (.not. file_exists) then
@@ -167,16 +172,139 @@ subroutine loadParameters
     call fson_get(json_data, "lowerBoundary.temperature", temp2)
     call fson_get(json_data, "upperBoundary.emittance", emi1)
     call fson_get(json_data, "lowerBoundary.emittance", emi2)
-    call fson_get(json_data, "gasComposition.CO2", xCO2)
-    call fson_get(json_data, "gasComposition.Air", xAir)
-    call fson_get(json_data, "gasComposition.Cyclopentane", xCyP)
     call fson_get(json_data, "gasDensity", rhog)
     call fson_get(json_data, "solidDensity", rhos)
-    call fson_get(json_data, "porosity", por)
-    call fson_get(json_data, "cellSize", dcell)
-    call fson_get(json_data, "morphologyInput", morph_input)
-    call fson_get(json_data, "wallThickness", dwall)
-    call fson_get(json_data, "strutContent", fs)
+    call fson_get(json_data, "sourceOfProperty.porosity", strval)
+    if (strval=="BubbleGrowth") then
+        after_foaming=TRIM(ADJUSTL(bg_res))//TRIM(ADJUSTL(after_foaming0))
+        open(unit=newunit(fi),file=after_foaming)
+        read(fi,*)
+        read(fi,*) matr(1:4)
+        rhof=matr(1)
+        por=1-rhof/rhos
+        close(fi)
+    elseif (strval=="Qmom0D") then
+        after_foaming=TRIM(ADJUSTL(qmom0D_res))//TRIM(ADJUSTL(after_foaming0))
+        open(unit=newunit(fi),file=after_foaming)
+        read(fi,*)
+        read(fi,*) matr(1:4)
+        rhof=matr(1)
+        por=1-rhof/rhos
+        close(fi)
+    elseif (strval=="Qmom3D") then
+        after_foaming=TRIM(ADJUSTL(qmom3D_res))//TRIM(ADJUSTL(after_foaming0))
+        open(unit=newunit(fi),file=after_foaming)
+        read(fi,*)
+        read(fi,*) matr(1:4)
+        rhof=matr(1)
+        por=1-rhof/rhos
+        close(fi)
+    elseif (strval=="DirectInput") then
+        call fson_get(json_data, "porosity", por)
+    else
+        write(*,*) 'unknown source for porosity'
+        stop
+    endif
+    rhof=(1-por)*rhos
+    call fson_get(json_data, "sourceOfProperty.cellSize", strval)
+    if (strval=="BubbleGrowth") then
+        after_foaming=TRIM(ADJUSTL(bg_res))//TRIM(ADJUSTL(after_foaming0))
+        open(unit=newunit(fi),file=after_foaming)
+        read(fi,*)
+        read(fi,*) matr(1:4)
+        dcell=matr(2)
+        close(fi)
+    elseif (strval=="Qmom0D") then
+        after_foaming=TRIM(ADJUSTL(qmom0D_res))//TRIM(ADJUSTL(after_foaming0))
+        open(unit=newunit(fi),file=after_foaming)
+        read(fi,*)
+        read(fi,*) matr(1:4)
+        dcell=matr(2)
+        close(fi)
+    elseif (strval=="Qmom3D") then
+        after_foaming=TRIM(ADJUSTL(qmom3D_res))//TRIM(ADJUSTL(after_foaming0))
+        open(unit=newunit(fi),file=after_foaming)
+        read(fi,*)
+        read(fi,*) matr(1:4)
+        dcell=matr(2)
+        close(fi)
+    elseif (strval=="DirectInput") then
+        call fson_get(json_data, "cellSize", dcell)
+    else
+        write(*,*) 'unknown source for cell size'
+        stop
+    endif
+    call fson_get(json_data, "sourceOfProperty.gasComposition", strval)
+    if (strval=="BubbleGrowth") then
+        after_foaming=TRIM(ADJUSTL(bg_res))//TRIM(ADJUSTL(after_foaming0))
+        open(unit=newunit(fi),file=after_foaming)
+        read(fi,*)
+        read(fi,*) matr(1:4)
+        xAir=0
+        xCyP=matr(3)
+        xCO2=matr(4)
+        xCyP=xCyP/(xCyP+xCO2)
+        xCO2=1-xCyP
+        close(fi)
+    elseif (strval=="Qmom0D") then
+        after_foaming=TRIM(ADJUSTL(qmom0D_res))//TRIM(ADJUSTL(after_foaming0))
+        open(unit=newunit(fi),file=after_foaming)
+        read(fi,*)
+        read(fi,*) matr(1:4)
+        xAir=0
+        xCyP=matr(3)
+        xCO2=matr(4)
+        xCyP=xCyP/(xCyP+xCO2)
+        xCO2=1-xCyP
+        close(fi)
+    elseif (strval=="Qmom3D") then
+        after_foaming=TRIM(ADJUSTL(qmom3D_res))//TRIM(ADJUSTL(after_foaming0))
+        open(unit=newunit(fi),file=after_foaming)
+        read(fi,*)
+        read(fi,*) matr(1:4)
+        xAir=0
+        xCyP=matr(3)
+        xCO2=matr(4)
+        xCyP=xCyP/(xCyP+xCO2)
+        xCO2=1-xCyP
+        close(fi)
+    elseif (strval=="DirectInput") then
+        call fson_get(json_data, "gasComposition.CO2", xCO2)
+        call fson_get(json_data, "gasComposition.Air", xAir)
+        call fson_get(json_data, "gasComposition.Cyclopentane", xCyP)
+    else
+        write(*,*) 'unknown source for gas composition'
+        stop
+    endif
+    call fson_get(json_data, "sourceOfProperty.strutContent", strval)
+    if (strval=="StrutContent") then
+        call strutContent(fs,rhof)
+    elseif (strval=="DirectInput") then
+        call fson_get(json_data, "strutContent", fs)
+    else
+        write(*,*) 'unknown source for strut content'
+        stop
+    endif
+    call fson_get(json_data, "sourceOfProperty.wallThickness", strval)
+    if (strval=="DirectInput") then
+        call fson_get(json_data, "wallThickness", dwall)
+    else
+        write(*,*) 'unknown source for wall thickness'
+        stop
+    endif
+    call fson_get(json_data, "morphologyInput", strval)
+    if (strval=="wallThickness") then
+        morph_input=1
+    elseif (strval=="strutContent") then
+        morph_input=2
+    elseif (strval=="strutSize") then
+        morph_input=3
+    elseif (strval=="strutContent2") then
+        morph_input=4
+    else
+        write(*,*) 'unknown choice of morphologyInput'
+        stop
+    endif
     call fson_get(json_data, "strutSize", dstrut)
     call fson_get(json_data, "foamThickness", dfoam)
     call fson_get(json_data, "spatialDiscretization", nz)

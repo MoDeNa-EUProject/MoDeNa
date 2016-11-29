@@ -14,6 +14,8 @@ module globals
         outputs_c,& ! output file with concentration profiles
         outputs_kin,& ! output file with variables of detailed kinetic model
         outputs_drain,& ! output file for the wall drainage
+        outputs_af,& ! output file for with final foam properties for foam
+                     ! conductivity and foam aging
         geometry ! geometry 3D=spherical, 2D=cylindrical
     logical :: &
         inertial_term,& !include inertial term in equations (t/f)
