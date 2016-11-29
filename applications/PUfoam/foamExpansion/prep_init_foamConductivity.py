@@ -43,6 +43,23 @@ def setIP(a0):
     else:
         a[1]=a[1]*opar
     return a
+def setIP_fractions(a0):
+    "creates a list with small perturbation around the input value"
+    a=[]
+    for i in xrange(4):
+        a.append(a0)
+    upar=1-1e-4
+    opar=1+1e-4
+    if a0>1:
+        a0=1.0
+    a[0]=a[0]*upar
+    if a0==0:
+        a[1]=1e-4
+    else:
+        a[1]=a[1]*opar
+        if a[1]>1:
+            a[1]=1.0
+    return a
 def foamAging():
     "create initial points from foamAging.json"
     if os.getcwd().split(os.path.sep)[-1] != 'foamAging':
@@ -116,10 +133,10 @@ def foamAging():
         'dcell': setIP(dcell0),
         'fstrut': setIP(fstrut0),
         'T': setIP(T0),
-        'x[CO2]': setIP(xCO20),
-        'x[CyP]': setIP(xCyP0),
-        'x[O2]': setIP(xAir0*0.21),
-        'x[N2]': setIP(xAir0*0.79),
+        'x[CO2]': setIP_fractions(xCO20),
+        'x[CyP]': setIP_fractions(xCyP0),
+        'x[O2]': setIP_fractions(xAir0*0.21),
+        'x[N2]': setIP_fractions(xAir0*0.79),
     }
     with open("./inputs/init_foamConductivity.json","w") as fl:
         json.dump(ini,fl,indent=4,sort_keys=True)
