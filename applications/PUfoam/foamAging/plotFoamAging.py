@@ -9,9 +9,10 @@ from __future__ import division
 from numpy import loadtxt,arange
 import matplotlib.pyplot as plt
 import json
+import os
 def main():
-    directory_in='./'
-    directory_out='results/'
+    directory_in='./inputs/'
+    directory_out='./results/foamAging/'
     infile=open(directory_in+'foamAging.json','r')
     decoded=json.load(infile)
     l=decoded['numerics']['numberOfOutputs']
@@ -24,7 +25,7 @@ def main():
     for i in arange(0,l+1,int((l-1)/6)):
         j='{0:04d}'.format(i)
         # infile=open(directory_out+'H2perm_'+j+'.dat','r')
-        infile=open(directory_out+'ppar_'+j+'.dat','r')
+        infile=open(os.path.join(directory_out,'ppar_'+j+'.dat'),'r')
         time,x,cair,ccd,ccyp=loadtxt(infile,skiprows=0,unpack=True)
         plt.figure(1)
         line1,=plt.plot(x,ccd,lw=lw,label='t={0:.1f} days'.format(time[0]))

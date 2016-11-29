@@ -101,9 +101,9 @@ subroutine integrate
         sol(ngas*(k-1)+1)=sheetSair
         sol(ngas*(k-1)+2)=sheetSCO2
         sol(ngas*(k-1)+3)=sheetScyp
-        ystate(ngas*(k-1)+1)=pICair*pressure/Rg/temp
-        ystate(ngas*(k-1)+2)=pICCO2*pressure/Rg/temp
-        ystate(ngas*(k-1)+3)=pICcyp*pressure/Rg/temp
+        ystate(ngas*(k-1)+1)=xAir*pressure/Rg/temp
+        ystate(ngas*(k-1)+2)=xCO2*pressure/Rg/temp
+        ystate(ngas*(k-1)+3)=xCyP*pressure/Rg/temp
         k=k+1
     enddo
     do i = 1, ncell
@@ -116,9 +116,9 @@ subroutine integrate
             sol(ngas*(k-1)+1)=1
             sol(ngas*(k-1)+2)=1
             sol(ngas*(k-1)+3)=1
-            ystate(ngas*(k-1)+1)=pICair*pressure/Rg/temp
-            ystate(ngas*(k-1)+2)=pICCO2*pressure/Rg/temp
-            ystate(ngas*(k-1)+3)=pICcyp*pressure/Rg/temp
+            ystate(ngas*(k-1)+1)=xAir*pressure/Rg/temp
+            ystate(ngas*(k-1)+2)=xCO2*pressure/Rg/temp
+            ystate(ngas*(k-1)+3)=xCyP*pressure/Rg/temp
             k=k+1
         enddo
         do j=1,divwall
@@ -130,9 +130,9 @@ subroutine integrate
             sol(ngas*(k-1)+1)=Sair
             sol(ngas*(k-1)+2)=SCO2
             sol(ngas*(k-1)+3)=Scyp
-            ystate(ngas*(k-1)+1)=pICair*pressure/Rg/temp
-            ystate(ngas*(k-1)+2)=pICCO2*pressure/Rg/temp
-            ystate(ngas*(k-1)+3)=pICcyp*pressure/Rg/temp
+            ystate(ngas*(k-1)+1)=xAir*pressure/Rg/temp
+            ystate(ngas*(k-1)+2)=xCO2*pressure/Rg/temp
+            ystate(ngas*(k-1)+3)=xCyP*pressure/Rg/temp
             k=k+1
         enddo
     end do
@@ -173,7 +173,7 @@ subroutine integrate
 ! ----------------------------------
 ! Integration loop
 ! ----------------------------------
-    open (newunit(fi),file='../results/keq_time.out')
+    open (newunit(fi),file='keq_time.out')
     write(fi,'(10A23)') '#time', 'eq.conductivity'
     call output(0, 0.0_dp, ystate, neq)
     call equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp_cond)

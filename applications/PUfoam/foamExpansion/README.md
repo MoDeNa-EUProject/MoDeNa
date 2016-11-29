@@ -49,9 +49,9 @@ cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local ..
 sudo make
 sudo make install
 ```
-### 3. Install boost, lapack and blas library
+### 3. Install boost, lapack, blas and veusz libraries
 ```
-sudo apt-get install libboost-dev liblapack-dev libblas-dev
+sudo apt-get install libboost-dev liblapack-dev libblas-dev veusz
 ```
 ### 4. Install PETSc globally:
 ```
@@ -124,28 +124,23 @@ export LD_LIBRARY_PATH=${LD_LIBRARY_PATH:-}:${HOME}/lib/python2.7/site-packages:
 ```
 Please note that the output of build should not contain any error messages.
 Otherwise, the tool cannot work properly.
-### 11. Intall VEUSZ plotting program (Optional)
-Some results can be easily visualized using [VEUSZ](http://home.gna.org/veusz/)
-program. It can be installed in Ubuntu using:
-```
-sudo apt-get install veusz
-```
 
 # Run
 In order to execute the program, you need to first provide the input variables
 for all the modelling tools. In the `examples` directory several cases have
 been provided. One can copy the `inputs` directory into the `foamExpansion` and
 modify it for the targeted recipe. The `unifiedInput.json` provides the input
-data for the zero dimensional simulation, `wallDrainage_inputs.json` provides the inputs for wall drainage simulation and the rest of input directory
+data for the bubble growth model and zero dimensional simulation, `wallDrainage_inputs.json` provides the inputs for the wall drainage simulation, `init_foamConductivity.json` provides initial points for the initialization of foamConductivity and the rest of input directory
 creates the test case for OpenFOAM simulation. The details of the input
 variables have been elaborated in `INPUTS.md`. After preparing the inputs the following
 steps should be executed:
 
 1. Initialize surrogate nano-scale models:
 ```
-./initModels1
-./initModels2
+./initModels
 ```
+
+    *Note:* foamConductivity takes initial points from `init_foamConductivity.json`. This file can be prepared using `prep_init_foamConductivity.py`.
 2.  Execute meso-scopic bubble growth simulation:
 ```
 ./workflow_bubbleGrowth
@@ -193,8 +188,8 @@ or
 
 # Results
 Results of the last simulation are stored in the corresponding sub-directory of
-the `results` directory. As mentioned before, we use `VEUSZ` to visualize the
-results of simulations. For example, to look at selected results for a 0D
+the `results` directory. We use VEUSZ to visualize some of the
+results. For example, to look at selected results for a 0D
 simulation, you can open `plotQmom0D.vsz` using VEUSZ. Further, the results of
 the 3D simulation (stored in the launcher directory) can be displayed using a
-third party software such as [paraview.](http://www.paraview.org/) Additional results of wall drainage simulation can be displayed by running `./plotWallDrainage.py`.
+third party software such as [paraview.](http://www.paraview.org/) Additional results can be displayed through python scripts like `plotWallDrainage.py`.

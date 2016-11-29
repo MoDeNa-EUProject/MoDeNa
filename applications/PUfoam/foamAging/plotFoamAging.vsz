@@ -1,8 +1,7 @@
 # Veusz saved document (version 1.23.1)
 # Saved at 2016-03-12T14:46:30.506807
 
-AddImportPath(u'/home/pavel/github/MoDeNa/applications/PUfoam/foamAging')
-ImportFile(u'results/keq_time.out', u'', ignoretext=True, linked=True)
+ImportFile(u'results/foamAging/keq_time.out', u'', ignoretext=True, linked=True)
 Add('page', name='page1', autoadd=False)
 To('page1')
 Set('width', u'12cm')

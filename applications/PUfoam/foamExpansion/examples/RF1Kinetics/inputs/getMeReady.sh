@@ -2,7 +2,7 @@
 
 # delete everything but the good stuff!
 ls > list
-egrep -v 'constant|system|results|0$|getMeReady.sh|workflow.py|log*|README|run.sh|prep.sh|case.foam|unifiedInput.json|wallDrainage_inputs.json' list > list2
+egrep -v 'constant|system|results|0$|getMeReady.sh|workflow.py|log*|README|run.sh|prep.sh|case.foam|unifiedInput.json|wallDrainage_inputs.json|foamConductivity.json|processResults.py' list > list2
 mv list2 list
 rm -rf $(<list)
 
@@ -20,37 +20,37 @@ find ./constant/polyMesh/ ! -name "blockMeshDict*" -type f -exec rm -r '{}' \;
 
 # prepare the 0 directory for run
 cd ./0
-rm -v alpha.gas 
+rm -v alpha.gas
 cp -v alphagas.org alpha.gas
 
-rm -v mZero 
+rm -v mZero
 cp -v mZero.org mZero
-rm -v M0 
+rm -v M0
 cp -v M0.org M0
 
-rm -v mOne 
+rm -v mOne
 cp -v mOne.org mOne
-rm -v M1 
+rm -v M1
 cp -v M1.org M1
 
-rm -v mTwo 
+rm -v mTwo
 cp -v mTwo.org mTwo
-rm -v M2 
+rm -v M2
 cp -v M2.org M2
 
-rm -v mThree 
+rm -v mThree
 cp -v mThree.org mThree
-rm -v M3 
+rm -v M3
 cp -v M3.org M3
 
-rm -v mFour 
+rm -v mFour
 cp -v mFour.org mFour
-rm -v M4 
+rm -v M4
 cp -v M4.org M4
 
-rm -v mFive 
+rm -v mFive
 cp -v mFive.org mFive
-rm -v M5 
+rm -v M5
 cp -v M5.org M5
 
 rm -v wBA_l
@@ -65,7 +65,7 @@ cp -v wCO2_g.org wCO2_g
 rm -v wBA_g
 cp -v wBA_g.org wBA_g
 
-rm -v rho_gas 
+rm -v rho_gas
 cp -v rho_gas.org rho_gas
 rm -v rho_foam
 cp -v rho_foam.org rho_foam

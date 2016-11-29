@@ -7,6 +7,13 @@
         "cellDiscretization": 1,
         "sheetDiscretization": 20
     },
+    "sourceOfProperty": {
+        "foamDensity": "DirectInput",
+        "cellSize": "DirectInput",
+        "gasComposition": "DirectInput",
+        "strutContent": "DirectInput",
+        "wallThickness": "DirectInput"
+    },
     "foamCondition": {
         "foamHalfThickness": 1.5e-2,
         "inProtectiveSheet": false,
