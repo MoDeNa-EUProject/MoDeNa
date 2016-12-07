@@ -1,0 +1,59 @@
+This is BibTeX, Version 0.99d (TeX Live 2015/Debian)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: elsarticle-template.aux
+The style file: elsarticle-num.bst
+Database file #1: mybibfile.bib
+Repeated entry---line 75 of file mybibfile.bib
+ : @article{Avalle2001455
+ :                       ,
+I'm skipping whatever remains of this entry
+You're missing a field name---line 1973 of file mybibfile.bib
+ :     year     = {2014}, 
+ :                        %other attributes omitted
+I'm skipping whatever remains of this entry
+Warning--empty chapter and pages in Berlin1980
+Warning--empty pages in Berlin1980
+Warning--can't use both author and editor fields in Rhodes1994
+Warning--empty chapter and pages in Rhodes1994
+You've used 33 entries,
+            2937 wiz_defined-function locations,
+            963 strings with 13822 characters,
+and the built_in function-call counts, 11438 in all, are:
+= -- 1157
+> -- 292
+< -- 2
++ -- 119
+- -- 86
+* -- 1036
+:= -- 1547
+add.period$ -- 59
+call.type$ -- 33
+change.case$ -- 29
+chr.to.int$ -- 0
+cite$ -- 37
+duplicate$ -- 327
+empty$ -- 1281
+format.name$ -- 109
+if$ -- 2948
+int.to.chr$ -- 0
+int.to.str$ -- 33
+missing$ -- 35
+newline$ -- 158
+num.names$ -- 35
+pop$ -- 200
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 598
+stack$ -- 0
+substring$ -- 734
+swap$ -- 128
+text.length$ -- 2
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 4
+while$ -- 66
+width$ -- 35
+write$ -- 347
+(There were 2 error messages)

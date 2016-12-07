@@ -1,0 +1,21 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [1][-]{section.2}{Materials}{}% 2
+\BOOKMARK [1][-]{section.3}{Multiscale characterization of PU foam}{}% 3
+\BOOKMARK [2][-]{subsection.3.1}{Microstructural characterization}{section.3}% 4
+\BOOKMARK [3][-]{subsubsection.3.1.1}{Scanning electron microscopy}{subsection.3.1}% 5
+\BOOKMARK [3][-]{subsubsection.3.1.2}{X-ray microtomography}{subsection.3.1}% 6
+\BOOKMARK [2][-]{subsection.3.2}{Macromechanical characterization}{section.3}% 7
+\BOOKMARK [2][-]{subsection.3.3}{Micromechanical characterization}{section.3}% 8
+\BOOKMARK [1][-]{section.4}{Multiscale modelling strategy}{}% 9
+\BOOKMARK [2][-]{subsection.4.1}{Random packing of spheres}{section.4}% 10
+\BOOKMARK [2][-]{subsection.4.2}{Laguerre tessellation}{section.4}% 11
+\BOOKMARK [2][-]{subsection.4.3}{Finite element model}{section.4}% 12
+\BOOKMARK [1][-]{section.5}{Experimental results}{}% 13
+\BOOKMARK [2][-]{subsection.5.1}{Microstructure of PU foam}{section.5}% 14
+\BOOKMARK [2][-]{subsection.5.2}{Elastic properties of the solid PU}{section.5}% 15
+\BOOKMARK [2][-]{subsection.5.3}{Compression result of PU foam}{section.5}% 16
+\BOOKMARK [1][-]{section.6}{Modelling results}{}% 17
+\BOOKMARK [2][-]{subsection.6.1}{RVE and mesh size sensitivity}{section.6}% 18
+\BOOKMARK [2][-]{subsection.6.2}{Experimental validation}{section.6}% 19
+\BOOKMARK [2][-]{subsection.6.3}{Deformation mechanism}{section.6}% 20
+\BOOKMARK [1][-]{section.7}{Conclusions}{}% 21
