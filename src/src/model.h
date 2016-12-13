@@ -124,6 +124,10 @@ typedef struct modena_model_t
 
     modena_substitute_model_t *substituteModels; /**< Substitute models `modena_substitute_model_t`*/
 
+    const char** inputs_names;                /**< Surrogate model inputs names */
+    const char** outputs_names;               /**< Surrogate model outputs names */
+    const char** parameters_names;            /**< Surrogate model parameter names */
+
 } modena_model_t;
 
 /**
@@ -293,12 +297,29 @@ size_t modena_model_outputs_argPos
     const char *name
 );
 
+const char** modena_model_inputs_names
+(
+    const modena_model_t *self
+);
+
+const char** modena_model_outputs_names
+(
+    const modena_model_t *self
+);
+
+const char** modena_model_parameters_names
+(
+    const modena_model_t *self
+);
+
 /**
  *  @brief Function returning the size of the input vector.
  *  @param modena_model_t pointer to a surrogate model created by modena_model_new.
  *  @return size_t integer length of the input array.
 */
 size_t modena_model_inputs_size(const modena_model_t *self);
+
+size_t modena_model_parameters_size(const modena_model_t *self);
 
 /**
  *  @brief Function returning the size of the output vector.
