@@ -48,9 +48,9 @@ end subroutine polymerConductivity
 
 !********************************BEGINNING*************************************
 !> calculation of thermal conductivity of gas
-subroutine gasConductivity(kgas,temp,xCO2,xAir,xCyP)
+subroutine gasConductivity(kgas,temp,xO2,xN2,xCO2,xCyP)
     real(dp), intent(out) :: kgas
-    real(dp), intent(in) :: temp,xCO2,xAir,xCyP
+    real(dp), intent(in) :: temp,xO2,xN2,xCO2,xCyP
     !modena variables
     integer(c_size_t) :: kgasTemppos
     integer(c_size_t) :: kgasXCO2pos
@@ -84,8 +84,8 @@ subroutine gasConductivity(kgas,temp,xCO2,xAir,xCyP)
     call modena_inputs_set(kgasInputs, kgasTemppos, temp)
     call modena_inputs_set(kgasInputs, kgasXCO2pos, xCO2)
     call modena_inputs_set(kgasInputs, kgasXCyPpos, xCyP)
-    call modena_inputs_set(kgasInputs, kgasXO2pos, xAir*0.21_dp)
-    call modena_inputs_set(kgasInputs, kgasXN2pos, xAir*0.79_dp)
+    call modena_inputs_set(kgasInputs, kgasXO2pos, xO2)
+    call modena_inputs_set(kgasInputs, kgasXN2pos, xN2)
     ret = modena_model_call (kgasModena, kgasInputs, kgasOutputs)
     if(ret /= 0) then
         call exit(ret)

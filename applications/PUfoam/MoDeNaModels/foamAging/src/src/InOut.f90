@@ -42,7 +42,8 @@ subroutine input()
 	call fson_get(json_data, "foamCondition.agingTemperature", temp)
 	call fson_get(json_data, "foamCondition.conductivityTemperature", temp_cond)
 	call fson_get(json_data, "foamCondition.initialPressure", pressure)
-	call fson_get(json_data, "foamCondition.boundaryPressure.Air", pBCair)
+	call fson_get(json_data, "foamCondition.boundaryPressure.O2", pBCO2)
+	call fson_get(json_data, "foamCondition.boundaryPressure.N2", pBCN2)
 	call fson_get(json_data, "foamCondition.boundaryPressure.CO2", pBCCO2)
 	call fson_get(&
 		json_data, "foamCondition.boundaryPressure.Cyclopentane", pBCcyp)
@@ -57,6 +58,8 @@ subroutine input()
         xCO2=matr(4)
         xCyP=xCyP/(xCyP+xCO2)
         xCO2=1-xCyP
+		xO2=0.21_dp*xAir
+		xN2=0.79_dp*xAir
         close(fi)
     elseif (strval=="Qmom0D") then
         after_foaming=TRIM(ADJUSTL(qmom0D_res))//TRIM(ADJUSTL(after_foaming0))
@@ -68,6 +71,8 @@ subroutine input()
         xCO2=matr(4)
         xCyP=xCyP/(xCyP+xCO2)
         xCO2=1-xCyP
+		xO2=0.21_dp*xAir
+		xN2=0.79_dp*xAir
         close(fi)
     elseif (strval=="Qmom3D") then
         after_foaming=TRIM(ADJUSTL(qmom3D_res))//TRIM(ADJUSTL(after_foaming0))
@@ -79,9 +84,12 @@ subroutine input()
         xCO2=matr(4)
         xCyP=xCyP/(xCyP+xCO2)
         xCO2=1-xCyP
+		xO2=0.21_dp*xAir
+		xN2=0.79_dp*xAir
         close(fi)
     elseif (strval=="DirectInput") then
-		call fson_get(json_data, "foamCondition.initialComposition.Air", xAir)
+		call fson_get(json_data, "foamCondition.initialComposition.O2", xO2)
+		call fson_get(json_data, "foamCondition.initialComposition.N2", xN2)
 		call fson_get(json_data, "foamCondition.initialComposition.CO2", xCO2)
 		call fson_get(&
 			json_data, "foamCondition.initialComposition.Cyclopentane", xCyP)
@@ -163,7 +171,7 @@ subroutine input()
     endif
 	call fson_get(json_data, "physicalProperties.polymerDensity", rhop)
 	call fson_get(json_data, &
-		"physicalProperties.foam.solubilityModel.Air", strval)
+		"physicalProperties.foam.solubilityModel.O2", strval)
 	if (strval=="constant") then
 		solModel(1)=0
 	elseif ( strval=="modena" ) then
@@ -172,7 +180,7 @@ subroutine input()
 		print*, "Solubility model must be constant or modena"
 	endif
 	call fson_get(json_data, &
-		"physicalProperties.foam.solubilityModel.CO2", strval)
+		"physicalProperties.foam.solubilityModel.N2", strval)
 	if (strval=="constant") then
 		solModel(2)=0
 	elseif ( strval=="modena" ) then
@@ -181,7 +189,7 @@ subroutine input()
 		print*, "Solubility model must be constant or modena"
 	endif
 	call fson_get(json_data, &
-		"physicalProperties.foam.solubilityModel.Cyclopentane", strval)
+		"physicalProperties.foam.solubilityModel.CO2", strval)
 	if (strval=="constant") then
 		solModel(3)=0
 	elseif ( strval=="modena" ) then
@@ -189,18 +197,30 @@ subroutine input()
 	else
 		print*, "Solubility model must be constant or modena"
 	endif
+	call fson_get(json_data, &
+		"physicalProperties.foam.solubilityModel.Cyclopentane", strval)
+	if (strval=="constant") then
+		solModel(4)=0
+	elseif ( strval=="modena" ) then
+		solModel(4)=1
+	else
+		print*, "Solubility model must be constant or modena"
+	endif
 	if (solModel(1)==0) then
-		call fson_get(json_data, "physicalProperties.foam.solubility.Air", Sair)
+		call fson_get(json_data, "physicalProperties.foam.solubility.O2", SO2)
 	endif
 	if (solModel(2)==0) then
-		call fson_get(json_data, "physicalProperties.foam.solubility.CO2", SCO2)
+		call fson_get(json_data, "physicalProperties.foam.solubility.N2", SN2)
 	endif
 	if (solModel(3)==0) then
+		call fson_get(json_data, "physicalProperties.foam.solubility.CO2", SCO2)
+	endif
+	if (solModel(4)==0) then
 		call fson_get(&
 			json_data, "physicalProperties.foam.solubility.Cyclopentane", Scyp)
 	endif
 	call fson_get(json_data, &
-		"physicalProperties.foam.diffusivityModel.Air", strval)
+		"physicalProperties.foam.diffusivityModel.O2", strval)
 	if (strval=="constant") then
 	    diffModel(1)=0
 	elseif ( strval=="modena" ) then
@@ -209,16 +229,16 @@ subroutine input()
 		print*, "Diffusivity model must be constant or modena"
 	endif
 	call fson_get(json_data, &
-		"physicalProperties.foam.diffusivityModel.CO2",strval)
+		"physicalProperties.foam.diffusivityModel.N2", strval)
 	if (strval=="constant") then
-		diffModel(2)=0
+	    diffModel(2)=0
 	elseif ( strval=="modena" ) then
 		diffModel(2)=1
 	else
 		print*, "Diffusivity model must be constant or modena"
 	endif
 	call fson_get(json_data, &
-		"physicalProperties.foam.diffusivityModel.Cyclopentane", strval)
+		"physicalProperties.foam.diffusivityModel.CO2",strval)
 	if (strval=="constant") then
 		diffModel(3)=0
 	elseif ( strval=="modena" ) then
@@ -226,27 +246,44 @@ subroutine input()
 	else
 		print*, "Diffusivity model must be constant or modena"
 	endif
+	call fson_get(json_data, &
+		"physicalProperties.foam.diffusivityModel.Cyclopentane", strval)
+	if (strval=="constant") then
+		diffModel(4)=0
+	elseif ( strval=="modena" ) then
+		diffModel(4)=1
+	else
+		print*, "Diffusivity model must be constant or modena"
+	endif
 	if (diffModel(1)==0) then
 		call fson_get(json_data, &
-			"physicalProperties.foam.diffusivity.Air", Dair)
+			"physicalProperties.foam.diffusivity.O2", DO2)
 	endif
 	if (diffModel(2)==0) then
 		call fson_get(json_data, &
-			"physicalProperties.foam.diffusivity.CO2", DCO2)
+			"physicalProperties.foam.diffusivity.N2", DN2)
 	endif
 	if (diffModel(3)==0) then
+		call fson_get(json_data, &
+			"physicalProperties.foam.diffusivity.CO2", DCO2)
+	endif
+	if (diffModel(4)==0) then
 		call fson_get(json_data, &
 			"physicalProperties.foam.diffusivity.Cyclopentane", Dcyp)
 	endif
 	if (sheet) then
 		call fson_get(json_data, &
-			"physicalProperties.sheet.solubility.Air", sheetSair)
+			"physicalProperties.sheet.solubility.O2", sheetSO2)
+		call fson_get(json_data, &
+			"physicalProperties.sheet.solubility.N2", sheetSN2)
 		call fson_get(json_data, &
 			"physicalProperties.sheet.solubility.CO2", sheetSCO2)
 		call fson_get(json_data, &
 			"physicalProperties.sheet.solubility.Cyclopentane", sheetScyp)
 		call fson_get(json_data, &
-			"physicalProperties.sheet.diffusivity.Air", sheetDair)
+			"physicalProperties.sheet.diffusivity.O2", sheetDO2)
+		call fson_get(json_data, &
+			"physicalProperties.sheet.diffusivity.N2", sheetDN2)
 		call fson_get(json_data, &
 			"physicalProperties.sheet.diffusivity.CO2", sheetDCO2)
 		call fson_get(json_data, &
@@ -294,7 +331,8 @@ subroutine output(iprof, time, ystate, neq)
 		write (11,100) time/(3600*24),pos,&
 			ystate(ngas*(i-1)+1)*sol(ngas*(i-1)+1),&
 			ystate(ngas*(i-1)+2)*sol(ngas*(i-1)+2),&
-			ystate(ngas*(i-1)+3)*sol(ngas*(i-1)+3)
+			ystate(ngas*(i-1)+3)*sol(ngas*(i-1)+3),&
+			ystate(ngas*(i-1)+4)*sol(ngas*(i-1)+4)
 	enddo
 	do i = 1,nfv
 		if (i==1) then
@@ -304,13 +342,14 @@ subroutine output(iprof, time, ystate, neq)
 		endif
 		if (mor(i)==1) then
 			write (12,101) time/(3600*24),pos,ystate(ngas*(i-1)+1)*Rg*temp,&
-				ystate(ngas*(i-1)+2)*Rg*temp,ystate(ngas*(i-1)+3)*Rg*temp
+				ystate(ngas*(i-1)+2)*Rg*temp,ystate(ngas*(i-1)+3)*Rg*temp,&
+				ystate(ngas*(i-1)+4)*Rg*temp
 		endif
 	enddo
     close(11)
 	close(12)
-100   format (f8.2,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3)
-101   format (f8.2,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3)
+100   format (f8.2,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3)
+101   format (f8.2,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3)
 end subroutine output
 !***********************************END****************************************
 
@@ -335,13 +374,16 @@ subroutine print_header
     print*, 'Physical properties:'
     write(*,'(A30,EN12.3,1x,A)') 'polymer density:',rhop,'kg/m3'
     write(*,'(A30,EN12.3,1x,A)') 'diffusivity in gas:',Dgas,'m2/s'
-    write(*,'(A30,EN12.3,1x,A)') 'air diffusivity:',Dair,'m2/s'
+    write(*,'(A30,EN12.3,1x,A)') 'O2 diffusivity:',DO2,'m2/s'
+	write(*,'(A30,EN12.3,1x,A)') 'N2 diffusivity:',DN2,'m2/s'
     write(*,'(A30,EN12.3,1x,A)') 'CO2 diffusivity:',DCO2,'m2/s'
     write(*,'(A30,EN12.3,1x,A)') 'pentane diffusivity:',Dcyp,'m2/s'
-	write(*,'(A30,EN12.3,1x,A)') 'air solubility:',Sair,'g/g/bar'
+	write(*,'(A30,EN12.3,1x,A)') 'O2 solubility:',SO2,'g/g/bar'
+	write(*,'(A30,EN12.3,1x,A)') 'N2 solubility:',SN2,'g/g/bar'
     write(*,'(A30,EN12.3,1x,A)') 'CO2 solubility:',SCO2,'g/g/bar'
 	write(*,'(A30,EN12.3,1x,A)') 'pentane solubility:',Scyp,'g/g/bar'
-	write(*,'(A30,EN12.3,1x,A)') 'air permeability:',Sair*Dair,'m2/s*g/g/bar'
+	write(*,'(A30,EN12.3,1x,A)') 'O2 permeability:',SO2*DO2,'m2/s*g/g/bar'
+	write(*,'(A30,EN12.3,1x,A)') 'N2 permeability:',SN2*DN2,'m2/s*g/g/bar'
     write(*,'(A30,EN12.3,1x,A)') 'CO2 permeability:',SCO2*DCO2,'m2/s*g/g/bar'
 	write(*,'(A30,EN12.3,1x,A)') 'pentane permeability:',Scyp*Dcyp,&
         'm2/s*g/g/bar'

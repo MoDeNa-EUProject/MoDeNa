@@ -1,7 +1,7 @@
 {
     "numerics": {
         "timeStart": 0,
-        "timeEnd": 1e6,
+        "timeEnd": 5e6,
         "numberOfOutputs": 100,
         "wallDiscretization": 5,
         "cellDiscretization": 1,
@@ -18,16 +18,18 @@
         "foamHalfThickness": 1.5e-2,
         "inProtectiveSheet": false,
         "sheetThickness": 10e-6,
-        "agingTemperature": 343.0,
+        "agingTemperature": 298.0,
         "conductivityTemperature": 283.0,
         "initialPressure": 101325.0,
         "initialComposition": {
-            "Air": 0.0,
+            "O2": 0.0,
+            "N2": 0.0,
             "CO2": 0.99,
             "Cyclopentane": 0.0
         },
         "boundaryPressure": {
-            "Air": 101325.0,
+            "O2": 21278.25,
+            "N2": 80046.75,
             "CO2": 0.0,
             "Cyclopentane": 0.0
         }
@@ -42,34 +44,40 @@
         "polymerDensity": 1.1e3,
         "foam": {
             "solubilityModel": {
-                "Air": "modena",
+                "O2": "modena",
+                "N2": "modena",
                 "CO2": "modena",
                 "Cyclopentane": "modena"
             },
             "solubility": {
-                "Air": 1e-00,
+                "O2": 1e-00,
+                "N2": 1e-00,
                 "CO2": 1e-00,
                 "Cyclopentane": 1e-00
             },
             "diffusivityModel": {
-                "Air": "modena",
+                "O2": "modena",
+                "N2": "modena",
                 "CO2": "modena",
                 "Cyclopentane": "modena"
             },
             "diffusivity": {
-                "Air": 2.86627521885e-13,
+                "O2": 2.86627521885e-13,
+                "N2": 2.86627521885e-13,
                 "CO2": 1.31384643981e-12,
                 "Cyclopentane": 1.14039387641e-13
             }
         },
         "sheet": {
             "solubility": {
-                "Air": 67.472E-06,
+                "O2": 67.472E-06,
+                "N2": 67.472E-06,
                 "CO2": 709.408E-06,
                 "Cyclopentane": 9.649E-03
             },
             "diffusivity": {
-                "Air": 2.86627521885e-13,
+                "O2": 2.86627521885e-13,
+                "N2": 2.86627521885e-13,
                 "CO2": 1.31384643981e-12,
                 "Cyclopentane": 1.14039387641e-13
             }

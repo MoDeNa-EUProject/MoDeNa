@@ -32,8 +32,8 @@ subroutine integrate
     real(dp), allocatable :: yinit(:)
 
     ! model should be general, but physical properties and conductivity are
-    ! hardcoded for ngas=3
-    ngas=3
+    ! hardcoded for ngas=4
+    ngas=4
 ! -----------------------------------
 ! load inputs
 ! -----------------------------------
@@ -45,28 +45,36 @@ subroutine integrate
     call createModels
     eps=1-rhof/rhop
     if (solModel(1)==1) then
-        Sair=airSolubility(temp)
+        SO2=o2Solubility(temp)
     endif
     if (solModel(2)==1) then
-        SCO2=cdSolubility(temp)
+        SN2=n2Solubility(temp)
     endif
     if (solModel(3)==1) then
+        SCO2=cdSolubility(temp)
+    endif
+    if (solModel(4)==1) then
         Scyp=cypSolubility(temp)
     endif
     if (diffModel(1)==1) then
-        Dair=airDiffusivity(temp)
+        DO2=o2Diffusivity(temp)
     endif
     if (diffModel(2)==1) then
-        DCO2=cdDiffusivity(temp)
+        DN2=n2Diffusivity(temp)
     endif
     if (diffModel(3)==1) then
+        DCO2=cdDiffusivity(temp)
+    endif
+    if (diffModel(4)==1) then
         Dcyp=cypDiffusivity(temp)
     endif
     call print_header
-    Sair=Sair*Rg*temp*1100._dp/(1e5*(0.21_dp*Mg(2)+0.79_dp*Mg(3)))
+    SO2=SO2*Rg*temp*1100._dp/(1e5*Mg(3))
+    SN2=SN2*Rg*temp*1100._dp/(1e5*Mg(2))
     SCO2=SCO2*Rg*temp*1100._dp/(1e5*Mg(1))
     Scyp=Scyp*Rg*temp*1100._dp/(1e5*Mg(4))
-    sheetSair=sheetSair*Rg*temp*1100._dp/(1e5*(0.21_dp*Mg(2)+0.79_dp*Mg(3)))
+    sheetSO2=sheetSO2*Rg*temp*1100._dp/(1e5*Mg(3))
+    sheetSN2=sheetSN2*Rg*temp*1100._dp/(1e5*Mg(2))
     sheetSCO2=sheetSCO2*Rg*temp*1100._dp/(1e5*Mg(1))
     sheetScyp=sheetScyp*Rg*temp*1100._dp/(1e5*Mg(4))
 ! -----------------------------------
@@ -76,6 +84,7 @@ subroutine integrate
         ncell=nint((dfoam-dsheet)/(dcell+dwall))
     else
         ncell = nint(dfoam/(dcell+dwall))
+        print*, ncell
         divsheet=0
     endif
     nFV = divsheet+ncell*(divwall+divcell)
@@ -95,15 +104,18 @@ subroutine integrate
     do i=1,divsheet
         dz(k)=dsheet/divsheet
         mor(k)=3
-        dif(ngas*(k-1)+1)=sheetDair
-        dif(ngas*(k-1)+2)=sheetDCO2
-        dif(ngas*(k-1)+3)=sheetDcyp
-        sol(ngas*(k-1)+1)=sheetSair
-        sol(ngas*(k-1)+2)=sheetSCO2
-        sol(ngas*(k-1)+3)=sheetScyp
-        ystate(ngas*(k-1)+1)=xAir*pressure/Rg/temp
-        ystate(ngas*(k-1)+2)=xCO2*pressure/Rg/temp
-        ystate(ngas*(k-1)+3)=xCyP*pressure/Rg/temp
+        dif(ngas*(k-1)+1)=sheetDO2
+        dif(ngas*(k-1)+2)=sheetDN2
+        dif(ngas*(k-1)+3)=sheetDCO2
+        dif(ngas*(k-1)+4)=sheetDcyp
+        sol(ngas*(k-1)+1)=sheetSO2
+        sol(ngas*(k-1)+2)=sheetSN2
+        sol(ngas*(k-1)+3)=sheetSCO2
+        sol(ngas*(k-1)+4)=sheetScyp
+        ystate(ngas*(k-1)+1)=xO2*pressure/Rg/temp
+        ystate(ngas*(k-1)+2)=xN2*pressure/Rg/temp
+        ystate(ngas*(k-1)+3)=xCO2*pressure/Rg/temp
+        ystate(ngas*(k-1)+4)=xCyP*pressure/Rg/temp
         k=k+1
     enddo
     do i = 1, ncell
@@ -113,26 +125,32 @@ subroutine integrate
             dif(ngas*(k-1)+1)=Dgas
             dif(ngas*(k-1)+2)=Dgas
             dif(ngas*(k-1)+3)=Dgas
+            dif(ngas*(k-1)+4)=Dgas
             sol(ngas*(k-1)+1)=1
             sol(ngas*(k-1)+2)=1
             sol(ngas*(k-1)+3)=1
-            ystate(ngas*(k-1)+1)=xAir*pressure/Rg/temp
-            ystate(ngas*(k-1)+2)=xCO2*pressure/Rg/temp
-            ystate(ngas*(k-1)+3)=xCyP*pressure/Rg/temp
+            sol(ngas*(k-1)+4)=1
+            ystate(ngas*(k-1)+1)=xO2*pressure/Rg/temp
+            ystate(ngas*(k-1)+2)=xN2*pressure/Rg/temp
+            ystate(ngas*(k-1)+3)=xCO2*pressure/Rg/temp
+            ystate(ngas*(k-1)+4)=xCyP*pressure/Rg/temp
             k=k+1
         enddo
         do j=1,divwall
             dz(k)=dwall/divwall
             mor(k)=2
-            dif(ngas*(k-1)+1)=Dair
-            dif(ngas*(k-1)+2)=DCO2
-            dif(ngas*(k-1)+3)=Dcyp
-            sol(ngas*(k-1)+1)=Sair
-            sol(ngas*(k-1)+2)=SCO2
-            sol(ngas*(k-1)+3)=Scyp
-            ystate(ngas*(k-1)+1)=xAir*pressure/Rg/temp
-            ystate(ngas*(k-1)+2)=xCO2*pressure/Rg/temp
-            ystate(ngas*(k-1)+3)=xCyP*pressure/Rg/temp
+            dif(ngas*(k-1)+1)=DO2
+            dif(ngas*(k-1)+2)=DN2
+            dif(ngas*(k-1)+3)=DCO2
+            dif(ngas*(k-1)+4)=Dcyp
+            sol(ngas*(k-1)+1)=SO2
+            sol(ngas*(k-1)+2)=SN2
+            sol(ngas*(k-1)+3)=SCO2
+            sol(ngas*(k-1)+4)=Scyp
+            ystate(ngas*(k-1)+1)=xO2*pressure/Rg/temp
+            ystate(ngas*(k-1)+2)=xN2*pressure/Rg/temp
+            ystate(ngas*(k-1)+3)=xCO2*pressure/Rg/temp
+            ystate(ngas*(k-1)+4)=xCyP*pressure/Rg/temp
             k=k+1
         enddo
     end do
@@ -140,13 +158,15 @@ subroutine integrate
 ! boundary conditions
 ! ----------------------------------
     if (sheet) then
-        bc(1)=pBCair/Rg/temp
-        bc(2)=pBCCO2/Rg/temp
-        bc(3)=pBCcyp/Rg/temp
+        bc(1)=pBCO2/Rg/temp
+        bc(2)=pBCN2/Rg/temp
+        bc(3)=pBCCO2/Rg/temp
+        bc(4)=pBCcyp/Rg/temp
     else
-        bc(1)=pBCair/Rg/temp
-        bc(2)=pBCCO2/Rg/temp
-        bc(3)=pBCcyp/Rg/temp
+        bc(1)=pBCO2/Rg/temp
+        bc(2)=pBCN2/Rg/temp
+        bc(3)=pBCCO2/Rg/temp
+        bc(4)=pBCcyp/Rg/temp
     endif
 ! ----------------------------------
 ! initialize integration
