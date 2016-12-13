@@ -1,0 +1,298 @@
+\begin{thebibliography}{10}
+\expandafter\ifx\csname url\endcsname\relax
+  \def\url#1{\texttt{#1}}\fi
+\expandafter\ifx\csname urlprefix\endcsname\relax\def\urlprefix{URL }\fi
+\expandafter\ifx\csname href\endcsname\relax
+  \def\href#1#2{#2} \def\path#1{#1}\fi
+
+\bibitem{Berlin1980}
+A.~Berlin, Chemistry and Processing of Foamed Polymers, Springer Berlin
+  Heidelberg, 1980.
+
+\bibitem{Chen2015150}
+Y.~Chen, R.~Das, M.~Battley,
+  \href{http://www.sciencedirect.com/science/article/pii/S0020768314003692}{Effects
+  of cell size and cell wall thickness variations on the stiffness of
+  closed-cell foams}, International Journal of Solids and Structures 52 (2015)
+  150 -- 164.
+\newblock \href
+  {http://dx.doi.org/http://dx.doi.org/10.1016/j.ijsolstr.2014.09.022}
+  {\path{doi:http://dx.doi.org/10.1016/j.ijsolstr.2014.09.022}}.
+\newline\urlprefix\url{http://www.sciencedirect.com/science/article/pii/S0020768314003692}
+
+\bibitem{Jang20102872}
+W.-Y. Jang, S.~Kyriakides, A.~M. Kraynik,
+  \href{http://www.sciencedirect.com/science/article/pii/S0020768310002271}{On
+  the compressive strength of open-cell metal foams with kelvin and random cell
+  structures}, International Journal of Solids and Structures 47~(21) (2010)
+  2872 -- 2883.
+\newblock \href
+  {http://dx.doi.org/http://dx.doi.org/10.1016/j.ijsolstr.2010.06.014}
+  {\path{doi:http://dx.doi.org/10.1016/j.ijsolstr.2010.06.014}}.
+\newline\urlprefix\url{http://www.sciencedirect.com/science/article/pii/S0020768310002271}
+
+\bibitem{Avalle2001455}
+M.~Avalle, G.~Belingardi, R.~Montanini,
+  \href{http://www.sciencedirect.com/science/article/pii/S0734743X00000609}{Characterization
+  of polymeric structural foams under compressive impact loading by means of
+  energy-absorption diagram}, International Journal of Impact Engineering
+  25~(5) (2001) 455 -- 472.
+\newblock \href
+  {http://dx.doi.org/http://dx.doi.org/10.1016/S0734-743X(00)00060-9}
+  {\path{doi:http://dx.doi.org/10.1016/S0734-743X(00)00060-9}}.
+\newline\urlprefix\url{http://www.sciencedirect.com/science/article/pii/S0734743X00000609}
+
+\bibitem{GibsonBookCellular}
+L.~J. Gibson, Ashby, Cellular Solids: Structure and Properties, Cambridge
+  University Press, 1999.
+
+\bibitem{Ma2011}
+Y.~Ma, R.~Pyrz, M.~Rodriguez-Perez, J.~Escudero, J.~C.~M. Rauhe, X.~Su, X-ray
+  microtomographis study of nanoclay-polypropylene foams, Cellular Polymers
+  30~(3) (2011) 95 -- 110.
+
+\bibitem{Sullivan20081754}
+R.~M. Sullivan, L.~J. Ghosn, B.~A. Lerch,
+  \href{http://www.sciencedirect.com/science/article/pii/S0020768307004465}{A
+  general tetrakaidecahedron model for open-celled foams}, International
+  Journal of Solids and Structures 45~(6) (2008) 1754 -- 1765.
+\newblock \href
+  {http://dx.doi.org/http://dx.doi.org/10.1016/j.ijsolstr.2007.10.028}
+  {\path{doi:http://dx.doi.org/10.1016/j.ijsolstr.2007.10.028}}.
+\newline\urlprefix\url{http://www.sciencedirect.com/science/article/pii/S0020768307004465}
+
+\bibitem{Subramanian25052012}
+N.~Subramanian, B.~V. Sankar,
+  \href{http://jsm.sagepub.com/content/early/2012/03/21/1099636212441475.abstract}{Evaluation
+  of micromechanical methods to determine stiffness and strength properties of
+  foams}, Journal of Sandwich Structures and Materials\href
+  {http://arxiv.org/abs/http://jsm.sagepub.com/content/early/2012/03/21/1099636212441475.full.pdf+html}
+  {\path{arXiv:http://jsm.sagepub.com/content/early/2012/03/21/1099636212441475.full.pdf+html}},
+  \href {http://dx.doi.org/10.1177/1099636212441475}
+  {\path{doi:10.1177/1099636212441475}}.
+\newline\urlprefix\url{http://jsm.sagepub.com/content/early/2012/03/21/1099636212441475.abstract}
+
+\bibitem{ZHU1997319}
+H.~Zhu, J.~Knott, N.~Mills,
+  \href{http://www.sciencedirect.com/science/article/pii/S0022509696000907}{Analysis
+  of the elastic properties of open-cell foams with tetrakaidecahedral cells},
+  Journal of the Mechanics and Physics of Solids 45~(3) (1997) 319 -- 343.
+\newblock \href
+  {http://dx.doi.org/http://dx.doi.org/10.1016/S0022-5096(96)00090-7}
+  {\path{doi:http://dx.doi.org/10.1016/S0022-5096(96)00090-7}}.
+\newline\urlprefix\url{http://www.sciencedirect.com/science/article/pii/S0022509696000907}
+
+\bibitem{Li20031769}
+K.~Li, X.-L. Gao, A.~Roy,
+  \href{http://www.sciencedirect.com/science/article/pii/S0266353803001179}{Micromechanics
+  model for three-dimensional open-cell foams using a tetrakaidecahedral unit
+  cell and castigliano's second theorem}, Composites Science and Technology
+  63~(12) (2003) 1769 -- 1781.
+\newblock \href
+  {http://dx.doi.org/http://dx.doi.org/10.1016/S0266-3538(03)00117-9}
+  {\path{doi:http://dx.doi.org/10.1016/S0266-3538(03)00117-9}}.
+\newline\urlprefix\url{http://www.sciencedirect.com/science/article/pii/S0266353803001179}
+
+\bibitem{Sihn2004167}
+S.~Sihn, A.~K. Roy,
+  \href{http://www.sciencedirect.com/science/article/pii/S0022509603000723}{Modeling
+  and prediction of bulk properties of open-cell carbon foam}, Journal of the
+  Mechanics and Physics of Solids 52~(1) (2004) 167 -- 191.
+\newblock \href
+  {http://dx.doi.org/http://dx.doi.org/10.1016/S0022-5096(03)00072-3}
+  {\path{doi:http://dx.doi.org/10.1016/S0022-5096(03)00072-3}}.
+\newline\urlprefix\url{http://www.sciencedirect.com/science/article/pii/S0022509603000723}
+
+\bibitem{bartsmith1998}
+H.~Bart-Smith, A.-F. Bastawros, D.~R. Mumm, A.~G. Evans, D.~J. Sypeck, H.~N.~G.
+  Wadley,
+  \href{https://www.cambridge.org/core/article/compressive-deformation-and-yielding-mechanisms-in-cellular-al-alloys-determined-using-x-ray-tomography-and-surface-strain-mapping/B5270EC307884B3CC47C431C17595255}{Compressive
+  deformation and yielding mechanisms in cellular al alloys determined using
+  x-ray tomography and surface strain mapping}, MRS Proceedings 521.
+\newblock \href {http://dx.doi.org/10.1557/PROC-521-71}
+  {\path{doi:10.1557/PROC-521-71}}.
+\newline\urlprefix\url{https://www.cambridge.org/core/article/compressive-deformation-and-yielding-mechanisms-in-cellular-al-alloys-determined-using-x-ray-tomography-and-surface-strain-mapping/B5270EC307884B3CC47C431C17595255}
+
+\bibitem{Elliott2002}
+J.~A. Elliott, A.~H. Windle, J.~R. Hobdell, G.~Eeckhaut, R.~J. Oldman,
+  W.~Ludwig, E.~Boller, P.~Cloetens, J.~Baruchel,
+  \href{http://dx.doi.org/10.1023/A:1014920902712}{In-situ deformation of an
+  open-cell flexible polyurethane foam characterised by 3d computed
+  microtomography}, Journal of Materials Science 37~(8) (2002) 1547--1555.
+\newblock \href {http://dx.doi.org/10.1023/A:1014920902712}
+  {\path{doi:10.1023/A:1014920902712}}.
+\newline\urlprefix\url{http://dx.doi.org/10.1023/A:1014920902712}
+
+\bibitem{Youssef2005719}
+S.~Youssef, E.~Maire, R.~Gaertner,
+  \href{http://www.sciencedirect.com/science/article/pii/S1359645404006330}{Finite
+  element modelling of the actual structure of cellular materials determined by
+  x-ray tomography}, Acta Materialia 53~(3) (2005) 719 -- 730.
+\newblock \href
+  {http://dx.doi.org/http://dx.doi.org/10.1016/j.actamat.2004.10.024}
+  {\path{doi:http://dx.doi.org/10.1016/j.actamat.2004.10.024}}.
+\newline\urlprefix\url{http://www.sciencedirect.com/science/article/pii/S1359645404006330}
+
+\bibitem{Grenestedt19991471}
+J.~L. Grenestedt,
+  \href{http://www.sciencedirect.com/science/article/pii/S0020768398000481}{Effective
+  elastic behavior of some models for perfect cellular solids}, International
+  Journal of Solids and Structures 36~(10) (1999) 1471 -- 1501.
+\newblock \href
+  {http://dx.doi.org/http://dx.doi.org/10.1016/S0020-7683(98)00048-1}
+  {\path{doi:http://dx.doi.org/10.1016/S0020-7683(98)00048-1}}.
+\newline\urlprefix\url{http://www.sciencedirect.com/science/article/pii/S0020768398000481}
+
+\bibitem{Redenbach201270}
+C.~Redenbach, I.~Shklyar, H.~Andrä,
+  \href{http://www.sciencedirect.com/science/article/pii/S0020722511001807}{Laguerre
+  tessellations for elastic stiffness simulations of closed foams with strongly
+  varying cell sizes}, International Journal of Engineering Science 50~(1)
+  (2012) 70 -- 78.
+\newblock \href
+  {http://dx.doi.org/http://dx.doi.org/10.1016/j.ijengsci.2011.09.002}
+  {\path{doi:http://dx.doi.org/10.1016/j.ijengsci.2011.09.002}}.
+\newline\urlprefix\url{http://www.sciencedirect.com/science/article/pii/S0020722511001807}
+
+\bibitem{Fan2004}
+Z.~Fan, Y.~Wu, X.~Zhao, Y.~Lu, Simulation of polycrystalline structure with
+  voronoi diagram in laguerre geometry based on random closed packing of
+  spheres, Computational Materials Science 29~(3) (2004) 301--308.
+\newblock \href {http://dx.doi.org/10.1016/j.commatsci.2003.10.006}
+  {\path{doi:10.1016/j.commatsci.2003.10.006}}.
+
+\bibitem{Rhodes1994}
+M.~B. Rhodes,
+  \href{http://dx.doi.org/10.1007/978-94-011-1256-7_3}{Characterization of
+  polymeric cellular structures}, Springer Netherlands, Dordrecht, 1994, pp.
+  56--77.
+\newblock \href {http://dx.doi.org/10.1007/978-94-011-1256-7_3}
+  {\path{doi:10.1007/978-94-011-1256-7_3}}.
+\newline\urlprefix\url{http://dx.doi.org/10.1007/978-94-011-1256-7_3}
+
+\bibitem{ImageJ}
+C.~A. Schneider, W.~S. Rasband, K.~W. Eliceiri,
+  \href{http://www.nature.com/nmeth/journal/v9/n7/full/nmeth.2089.html}{Nih
+  image to imagej: 25 years of image analysis}, Nature methods 9~(7) (2012) 671
+  -- 675.
+\newblock \href {http://dx.doi.org/doi:10.1038/nmeth.2089}
+  {\path{doi:doi:10.1038/nmeth.2089}}.
+\newline\urlprefix\url{http://www.nature.com/nmeth/journal/v9/n7/full/nmeth.2089.html}
+
+\bibitem{ASTMC297}
+ASTM, {ASTM C297 / C297M - 16 Standard Test Method for Flatwise Tensile
+  Strength of Sandwich Constructions} (2010).
+
+\bibitem{bargiel1991c}
+M.~Bargie{\l}, J.~Mo{\'s}ci{\'n}ski, C-language program for the irregular close
+  packing of hard spheres, Computer Physics Communications 64~(1) (1991)
+  183--192.
+
+\bibitem{Redenbach20091397}
+C.~Redenbach,
+  \href{http://www.sciencedirect.com/science/article/pii/S0927025608004266}{Microstructure
+  models for cellular materials}, Computational Materials Science 44~(4) (2009)
+  1397 -- 1407.
+\newblock \href
+  {http://dx.doi.org/http://dx.doi.org/10.1016/j.commatsci.2008.09.018}
+  {\path{doi:http://dx.doi.org/10.1016/j.commatsci.2008.09.018}}.
+\newline\urlprefix\url{http://www.sciencedirect.com/science/article/pii/S0927025608004266}
+
+\bibitem{Köll201611}
+J.~Köll, S.~Hallström,
+  \href{http://www.sciencedirect.com/science/article/pii/S1359645416300246}{Elastic
+  properties of equilibrium foams}, Acta Materialia 113 (2016) 11 -- 18.
+\newblock \href
+  {http://dx.doi.org/http://dx.doi.org/10.1016/j.actamat.2016.01.025}
+  {\path{doi:http://dx.doi.org/10.1016/j.actamat.2016.01.025}}.
+\newline\urlprefix\url{http://www.sciencedirect.com/science/article/pii/S1359645416300246}
+
+\bibitem{Gmsh}
+C.~Geuzaine, J.-F. Remacle, \href{http://dx.doi.org/10.1002/nme.2579}{Gmsh: A
+  3-d finite element mesh generator with built-in pre- and post-processing
+  facilities}, International Journal for Numerical Methods in Engineering
+  79~(11) (2009) 1309--1331.
+\newblock \href {http://dx.doi.org/10.1002/nme.2579}
+  {\path{doi:10.1002/nme.2579}}.
+\newline\urlprefix\url{http://dx.doi.org/10.1002/nme.2579}
+
+\bibitem{Mills2007xvii}
+N.~Mills,
+  \href{http://www.sciencedirect.com/science/article/pii/B9780750680691500003}{Foreword},
+  in: N.~Mills (Ed.), Polymer Foams Handbook, Butterworth-Heinemann, Oxford,
+  2007, pp. xvii -- xviii.
+\newblock \href
+  {http://dx.doi.org/http://dx.doi.org/10.1016/B978-075068069-1/50000-3}
+  {\path{doi:http://dx.doi.org/10.1016/B978-075068069-1/50000-3}}.
+\newline\urlprefix\url{http://www.sciencedirect.com/science/article/pii/B9780750680691500003}
+
+\bibitem{Jang20081845}
+W.-Y. Jang, A.~M. Kraynik, S.~Kyriakides,
+  \href{http://www.sciencedirect.com/science/article/pii/S0020768307004118}{On
+  the microstructure of open-cell foams and its effect on elastic properties},
+  International Journal of Solids and Structures 45~(7–8) (2008) 1845 --
+  1875.
+\newblock \href
+  {http://dx.doi.org/http://dx.doi.org/10.1016/j.ijsolstr.2007.10.008}
+  {\path{doi:http://dx.doi.org/10.1016/j.ijsolstr.2007.10.008}}.
+\newline\urlprefix\url{http://www.sciencedirect.com/science/article/pii/S0020768307004118}
+
+\bibitem{HUET1990813}
+C.~Huet,
+  \href{http://www.sciencedirect.com/science/article/pii/0022509690900412}{Application
+  of variational concepts to size effects in elastic heterogeneous bodies},
+  Journal of the Mechanics and Physics of Solids 38~(6) (1990) 813 -- 841.
+\newblock \href
+  {http://dx.doi.org/http://dx.doi.org/10.1016/0022-5096(90)90041-2}
+  {\path{doi:http://dx.doi.org/10.1016/0022-5096(90)90041-2}}.
+\newline\urlprefix\url{http://www.sciencedirect.com/science/article/pii/0022509690900412}
+
+\bibitem{Segurado20022107}
+J.~Segurado, J.~Llorca,
+  \href{http://www.sciencedirect.com/science/article/pii/S0022509602000212}{A
+  numerical approximation to the elastic properties of sphere-reinforced
+  composites}, Journal of the Mechanics and Physics of Solids 50~(10) (2002)
+  2107 -- 2121.
+\newblock \href
+  {http://dx.doi.org/http://dx.doi.org/10.1016/S0022-5096(02)00021-2}
+  {\path{doi:http://dx.doi.org/10.1016/S0022-5096(02)00021-2}}.
+\newline\urlprefix\url{http://www.sciencedirect.com/science/article/pii/S0022509602000212}
+
+\bibitem{oyen2005}
+M.~L. Oyen,
+  \href{https://www.cambridge.org/core/article/spherical-indentation-creep-following-ramp-loading/2AE00B3BCE30DE462602822CCFC3E80A}{Spherical
+  indentation creep following ramp loading}, Journal of Materials Research
+  20~(8) (2005) 2094--2100.
+\newblock \href {http://dx.doi.org/10.1557/JMR.2005.0259}
+  {\path{doi:10.1557/JMR.2005.0259}}.
+\newline\urlprefix\url{https://www.cambridge.org/core/article/spherical-indentation-creep-following-ramp-loading/2AE00B3BCE30DE462602822CCFC3E80A}
+
+\bibitem{1960JAM....27..438L}
+E.~H. {Lee}, J.~R.~M. {Radok}, {The Contact Problem for Viscoelastic Bodies},
+  Journal of Applied Mechanics 27 (1960) 438.
+\newblock \href {http://dx.doi.org/10.1115/1.3644020}
+  {\path{doi:10.1115/1.3644020}}.
+
+\bibitem{Desprat20052224}
+N.~Desprat, A.~Richert, J.~Simeon, A.~Asnacios,
+  \href{http://www.sciencedirect.com/science/article/pii/S0006349505732823}{Creep
+  function of a single living cell}, Biophysical Journal 88~(3) (2005) 2224 --
+  2233.
+\newblock \href
+  {http://dx.doi.org/http://dx.doi.org/10.1529/biophysj.104.050278}
+  {\path{doi:http://dx.doi.org/10.1529/biophysj.104.050278}}.
+\newline\urlprefix\url{http://www.sciencedirect.com/science/article/pii/S0006349505732823}
+
+\bibitem{johnson1985contacMech}
+K.~L. Johnson,
+  \href{https://www.cambridge.org/core/books/contact-mechanics/E3707F77C2EBCE727C3911AFBD2E4AC2}{Contact
+  Mechanics:}, Cambridge University Press, Cambridge, 1985.
+\newblock \href {http://dx.doi.org/10.1017/CBO9781139171731}
+  {\path{doi:10.1017/CBO9781139171731}}.
+\newline\urlprefix\url{https://www.cambridge.org/core/books/contact-mechanics/E3707F77C2EBCE727C3911AFBD2E4AC2}
+
+\bibitem{SergioSabadoThesis}
+S.~Sádaba, High fidelity simulations of failure in fiber-reinforced
+  composites, Ph.D. thesis, Universidad Politécnica de Madrid (2014).
+
+\end{thebibliography}

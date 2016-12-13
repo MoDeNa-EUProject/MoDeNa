@@ -1,0 +1,76 @@
+\subsection{Deformation mechanism}
+As discussed earlier, the model is able to predict three different steps happening till 10\% compressive strain: Linear elastic, slight drop in stress and plateau stress. Since the model consists of two geometric features, struts and faces (beam and shell elements), in this part the role of both beam and shell elements in compressive loading condition is discussed separately. It is worth reminding that the beam and shell elements have the common nodes in edges, as a result, no separation of faces from struts could be expected in this modelling strategy. However, the acceptable agreement between experimental measurements and FE results (see Figure~\ref{fig:StressStrainCurveExpFem}) shows that the assumption of inseparability of faces from struts does not affect the results significantly. Moreover, as depicted in Figure~\ref{fig:RVEdeformed}, at high strains close to 10\%, deformation is mainly localized at the top of the RVE, however, at the beginning of deformation it is more uniform throughout the whole structure of RVE.
+
+\begin{figure}[hb]
+  \centering
+  \includegraphics[scale=0.6]{StrainLocalization}
+  \captionsetup{justification=centering}
+  \caption[Close up of \textit{Hemidactylus} sp. ]
+   {The deformed RVE at 10\% strain.}
+  \label{fig:RVEdeformed}
+\end{figure} 
+
+Since localization occurs at the top of the RVE, while having uniform deformation at the middle, in order to study the behavior of beams during deformation, two beams from the middle of two different struts, one strut from top and other from middle of RVE, are chosen. Figure~\ref{fig:AxialForceBeams} shows the evolution of axial force for those two mentioned beam elements together with engineering stress of the RVE versus engineering strain . As can be seen, in linear elastic regime ($\varepsilon < 0.04$), both beam elements show increase in load linearly however the beam located at the top has a higher axial force compare to one at the middle. As the compression progresses ($\varepsilon > 0.04$), axial force in beam at the top keeps increasing while for the one at the middle, axial force starts showing to be constant. This points corresponds with the initiation of yielding for RVE , as illustrated by a bold dot in Figure~\ref{fig:AxialForceBeams}. At 5\% percent strain, significant drop in axial force for the beam at the top of the RVE almost coincides with the drop in compressive engineering stress for the whole RVE, showing that, the main reason for observed drop in stress for the foam microstructure during compression sources in buckling of beams (struts) located at the top. Although, in higher strains ($\epsilon > 0.05$), the axial force in beam at the top becomes almost constant and less than the one for the beam at the middle of the RVE. This difference in constant axial force for the beam at the top and the beam at the middle confirms that the task of load carrying is little by little transfers from the beams at the top to the beams which are located at the middle of RVE.
+% Figure~\ref{fig:DeformedBeams} illustrates the deformed shape of two mentioned beams at different levels of strain. One could notice the severity of buckling in case of strut coming from the top of the RVE compare the one from the middle.
+
+%%%%%%%%%% Figure: AxialForceBeams}
+Figure ????????????????????????
+
+%%%%%%%%%% Figure: DeformedBeams}
+Figure ????????????????????????
+
+\begin{figure}[hb]
+  \centering
+  \includegraphics[scale=0.6]{CalculatedElastic}
+  \captionsetup{justification=centering}
+  \caption[Close up of \textit{Hemidactylus} sp. ]
+   { the solid PU.}
+  \label{fig:AxialForceBeams}
+\end{figure} 
+\begin{figure}[hb]
+  \centering
+  \includegraphics[scale=0.6]{CalculatedElastic}
+  \captionsetup{justification=centering}
+  \caption[Close up of \textit{Hemidactylus} sp. ]
+   { the solid PU.}
+  \label{fig:DeformedBeams}
+\end{figure} 
+
+Similar trends for the axil force of beams at the top and the the middle of RVE (see Figure~\ref{fig:DeformedBeams}) have been observed by plotting the axial force versus strain for several beams located on the top and the middle of RVE, proving universality of two mentioned trades at the top and the middle of RVE . 
+
+Similarly, axial force for two shell elements located at the top and the middle of RVE, respectively, together with engineering stress of whole RVE versus engineering strain are presented in Figure~\ref{fig:AxialForceShells}. Clearly, same trend as earlier described for the beams at the top and the middle of RVE can be seen here. In linear elastic step of deformation, both shell elements show increase in load with the significant difference in value. After this step, the shell element at the middle reaches the specific force which more or less remains constant up to the end of the deformation. However, the shell element located on the top are experiencing a severe drop in force which corresponds almost with drop in stress for the whole RVE. Then, the axial force keeps constant for this elements up to the end of the deformation. Similar axial force trend observed for several shell elements in different areas in two regions of the top and the middle of the RVE. In addition, it can be said that the axial force is almost showing a very close trend for the shell elements located on the same face.  
+
+%%%%%%%%%% Figure: AxialForceShells}
+Figure ????????????????????????
+
+\begin{figure}[hb]
+  \centering
+  \includegraphics[scale=0.6]{CalculatedElastic}
+  \captionsetup{justification=centering}
+  \caption[Close up of \textit{Hemidactylus} sp. ]
+   { the solid PU.}
+  \label{fig:AxialForceShells}
+\end{figure} 
+
+For the sake of clearance in observing the deformation of faces (shell elements) and struts (beam elements), the cut slice of RVE in Z plane is shown at different levels of strain, figure~\ref{fig:RVEdeformedFaces}. Apparently, the buckling of faces starts even at the very early stages of loading (comprise figure~\ref{fig:RVEdeformedFaces}a and b). The early buckling of faces is not surprising, since the volume fraction of solid PU located at the faces is just 15\% results in thickness of $\approx 0.4$\SI{}{\micro\metre}, this extremely thin faces could be bent and buckled easily. Moreover, the shell elements at the edges are attached to the beam elements by sharing the nodes. Consequently, it is expected that the faces in the RVE follow the the struts in case of deformation. This is why, again as observed for beam elements, the deformation localized at the top of the RVE at high strains figure~\ref{fig:RVEdeformedFaces}b. Although, at the linear elastic step, the buckling of faces is uniform in whole structure and can be seen almost in all the faces. In addition, in this step,  the axial force is increasing uniformly in RVE by moving toward higher strains. 
+
+Figure~\ref{fig:RVEdeformedFaces}c and d show the state of axial force for all beam and shell elements before and after the small drop in stress of RVE (see figure~\ref{fig:AxialForceBeams}), respectively. The significant decrease in maximum compressive axial force (values for compressive loads is shown in negative in figure~\ref{fig:RVEdeformedFaces})  explains well the drop in stress. As can be seen in figure~\ref{fig:RVEdeformedFaces}c, the maximum compressive axial force (\SI{-3.059e5}{\micro\N}) appears in geometric features which are standing parallel to the loading direction (along the $Y$ axis).   Moreover, the described drop in stress caused by several sequential decrease in axial force. In other words, the buckling of beams located on the struts at the top of the RVE happens step by step and the summation of this successive buckling is a small drop in stress for the RVE. Finally, the maximum compressive axial force shows increasing trend up to 10\%, figure~\ref{fig:RVEdeformedFaces}e. 
+
+ 
+\begin{figure}[hb]
+  \centering
+  \includegraphics[scale=0.4]{Deformed}
+  \captionsetup{justification=centering}
+  \caption{Deformed cut of RVE at: (a)0\%, (b)2\%, (c and d)5\%, (e)10\% compressive strain including all beam and shell elements. The loading direction is along $Y$ axis.}
+  \label{fig:RVEdeformedFaces}
+\end{figure}
+
+
+
+
+%%%%%%%%%% Figure: RVEdeformedFaces}
+Figure ????????????????????????
+
+
+
+????????????'axial force big for struts so they are main load carriiers?????????¿¿¿¿¿¿¿¿¿ interaction of both beam and shells  
