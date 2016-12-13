@@ -14,8 +14,8 @@ rm -fv log
 echo "MODENAFoam is running..."
 ${FOAM_USER_APPBIN}/MODENAFoam >& log
 echo "Post-processing..."
-postProcess -func 'probes(TS, XOH, XW, M0, M1, M2, rho_foam, wBA_g, wCO2_g)'
-cd postProcessing/probes\(TS,XOH,XW,M0,M1,M2,rho_foam,wBA_g,wCO2_g\)/0/
+postProcess -func probe
+cd postProcessing/probes/0/
 for file in $(ls *);
         do
                 sed '/^#/d' $file > $file.txt;
