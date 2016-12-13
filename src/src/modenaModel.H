@@ -42,6 +42,7 @@ MoDeNa C++ interface library
 
 #include <exception>
 #include <string>
+#include <vector>
 
 #include "modena.h"
 
@@ -123,6 +124,21 @@ public:
 
     // Member Functions
 
+        inline size_t inputs_size() const
+        {
+            return modena_model_inputs_size(model_);
+        }
+
+        inline size_t outputs_size() const
+        {
+            return modena_model_outputs_size(model_);
+        }
+
+        inline size_t parameters_size() const
+        {
+            return modena_model_parameters_size(model_);
+        }
+
         inline size_t inputs_argPos(const std::string& name) const
         {
             return modena_model_inputs_argPos(model_, name.c_str());
@@ -146,6 +162,45 @@ public:
         inline void argPos_check() const
         {
             modena_model_argPos_check(model_);
+        }
+
+        inline std::vector<std::string> inputs_names() const
+        {
+            std::vector<std::string> v;
+
+            const char** iNames = modena_model_inputs_names(model_);
+            for(int i=0; i<modena_model_inputs_size(model_); i++)
+            {
+                v.push_back(std::string(iNames[i]));
+            }
+
+            return v;
+        }
+
+        inline std::vector<std::string> outputs_names() const
+        {
+            std::vector<std::string> v;
+
+            const char** oNames = modena_model_outputs_names(model_);
+            for(int i=0; i<modena_model_outputs_size(model_); i++)
+            {
+                v.push_back(std::string(oNames[i]));
+            }
+
+            return v;
+        }
+
+        inline std::vector<std::string> parameters_names() const
+        {
+            std::vector<std::string> v;
+
+            const char** pNames = modena_model_parameters_names(model_);
+            for(int i=0; i<modena_model_parameters_size(model_); i++)
+            {
+                v.push_back(std::string(pNames[i]));
+            }
+
+            return v;
         }
 
         inline void call() const
