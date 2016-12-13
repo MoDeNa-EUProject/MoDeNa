@@ -9,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014-2016 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -50,6 +50,7 @@ License
 #include "indexset.h"
 #include "function.h"
 #include "model.h"
+#include <execinfo.h>
 
 #ifndef thread_local
 # if __STDC_VERSION__ >= 201112 && !defined __STDC_NO_THREADS__
@@ -75,6 +76,8 @@ License
 thread_local int modena_error_code = 0;
 
 PyObject *modena_DoesNotExist = NULL;
+PyObject *modena_OutOfBounds = NULL;
+PyObject *modena_ParametersNotValid = NULL;
 
 struct modena_errordesc
 {
@@ -100,9 +103,17 @@ static PyMethodDef module_methods[] = {
 #ifndef PyMODINIT_FUNC    /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
+
+// TODO: Support non-Gcc compilers here
+PyMODINIT_FUNC initlibmodena(void) __attribute__((constructor));
+
 PyMODINIT_FUNC initlibmodena(void)
 {
-    PyObject* module;
+    // Initialize the Python Interpreter
+    if(!Py_IsInitialized())
+    {
+        Py_Initialize();
+    }
 
     if(PyType_Ready(&modena_index_set_tType) < 0)
     {
@@ -119,11 +130,11 @@ PyMODINIT_FUNC initlibmodena(void)
         return;
     }
 
-    module = Py_InitModule3
+    PyObject* module = Py_InitModule3
     (
         "libmodena",
         module_methods,
-        "Module that creates an extension types for modena framework."
+        "Module that creates extension types for modena framework."
     );
 
     if(!module)
@@ -197,7 +208,40 @@ PyMODINIT_FUNC initlibmodena(void)
         Py_DECREF(pName);
         if(!modena_DoesNotExist){ Modena_PyErr_Print(); }
 
+        pName = PyString_FromString("ParametersNotValid");
+        if(!pName){ Modena_PyErr_Print(); }
+
+        modena_ParametersNotValid = PyObject_GetItem(pDict, pName);
+        Py_DECREF(pName);
+        if(!modena_ParametersNotValid){ Modena_PyErr_Print(); }
+
+        pName = PyString_FromString("OutOfBounds");
+        if(!pName){ Modena_PyErr_Print(); }
+
+        modena_OutOfBounds = PyObject_GetItem(pDict, pName);
+        Py_DECREF(pName);
+        if(!modena_OutOfBounds){ Modena_PyErr_Print(); }
+
+
         Py_DECREF(pModule);
     }
+}
+
+
+void modena_print_backtrace()
+{
+    void* tracePtrs[100];
+    int count = backtrace( tracePtrs, 100 );
+
+    char** funcNames = backtrace_symbols( tracePtrs, count );
+    // Print the stack trace
+    int ii;
+    for( ii = 0; ii < count; ii++ )
+        printf( "%s\n", funcNames[ii] );
+
+    // Free the string pointers
+    free( funcNames );
+
+    exit(1);
 }
 

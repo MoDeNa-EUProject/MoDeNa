@@ -1,0 +1,19 @@
+{
+    "MU": 0.15,
+    "SIGMA": 0.01,
+    "NumOfCells": 27,
+    "porosity": 0.92,
+    "strutContent": 0.6,
+    "filename": "PeriodicRVE",
+    "deleteFiles": 0,
+    "packing": 1,
+    "alternativePackingAlgorithm": 0,
+    "tesselation": 1,
+    "visualizeTesselation": 0,
+    "geometry": 1,
+    "statistics": 0,
+    "hypermesh": 0,
+    "moveToPeriodicBox": 1,
+    "renderBox": 0,
+    "binarizeBox": 0
+}

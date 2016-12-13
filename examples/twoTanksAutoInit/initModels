@@ -1,5 +1,5 @@
-#!/usr/bin/python
-'''
+#!/usr/bin/env python
+'''@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -10,7 +10,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014-2016 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -27,17 +27,17 @@ License
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
+@endcond'''
 
-Description
-    Initialisation script for the flowRate model. The script calculates a few
-    data points and fits the surrogate model. Then the model is inserted into
-    the database.
+"""
+@file
+Initialisation script for the flowRate model. The script calculates a few
+data points and fits the surrogate model. Then the model is inserted into
+the database.
 
-Authors
-    Henrik Rusche
-
-Contributors
-'''
+@author Henrik Rusche
+@copyright 2014-2016, MoDeNa Project. GNU Public License.
+"""
 
 import modena
 
@@ -46,4 +46,3 @@ import modena
 # Remove the models based on log info stored during execution of the workflow
 collection = modena.SurrogateModel._get_collection()
 collection.remove( { '_id': 'flowRate' } )
-

@@ -93,11 +93,16 @@ identical model implementations. Complex operations such as database
 access are referred back to the high-level python module using
 call-back mechanisms.
 
+## Documentation
+
+The Doxygen documentation can be found [here](http://henrus.github.io/MoDeNa/index.html).
+Additional information on the software design can be found [here](http://henrus.github.io/MoDeNa/design/index.html).
+
 ## Dependencies
 - mongodb - Ideally from packages
 - pymongo - Ideally from packages
 - scipy - Ideally from packages
-- Fireworks - No packages, but pip
+- Fireworks - 1.2.5 and above, No packages, but pip
 - R - Ideally from packages
 - SWIG - Simple Wrapper and Interface Generator (optional)
 
@@ -105,9 +110,9 @@ call-back mechanisms.
 
 ### Install packages
 ```
+user@machine> deb http://cran.rstudio.com/bin/linux/ubuntu trusty/
 user@machine> sudo apt-get install automake libltdl-dev libltdl7 mongodb \
-    python-rpy2 python-pip python-scipy python-rpy2 python-blessings \
-    r-base r-base-dev
+    python-pip python-scipy python-rpy2 python-blessings r-base r-base-dev
 ```
 
 ### Install packages (optional)
@@ -117,7 +122,7 @@ user@machine> sudo apt-get install swig
 
 ### Install pip packages
 ```
-user@machine> sudo pip install FireWorks pymongo==2.8 mongoengine==0.8.7
+user@machine> sudo pip install FireWorks pymongo mongoengine
 ```
 
 ### Install R-libraries (this is done from within the R environment)

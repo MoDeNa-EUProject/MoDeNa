@@ -1,7 +1,12 @@
 #!/bin/sh
-foamAging="../Models/foamAging/src"
+MODELS_DIR="../MoDeNaModels"
+
+foamAging="${MODELS_DIR}/foamAging/src"
 cmake -H${foamAging} -B${foamAging} && make --directory=${foamAging}
 
-foamConductivity="../Models/foamConductivity/src"
+foamConductivity="${MODELS_DIR}/foamConductivity/src"
 cmake -H${foamConductivity} -B${foamConductivity} && \
-    make --directory=${foamConductivity}
+  make --directory=${foamConductivity}
+
+solubility="${MODELS_DIR}/Solubility/src"
+make --directory=${solubility}

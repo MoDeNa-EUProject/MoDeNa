@@ -10,7 +10,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014-2016 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -34,7 +34,7 @@ License
 Low-level interface library
 
 @author Henrik Rusche
-@copyright  2014-2015, MoDeNa Project. GNU Public License.
+@copyright  2014-2016, MoDeNa Project. GNU Public License.
 */
 
 #ifndef __FUNCTION_H__
@@ -77,12 +77,13 @@ typedef struct modena_function_t
 
     PyObject *pFunction;
 
+    size_t parameters_size;
+
     lt_dlhandle handle;
 
     void (*function)
     (
-        const double* p,
-        const double* in_i,
+        const struct modena_model_t* model,
         const double* i,
         double *o
     );

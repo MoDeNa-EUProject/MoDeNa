@@ -9,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014-2016 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -77,8 +77,10 @@ __BEGIN_DECLS
 // Declare variable for error handling
 extern thread_local int modena_error_code;
 
-// Declare python exception
+// Declare python exceptions
 extern PyObject *modena_DoesNotExist;
+extern PyObject *modena_OutOfBounds;
+extern PyObject *modena_ParametersNotValid;
 
 enum modena_error_t
 {
@@ -114,10 +116,22 @@ INLINE_FUN int modena_error()
 // Returns error message for error code
 const char* modena_error_message(int error_code);
 
-#define Modena_PyErr_Print() \
-    fprintf(stderr, "Error in python catched in %i of %s\n", __LINE__, __FILE__); \
-    PyErr_Print(); \
-    exit(1);
+void modena_print_backtrace();
+
+#define Modena_Info_Print(...)                                                \
+    char Modena_message[256];                                                 \
+    sprintf(Modena_message, __VA_ARGS__);                                     \
+    fprintf(stdout, "%s in line %i of %s\n", Modena_message,  __LINE__, __FILE__);
+
+#define Modena_Error_Print(...)                                               \
+    char Modena_message[256];                                                 \
+    sprintf(Modena_message, __VA_ARGS__);                                     \
+    fprintf(stderr, "%s in line %i of %s\n", Modena_message, __LINE__, __FILE__);
+
+#define Modena_PyErr_Print()                                                  \
+    PyErr_Print();                                                            \
+    Modena_Error_Print("Error in python catched");                            \
+    modena_print_backtrace();
 
 __END_DECLS
 

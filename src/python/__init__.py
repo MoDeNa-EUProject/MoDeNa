@@ -9,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014-2016 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -32,28 +32,50 @@ License
 @file
 Module providing the MoDeNa python interface
 
-@copyright  2014-2015, MoDeNa Project. GNU Public License.
+@copyright  2014-2016, MoDeNa Project. GNU Public License.
 """
 
-import os
+import os, sys
 from pkg_resources import get_distribution
 
 __version__ = get_distribution('modena').version
 
 MODENA_INSTALL_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MODENA_WORKING_DIR = os.path.realpath(os.getcwd())
 
-from Strategy import BackwardMappingScriptTask, BackwardMappingTask
-from SurrogateModel import CFunction, IndexSet, Workflow2, \
-    SurrogateModel, ForwardMappingModel, BackwardMappingModel
+from Strategy import BackwardMappingScriptTask, ModenaFireTask
+from SurrogateModel import CFunction, IndexSet, \
+    SurrogateModel, ForwardMappingModel, BackwardMappingModel, \
+    ModenaFireTask, MODENA_PARSED_URI
+
+def find_module(target, startsearch=MODENA_WORKING_DIR):
+    """Function recursively searching through the file tree for "target"
+
+    @arg target: 'str' name of directory e.g. "Desktop"
+    """
+
+    pth = os.path.abspath(startsearch)
+    while target not in os.listdir(pth):
+        pth = os.path.abspath(os.path.join(pth,'..'))  # step back a directory
+        if os.path.ismount(pth):                       # break if we hit "root"
+            pth = None
+            break
+
+    if pth is not None:
+        sys.path.insert(0, os.path.join(pth,target))
+    else:
+        print "Could not find directory: %s" %(target)
 
 def import_helper():
     from os.path import dirname
     import imp
+
+
     fp = None
     try:
         fp, pathname, description = imp.find_module(
             'libmodena',
-            [ dirname(__file__)+"/../../../modena" ]
+            [ find_module("modena", os.path.join(MODENA_INSTALL_DIR, "..","..")) ]
         )
     except ImportError:
         import libmodena
@@ -64,6 +86,9 @@ def import_helper():
         finally:
             fp.close()
         return _mod
+
+
+find_module("MoDeNaModels")   # Look for a models directory
 libmodena = import_helper()
 del import_helper
 

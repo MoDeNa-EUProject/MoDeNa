@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8)
 project (modena C CXX Fortran)
 
 if( CMAKE_VERSION VERSION_GREATER "3.0" )
@@ -11,7 +11,8 @@ endif()
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE ON)
 
-set(PACKAGE_VERSION 0.6)
+set(PACKAGE_VERSION 1.0)
+
 set(CMAKE_BUILD_TYPE Release)
 
 add_custom_target(debug

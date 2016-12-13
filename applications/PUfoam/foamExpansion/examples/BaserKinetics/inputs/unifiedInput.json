@@ -1,0 +1,93 @@
+{
+    "physicalBlowingAgent": "n-pentane",
+    "initialConditions": {
+        "concentrations": {
+            "isocyanate": 4455,
+            "polyol": 5140,
+            "water": 671,
+            "blowingAgents": {
+                "PBL": 0.0,
+                "CO2": 5.5
+            }
+        },
+        "bubbleRadius": 10e-6,
+        "bubbleRadiusDeviation": 1e-1,
+        "numberBubbleDensity": 0.10e12,
+        "temperature": 300
+    },
+    "kinetics": {
+        "kineticModel": "Baser",
+        "useDilution": true,
+        "gelPoint": 0.6,
+        "gellingReaction": {
+            "frequentialFactor": 1,
+            "activationEnergy": 3.514e4,
+            "reactionEnthalpy": -6.85e4
+        },
+        "blowingReaction": {
+            "frequentialFactor": 1.050e3,
+            "activationEnergy": 2.704e4,
+            "reactionEnthalpy": -8.15e4
+        }
+    },
+    "physicalProperties": {
+        "pressure": 1.01e5,
+        "blowingAgents": {
+            "PBL": {
+                "molarMass": 72.15e-3,
+                "heatCapacityInLiquidPhase": 870,
+                "heatCapacityInGaseousPhase": 593,
+                "evaporationHeat": 2e5,
+                "density": 751.0,
+                "diffusivityModel": "constant",
+                "diffusivity": 2.4e-12,
+                "solubilityModel": "Winkler"
+            },
+            "CO2": {
+                "molarMass": 44e-3,
+                "heatCapacityInLiquidPhase": 837,
+                "heatCapacityInGaseousPhase": 837,
+                "evaporationHeat": 0,
+                "diffusivityModel": "constant",
+                "diffusivity": 4.4e-10,
+                "solubilityModel": "constant",
+                "solubility": 1.1e-4
+            }
+        },
+        "air" :{
+            "molarMass": 29e-3
+        },
+        "polymer": {
+            "heatCapacity": 1800,
+            "polymerDensityModel": "constant",
+            "density": 1100,
+            "viscosityModel": "CastroMacosko",
+            "molarMassNCO": 615
+        },
+        "surfaceTensionModel": "constant",
+        "surfaceTension": 25e-3,
+        "ModenaFoamViscosityModel": false
+    },
+    "bubbleGrowth": {
+        "geometry": "3D",
+        "integrator": "dlsodes",
+        "method": "stiff",
+        "inertialTerm": false,
+        "solubilityCorrection": false,
+        "meshCoarseningParameter": 1.02,
+        "internalNodes": 200,
+        "initialTime": 0,
+        "finalTime": 100,
+        "outerTimeSteps": 200,
+        "maxInnerTimeSteps": 5000,
+        "relativeTolerance": 1e-8,
+        "absoluteTolerance": 1e-8
+    },
+   "QmomKinetics": {
+       "relativeTolerance": 1e-6,
+       "absoluteTolerance": 1e-6,
+       "timeStep": 1,
+       "endTime": 200,
+       "bubbleMode": "mean radius"
+   }
+}

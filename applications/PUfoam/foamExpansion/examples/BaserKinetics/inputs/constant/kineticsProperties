@@ -1,0 +1,59 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.1.0                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.2;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      kineticsProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+liquidMixtureDensitySurrogate off;
+thermalConductivitySurrogateSwitch on;
+blowingAgent    	n-pentane;
+KineticsModel    generic;
+GellingConstants
+{
+	A_OH            1;				// m3/mol s
+	E_OH            3.514e4;		// J/mol
+	initCOH         4191.7;			// Initial concentration of polyol OH groups in the mixutre, mol/m3
+	initCNCO        4455;			// Initial concentration of isocianate NCO groups in the mixutre, mol/m3
+	initCW    	    671;			// Initial concentration of water in the mixture, mol/m3
+	gellingPoint    0.606; 			// the assumed gelling point, -
+
+}
+
+BlowingConstants
+{
+	A_W        1.050e3;			// 1/s
+	E_W        2.704e4;		// J/mol
+}
+
+GenericConstants
+{
+	idealGasCons        		8.3145;	// J/mol K
+	rhoPolymer          		1100.0;	// kg/m3 Density of the liquid polymer
+	rhoBlowingAgent     		751.0;	// kg.m3 Density of the blowing agent
+	molecularMassCO2   	 		44.0;	// Molecular mass of carbon dioxide, kg/kmol
+	molecularMassBlowingAgent   72.15;	// Molecular mass of blowing agent, kg/kmol
+	molecularMassNCO            615.0;	// Molecular weight of NCO, kg/kmol
+	molecularMassLiquidFoam		378.9;	// Molecular weight of liquid mixture, kg/kmol
+	dxdTcons    	            -0.01162790697;//-0.00602; Model constant for the blowing agent: dXBL/dT
+	initBlowingAgent            5e-8;	// Initial weight fraction of blowing agent in the liquid, -
+	surfaceTension				11.5e-3;
+}
+
+EnthalpyConstants
+{
+	deltaOH            -6.85e4;		// Reaction heat for the gelling reaction, J/mol
+	deltaW             -8.15e4;		// Reaction heat for the blowing reaction, J/mol
+	PUspecificHeat     1800.0;		// Polyurethane specific heat, J/kg K
+	latentHeat         2.0e5;		// Latent heat of blowing agent, J/kg
+}

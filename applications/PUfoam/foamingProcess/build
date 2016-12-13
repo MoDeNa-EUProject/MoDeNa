@@ -1,7 +1,0 @@
-#!/bin/sh
-bubbleGrowth="../Models/bubbleGrowth/src"
-cmake -H${bubbleGrowth} -B${bubbleGrowth} && make --directory=${bubbleGrowth}
-
-CFD_tool_0D="../Models/CFD_tool_0D/src"
-cmake -H${CFD_tool_0D} -B${CFD_tool_0D} && \
-    make --directory=${CFD_tool_0D}

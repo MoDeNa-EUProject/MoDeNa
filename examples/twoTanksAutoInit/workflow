@@ -36,10 +36,10 @@ Authors
 
 Contributors
 '''
-
+import modena
 from fireworks import Firework, Workflow, LaunchPad
 from fireworks.core.rocket_launcher import rapidfire
-import twoTank
+from twoTank import m as SIMULATION
 from modulefinder import ModuleFinder
 
 
@@ -49,7 +49,7 @@ launchpad.reset('', require_password=False)
 
 # create the individual FireWorks and Workflow
 # Source code in src/twoTanksMacroscopicProblem.C
-wf = Workflow([Firework(twoTank.m)], {}, name="simulation")
+wf = Workflow([Firework(SIMULATION)], {}, name="simulation")
 
 # store workflow and launch it locally
 launchpad.add_wf(wf)
