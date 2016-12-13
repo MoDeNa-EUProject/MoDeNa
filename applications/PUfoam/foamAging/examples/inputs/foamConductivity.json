@@ -17,9 +17,10 @@
         "wallThickness": "DirectInput"
     },
     "gasComposition": {
-        "CO2": 0.3,
-        "Air": 0.3,
-        "Cyclopentane": 0.4
+        "O2": 0.1,
+        "N2": 0.4,
+        "CO2": 0.2,
+        "Cyclopentane": 0.3
     },
     "porosity": 9.678182e-01,
     "cellSize": 5.100000e-04,

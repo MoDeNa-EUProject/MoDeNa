@@ -64,11 +64,15 @@ class FoamConductivityExactTask(ModenaFireTask):
         xCyP = self['point']['x[CyP]']
         xO2 = self['point']['x[O2]']
         xN2 = self['point']['x[N2]']
-        xAir = xN2+xO2
         # Write input
         inputs={"upperBoundary": {"temperature": temp+1,"emittance": 0.9}}
         inputs["lowerBoundary"]={"temperature": temp-1,"emittance": 0.9}
-        inputs["gasComposition"]={"CO2": xCO2,"Air": xAir,"Cyclopentane": xCyP}
+        inputs["gasComposition"]={
+            "O2": xO2,
+            "N2": xN2,
+            "CO2": xCO2,
+            "Cyclopentane": xCyP
+        }
         inputs["gasDensity"]=1.2
         inputs["solidDensity"]=1.1e3
         inputs["sourceOfProperty"]={
