@@ -297,16 +297,37 @@ size_t modena_model_outputs_argPos
     const char *name
 );
 
+/**
+ *  @brief Function returning the names of the inputs.
+ *
+ *The function may be used to determine the inputs of a model.
+ *
+ *  @param self pointer to surrogate model created by modena_model_new.
+*/
 const char** modena_model_inputs_names
 (
     const modena_model_t *self
 );
 
+/**
+ *  @brief Function returning the names of the outputs.
+ *
+ *The function may be used to determine the outputs of a model.
+ *
+ *  @param self pointer to surrogate model created by modena_model_new.
+*/
 const char** modena_model_outputs_names
 (
     const modena_model_t *self
 );
 
+/**
+ *  @brief Function returning the names of the parameters.
+ *
+ *The function may be used to determine the parameters of a model.
+ *
+ *  @param self pointer to surrogate model created by modena_model_new.
+*/
 const char** modena_model_parameters_names
 (
     const modena_model_t *self
@@ -319,14 +340,19 @@ const char** modena_model_parameters_names
 */
 size_t modena_model_inputs_size(const modena_model_t *self);
 
-size_t modena_model_parameters_size(const modena_model_t *self);
-
 /**
  *  @brief Function returning the size of the output vector.
  *  @param modena_model_t surrogate model created by modena_model_new.
  *  @return size_t integer length of the output array.
 */
 size_t modena_model_outputs_size(const modena_model_t *self);
+
+/**
+ *  @brief Function returning the size of the parameter vector.
+ *  @param modena_model_t surrogate model created by modena_model_new.
+ *  @return size_t integer length of the parameter array.
+*/
+size_t modena_model_parameters_size(const modena_model_t *self);
 
 void modena_model_inputs_siunits
 (

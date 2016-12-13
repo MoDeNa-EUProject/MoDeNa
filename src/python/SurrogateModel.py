@@ -830,11 +830,11 @@ class SurrogateModel(DynamicDocument):
 
             self.save()
 
-        for k, v in self.inputs.iteritems():
-            print 'inputs in model', k, self.inputs_argPos(k)
-        for k, v in self.surrogateFunction.inputs_iterAll():
-            print 'inputs in function', k, v.argPos
-        print('parameters = [%s]' % ', '.join('%g' % v for v in self.parameters))
+        #for k, v in self.inputs.iteritems():
+        #    print 'inputs in model', k, self.inputs_argPos(k)
+        #for k, v in self.surrogateFunction.inputs_iterAll():
+        #    print 'inputs in function', k, v.argPos
+        #print('parameters = [%s]' % ', '.join('%g' % v for v in self.parameters))
 
 
     @abc.abstractmethod

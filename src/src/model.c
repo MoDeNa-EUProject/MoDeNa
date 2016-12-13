@@ -252,7 +252,6 @@ void modena_model_get_minMax
     PyObject *ponames = PyTuple_GET_ITEM(pObj, 3); // Borrowed ref
     pSeq = PySequence_Fast(ponames, "expected a sequence");
     self->outputs_size = PySequence_Size(pSeq);
-    printf("o size = %zu\n", self->outputs_size);
     self->outputs_names = malloc(self->outputs_size*sizeof(char*));
 
     for(i = 0; i < self->outputs_size; i++)
@@ -265,12 +264,10 @@ void modena_model_get_minMax
     PyObject *ppnames = PyTuple_GET_ITEM(pObj, 4); // Borrowed ref
     pSeq = PySequence_Fast(ppnames, "expected a sequence");
     self->parameters_size = PySequence_Size(pSeq);
-    printf("p size = %zu\n", self->parameters_size);
     self->parameters_names = malloc(self->parameters_size*sizeof(char*));
     for(i = 0; i < self->parameters_size; i++)
     {
         self->parameters_names[i] = PyString_AsString(PyList_GET_ITEM(pSeq, i));
-        printf("%s\n", self->parameters_names[i]);
     }
     Py_DECREF(pSeq);
     if(PyErr_Occurred()){ Modena_PyErr_Print(); }
@@ -665,14 +662,14 @@ void modena_model_call_no_check
  */
 void modena_model_destroy(modena_model_t *self)
 {
-    size_t j;
-    for(j = 0; j < self->substituteModels_size; j++)
+    size_t i;
+    for(i = 0; i < self->substituteModels_size; i++)
     {
-        Py_XDECREF(self->substituteModels[j].model);
-        modena_inputs_destroy(self->substituteModels[j].inputs);
-        modena_outputs_destroy(self->substituteModels[j].outputs);
-        free(self->substituteModels[j].map_inputs);
-        free(self->substituteModels[j].map_outputs);
+        Py_XDECREF(self->substituteModels[i].model);
+        modena_inputs_destroy(self->substituteModels[i].inputs);
+        modena_outputs_destroy(self->substituteModels[i].outputs);
+        free(self->substituteModels[i].map_inputs);
+        free(self->substituteModels[i].map_outputs);
     }
     free(self->substituteModels);
 
@@ -686,6 +683,10 @@ void modena_model_destroy(modena_model_t *self)
     {
         modena_function_destroy(self->mf);
     }
+
+    free(self->inputs_names);
+    free(self->outputs_names);
+    free(self->parameters_names);
 
     Py_XDECREF(self->pModel);
 
