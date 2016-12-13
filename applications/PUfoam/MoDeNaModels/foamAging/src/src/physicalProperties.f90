@@ -65,6 +65,18 @@ module physicalProperties
     integer(c_size_t) :: scypTemppos
     integer(c_size_t) :: scypxl1pos
     integer(c_size_t) :: scypxl2pos
+    type(c_ptr) :: so2Modena = c_null_ptr
+    type(c_ptr) :: so2Inputs = c_null_ptr
+    type(c_ptr) :: so2Outputs = c_null_ptr
+    integer(c_size_t) :: so2Temppos
+    integer(c_size_t) :: so2xl1pos
+    integer(c_size_t) :: so2xl2pos
+    type(c_ptr) :: sn2Modena = c_null_ptr
+    type(c_ptr) :: sn2Inputs = c_null_ptr
+    type(c_ptr) :: sn2Outputs = c_null_ptr
+    integer(c_size_t) :: sn2Temppos
+    integer(c_size_t) :: sn2xl1pos
+    integer(c_size_t) :: sn2xl2pos
     type(c_ptr) :: dcdModena = c_null_ptr
     type(c_ptr) :: dcdInputs = c_null_ptr
     type(c_ptr) :: dcdOutputs = c_null_ptr
@@ -159,22 +171,38 @@ subroutine createModels
         kcypModena, c_char_"T"//c_null_char);
     call modena_model_argPos_check(kcypModena)
     if (solModel(1)==1) then
-        sairModena = modena_model_new (&
-            c_char_"Solubility[A=Air,B=2]"//c_null_char);
+        so2Modena = modena_model_new (&
+            c_char_"Solubility[A=O2,B=2]"//c_null_char);
         if (modena_error_occurred()) then
             call exit(modena_error())
         endif
-        sairInputs = modena_inputs_new (sairModena);
-        sairOutputs = modena_outputs_new (sairModena);
-        sairTemppos = modena_model_inputs_argPos(&
-            sairModena, c_char_"T"//c_null_char);
-        sairxl1pos = modena_model_inputs_argPos(&
-            sairModena, c_char_"xl1"//c_null_char);
-        sairxl2pos = modena_model_inputs_argPos(&
-            sairModena, c_char_"xl2"//c_null_char);
-        call modena_model_argPos_check(sairModena)
+        so2Inputs = modena_inputs_new (so2Modena);
+        so2Outputs = modena_outputs_new (so2Modena);
+        so2Temppos = modena_model_inputs_argPos(&
+            so2Modena, c_char_"T"//c_null_char);
+        so2xl1pos = modena_model_inputs_argPos(&
+            so2Modena, c_char_"xl1"//c_null_char);
+        so2xl2pos = modena_model_inputs_argPos(&
+            so2Modena, c_char_"xl2"//c_null_char);
+        call modena_model_argPos_check(so2Modena)
     endif
     if (solModel(2)==1) then
+        sn2Modena = modena_model_new (&
+            c_char_"Solubility[A=N2,B=2]"//c_null_char);
+        if (modena_error_occurred()) then
+            call exit(modena_error())
+        endif
+        sn2Inputs = modena_inputs_new (sn2Modena);
+        sn2Outputs = modena_outputs_new (sn2Modena);
+        sn2Temppos = modena_model_inputs_argPos(&
+            sn2Modena, c_char_"T"//c_null_char);
+        sn2xl1pos = modena_model_inputs_argPos(&
+            sn2Modena, c_char_"xl1"//c_null_char);
+        sn2xl2pos = modena_model_inputs_argPos(&
+            sn2Modena, c_char_"xl2"//c_null_char);
+        call modena_model_argPos_check(sn2Modena)
+    endif
+    if (solModel(3)==1) then
         scdModena = modena_model_new (&
             c_char_"Solubility[A=CO2,B=2]"//c_null_char);
         if (modena_error_occurred()) then
@@ -190,7 +218,7 @@ subroutine createModels
             scdModena, c_char_"xl2"//c_null_char);
         call modena_model_argPos_check(scdModena)
     endif
-    if (solModel(3)==1) then
+    if (solModel(4)==1) then
         scypModena = modena_model_new (&
             c_char_"Solubility[A=CyP,B=2]"//c_null_char);
         if (modena_error_occurred()) then
@@ -206,6 +234,22 @@ subroutine createModels
             scypModena, c_char_"xl2"//c_null_char);
         call modena_model_argPos_check(scypModena)
     endif
+    if (solModel(5)==1) then
+        sairModena = modena_model_new (&
+            c_char_"Solubility[A=Air,B=2]"//c_null_char);
+        if (modena_error_occurred()) then
+            call exit(modena_error())
+        endif
+        sairInputs = modena_inputs_new (sairModena);
+        sairOutputs = modena_outputs_new (sairModena);
+        sairTemppos = modena_model_inputs_argPos(&
+            sairModena, c_char_"T"//c_null_char);
+        sairxl1pos = modena_model_inputs_argPos(&
+            sairModena, c_char_"xl1"//c_null_char);
+        sairxl2pos = modena_model_inputs_argPos(&
+            sairModena, c_char_"xl2"//c_null_char);
+        call modena_model_argPos_check(sairModena)
+    endif
     if (diffModel(1)==1) then
         do2Modena = modena_model_new (&
             c_char_"diffusivityPol[A=O2]"//c_null_char);
@@ -217,6 +261,8 @@ subroutine createModels
         do2Temppos = modena_model_inputs_argPos(&
             do2Modena, c_char_"T"//c_null_char);
         call modena_model_argPos_check(do2Modena)
+    endif
+    if (diffModel(2)==1) then
         dn2Modena = modena_model_new (&
             c_char_"diffusivityPol[A=N2]"//c_null_char);
         dn2Inputs = modena_inputs_new (dn2Modena);
@@ -225,7 +271,7 @@ subroutine createModels
             dn2Modena, c_char_"T"//c_null_char);
         call modena_model_argPos_check(dn2Modena)
     endif
-    if (diffModel(2)==1) then
+    if (diffModel(3)==1) then
         dcdModena = modena_model_new (&
             c_char_"diffusivityPol[A=CO2]"//c_null_char);
         if (modena_error_occurred()) then
@@ -237,7 +283,7 @@ subroutine createModels
             dcdModena, c_char_"T"//c_null_char);
         call modena_model_argPos_check(dcdModena)
     endif
-    if (diffModel(3)==1) then
+    if (diffModel(4)==1) then
         dcypModena = modena_model_new (&
             c_char_"diffusivityPol[A=CyP]"//c_null_char);
         if (modena_error_occurred()) then
@@ -272,34 +318,46 @@ subroutine destroyModels
     call modena_outputs_destroy (kcypOutputs);
     call modena_model_destroy (kcypModena);
     if (solModel(1)==1) then
-        call modena_inputs_destroy (sairInputs);
-        call modena_outputs_destroy (sairOutputs);
-        call modena_model_destroy (sairModena);
+        call modena_inputs_destroy (so2Inputs);
+        call modena_outputs_destroy (so2Outputs);
+        call modena_model_destroy (so2Modena);
     endif
     if (solModel(2)==1) then
+        call modena_inputs_destroy (sn2Inputs);
+        call modena_outputs_destroy (sn2Outputs);
+        call modena_model_destroy (sn2Modena);
+    endif
+    if (solModel(3)==1) then
         call modena_inputs_destroy (scdInputs);
         call modena_outputs_destroy (scdOutputs);
         call modena_model_destroy (scdModena);
     endif
-    if (solModel(3)==1) then
+    if (solModel(4)==1) then
         call modena_inputs_destroy (scypInputs);
         call modena_outputs_destroy (scypOutputs);
         call modena_model_destroy (scypModena);
+    endif
+    if (solModel(5)==1) then
+        call modena_inputs_destroy (sairInputs);
+        call modena_outputs_destroy (sairOutputs);
+        call modena_model_destroy (sairModena);
     endif
     if (diffModel(1)==1) then
         call modena_inputs_destroy (do2Inputs);
         call modena_outputs_destroy (do2Outputs);
         call modena_model_destroy (do2Modena);
+    endif
+    if (diffModel(2)==1) then
         call modena_inputs_destroy (dn2Inputs);
         call modena_outputs_destroy (dn2Outputs);
         call modena_model_destroy (dn2Modena);
     endif
-    if (diffModel(2)==1) then
+    if (diffModel(3)==1) then
         call modena_inputs_destroy (dcdInputs);
         call modena_outputs_destroy (dcdOutputs);
         call modena_model_destroy (dcdModena);
     endif
-    if (diffModel(3)==1) then
+    if (diffModel(4)==1) then
         call modena_inputs_destroy (dcypInputs);
         call modena_outputs_destroy (dcypOutputs);
         call modena_model_destroy (dcypModena);
@@ -422,6 +480,44 @@ end function cdSolubility
 
 
 !********************************BEGINNING*************************************
+!> solubility of O2
+real(dp) function o2Solubility(temp)
+    real(dp), intent(in) :: temp
+    real(dp) :: xl1,xl2
+    xl1=1.0e-3_dp
+    xl2=1-xl1
+    call modena_inputs_set(so2Inputs, so2Temppos, temp)
+    call modena_inputs_set(so2Inputs, so2xl1pos, xl1)
+    call modena_inputs_set(so2Inputs, so2xl2pos, xl2)
+    ret = modena_model_call (so2Modena, so2Inputs, so2Outputs)
+    if(ret /= 0) then
+        call exit(ret)
+    endif
+    o2Solubility=modena_outputs_get(so2Outputs, 0_c_size_t)
+end function o2Solubility
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> solubility of N2
+real(dp) function n2Solubility(temp)
+    real(dp), intent(in) :: temp
+    real(dp) :: xl1,xl2
+    xl1=1.0e-3_dp
+    xl2=1-xl1
+    call modena_inputs_set(sn2Inputs, sn2Temppos, temp)
+    call modena_inputs_set(sn2Inputs, sn2xl1pos, xl1)
+    call modena_inputs_set(sn2Inputs, sn2xl2pos, xl2)
+    ret = modena_model_call (sn2Modena, sn2Inputs, sn2Outputs)
+    if(ret /= 0) then
+        call exit(ret)
+    endif
+    n2Solubility=modena_outputs_get(sn2Outputs, 0_c_size_t)
+end function n2Solubility
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
 !> solubility of air
 real(dp) function airSolubility(temp)
     real(dp), intent(in) :: temp
@@ -484,6 +580,34 @@ real(dp) function cypDiffusivity(temp)
     endif
     cypDiffusivity=modena_outputs_get(dcypOutputs, 0_c_size_t)
 end function cypDiffusivity
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> diffusivity of O2
+real(dp) function o2Diffusivity(temp)
+    real(dp), intent(in) :: temp
+    call modena_inputs_set(do2Inputs, do2Temppos, temp)
+    ret = modena_model_call (do2Modena, do2Inputs, do2Outputs)
+    if(ret /= 0) then
+        call exit(ret)
+    endif
+    o2Diffusivity=modena_outputs_get(do2Outputs, 0_c_size_t)
+end function o2Diffusivity
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> diffusivity of N2
+real(dp) function n2Diffusivity(temp)
+    real(dp), intent(in) :: temp
+    call modena_inputs_set(dn2Inputs, dn2Temppos, temp)
+    ret = modena_model_call (dn2Modena, dn2Inputs, dn2Outputs)
+    if(ret /= 0) then
+        call exit(ret)
+    endif
+    n2Diffusivity=modena_outputs_get(dn2Outputs, 0_c_size_t)
+end function n2Diffusivity
 !***********************************END****************************************
 
 

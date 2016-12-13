@@ -19,33 +19,37 @@ subroutine equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp)
     real(dp), dimension(:), intent(in) :: ystate
     integer, intent(in) :: ngas,nfv,mor(:)
     real(dp), intent(in) :: temp,eps,dcell,fstrut
-    real(dp) :: ccd,cair,ccyp,xcd,xair,xcyp,kgas
+    real(dp) :: ccd,cair,ccyp,co2,cn2,xcd,xair,xcyp,xo2,xn2,kgas
     real(dp), dimension(4) :: kg,yg,cpg
     integer :: i,j
     !calculate average concentrations
+    co2=0
+    cn2=0
     ccd=0
-    cair=0
     ccyp=0
     j=1
     do i=1,nfv
         if (mor(i)==1) then
-            cair=cair+ystate(ngas*(i-1)+1)
-            ccd=ccd+ystate(ngas*(i-1)+2)
-            ccyp=ccyp+ystate(ngas*(i-1)+3)
+            co2=co2+ystate(ngas*(i-1)+1)
+            cn2=cn2+ystate(ngas*(i-1)+2)
+            ccd=ccd+ystate(ngas*(i-1)+3)
+            ccyp=ccyp+ystate(ngas*(i-1)+4)
             j=j+1
         endif
     enddo
-    cair=cair/j
+    co2=co2/j
+    cn2=cn2/j
     ccd=ccd/j
     ccyp=ccyp/j
-    xair=cair/(cair+ccd+ccyp)
-    xcd=ccd/(cair+ccd+ccyp)
-    xcyp=ccyp/(cair+ccd+ccyp)
+    xo2=co2/(co2+cn2+ccd+ccyp)
+    xn2=cn2/(co2+cn2+ccd+ccyp)
+    xcd=ccd/(co2+cn2+ccd+ccyp)
+    xcyp=ccyp/(co2+cn2+ccd+ccyp)
     kg(1)=cdConductivity(temp)
     kg(2)=nitrConductivity(temp)
     kg(3)=oxyConductivity(temp)
     kg(4)=cypConductivity(temp)
-    yg=(/xcd,0.79_dp*xair,0.21_dp*xair,xcyp/)
+    yg=(/xcd,xn2,xo2,xcyp/)
     do i=1,4
         if (abs(yg(i))<1e-6_dp) then
             yg(i)=0
