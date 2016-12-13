@@ -62,23 +62,5 @@ maxDeltaT       0.05;
 
 functions
 {
-       volAverage
-       {
-               type                    cellSource;
-               functionObjectLibs ("libfieldFunctionObjects.so");
-               log                     true;
-               valueOutput             false;
-               source                  all;
-               operation               volAverage;
-               outputControl           outputTime;
-               outputInterval 1;
-               fields
-               (
-                  alpha.gas
-                  mZero
-                  mOne
-                  rho_foam
-                  rho
-               );
-        }
+    #includeFunc  probes
 }

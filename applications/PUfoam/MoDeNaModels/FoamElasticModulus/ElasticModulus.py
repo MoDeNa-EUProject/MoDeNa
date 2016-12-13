@@ -23,62 +23,57 @@ License
 @endcond'''
 
 import os
-from modena import ForwardMappingModel,BackwardMappingModel,SurrogateModel,CFunction,IndexSet#,ModenaFireTask
+from os import getcwd, system
+from os.path import abspath, dirname, join
+from jinja2 import Template
+import subprocess
+
+from modena import ForwardMappingModel,BackwardMappingModel, CFunction, ModenaFireTask, Strategy
+
+
 from fireworks.utilities.fw_utilities import explicit_serialize
 
-'''
-# ********************************* Class ********************************** #
+# ----------------------- Convenience variables ----------------------------- #
+MODULE_DIR = dirname(abspath(__file__))
+EXECUTION_DIR = getcwd()
+
+TEMPLATE_FoamElasticModulus = Template(\
+"""
+{{ s['point']['Mu'] }}
+{{ s['point']['Sigma'] }}
+{{ s['point']['strut_content'] }}
+{{ s['point']['rho'] }}
+""", trim_blocks=True, lstrip_blocks=True)
+
+# ----------------------- Exact simulation wrapper -------------------------- #
 @explicit_serialize
 class MechanicalPropertiesExactSim(ModenaFireTask):
     """
-    This FireTask controls the execution of the detailed model of the Surface Tension model.
-    The detailed model is a density functional theory implementation based on PC-SAFT. A
-    detailed description of this model can be found in Deliverable 1.3 on the MoDeNa website.
-    In order to start the detailed model, the input values for the model are first written to the
-    file "in.txt". The detailed model code picks them up from this file and performs the according
-    calculation. Once it is done, the output value is written to the file "out.txt". This FireTask
-    then reads in the calculated surface tension from "out.txt" and inserts this value into the
-    database.
     """
 
-    MODULE_DIR = os.path.dirname(os.path.abspath(__file__))#ectory containing this file
     INPUT_FILE = "Inputs.in"
     OUTPUT_FILE = "Outputs.in"
 
     def task(self, fw_spec):
 
         # Write input for detailed model
-        self.generate_inputfile()
+        TEMPLATE_FoamElasticModulus.stream(s=self).dump(self.INPUT_FILE)
 
         # Execute detailed model
-        # run_command = MODULE_DIR + "/python FoamElasticModulus.py"
-        run_command = MODULE_DIR + "/python 'Hello World'"
+        run_command = join(MODULE_DIR, "AbaqusSimulation.py")
 
-        ret = os.system(run_command)
+        ret = subprocess.check_call(run_command, shell=True)
         # This call enables backward mapping capabilities (not needed in this example)
         self.handleReturnCode(ret)
 
         # Analyse output
-        self.analyse_output()
-
-    def generate_inputfile(self):
-        """Method generating a input file using the Jinja2 template engine."""
-        Template("""
-{{ s['point']['Mu'] }}
-{{ s['point']['Sigma'] }}
-            """, trim_blocks=True,
-               lstrip_blocks=True).stream(s=self).dump(self.INPUT_FILE)
-
-    def analyse_output(self):
-        """Method analysing the output of the file.
-             @TODO consider adding check for empty file
-        """
         with open(self.OUTPUT_FILE, 'r') as FILE:
             self['point']['E'] = float(FILE.readline())
-'''
-"""
-# TODO: This function is not implemented properly
-f = CFunction(
+
+
+
+# ----------------------- Surrogate Functions ------------------------------- #
+f_backward = CFunction(
     Ccode= '''
 #include "modena.h"
 #include "math.h"
@@ -90,26 +85,36 @@ void two_tank_flowRate
 )
 {
     {% block variables %}{% endblock %}
+
+
+    const double C1 = parameters[0];
+    const double C2 = parameters[1];
+
+    const double E_PU = 2400;
+    const double rho_PU = 1200;
+
+    outputs[0] = E_PU*(C1*pow(strut_content*rho/rho_PU,2) + C2*(1-strut_content)*(rho/rho_PU));
 }
 ''',
     # These are global bounds for the function
     inputs={
-        'Mu': { 'min': 0, 'max': 9e99 },
-        'Var': { 'min': 0, 'max': 9e99 },
+        'rho': { 'min': 0, 'max': 1e5},
+        'strut_content': { 'min': 0, 'max': 1e5},
+        'Mu': { 'min': 0, 'max': 1e5},
+        'Sigma': { 'min': 0, 'max': 1e5},
     },
     outputs={
         'E': { 'min': 9e99, 'max': -9e99, 'argPos': 0 },
     },
     parameters={
-        'param0': { 'min': 0.0, 'max': 10.0, 'argPos': 0 },
-        'param1': { 'min': 0.0, 'max': 10.0, 'argPos': 1 },
+        'C1': { 'min': 0.0, 'max': 10.0, 'argPos': 0 },
+        'C2': { 'min': 0.0, 'max': 10.0, 'argPos': 1 },
     },
 )
-"""
 
 
 # Strut content is a assumed to be a function of foam density.
-f = CFunction(
+f_ludwigshafen = CFunction(
     Ccode='''
 #include "modena.h"
 #include "math.h"
@@ -147,30 +152,39 @@ void ElasticModulus
 )
 
 
-# Forward mapping model is used.
+# -------------------------- Surrogate Models ------------------------------- #
 m_forward = ForwardMappingModel(
     _id='FoamElasticModulus',
-    surrogateFunction=f,
+    surrogateFunction=f_ludwigshafen,
     substituteModels= [ ],
     parameters=[0, 1],# TODO: Use real values from Ludwigshafen presentation
 )
-"""
+
+
 m_backward = BackwardMappingModel(
-    _id= 'FoamElasticModulus',
-    surrogateFunction= f,
-    exactTask= ,
-    substituteModels= [ ],
-    initialisationStrategy= Strategy.EmptyInitialisationStrategy(),
+    _id= 'FoamElasticModulus_TEST',
+    surrogateFunction= f_backward,
+    exactTask=MechanicalPropertiesExactSim(),
+    substituteModels= [],
+    initialisationStrategy= Strategy.InitialData(
+       initialData={
+        'rho': [30.2,60,120,240,30.2,60,120,240,30.2,30.2,30.2,30.2,30.2,30.2,30.2],
+        'strut_content': [0.4,0.4,0.4,0.4,0.8,0.8,0.8,0.8,0.85,0.85,0.85,0.85,0.85,0.85,0.85],
+        'Mu': [0.39,0.39,0.39,0.39,0.39,0.39,0.39,0.39,0.39,0.39,0.39,0.39,0.39,0.39,0.39],
+        'Sigma': [0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.15,0.01,0.05,0.1,0.15,0.2,0.25,0.30],
+        'E': [8.16,22.85,52.89,124.73,6.53,13.06,30.36,65.63,4.97,5.48,5.42,4.52,4.61,4.42,4.79],
+        }
+    ),
     outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(
         nNewPoints= 4
     ),
     parameterFittingStrategy= Strategy.NonLinFitWithErrorContol(
         testDataPercentage= 0.2,
-        maxError= 0.05,
+        maxError= 9e99,
         improveErrorStrategy= Strategy.StochasticSampling(
             nNewPoints= 2
         ),
         maxIterations= 5 # Currently not used
     ),
 )
-"""
+
