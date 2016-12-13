@@ -73,7 +73,12 @@ blowing_agents = IndexSet(
 
 monomers = IndexSet(
     name = 'monomers',
-    names = ['PU', 'THF', 'HEXANE', 'surfactant']
+    names = ['PU', 'THF', 'HEXANE']
+)
+
+surfactant = IndexSet(
+    name = 'surfactant',
+    names = ['surfactant','no_surfactant']
 )
 
 
@@ -119,33 +124,21 @@ class SurfaceTensionExactSim(ModenaFireTask):
         self.analyse_output()
 
     def generate_inputfile(self):
-        """Method generating a input file using the Jinja2 template engine."""
-        Template("""
-            {#
-                 Write inputs to the template, one per line.
-            #}
-            {% for k,v in s['point'].iteritems() %}
-                 {{ v }}
-            {% endfor %}
-            {#
-                 The number of species, one integer.
-            #}
-                  {{ s['indices'].__len__() }}
-            {#
-                 Write the species (lower case) one per line.
-            #}
-            {% for k,v in s['indices'].iteritems() %}
-                   {{ v.lower() }}
-            {% endfor %}
-            {#
-                    Set initial feed molar fractions to zero.
-            #}
-            {% for k,v in s['indices'].iteritems() %}
-                {{ 0.0 }}
-            {% endfor %}
-            """, trim_blocks=True,
-               lstrip_blocks=True).stream(s=self).dump('in.txt')
-
+        with open('in.txt','w') as f:
+            f.write("{}\n".format(self['point']['T']))
+            if self['indices']['C']=='no_surfactant':
+                ncomp=2
+                f.write("{}\n".format(ncomp))
+                f.write("{}\n".format(self['indices']['A'].lower()))
+                f.write("{}\n".format(self['indices']['B'].lower()))
+            else:
+                ncomp=3
+                f.write("{}\n".format(ncomp))
+                f.write("{}\n".format(self['indices']['A'].lower()))
+                f.write("{}\n".format(self['indices']['B'].lower()))
+                f.write("{}\n".format(self['indices']['C'].lower()))
+            for i in range(ncomp):
+                f.write("{}\n".format(0.0))
         with open('out.txt','w+') as FILE:
             pass
 
@@ -196,35 +189,36 @@ outputs[0] = P0 + T*P1 + P2*T*T;
     species = {
         'A' : blowing_agents,
         'B' : monomers,
+        'C' : surfactant,
     }
 )
 
-m = BackwardMappingModel(
-    _id= 'SurfaceTension[A=AIR,B=THF]',
-    surrogateFunction= f,
-    exactTask= SurfaceTensionExactSim(),
-    substituteModels= [ ],
-    initialisationStrategy= Strategy.InitialPoints(
-        initialPoints=
-        {
-            'T': [270.0, 290.0, 330.0],
-        },
-    ),
-    outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(
-        nNewPoints= 4
-    ),
-    parameterFittingStrategy= Strategy.NonLinFitWithErrorContol(
-        testDataPercentage= 0.2,
-        maxError= 1e-2,
-        improveErrorStrategy= Strategy.StochasticSampling(
-            nNewPoints= 2
-        ),
-        maxIterations= 5 # Currently not used
-    ),
-)
+# m = BackwardMappingModel(
+#     _id= 'SurfaceTension[A=AIR,B=THF]',
+#     surrogateFunction= f,
+#     exactTask= SurfaceTensionExactSim(),
+#     substituteModels= [ ],
+#     initialisationStrategy= Strategy.InitialPoints(
+#         initialPoints=
+#         {
+#             'T': [270.0, 290.0, 330.0],
+#         },
+#     ),
+#     outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(
+#         nNewPoints= 4
+#     ),
+#     parameterFittingStrategy= Strategy.NonLinFitWithErrorContol(
+#         testDataPercentage= 0.2,
+#         maxError= 1e-2,
+#         improveErrorStrategy= Strategy.StochasticSampling(
+#             nNewPoints= 2
+#         ),
+#         maxIterations= 5 # Currently not used
+#     ),
+# )
 
 m2 = BackwardMappingModel(
-    _id= 'SurfaceTension[A=AIR,B=PU]',
+    _id= 'SurfaceTension[A=AIR,B=PU,C=surfactant]',
     surrogateFunction= f,
     exactTask= SurfaceTensionExactSim(),
     substituteModels= [ ],
@@ -246,4 +240,3 @@ m2 = BackwardMappingModel(
         maxIterations= 5 # Currently not used
     ),
 )
-
