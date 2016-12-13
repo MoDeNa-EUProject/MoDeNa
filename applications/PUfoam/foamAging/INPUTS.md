@@ -25,11 +25,13 @@ The following key-pairs should be defined:
     - `conductivityTemperature`: temperature of conductivity measurements (K)
     - `initialPressure`: initial pressure in foam (Pa)
     - `initialComposition`:
-        - `Air`: molar fraction of air in initial foam
+        - `O2`: molar fraction of oxygen in initial foam
+        - `N2`: molar fraction of nitrogen in initial foam
         - `CO2`: molar fraction of CO2 in initial foam
         - `Cyclopentane`: molar fraction of cyclopentane in initial foam
     - `boundaryPressure`:
-        - `Air`: pressure of air at the outer boundary (Pa)
+        - `O2`: pressure of oxygen at the outer boundary (Pa)
+        - `N2`: pressure of nitrogen at the outer boundary (Pa)
         - `CO2`: pressure of CO2 at the outer boundary (Pa)
         - `Cyclopentane`: pressure of cyclopentane at the outer boundary (Pa)
 - `morphology`:
@@ -41,28 +43,34 @@ The following key-pairs should be defined:
     - `polymerDensity`: polymer density (kg/m3)
     - `foam`:
         - `solubilityModel`:
-            - `Air`: solubility model ["constant","modena"]
+            - `O2`: solubility model ["constant","modena"]
+            - `N2`: solubility model ["constant","modena"]
             - `CO2`: solubility model ["constant","modena"]
             - `Cyclopentane`: solubility model ["constant","modena"]
         - `solubility`:
-            - `Air`: solubility of air, if "constant" model is used (g/g/bar)
+            - `O2`: solubility of oxygen, if "constant" model is used (g/g/bar)
+            - `N2`: solubility of nitrogen, if "constant" model is used (g/g/bar)
             - `CO2`: solubility of CO2, if "constant" model is used (g/g/bar)
             - `Cyclopentane`: solubility of cyclopentane, if "constant" model is used (g/g/bar)
         - `diffusivityModel`:
-            - `Air`: diffusivity model ["constant","modena"]
+            - `O2`: diffusivity model ["constant","modena"]
+            - `N2`: diffusivity model ["constant","modena"]
             - `CO2`: diffusivity model ["constant","modena"]
             - `Cyclopentane`: diffusivity model ["constant","modena"]
         - `diffusivity`:
-            - `Air`: diffusivity of air, if "constant" model is used (m2/s)
+            - `O2`: diffusivity of oxygen, if "constant" model is used (m2/s)
+            - `N2`: diffusivity of nitrogen, if "constant" model is used (m2/s)
             - `CO2`: diffusivity of CO2, if "constant" model is used (m2/s)
             - `Cyclopentane`: diffusivity of cyclopentane, if "constant" model is used (m2/s)
     - `sheet`:
         - `solubility`:
-            - `Air`: solubility of air, if "constant" model is used (g/g/bar)
+            - `O2`: solubility of oxygen, if "constant" model is used (g/g/bar)
+            - `N2`: solubility of nitrogen, if "constant" model is used (g/g/bar)
             - `CO2`: solubility of CO2, if "constant" model is used (g/g/bar)
             - `Cyclopentane`: solubility of cyclopentane, if "constant" model is used (g/g/bar)
         - `diffusivity`:
-            - `Air`: diffusivity of air, if "constant" model is used (m2/s)
+            - `O2`: diffusivity of oxygen, if "constant" model is used (m2/s)
+            - `N2`: diffusivity of nitrogen, if "constant" model is used (m2/s)
             - `CO2`: diffusivity of CO2, if "constant" model is used (m2/s)
             - `Cyclopentane`: diffusivity of cyclopentane, if "constant" model is used (m2/s)
 

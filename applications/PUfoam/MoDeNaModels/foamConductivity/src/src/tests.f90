@@ -157,7 +157,7 @@ subroutine loadParameters
     type(fson_value), pointer :: json_data
     integer :: fi,ios,i,j
     logical :: file_exists
-    real(dp) :: xCO2,xAir,xCyP,matr(7)
+    real(dp) :: xO2,xN2,xCO2,xCyP,matr(7)
     character(len=80) :: strval !name of the file with morphology
     inputs=TRIM(ADJUSTL(fileplacein_par))//TRIM(ADJUSTL(inputs))
     inquire(file=inputs,exist=file_exists) !first try current folder
@@ -240,7 +240,8 @@ subroutine loadParameters
         open(unit=newunit(fi),file=after_foaming)
         read(fi,*)
         read(fi,*) matr(1:4)
-        xAir=0
+        xO2=0
+        xN2=0
         xCyP=matr(3)
         xCO2=matr(4)
         xCyP=xCyP/(xCyP+xCO2)
@@ -251,7 +252,8 @@ subroutine loadParameters
         open(unit=newunit(fi),file=after_foaming)
         read(fi,*)
         read(fi,*) matr(1:4)
-        xAir=0
+        xO2=0
+        xN2=0
         xCyP=matr(3)
         xCO2=matr(4)
         xCyP=xCyP/(xCyP+xCO2)
@@ -262,15 +264,17 @@ subroutine loadParameters
         open(unit=newunit(fi),file=after_foaming)
         read(fi,*)
         read(fi,*) matr(1:4)
-        xAir=0
+        xO2=0
+        xN2=0
         xCyP=matr(3)
         xCO2=matr(4)
         xCyP=xCyP/(xCyP+xCO2)
         xCO2=1-xCyP
         close(fi)
     elseif (strval=="DirectInput") then
+        call fson_get(json_data, "gasComposition.O2", xO2)
+        call fson_get(json_data, "gasComposition.N2", xN2)
         call fson_get(json_data, "gasComposition.CO2", xCO2)
-        call fson_get(json_data, "gasComposition.Air", xAir)
         call fson_get(json_data, "gasComposition.Cyclopentane", xCyP)
     else
         write(*,*) 'unknown source for gas composition'
@@ -324,7 +328,7 @@ subroutine loadParameters
         temp2=tmean
     endif
     tmean=(temp1+temp2)/2
-    call gasConductivity(cond1,tmean,xCO2,xAir,xCyP)
+    call gasConductivity(cond1,tmean,xO2,xN2,xCO2,xCyP)
     call polymerConductivity(cond2,tmean)
     n1=1
     k1=0
