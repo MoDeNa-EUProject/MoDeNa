@@ -64,7 +64,8 @@
             "viscosityModel": "CastroMacosko",
             "molarMassNCO": 615
         },
-        "surfaceTensionModel": "constant",
+        "surfaceTensionModel": "pcsaft",
+        "surfactant": true,
         "surfaceTension": 25e-3,
         "ModenaFoamViscosityModel": false
     },

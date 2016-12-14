@@ -20,6 +20,7 @@ module globals
     logical :: &
         inertial_term,& !include inertial term in equations (t/f)
         solcorr,& !use solubility correction on bubble radius (t/f)
+        surfactantPresent,& !surfactant is present - pcsaft caluclation (t/f)
         gelpoint,& !gel point reached (t/f)
         dilution,& !use dilution effect for kinetics (t/f)
         shooting !am I using shooting method (t/f)

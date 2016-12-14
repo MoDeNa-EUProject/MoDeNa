@@ -2,9 +2,9 @@
 
 !!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
 !> \file Main.F90
-!! \brief Main program  
+!! \brief Main program
 !!
-!! THIS CODE WAS WRITTEN AT 
+!! THIS CODE WAS WRITTEN AT
 !! UNIVERSITY OF STUTTGART,
 !! INSTITUTE OF TECHNICAL THERMODYNAMICS AND THERMAL PROCESS ENGINEERING
 !! BY
@@ -12,7 +12,7 @@
 !! JONAS MAIRHOFER
 !!
 !!
-!! This program calculates surface tensions using the a Density Functional 
+!! This program calculates surface tensions using the a Density Functional
 !! Theory based on the PC-SAFTequation of state.
 !! The contributions to the Helmholtz energy functional are calculated
 !! as folows:
@@ -41,7 +41,7 @@
 !! So far, pressure is set to 1bar in all calculaions
 !!
 !!
-!!If you would like to use this code in your work, please cite the 
+!!If you would like to use this code in your work, please cite the
 !!following publications:
 !!
 !!Gross, Joachim, and Gabriele Sadowski. "Perturbed-chain SAFT: An equation of state based on a perturbation theory for chain molecules." Industrial & engineering chemistry research 40.4 (2001): 1244-1260.
@@ -53,14 +53,14 @@
 !!
 !! In order to run this code, PETSc 3.4.4 has to be installed
 !!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-! 
+!
 
 
 Program DFT
 
 Use PARAMETERS, Only: np,nc,KBOL
 Use BASIC_VARIABLES, Only: ncomp,t,p,ensemble_flag,num,parame,eos,pol,xif,compna,mm, &
-                           surfactant, wif_surfactant  
+                           surfactant, wif_surfactant
 Use EOS_VARIABLES, Only: dhs,mseg,eta,dd_term,dq_term,qq_term
 Use EOS_CONSTANTS, Only: ap,bp,dnm
 Use mod_DFT, Only: box,dzp,fa,zp,fa_disp,ab_disp,pbulk
@@ -77,8 +77,8 @@ Implicit None
 
 #include <finclude/petscsys.h>
 
-!> ---------------------------------------------------------------------- 
-!!Variables 
+!> ----------------------------------------------------------------------
+!!Variables
 !! ----------------------------------------------------------------------
 
 PetscErrorCode     :: ierr
@@ -91,7 +91,7 @@ REAL               :: dhs_save(nc)
 REAL               :: cif(nc)
 REAL               :: psi_factor
 REAL               :: x_surfactant
-INTEGER            :: position_surfactant  
+INTEGER            :: position_surfactant
 
 !external subroutines associated with Solver
 external FormInitialGuess
@@ -105,10 +105,10 @@ external FormFunction
       call MPI_Comm_rank(PETSC_COMM_WORLD,user%rank,ierr)
       call MPI_Comm_size(PETSC_COMM_WORLD,user%num_procs,ierr)
 
-!> ---------------------------------------------------------------------- 
+!> ----------------------------------------------------------------------
 !!Read information from inputfile "in.txt"
 !! ----------------------------------------------------------------------
- 
+
       filename='./in.txt'
       CALL file_open(filename,77)       ! open input file
       READ (77,*) t                     ! read temperature
@@ -119,7 +119,7 @@ external FormFunction
       Do i = 1,ncomp                    ! read component overall molar concentrations
        READ (77,*) xif(i)
      End Do
- 
+
      !check whether surfactant present in system
      surfactant = .false.
      If(ncomp > 1) Then
@@ -132,9 +132,9 @@ external FormFunction
              position_surfactant = i
           End If
         End Do
-     End If   
-        
-     If(surfactant) Then   
+     End If
+
+     If(surfactant) Then
         !calculate new molar concentrations without surfactant
         If(position_surfactant == 1) Then
             Do i = 2,ncomp+1
@@ -142,25 +142,31 @@ external FormFunction
                compna(i-1) = compna(i)
             End Do
             xif(1:ncomp) = xif(1:ncomp) / sum(xif(1:ncomp))
-        Else If(position_surfactant == ncomp + 1) Then    
+        Else If(position_surfactant == ncomp + 1) Then
             xif(1:ncomp) = xif(1:ncomp) / sum(xif(1:ncomp))
-        Else 
+        Else
             Do i = 1,ncomp+1
               If(i>position_surfactant) Then
                   xif(i-1) = xif(i)
                   compna(i-1) = compna(i)
-              End If    
+              End If
             End Do
             xif(1:ncomp) = xif(1:ncomp) / sum(xif(1:ncomp))
         End If
-        
+
      End If
- 
- 
+
+     !In cases where only 0.0 are passed for xif, xif(1:ncomp) = xif(1:ncomp) / sum(xif(1:ncomp)) leads to NAN results
+     If(xif(1) /= xif(1)) Then
+        If(ncomp == 2) xif(1:ncomp) = 0.
+        If(ncomp >  2) xif(1:ncomp) = 1./Real(ncomp)
+     End If
+
+
 !       !calculate molar fractions from molar concentrations
 !       xif(1:ncomp) =cif(1:ncomp) / sum(cif(1:ncomp))
-      
-      
+
+
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !  GENERAL SIMULATION SET UP
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -172,19 +178,19 @@ external FormFunction
 
   eos = 1
   pol = 1
-  
+
   p = 1.000e05
-  
+
   CALL para_input             ! retriev pure comp. parameters
 
-  ensemble_flag = 'tp'        ! this specifies, whether the eos-subroutines 
+  ensemble_flag = 'tp'        ! this specifies, whether the eos-subroutines
                               ! are executed for constant 'tp' or for constant 'tv'
 
 
-                              
+
 !calculate feed mass fraction of surfactant
-If(surfactant) wif_surfactant = x_surfactant*2655.24078 / (sum( xif(1:ncomp)*mm(1:ncomp) ) + x_surfactant*2655.24078 )             
-  
+If(surfactant) wif_surfactant = 0.01!x_surfactant*2655.24078 / (sum( xif(1:ncomp)*mm(1:ncomp) ) + x_surfactant*2655.24078 )
+
 !> - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 !!  Start phase equilibrium calculation and determine critical point
 !! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -200,9 +206,9 @@ If(surfactant) wif_surfactant = x_surfactant*2655.24078 / (sum( xif(1:ncomp)*mm(
   !determine critical point
     num = 0
     dhs_save = dhs               !needed because subroutine CRIT_POINT_MIX changes the value
-    CALL CRIT_POINT_MIX(tc,user) !of the global variable dhs! In cases where Tc doesnt converge 
+    CALL CRIT_POINT_MIX(tc,user) !of the global variable dhs! In cases where Tc doesnt converge
     dhs = dhs_save               !dhs can be NAN after CRIT_POINT_MIX!!
-    !chance to overwite NAN results 
+    !chance to overwite NAN results
 !     IF(user%rank == 0) THEN
 !         WRITE (*,*) 'Give final value of Tc:'
 !         READ (*,*) tc
@@ -211,13 +217,13 @@ If(surfactant) wif_surfactant = x_surfactant*2655.24078 / (sum( xif(1:ncomp)*mm(
 
 
 
-   
+
 !>-------------------------------------------
-!!DFT Set Up 
+!!DFT Set Up
 !!-------------------------------------------
 
    num = 1
-   CALL SET_DEFAULT_EOS_NUMERICAL     
+   CALL SET_DEFAULT_EOS_NUMERICAL
 
    !set default values (overwritten from makefile)
    box   = 45.0                !box length [A]
@@ -231,24 +237,24 @@ If(surfactant) wif_surfactant = x_surfactant*2655.24078 / (sum( xif(1:ncomp)*mm(
    dzp   = box / REAL(ngrid)   !grid spacing [A]
    Allocate(fa(ncomp))
    fa(1:ncomp) = NINT( parame(1:ncomp,2) / dzp  ) !grid points per sigma [-]
-   
+
    !FOR DISP
    ALLOCATE(fa_disp(ncomp),ab_disp(ncomp))
-   psi_factor = 1.5              
-   fa_disp(1:ncomp) = NINT( psi_factor * REAL(fa(1:ncomp)) ) 
+   psi_factor = 1.5
+   fa_disp(1:ncomp) = NINT( psi_factor * REAL(fa(1:ncomp)) )
    Do i=1,ncomp
-     if( MOD(fa_disp(i),2) /= 0 ) fa_disp(i) = fa_disp(i) + 1            
+     if( MOD(fa_disp(i),2) /= 0 ) fa_disp(i) = fa_disp(i) + 1
    End Do
- 
-   
-   ab_disp(1:ncomp) = psi_factor * dhs(1:ncomp)      
+
+
+   ab_disp(1:ncomp) = psi_factor * dhs(1:ncomp)
 
 
    ngp = 2 * maxval(fa_disp(1:ncomp)) + 5   !number of ghost points (+5 kann eig weg)
 
-   Allocate(zp(-ngp:ngrid+ngp))      
+   Allocate(zp(-ngp:ngrid+ngp))
 
-   Do i=-ngp,ngrid+ngp 
+   Do i=-ngp,ngrid+ngp
       zp(i) = REAL(i) * dzp          !z-distance from origin of grid points [A]
    End Do
 
@@ -257,12 +263,12 @@ If(surfactant) wif_surfactant = x_surfactant*2655.24078 / (sum( xif(1:ncomp)*mm(
 
    !update z3t, the T-dependent quantity that relates eta and rho, as eta = z3t*rho
    CALL PERTURBATION_PARAMETER
-  
+
 !>-------------------------------------------
-!!Evaluate Initial Guess,Set up solver,solve system 
+!!Evaluate Initial Guess,Set up solver,solve system
 !!-------------------------------------------
      call SolverSetup
 
 
 
-End Program DFT 
+End Program DFT
