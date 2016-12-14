@@ -830,6 +830,7 @@ class SurrogateModel(DynamicDocument):
 
             self.save()
 
+        #print 'model =', self._id, len(self.inputs)
         #for k, v in self.inputs.iteritems():
         #    print 'inputs in model', k, self.inputs_argPos(k)
         #for k, v in self.surrogateFunction.inputs_iterAll():
@@ -1266,6 +1267,9 @@ class SurrogateModel(DynamicDocument):
             inst = inst_ref()
             if inst is not None:
                 yield inst
+
+    def __repr__(self):
+        return self._id
 
 
 class ForwardMappingModel(SurrogateModel):

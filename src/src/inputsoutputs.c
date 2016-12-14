@@ -64,7 +64,7 @@ void modena_siunits_destroy(modena_siunits_t *self)
 modena_inputs_t *modena_inputs_new(const modena_model_t *self)
 {
     modena_inputs_t *i = malloc(sizeof(modena_inputs_t));
-    i->inputs = malloc(self->inputs_size*sizeof(double));
+    i->inputs = malloc(self->inputs_internal_size*sizeof(double));
     return i;
 }
 

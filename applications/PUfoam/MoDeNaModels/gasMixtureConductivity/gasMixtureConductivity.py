@@ -221,5 +221,5 @@ m_gasMixtureConductivity = ForwardMappingModel(
                       gasConductivity.m_CyP_thermal_conductivity,\
                       gasConductivity.m_O2_thermal_conductivity,\
                       gasConductivity.m_N2_thermal_conductivity],
-    parameters=[1, 1, 1, 1],
+    parameters=[1, 1, 1],
 )
