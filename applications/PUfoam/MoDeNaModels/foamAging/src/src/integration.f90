@@ -30,10 +30,12 @@ subroutine integrate
     real(dp), allocatable :: ystate(:), yprime(:) ! vector of state
     real(dp), allocatable :: RWORK(:)
     real(dp), allocatable :: yinit(:)
+    real(dp), allocatable :: pp(:) ! partial pressure
 
     ! model should be general, but physical properties and conductivity are
     ! hardcoded for ngas=4
     ngas=4
+    allocate(pp(ngas))
 ! -----------------------------------
 ! load inputs
 ! -----------------------------------
@@ -194,10 +196,11 @@ subroutine integrate
 ! Integration loop
 ! ----------------------------------
     open (newunit(fi),file='keq_time.out')
-    write(fi,'(10A23)') '#time', 'eq.conductivity'
-    call output(0, 0.0_dp, ystate, neq)
+    write(fi,'(10A23)') '#time', 'eq_conductivity', 'total_pressure', 'p_O2', &
+        'p_N2', 'p_CO2', 'p_CP'
+    call output(0, 0.0_dp, ystate, neq, pp)
     call equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp_cond)
-    write(fi,'(10es23.15)') tbeg/(3600*24),keq*1.0e3_dp
+    write(fi,'(10es23.15)') tbeg/(3600*24),keq*1.0e3_dp,sum(pp),pp
     do i = 1, nroutputs*multiplicator       ! stabilizing multiplicator
         tin  = dble(i-1)*(tend-tbeg)/dble(nroutputs*multiplicator)+tbeg
         tout = dble(i  )*(tend-tbeg)/dble(nroutputs*multiplicator)+tbeg
@@ -230,9 +233,9 @@ subroutine integrate
         if (mod(i,multiplicator).eq.0) then
             write(*,'(2x,A,1x,f6.1,1x,A)') 'time:', tout/(3600*24),'days'
             write(10,'(2x,A,1x,es9.3,1x,A)') 'time:', tout/(3600*24),'days'
-            call output(i/multiplicator, tout, ystate, neq)
+            call output(i/multiplicator, tout, ystate, neq, pp)
             call equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp_cond)
-            write(fi,'(10es23.15)') tout/(3600*24),keq*1e3
+            write(fi,'(10es23.15)') tout/(3600*24),keq*1e3,sum(pp),pp
         endif
     enddo
     close(10)

@@ -296,15 +296,16 @@ end subroutine input
 
 !********************************BEGINNING*************************************
 !> saves results to file
-subroutine output(iprof, time, ystate, neq)
+subroutine output(iprof, time, ystate, neq, pp)
 	use constants
 	use globals
 	use model, only: ngas,dz,mor,nfv,sol
 	integer :: i, j, iprof
-	integer :: neq
+	integer :: neq, spp
 
 	real(dp) :: time,pos
 	real(dp) :: ystate(:)
+	real(dp) :: pp(:) ! partial pressure
 
 	character(len=1) :: name_1	! one character
 	character(len=2) :: name_2	! two characters
@@ -334,6 +335,8 @@ subroutine output(iprof, time, ystate, neq)
 			ystate(ngas*(i-1)+3)*sol(ngas*(i-1)+3),&
 			ystate(ngas*(i-1)+4)*sol(ngas*(i-1)+4)
 	enddo
+	pp=0
+	spp=0
 	do i = 1,nfv
 		if (i==1) then
 		    pos=dz(1)
@@ -341,11 +344,16 @@ subroutine output(iprof, time, ystate, neq)
 			pos=pos+(dz(i-1)+dz(i))/2
 		endif
 		if (mor(i)==1) then
+			do j=1,ngas
+				pp(j)=pp(j)+ystate(ngas*(i-1)+j)*Rg*temp
+			enddo
+			spp=spp+1
 			write (12,101) time/(3600*24),pos,ystate(ngas*(i-1)+1)*Rg*temp,&
 				ystate(ngas*(i-1)+2)*Rg*temp,ystate(ngas*(i-1)+3)*Rg*temp,&
 				ystate(ngas*(i-1)+4)*Rg*temp
 		endif
 	enddo
+	pp=pp/spp
     close(11)
 	close(12)
 100   format (f8.2,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3)
