@@ -78,6 +78,27 @@ main(int argc, char *argv[])
     modena_inputs_t *inputs = modena_inputs_new(model);
     modena_outputs_t *outputs = modena_outputs_new(model);
 
+    cout << "inputs:" << endl;
+    const char** iNames = modena_model_inputs_names(model);
+    for(int i=0; i<modena_model_inputs_size(model); i++)
+    {
+        cout << iNames[i] << endl;
+    }
+
+    cout << "outputs:" << endl;
+    const char** oNames = modena_model_outputs_names(model);
+    for(int i=0; i<modena_model_outputs_size(model); i++)
+    {
+        cout << oNames[i] << endl;
+    }
+
+    cout << "parameters:" << endl;
+    const char** pNames = modena_model_parameters_names(model);
+    for(int i=0; i<modena_model_parameters_size(model); i++)
+    {
+        cout << pNames[i] << endl;
+    }
+
     size_t Dpos = modena_model_inputs_argPos(model, "D");
     size_t rho0Pos = modena_model_inputs_argPos(model, "rho0");
     size_t p0Pos = modena_model_inputs_argPos(model, "p0");

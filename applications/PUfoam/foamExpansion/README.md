@@ -193,3 +193,5 @@ results. For example, to look at selected results for a 0D
 simulation, you can open `plotQmom0D.vsz` using VEUSZ. Further, the results of
 the 3D simulation (stored in the launcher directory) can be displayed using a
 third party software such as [paraview.](http://www.paraview.org/) Additional results can be displayed through python scripts like `plotWallDrainage.py`.
+
+The Foam aging and Foam conductivity applications can read the final foam morphology from the results of Foam expansion. It is communicated through the `after_foaming.txt` file. In case of 3D simulation, average foam morphology is used, but user must specify several points in `system/probes` file.
