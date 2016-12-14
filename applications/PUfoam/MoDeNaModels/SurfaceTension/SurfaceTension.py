@@ -143,9 +143,8 @@ class SurfaceTensionExactSim(ModenaFireTask):
             pass
 
     def analyse_output(self):
-        """Method        'A' : blowing_agents,
-        'B' : monomers analysing the output of the file.
-             @TODO consider adding check for empty file
+        """ analysing the output of the file.
+            @TODO consider adding check for empty file
         """
         with open('out.txt', 'r') as FILE:
             self['point']['ST'] = float(FILE.readline())
@@ -193,29 +192,29 @@ outputs[0] = P0 + T*P1 + P2*T*T;
     }
 )
 
-# m = BackwardMappingModel(
-#     _id= 'SurfaceTension[A=AIR,B=THF]',
-#     surrogateFunction= f,
-#     exactTask= SurfaceTensionExactSim(),
-#     substituteModels= [ ],
-#     initialisationStrategy= Strategy.InitialPoints(
-#         initialPoints=
-#         {
-#             'T': [270.0, 290.0, 330.0],
-#         },
-#     ),
-#     outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(
-#         nNewPoints= 4
-#     ),
-#     parameterFittingStrategy= Strategy.NonLinFitWithErrorContol(
-#         testDataPercentage= 0.2,
-#         maxError= 1e-2,
-#         improveErrorStrategy= Strategy.StochasticSampling(
-#             nNewPoints= 2
-#         ),
-#         maxIterations= 5 # Currently not used
-#     ),
-# )
+m = BackwardMappingModel(
+    _id= 'SurfaceTension[A=AIR,B=PU,C=no_surfactant]',
+    surrogateFunction= f,
+    exactTask= SurfaceTensionExactSim(),
+    substituteModels= [ ],
+    initialisationStrategy= Strategy.InitialPoints(
+        initialPoints=
+        {
+            'T': [290.0, 300.0, 350.0, 500.0],
+        },
+    ),
+    outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(
+        nNewPoints= 4
+    ),
+    parameterFittingStrategy= Strategy.NonLinFitWithErrorContol(
+        testDataPercentage= 0.2,
+        maxError= 1e-0,
+        improveErrorStrategy= Strategy.StochasticSampling(
+            nNewPoints= 2
+        ),
+        maxIterations= 5 # Currently not used
+    ),
+)
 
 m2 = BackwardMappingModel(
     _id= 'SurfaceTension[A=AIR,B=PU,C=surfactant]',
@@ -225,7 +224,7 @@ m2 = BackwardMappingModel(
     initialisationStrategy= Strategy.InitialPoints(
         initialPoints=
         {
-            'T': [340.0, 350.0, 360.0, 371.0, 380.0],
+            'T': [290.0, 300.0, 350.0, 500.0],
         },
     ),
     outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(
