@@ -193,7 +193,7 @@ outputs[0] = P0 + T*P1 + P2*T*T;
 )
 
 m = BackwardMappingModel(
-    _id= 'SurfaceTension[A=AIR,B=PU,C=no_surfactant]',
+    _id= 'SurfaceTension[A=AIR,B=PU,C=surfactant]',
     surrogateFunction= f,
     exactTask= SurfaceTensionExactSim(),
     substituteModels= [ ],
@@ -217,7 +217,7 @@ m = BackwardMappingModel(
 )
 
 m2 = BackwardMappingModel(
-    _id= 'SurfaceTension[A=AIR,B=PU,C=surfactant]',
+    _id= 'SurfaceTension[A=AIR,B=PU,C=no_surfactant]',
     surrogateFunction= f,
     exactTask= SurfaceTensionExactSim(),
     substituteModels= [ ],
