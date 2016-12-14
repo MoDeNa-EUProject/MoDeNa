@@ -21,12 +21,8 @@ module physicalProperties
     integer(c_size_t) :: kfoamEpspos
     integer(c_size_t) :: kfoamDcellpos
     integer(c_size_t) :: kfoamFstrutpos
-    ! integer(c_size_t) :: kfoamKgaspos
     integer(c_size_t) :: kfoamTemppos
-    integer(c_size_t) :: kfoamXCO2pos
-    integer(c_size_t) :: kfoamXCyPpos
-    integer(c_size_t) :: kfoamXO2pos
-    integer(c_size_t) :: kfoamXN2pos
+    integer(c_size_t), allocatable :: kfoamXg(:)
     type(c_ptr) :: kgasModena = c_null_ptr
     type(c_ptr) :: kgasInputs = c_null_ptr
     type(c_ptr) :: kgasOutputs = c_null_ptr
@@ -96,7 +92,14 @@ module physicalProperties
 contains
 !********************************BEGINNING*************************************
 !> creates Modena models
-subroutine createModels
+subroutine createModels(ngas)
+    integer :: ngas
+    integer :: i
+    character(len=80) :: gasname(ngas)
+    gasname(1) = "O2"
+    gasname(2) = "N2"
+    gasname(3) = "CO2"
+    gasname(4) = "CyP"
     kfoamModena = modena_model_new (c_char_"foamConductivity"//c_null_char);
     if (modena_error_occurred()) then
         call exit(modena_error())
@@ -109,18 +112,12 @@ subroutine createModels
         kfoamModena, c_char_"dcell"//c_null_char);
     kfoamFstrutpos = modena_model_inputs_argPos(&
         kfoamModena, c_char_"fstrut"//c_null_char);
-    ! kfoamKgaspos = modena_model_inputs_argPos(&
-    !     kfoamModena, c_char_"kgas"//c_null_char);
     kfoamTemppos = modena_model_inputs_argPos(&
         kfoamModena, c_char_"T"//c_null_char);
-    kfoamXCO2pos = modena_model_inputs_argPos(&
-        kfoamModena, c_char_"x[CO2]"//c_null_char);
-    kfoamXCyPpos = modena_model_inputs_argPos(&
-        kfoamModena, c_char_"x[CyP]"//c_null_char);
-    kfoamXO2pos = modena_model_inputs_argPos(&
-        kfoamModena, c_char_"x[O2]"//c_null_char);
-    kfoamXN2pos = modena_model_inputs_argPos(&
-        kfoamModena, c_char_"x[N2]"//c_null_char);
+    do i=1,ngas
+        kfoamXg(i) = modena_model_inputs_argPos(kfoamModena, &
+            c_char_"x["//TRIM(ADJUSTL(gasname(i)))//"]"//c_null_char);
+    enddo
     call modena_model_argPos_check(kfoamModena)
     kgasModena = modena_model_new (&
         c_char_"gasMixtureConductivity"//c_null_char)

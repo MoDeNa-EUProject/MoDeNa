@@ -19,45 +19,34 @@ subroutine equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp)
     real(dp), dimension(:), intent(in) :: ystate
     integer, intent(in) :: ngas,nfv,mor(:)
     real(dp), intent(in) :: temp,eps,dcell,fstrut
-    real(dp) :: ccd,cair,ccyp,co2,cn2,xcd,xair,xcyp,xo2,xn2,kgas
-    real(dp), dimension(4) :: kg,yg,cpg
-    integer :: i,j
+    real(dp) :: kgas
+    real(dp), dimension(ngas) :: kg,yg,cpg,cc
+    integer :: i,j,k
     !calculate average concentrations
-    co2=0
-    cn2=0
-    ccd=0
-    ccyp=0
-    j=1
+    cc=0
+    j=0
     do i=1,nfv
         if (mor(i)==1) then
-            co2=co2+ystate(ngas*(i-1)+1)
-            cn2=cn2+ystate(ngas*(i-1)+2)
-            ccd=ccd+ystate(ngas*(i-1)+3)
-            ccyp=ccyp+ystate(ngas*(i-1)+4)
+            do k=1,ngas
+                cc(k)=cc(k)+ystate(ngas*(i-1)+k)
+            enddo
             j=j+1
         endif
     enddo
-    co2=co2/j
-    cn2=cn2/j
-    ccd=ccd/j
-    ccyp=ccyp/j
-    xo2=co2/(co2+cn2+ccd+ccyp)
-    xn2=cn2/(co2+cn2+ccd+ccyp)
-    xcd=ccd/(co2+cn2+ccd+ccyp)
-    xcyp=ccyp/(co2+cn2+ccd+ccyp)
-    kg(1)=cdConductivity(temp)
+    cc=cc/j
+    yg=cc/sum(cc)
+    kg(1)=oxyConductivity(temp)
     kg(2)=nitrConductivity(temp)
-    kg(3)=oxyConductivity(temp)
+    kg(3)=cdConductivity(temp)
     kg(4)=cypConductivity(temp)
-    yg=(/xcd,xn2,xo2,xcyp/)
-    do i=1,4
+    do i=1,ngas
         if (abs(yg(i))<1e-6_dp) then
             yg(i)=0
         endif
     enddo
-    cpg(1)=cdHeatCapacity(temp)
+    cpg(1)=oxyHeatCapacity(temp)
     cpg(2)=nitrHeatCapacity(temp)
-    cpg(3)=oxyHeatCapacity(temp)
+    cpg(3)=cdHeatCapacity(temp)
     cpg(4)=cypHeatCapacity(temp)
     select case(gasModel) ! determine conductivity of gas mixture
     case (1)
@@ -74,12 +63,10 @@ subroutine equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp)
     call modena_inputs_set(kfoamInputs, kfoamEpspos, eps)
     call modena_inputs_set(kfoamInputs, kfoamDcellpos, dcell)
     call modena_inputs_set(kfoamInputs, kfoamFstrutpos, fstrut)
-    ! call modena_inputs_set(kfoamInputs, kfoamKgaspos, kgas)
     call modena_inputs_set(kfoamInputs, kfoamTemppos, temp)
-    call modena_inputs_set(kfoamInputs, kfoamXCO2pos, yg(1))
-    call modena_inputs_set(kfoamInputs, kfoamXCyPpos, yg(4))
-    call modena_inputs_set(kfoamInputs, kfoamXO2pos, yg(3))
-    call modena_inputs_set(kfoamInputs, kfoamXN2pos, yg(2))
+    do i=1,ngas
+        call modena_inputs_set(kfoamInputs, kfoamXg(i), yg(i))
+    enddo
     ret = modena_model_call (kfoamModena, kfoamInputs, kfoamOutputs)
     if (modena_error_occurred()) then
         call exit(modena_error())
@@ -101,7 +88,7 @@ real(dp) function weightedAverage(k,yin) result(kmix)
     allocate(y(n))
     y=yin
     if (minval(y)<0) then
-        print*,  'Input molar fractions to weightedAverage cannot be negative.'
+        print*, 'Input molar fractions to weightedAverage cannot be negative.'
         print*, y
         stop
     endif
@@ -135,7 +122,7 @@ real(dp) function extWassiljewa(k,yin,Tc,pc,M,T,eps) result(kmix)
     allocate(y(n),gam(n),ktr(n,n),A(n,n))
     y=yin
     if (minval(y)<0) then
-        print*,  'Input molar fractions to extWassiljewa cannot be negative.'
+        print*, 'Input molar fractions to extWassiljewa cannot be negative.'
         print*, y
         stop
     endif
@@ -186,7 +173,7 @@ real(dp) function lindsayBromley(k,yin,Tb,cp,M,T) result(kmix)
     allocate(y(n),cv(n),S(n),gam(n),A(n,n))
     y=yin
     if (minval(y)<0) then
-        print*,  'Input molar fractions to lindsayBromley cannot be negative.'
+        print*, 'Input molar fractions to lindsayBromley cannot be negative.'
         print*, y
         stop
     endif
@@ -238,7 +225,7 @@ real(dp) function pandeyPrajapati(k,yin,Tb,M,T) result(kmix)
     allocate(y(n),S(n),A(n,n))
     y=yin
     if (minval(y)<0) then
-        print*,  'Input molar fractions to pandeyPrajapati cannot be negative.'
+        print*, 'Input molar fractions to pandeyPrajapati cannot be negative.'
         print*, y
         stop
     endif
