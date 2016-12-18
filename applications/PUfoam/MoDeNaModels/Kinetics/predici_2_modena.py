@@ -1,4 +1,9 @@
 
+"""
+@ingroup mod_kinetics
+@namespace Kinetics.Predici_2_modena
+"""
+
 import sys
 import time
 

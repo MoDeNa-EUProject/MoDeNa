@@ -1,3 +1,5 @@
+@ingroup foam_constr
+
 # Program for foam reconstruction
 - based on Voronoi tessellation
 - closed-cell foams

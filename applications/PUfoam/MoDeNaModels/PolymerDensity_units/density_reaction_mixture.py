@@ -31,6 +31,10 @@ License
 """
 @file
 Surrogate function and model definitions for the density of the reaction mixturemode
+
+@ingroup mod_reactionMixDensity
+@namespace PolymerDensity_units.density_reaction_mixture
+
 @author    Erik Laurini
 @author    Mohsen Karimi
 @copyright 2014-2016, MoDeNa Project. GNU Public License.

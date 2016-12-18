@@ -29,9 +29,10 @@ License
 @endcond'''
 
 """
-@file
-Backward mapping Firetask for Foam ageing model.
-Contains path to the detailed model executable.
+@ingroup foam_aging
+@namespace foamAging.foamAging
+@brief Backward mapping Firetask for Foam ageing model.
+       Contains path to the detailed model executable.
 
 @author    Pavel Ferkl
 @copyright 2014-2016, MoDeNa Project. GNU Public License.

@@ -1,3 +1,5 @@
+@ingroup ex_multiComponent
+
 MULTICOMPONENT DIFFUSION EXAMPLE:
 =================================
 

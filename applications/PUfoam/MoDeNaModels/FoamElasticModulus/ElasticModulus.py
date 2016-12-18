@@ -22,6 +22,29 @@ License
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
 @endcond'''
 
+"""
+@namespace  FoamElasticModulus.ElasticModulus
+@ingroup    mod_elasticmodulus
+@brief      Surrogate Function, Surrogate Model templates and Model Recipe
+@author
+@copyright 2014-2016, MoDeNa Project. GNU Public License.
+@details
+
+Detailed
+
+
+description
+
+
+of
+
+
+the
+
+
+module
+"""
+
 import os
 from os import getcwd, system
 from os.path import abspath, dirname, join

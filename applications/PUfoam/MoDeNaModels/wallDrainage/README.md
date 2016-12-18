@@ -1,4 +1,8 @@
-## Wall drainage
+@ingroup wall_drain
+
+Wall drainage
+=============
+
 Simulates wall drainage in PU foaming process
 
 ## Installation

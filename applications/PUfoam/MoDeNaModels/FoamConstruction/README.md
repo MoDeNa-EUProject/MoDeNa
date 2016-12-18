@@ -1,5 +1,8 @@
+@ingroup foam_constr
+
 Foam Construction
-============================
+=================
+
 ## Installation
 The code depends on several third-party applications:
 - `neper` and `voro++` for tessellation

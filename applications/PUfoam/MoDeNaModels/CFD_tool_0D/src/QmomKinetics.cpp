@@ -27,15 +27,17 @@ License
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
 @endcond
-@file
+
+@ingroup    mod_0Dcfd
+@brief      macro-scale tool for the foaming process.
+@details
     This is a macro-scale modeling tool for the foaming process. The code utilizes
     the MoDeNa interface library to connect different models including nano, and
     meso scale models. The code returns the evolution of foam properties such as
     density, temperature and bubble/cell size distribution.
-@brief      macro-scale tool for the foaming process.
+
 @authors    Mohsen Karimi, Daniele Marchisio, Pavel Ferkl
 @copyright  2014-2016, MoDeNa Project. GNU Public License.
-@ingroup    app_foaming
 */
 
 #include <iostream>

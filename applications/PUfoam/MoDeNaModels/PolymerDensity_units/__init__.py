@@ -1,4 +1,4 @@
-'''
+'''@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -34,6 +34,11 @@ Authors
     Henrik Rusche
 
 Contributors
-'''
+@endcond'''
+
+"""
+@ingroup mod_reactionMixDensity
+@namespace PolymerDensity_units
+"""
 
 from density_reaction_mixture import m

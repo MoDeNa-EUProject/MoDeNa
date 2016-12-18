@@ -29,7 +29,9 @@ License
 @endcond'''
 
 """
-@file      Backward mapping FireTask for rheology model.
+@ingroup   mod_rheology
+@namespace Rheology.Rheology
+@brief     Backward mapping FireTask for rheology model.
 @author    Christos Mitrias
 @copyright 2014-2016, MoDeNa Project. GNU Public License.
 @ingroup   app_foaming
@@ -67,8 +69,9 @@ with open(getcwd()+'/inputs/unifiedInput.json') as jsonfile:
 
 # ------------------------- Utility functions ------------------------------- #
 def link_files(src, dst):
-    """ Function symlinking all files and directories from directory "src"
-        to the directory "dst".
+    """
+    @brief Function symlinking all files and directories from directory "src"
+           sto the directory "dst".
     """
     for dirpath,_,filenames in walk(src):
         dstpth = join(dst, dirpath[len(src)+1:])
@@ -112,7 +115,7 @@ def link_files(src, dst):
 @explicit_serialize
 class RheologyExactTask_dummy(ModenaFireTask):
     """
-    A FireTask that starts a microscopic code and updates the database.
+    @brief A FireTask that starts a microscopic code and updates the database.
     """
     INPUT_FILE = 'RheologyExact.in'
     OUTPUT_FILE = 'RheologyExact.out'
@@ -142,7 +145,8 @@ class RheologyExactTask_dummy(ModenaFireTask):
         remove(self.INPUT_FILE)
         remove(self.OUTPUT_FILE)
 
-
+## Surrogate Function
+#
 f_dummy = CFunction(
     Ccode= '''
 #include "modena.h"

@@ -30,9 +30,10 @@ License
 
 """
 @file
-Surrogate function and model definitions for thermal conductivity of blowing
-agents.
-
+@ingroup   mod_gasConductivity
+@namespace gasConductivity.gasConductivity
+@brief     Surrogate function and model definitions for thermal conductivity of
+           blowing agents.
 @author    Erik Laurini
 @author    Pavel Ferkl
 @copyright 2014-2016, MoDeNa Project. GNU Public License.

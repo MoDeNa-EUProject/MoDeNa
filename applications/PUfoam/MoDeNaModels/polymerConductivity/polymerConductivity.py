@@ -29,9 +29,10 @@ License
 @endcond'''
 
 """
-@file
-Surrogate function and model definitions for thermal conductivity of
-polyurethane
+@ingroup mod_polymerConductivity
+@namespace polymerConductivity.polymerConductivity
+@brief Surrogate function and model definitions for thermal conductivity of
+      polyurethane
 
 @author    Erik Laurini
 @author    Pavel Ferkl

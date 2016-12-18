@@ -1,4 +1,6 @@
-TWO TANKS EXAMPLE:
+@ingroup ex_twoTank
+
+TWO TANKS EXAMPLE
 ==================
 
 The discharge of air from one tank into another through a nozzle. The
@@ -41,4 +43,3 @@ How to run?
 
 # Run again to see that no fitting is done on the second start
     ./workflow
-

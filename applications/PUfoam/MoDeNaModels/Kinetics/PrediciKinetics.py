@@ -29,7 +29,8 @@ License
 @endcond'''
 
 """
-@file      Missing description
+@ingroup mod_kinetics
+@namespace Kinetics.PrediciKinetics
 @todo      Document
 @author    Andreas Daiss
 @copyright 2014-2016, MoDeNa Project. GNU Public License.
