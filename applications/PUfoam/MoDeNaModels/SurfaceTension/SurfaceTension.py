@@ -29,8 +29,17 @@ License
 @endcond'''
 
 """
-@file
-This is the Surface Tension python module. Basically, it contains the following:
+@file       SurfaceTension.py
+@namespace  SurfaceTension.SurfaceTension
+@ingroup    mod_surfacetension
+@brief      Surrogate Function, Surrogate Model templates and Model Recipe
+@author    Jonas Mairhofer
+@copyright 2014-2016, MoDeNa Project. GNU Public License.
+@details
+
+# Surface Tension python module.
+
+Contains the following:
 
 The FireTask which controls the call of the detailed model. This detailed model is called
 at the very beginning of the simulation in order to generate initial data points
@@ -54,10 +63,6 @@ fitted range. The parameter fitting strategy defines tolerances and maximal iter
 which are passed to the numerical solver which performs the actual fitting of the
 surrogate model parameters.
 
-
-@author    Jonas Mairhofer
-@copyright 2014-2016, MoDeNa Project. GNU Public License.
-@ingroup   app_foaming
 """
 
 import os
@@ -65,17 +70,46 @@ from modena import *
 from fireworks.utilities.fw_utilities import explicit_serialize
 from jinja2 import Template
 
-
+## @var blowing_agents
+# @brief (MoDeNa) Index Set for the Blowing Agents that are valid for the model
+# @details
+#
+# The index set contains two elements:
+#
+# @f[
+#     \mathbb{A} = \left\{ \text{Air}, \text{CO2} \right\}
+# @f]
+#
 blowing_agents = IndexSet(
     name= 'blowing_agents',
     names= [ 'AIR', 'CO2']
 )
 
+## @var monomers
+# @brief (MoDeNa) Index Set for the Monomers that are valid for the model
+# @details
+#
+# The index set contains four elements:
+#
+# @f[
+#   \mathbb{B} = \left\{ \text{PU}, \text{THF}, \text{HEXANE} \right\}
+# @f]
+#
 monomers = IndexSet(
     name = 'monomers',
     names = ['PU', 'THF', 'HEXANE']
 )
 
+## @var surfactant
+# @brief (MoDeNa) Index Set for the Surfactants that are valid for the model
+# @details
+#
+# The index set contains four elements:
+#
+# @f[
+#   \mathbb{C}= \left\{ \text{surfactant}, \text{no_surfactant} \right\}
+# @f]
+#
 surfactant = IndexSet(
     name = 'surfactant',
     names = ['surfactant','no_surfactant']
@@ -87,15 +121,28 @@ surfactant = IndexSet(
 @explicit_serialize
 class SurfaceTensionExactSim(ModenaFireTask):
     """
-    This FireTask controls the execution of the detailed model of the Surface Tension model.
-    The detailed model is a density functional theory implementation based on PC-SAFT. A
-    detailed description of this model can be found in Deliverable 1.3 on the MoDeNa website.
+    @brief    Recipe for PCSAFT Surface Tension Application
+    @details
+              This FireTask controls the execution of the detailed model of the
+              Surface Tension model. The detailed model is a density functional
+              theory implementation based on PC-SAFT. A detailed description of
+              this model can be found in Deliverable 1.3 on the [MoDeNa]
+              website.
 
-    In order to start the detailed model, the input values for the model are first written to the
-    file "in.txt". The detailed model code picks them up from this file and performs the according
-    calculation. Once it is done, the output value is written to the file "out.txt". This FireTask
-    then reads in the calculated surface tension from "out.txt" and inserts this value into the
-    database.
+              In order to start the detailed model, the input values for the
+              model are first written to the file "in.txt". The detailed model
+              code picks them up from this file and performs the according
+              calculation. Once it is done, the output value is written to the
+              file "out.txt". This FireTask then reads in the calculated
+              surface tension from "out.txt" and inserts this value into the
+              database.
+
+              [MoDeNa]: http://www.modenaproject.eu/
+
+    @attention
+    @pre
+    @note
+    @warning
     """
 
     def task(self, fw_spec):
@@ -124,6 +171,35 @@ class SurfaceTensionExactSim(ModenaFireTask):
         self.analyse_output()
 
     def generate_inputfile(self):
+        """
+        @brief   Generate a input file using the Jinja2 template engine.
+        """
+        Template("""
+            {#
+                 Write inputs to the template, one per line.
+            #}
+            {% for k,v in s['point'].iteritems() %}
+                 {{ v }}
+            {% endfor %}
+            {#
+                 The number of species, one integer.
+            #}
+                  {{ s['indices'].__len__() }}
+            {#
+                 Write the species (lower case) one per line.
+            #}
+            {% for k,v in s['indices'].iteritems() %}
+                   {{ v.lower() }}
+            {% endfor %}
+            {#
+                    Set initial feed molar fractions to zero.
+            #}
+            {% for k,v in s['indices'].iteritems() %}
+                {{ 0.0 }}
+            {% endfor %}
+            """, trim_blocks=True,
+               lstrip_blocks=True).stream(s=self).dump('in.txt')
+
         with open('in.txt','w') as f:
             f.write("{}\n".format(self['point']['T']))
             if self['indices']['C']=='no_surfactant':
@@ -139,8 +215,6 @@ class SurfaceTensionExactSim(ModenaFireTask):
                 f.write("{}\n".format(self['indices']['C'].lower()))
             for i in range(ncomp):
                 f.write("{}\n".format(0.0))
-        with open('out.txt','w+') as FILE:
-            pass
 
     def analyse_output(self):
         """ analysing the output of the file.
@@ -149,9 +223,27 @@ class SurfaceTensionExactSim(ModenaFireTask):
         with open('out.txt', 'r') as FILE:
             self['point']['ST'] = float(FILE.readline())
 
-
-
-
+## @var f
+# @brief (MoDeNa) Surrogate Function Template
+# @details
+#
+# The surrogate function is an indexed function of the form:
+#
+# @f[
+#    \hat{\mathcal{M}} := f_{A,B,C}(T; \theta_1, \theta_2, \theta_3) \quad;\quad 270 \leq T \leq 550 \quad A\in\mathbb{A} \quad B\in \mathbb{B} \quad C\in \mathbb{C}
+# @f]
+#
+# Where @f$\mathbb{A}@f$ and @f$\mathbb{B}@f$ respectively are the index sets @ref blowing_agents and @ref monomers.
+#
+# @f[
+#    f_{A,B}(T; \theta_1, \theta_2, \theta_3) := \theta_1 \cdot T + \theta_2 \cdot T^2 + \theta_3 \cdot T^3
+# @f]
+#
+# @attention Look here
+# @pre
+# @note
+# @todo     Check if parameter bounds are reasonable
+# @warning
 f = CFunction(
     Ccode= r'''
 #include "modena.h"
@@ -173,15 +265,14 @@ const double P2 = parameters[2];
 outputs[0] = P0 + T*P1 + P2*T*T;
 }
 ''',
-    # These are global bounds for the function
     inputs={
-        'T': { 'min': 270.0, 'max': 550.0 },        #check if boundaries reasonable, from this range, the random values for the DOE are chosen!
+        'T': { 'min': 270.0, 'max': 550.0 },
     },
     outputs={
         'ST': { 'min': 9e99, 'max': -9e99, 'argPos': 0 },
     },
     parameters={
-        'param0': { 'min': -1E10, 'max': 1E10, 'argPos': 0 },    #check if boundaries are reasonable!!!
+        'param0': { 'min': -1E10, 'max': 1E10, 'argPos': 0 },
         'param1': { 'min': -1E10, 'max': 1E10, 'argPos': 1 },
         'param2': { 'min': -1E10, 'max': 1E10, 'argPos': 2 },
     },
@@ -192,6 +283,22 @@ outputs[0] = P0 + T*P1 + P2*T*T;
     }
 )
 
+## @var m
+# @brief (MoDeNa) Surrogate Model Template (Air, THF)
+# @details
+#
+# The surrogate model is defined for the indices "Air" and "THF":
+# @f[
+#    \hat{\mathcal{M}} := f_{\text{Air},\text{THF},\text{surfactant}}( T; \theta_1, \theta_2, \theta_3)
+# @f]
+#
+# @attention Look here
+# @pre
+# @note
+# @todo
+# @warning
+# @bug
+#
 m = BackwardMappingModel(
     _id= 'SurfaceTension[A=AIR,B=PU,C=surfactant]',
     surrogateFunction= f,
@@ -216,6 +323,19 @@ m = BackwardMappingModel(
     ),
 )
 
+## @var m2
+# @brief (MoDeNa) Surrogate Model Template (Air, PU)
+# @details
+#
+# @f[
+#    \hat{\mathcal{M}} := f_{\text{Air},\text{PU},\text{no_surfactant}}( T; \theta_1, \theta_2, \theta_3)
+# @f]
+#
+# @note
+# @todo
+# @warning
+# @bug
+#
 m2 = BackwardMappingModel(
     _id= 'SurfaceTension[A=AIR,B=PU,C=no_surfactant]',
     surrogateFunction= f,

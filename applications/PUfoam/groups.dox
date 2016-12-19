@@ -1,0 +1,10 @@
+/**
+  @defgroup applications
+  @brief    Polyurethane foam applications using the MoDeNa framework
+*/
+
+/**
+  @defgroup models
+  @brief    Collection of complex mathematical models
+*/
+

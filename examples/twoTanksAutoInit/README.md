@@ -1,3 +1,5 @@
+@ingroup ex_twoTank
+
 TWO TANKS EXAMPLE:
 ==================
 
@@ -42,4 +44,3 @@ How to run?
 
 # Run again to see that no fitting is done on the second start
     ./workflow
-

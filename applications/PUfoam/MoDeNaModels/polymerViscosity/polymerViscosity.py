@@ -30,6 +30,8 @@ License
 
 """
 @file      Surrogate function and model definitions for polymer viscosity model.
+@ingroup mod_polymerViscocity
+@namespace polymerViscocity.polymerViscocity
 @author    Pavel Ferkl
 @copyright 2014-2016, MoDeNa Project. GNU Public License.
 @ingroup   app_foaming

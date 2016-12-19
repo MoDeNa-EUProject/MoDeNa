@@ -1,0 +1,68 @@
+/*! @page deps Dependencies
+ *  @section dep_Surfacetension Dependencies of Surface tension model
+ *
+ *
+ *   | Dependency | Type                            | Tested Version |
+ *   | ---------- | ------------------------------- | -------------- |
+ *   | gfortran   | compiler                        | 5.4            |
+ *   | [PETSc]    | Toolkit - Scientific Computing  | 3.4.5 *        |
+ *   | BLAS       | Library - Basic Linear Algebra  | **             |
+ *   | LAPACK     | Toolkit - Linear algebra        | **             |
+ *   | SCALAPACK  | SCalable Lapack (mpi)           | **             |
+ *   | MPI        | Message Passing Interface       | **             |
+ *   * The dependency is strictly dependent on this version.
+ *
+ *   ** Dependencies **must** be compatible with the **version** of [PETSc]. This is
+ *   ducumented in the module @ref mod_surfacetension.
+ *   [1]: adsfasdf
+ *   [PETSc]: https://www.mcs.anl.gov/petsc/
+*/
+
+/**
+ * @defgroup mod_surfacetension Surface Tension MoDeNa Module
+ * @ingroup  models
+ * @brief    Integrates Surface Tension model into the MoDeNa software framework
+ * @details
+ *
+ * @ref SurfaceTension.SurfaceTension.m Surrogate Model
+ * @ref SurfaceTension.SurfaceTension.m2 Surrogate Model
+ * @ref dep_Surfacetension
+ *
+ * @remark
+ * @attention
+ * @pre
+ * @note
+ * @warning
+*/
+
+/**
+ * @defgroup ex_mod_surfacetension Example Workflow
+ * @ingroup mod_surfacetension
+ * @brief   Integrates Surface Tension model into the MoDeNa software framework
+ * @details
+ *
+ *
+ * @remark
+ * @attention
+ * @pre
+ * @note
+ * @warning
+*/
+
+
+/**
+ * @defgroup src_mod_surfacetension Fortran Source Code
+ * @ingroup  mod_surfacetension
+ * @brief    Source Code Documentation
+ * @details
+ *
+ *
+ * @remark
+ * @attention
+ * @pre
+ * @note
+ * @warning
+*/
+
+
+

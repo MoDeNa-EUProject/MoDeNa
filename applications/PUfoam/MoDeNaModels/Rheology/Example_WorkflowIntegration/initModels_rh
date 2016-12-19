@@ -30,10 +30,10 @@ License
 @endcond'''
 
 """
-@file      Initialisation script for the rheology model.
+@ingroup   mod_ex_rheology
+@brief     Initialisation script for the rheology model.
 @author    Christos Mitrias
 @copyright 2014-2016, MoDeNa Project. GNU Public License.
-@ingroup   app_foaming
 """
 
 from modena import SurrogateModel, MODENA_PARSED_URI

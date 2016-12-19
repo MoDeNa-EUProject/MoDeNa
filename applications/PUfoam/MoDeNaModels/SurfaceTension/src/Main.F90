@@ -1,8 +1,12 @@
-
+!>
+!! @addtogroup src_mod_surfacetension
+!! @{
 
 !!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-!> \file Main.F90
-!! \brief Main program
+!>
+!! @brief Main program  
+!!
+!! @details
 !!
 !! THIS CODE WAS WRITTEN AT
 !! UNIVERSITY OF STUTTGART,
@@ -49,11 +53,22 @@
 !!Gross, Joachim, and Jadran Vrabec. "An equation-of-state contribution for polar components: Dipolar molecules." AIChE journal 52.3 (2006): 1194-1204.
 !!Gross, Joachim. "A density functional theory for vapor-liquid interfaces using the PCP-SAFT equation of state." The Journal of chemical physics 131.20 (2009): 204705.
 !!Klink, Christoph, and Joachim Gross. "A density functional theory for vapor-liquid interfaces of mixtures using the perturbed-chain polar statistical associating fluid theory equation of state." Industrial & Engineering Chemistry Research 53.14 (2014): 6169-6178.
+<<<<<<< HEAD
+!! @warning
+!! @note
+!! @bug
+!! @pre
+!! @todo
+!! @attention In order to run this code, PETSc 3.4.4 has to be installed
+!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
+! 
+=======
 !!
 !!
 !! In order to run this code, PETSc 3.4.4 has to be installed
 !!WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
 !
+>>>>>>> upstream/nextRelease
 
 
 Program DFT
@@ -271,4 +286,11 @@ If(surfactant) wif_surfactant = 0.01!x_surfactant*2655.24078 / (sum( xif(1:ncomp
 
 
 
+<<<<<<< HEAD
+End Program DFT 
+!>
+!! @}
+
+=======
 End Program DFT
+>>>>>>> upstream/nextRelease

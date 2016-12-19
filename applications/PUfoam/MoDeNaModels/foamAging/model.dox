@@ -1,0 +1,7 @@
+/**
+@defgroup foam_aging Foam aging
+@ingroup  models
+@brief    Predicts the evolution of composition of gas phase in foam and
+determines the change in thermal properties.
+*/
+

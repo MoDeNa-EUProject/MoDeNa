@@ -29,8 +29,9 @@ License
 @endcond'''
 
 """
-@file
-Backward mapping FireTask for Wall drainage model.
+@ingroup wall_drain Wall
+@namespace wallDrainage.wallDrainage
+@brief Backward mapping FireTask for Wall drainage model.
 
 @author    Pavel Ferkl
 @copyright 2014-2016, MoDeNa Project. GNU Public License.

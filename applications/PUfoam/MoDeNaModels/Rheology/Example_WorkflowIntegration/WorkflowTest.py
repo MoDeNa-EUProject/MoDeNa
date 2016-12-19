@@ -1,3 +1,8 @@
+
+"""
+@ingroup mod_ex_rheology
+"""
+
 import os
 import modena
 from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, \
