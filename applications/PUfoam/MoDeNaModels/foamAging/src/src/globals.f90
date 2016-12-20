@@ -9,7 +9,7 @@ module globals
 	logical :: sheet
 	integer :: nroutputs
 	integer :: divwall, divcell, divsheet, ncell
-	integer :: solModel(5),diffModel(4)
+	integer, dimension(:), allocatable :: solModel,diffModel
 	real(dp) :: tend,tbeg
 	real(dp) :: dcell, dwall, dfoam, dsheet
 	real(dp) :: temp, temp_cond

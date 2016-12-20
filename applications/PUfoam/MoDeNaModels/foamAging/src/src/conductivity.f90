@@ -22,9 +22,13 @@ subroutine equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp)
     integer, intent(in) :: ngas,nfv,mor(:)
     real(dp), intent(in) :: temp,eps,dcell,fstrut
     real(dp) :: kgas
-    real(dp), dimension(ngas) :: kg,yg,cpg,cc
+    real(dp), dimension(ngas) :: kg,yg,cc
     integer :: i,j,k
     !calculate average concentrations
+    cpg(1)=oxyHeatCapacity(temp)
+    cpg(2)=nitrHeatCapacity(temp)
+    cpg(3)=cdHeatCapacity(temp)
+    cpg(4)=cypHeatCapacity(temp)
     cc=0
     j=0
     do i=1,nfv
@@ -43,10 +47,6 @@ subroutine equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp)
             yg(i)=0
         endif
     enddo
-    cpg(1)=oxyHeatCapacity(temp)
-    cpg(2)=nitrHeatCapacity(temp)
-    cpg(3)=cdHeatCapacity(temp)
-    cpg(4)=cypHeatCapacity(temp)
     select case(gasModel) ! determine conductivity of gas mixture
     case (1)
         kgas = weightedAverage(kg,yg)

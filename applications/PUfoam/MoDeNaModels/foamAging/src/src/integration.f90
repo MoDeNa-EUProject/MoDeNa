@@ -35,6 +35,11 @@ subroutine integrate
     ! model should be general, but physical properties and conductivity are
     ! hardcoded for ngas=4
     ngas=4
+    gasname(1)="O2"
+    gasname(2)="N2"
+    gasname(3)="CO2"
+    gasname(4)="CyP"
+    allocate(solModel(ngas),diffModel(ngas))
     allocate(pp(ngas),Sg(ngas),Dg(ngas),xg(ngas),sheetSg(ngas),sheetDg(ngas))
     allocate(pBg(ngas),kfoamXg(ngas),kgasXg(ngas))
     allocate(sgModena(ngas),sgInputs(ngas),sgOutputs(ngas))
