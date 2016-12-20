@@ -30,7 +30,8 @@ License
 @endcond'''
 
 """
-@file      A simple workflow
+@ingroup mod_3Dcfd
+@namespace CFD_tool_3D.CFD_tool_3D
 @author    Mohsen Karimi
 @copyright 2014-2016, MoDeNa Project. GNU Public License.
 @ingroup   app_foaming

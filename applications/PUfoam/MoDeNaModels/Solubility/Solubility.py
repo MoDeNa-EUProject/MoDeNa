@@ -29,7 +29,11 @@ License
 @endcond'''
 
 """
-@file
+@ingroup mod_solubility
+@namespace Solubility.Solubility
+
+@details
+
 This is the Solubility python module. Basically, it contains the following:
 
 The FireTask which controls the call of the detailed model. This detailed model is called
@@ -56,7 +60,6 @@ surrogate model parameters.
 
 @author    Jonas Mairhofer, Pavel Ferkl
 @copyright 2014-2016, MoDeNa Project. GNU Public License.
-@ingroup   app_foaming
 """
 
 import os
@@ -158,7 +161,12 @@ class SolubilityExactSim(ModenaFireTask):
         self['point']['H'] = float(FILE.readline())
         FILE.close()
 
-
+## @var Ccode2
+# @brief Surrogate Function
+# @details
+#
+# $$f(T) := \\theta_0 + \\theta_1 \\cdot T + \\theta_2 \cdot T^2$$
+#
 Ccode2='''
 #include "modena.h"
 #include "math.h"

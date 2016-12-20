@@ -1,3 +1,5 @@
+@ingroup ex_twoTank
+
 TWO TANKS EXAMPLE:
 ==================
 

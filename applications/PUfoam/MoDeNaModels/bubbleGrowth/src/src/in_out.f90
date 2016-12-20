@@ -156,6 +156,7 @@ subroutine read_inputs
         call fson_get(json_data, "physicalProperties.surfaceTension", sigma)
     elseif (strval=="pcsaft") then
         itens_model=2
+        call fson_get(json_data, "physicalProperties.surfactant", surfactantPresent)
     else
         stop 'unknown interfacial tension model'
     endif

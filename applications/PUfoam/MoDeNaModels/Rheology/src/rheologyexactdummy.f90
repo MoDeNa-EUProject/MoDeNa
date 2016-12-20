@@ -1,3 +1,5 @@
+@ingroup mod_src_rheology
+
 program rheologyexactdummy
 !  use iso_c_binding
 !  use fmodena

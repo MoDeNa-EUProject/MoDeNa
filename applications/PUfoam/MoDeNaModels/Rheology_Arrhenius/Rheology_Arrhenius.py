@@ -30,6 +30,8 @@ License
 
 """
 @file      Backward mapping FireTask for rheology model.
+@ingroup mod_rheologyArrhenius
+@namespace Rheology_Arrhenius.Rheology_Arrhenius
 @author    Christos Mitrias
 @copyright 2014-2016, MoDeNa Project. GNU Public License.
 @ingroup   app_foaming

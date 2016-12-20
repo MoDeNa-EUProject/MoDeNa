@@ -1,4 +1,4 @@
-'''
+'''@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -34,6 +34,14 @@ Authors
     Henrik Rusche
 
 Contributors
-'''
+@endcond'''
+
+"""
+@namespace  FoamElasticModulus
+@ingroup    mod_elasticmodulus
+@brief      Python Module
+@author
+@copyright 2014-2016, MoDeNa Project. GNU Public License.
+"""
 
 from ElasticModulus import *

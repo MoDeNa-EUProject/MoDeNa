@@ -1,0 +1,38 @@
+/*! \page deps Dependencies
+  \section dep_Rheology Dependencies of Rheology model
+  - Gmsh 2.8.5 (Any version above 2.8.5 should probably work but not all of them have been tested)
+*/
+
+/**
+ * @defgroup mod_rheology Rheology
+ * @ingroup models
+ * @brief   Integrates the Rheology model into the MoDeNa software framework
+ * @details
+ *
+ * @pre
+ * @note
+ * @warning
+*/
+
+
+/**
+ * @defgroup mod_ex_rheology Example Workflow
+ * @ingroup mod_rheology
+ * @brief   Example of Workflow Employting the Rheology Surrogate Model
+ * @details
+ *
+ * @pre
+ * @note
+ * @warning
+*/
+
+/**
+ * @defgroup mod_src_rheology Source Code
+ * @ingroup mod_rheology
+ * @brief    Tfem
+ * @details
+ *
+ * @pre
+ * @note
+ * @warning
+*/

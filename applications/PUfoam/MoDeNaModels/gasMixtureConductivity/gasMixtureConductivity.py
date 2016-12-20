@@ -29,9 +29,9 @@ License
 @endcond'''
 
 """
-@file
-Surrogate function and model definitions for thermal conductivity of mixture of
-blowing agents.
+@ingroup   mod_gasMixConductivity
+@namespace gasMixtureConductivity.gasMixtureConductivity
+@brief Surrogate function and model definitions for thermal conductivity of mixture of blowing agents.
 
 @author    Pavel Ferkl
 @copyright 2014-2016, MoDeNa Project. GNU Public License.
@@ -221,5 +221,5 @@ m_gasMixtureConductivity = ForwardMappingModel(
                       gasConductivity.m_CyP_thermal_conductivity,\
                       gasConductivity.m_O2_thermal_conductivity,\
                       gasConductivity.m_N2_thermal_conductivity],
-    parameters=[1, 1, 1, 1],
+    parameters=[1, 1, 1],
 )

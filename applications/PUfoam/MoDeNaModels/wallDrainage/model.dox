@@ -1,0 +1,6 @@
+/**
+@defgroup wall_drain Wall drainage
+@ingroup  models
+@brief    Simulates the formation of wall and strut during foaming.
+*/
+

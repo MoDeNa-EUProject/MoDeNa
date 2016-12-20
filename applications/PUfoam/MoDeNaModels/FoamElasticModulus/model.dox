@@ -1,0 +1,34 @@
+/*! @page deps Dependencies
+ *  @section dep_elasticModulus Dependencies for the Elastiv Modulus Module
+ *
+ *   | Dependency | Type                                                    | Version |
+ *   | ---------- | ------------------------------------------------------- | ------- |
+ *   | [abaqus]   | Software Package -- Finite Element Analysis             | 6.13    |
+ *   | itertools  | Python package                                          | *       |
+ *   | commands   | Python package                                          | *       |
+ *   | glob       | Python package                                          | *       |
+ *   | [neper]    | Software Package -- polycrystal generation and meshing  | 3.0.1   |
+ *   | [gmsh]     | Software Package -- mesh generator                      | 2.10.1  |
+ *   * Any recent version should work.
+ * 
+ *   [abaqus]: http://www.3ds.com/products-services/simulia/products/abaqus/
+ *   [neper]: http://neper.sourceforge.net/ 
+ *   [gmsh]: http://gmsh.info/ 
+*/
+
+/**
+ * @defgroup mod_elasticmodulus Elastic Modulus
+ * @ingroup models
+ * @brief   Calculates the elastic
+ * @details
+ *
+ * @section sec_descr Detailed description
+ *
+ * The model describes the elastic modulus of a polymer matrix.
+ *
+ *
+*/
+
+
+
+

@@ -95,9 +95,13 @@ subroutine createModenaModels
         call modena_model_argPos_check(rhopModena)
     endif
     if (itens_model==2) then
-        itensModena = modena_model_new (&
-            c_char_"SurfaceTension[A=AIR,B=PU]"//c_null_char);
-            ! c_char_"SurfaceTension[A=AIR,B=THF]"//c_null_char);
+        if (surfactantPresent) then
+            itensModena = modena_model_new (c_char_&
+                "SurfaceTension[A=AIR,B=PU,C=surfactant]"//c_null_char);
+        else
+            itensModena = modena_model_new (c_char_&
+                "SurfaceTension[A=AIR,B=PU,C=no_surfactant]"//c_null_char);
+        endif
         if (modena_error_occurred()) then
             call exit(modena_error())
         endif

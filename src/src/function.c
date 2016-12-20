@@ -76,6 +76,18 @@ void modena_function_load_library(modena_function_t* self)
     Py_DECREF(pFunctionName);
     Py_DECREF(pLibraryName);
 
+    PyObject *pInputs =
+        PyObject_GetAttrString(self->pFunction, "inputs");
+    if(!pInputs){ Modena_PyErr_Print(); }
+    self->inputs_size = PyObject_Size(pInputs);
+    Py_DECREF(pInputs);
+
+    PyObject *pOutputs =
+        PyObject_GetAttrString(self->pFunction, "outputs");
+    if(!pOutputs){ Modena_PyErr_Print(); }
+    self->outputs_size = PyObject_Size(pOutputs);
+    Py_DECREF(pOutputs);
+
     PyObject *pParameters =
         PyObject_GetAttrString(self->pFunction, "parameters");
     if(!pParameters){ Modena_PyErr_Print(); }

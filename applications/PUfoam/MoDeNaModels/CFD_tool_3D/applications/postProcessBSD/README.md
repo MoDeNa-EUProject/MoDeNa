@@ -1,3 +1,5 @@
+@ingroup postProc_mod_3Dcfd
+
 ## postProcessBSD
 This is a post-processing application to analyze the results of population balance equation. It calcualtes the mean and variance of the bubble size distribution at each time step and write the results as field variables in each time directory. They can be further post-processed using `postProcess -func probe` command to probe the values on the target locations of the domain.
 

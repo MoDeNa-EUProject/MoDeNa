@@ -1,6 +1,7 @@
-# README
-@ingroup app_foaming
-@brief This is a 0D example of the CFD code with the calls to the database using the MoDeNa interface.
+@ingroup mod_0Dcfd
+
+Zero-D example of the CFD code
+==============================
 
 ## Description
 This is a zero dimensional prototype of the application of MoDeNa interface library to connect different 
@@ -61,5 +62,3 @@ used to solve the ODEs. Further details on the integration method can be found [
 
 -------------
 
-@authors Mohsen Karimi, Daniele Marchisio, Pavel Ferkl
-@copyright  2014-2016, MoDeNa Project. GNU Public License.

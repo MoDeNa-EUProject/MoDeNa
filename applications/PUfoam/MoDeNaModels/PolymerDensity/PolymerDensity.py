@@ -29,8 +29,9 @@ License
 @endcond'''
 
 """
+@ingroup   mod_polymerDensity
+@namespace PolymerDensity.PolymerDensity
 @file      Backward mapping FireTask for rheology model.
-@todo      Document
 @author    Jonas Mairhofer
 @copyright 2014-2016, MoDeNa Project. GNU Public License.
 @ingroup   app_foaming

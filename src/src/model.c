@@ -219,10 +219,10 @@ void modena_model_get_minMax
 
     PyObject *pMin = PyTuple_GET_ITEM(pObj, 0); // Borrowed ref
     PyObject *pSeq = PySequence_Fast(pMin, "expected a sequence");
-    self->inputs_size = PySequence_Size(pMin);
-    self->inputs_min = malloc(self->inputs_size*sizeof(double));
+    self->inputs_internal_size = PySequence_Size(pSeq);
+    self->inputs_min = malloc(self->inputs_internal_size*sizeof(double));
     size_t i;
-    for(i = 0; i < self->inputs_size; i++)
+    for(i = 0; i < self->inputs_internal_size; i++)
     {
         self->inputs_min[i] = PyFloat_AsDouble(PyList_GET_ITEM(pSeq, i));
     }
@@ -231,10 +231,45 @@ void modena_model_get_minMax
 
     PyObject *pMax = PyTuple_GET_ITEM(pObj, 1); // Borrowed ref
     pSeq = PySequence_Fast(pMax, "expected a sequence");
-    self->inputs_max = malloc(self->inputs_size*sizeof(double));
-    for(i = 0; i < self->inputs_size; i++)
+    self->inputs_max = malloc(self->inputs_internal_size*sizeof(double));
+    for(i = 0; i < self->inputs_internal_size; i++)
     {
         self->inputs_max[i] = PyFloat_AsDouble(PyList_GET_ITEM(pSeq, i));
+    }
+    Py_DECREF(pSeq);
+    if(PyErr_Occurred()){ Modena_PyErr_Print(); }
+
+    PyObject *pinames = PyTuple_GET_ITEM(pObj, 2); // Borrowed ref
+    pSeq = PySequence_Fast(pinames, "expected a sequence");
+    self->inputs_names = malloc(self->inputs_size*sizeof(char*));
+    for(i = 0; i < self->inputs_size; i++)
+    {
+        self->inputs_names[i] =
+            strdup(PyString_AsString(PyList_GET_ITEM(pSeq, i)));
+    }
+    Py_DECREF(pSeq);
+    if(PyErr_Occurred()){ Modena_PyErr_Print(); }
+
+    PyObject *ponames = PyTuple_GET_ITEM(pObj, 3); // Borrowed ref
+    pSeq = PySequence_Fast(ponames, "expected a sequence");
+    self->outputs_size = PySequence_Size(pSeq);
+    self->outputs_names = malloc(self->outputs_size*sizeof(char*));
+    for(i = 0; i < PySequence_Size(pSeq); i++)
+    {
+        self->outputs_names[i] =
+            strdup(PyString_AsString(PyList_GET_ITEM(pSeq, i)));
+    }
+    Py_DECREF(pSeq);
+    if(PyErr_Occurred()){ Modena_PyErr_Print(); }
+
+    PyObject *ppnames = PyTuple_GET_ITEM(pObj, 4); // Borrowed ref
+    pSeq = PySequence_Fast(ppnames, "expected a sequence");
+    self->parameters_size = PySequence_Size(pSeq);
+    self->parameters_names = malloc(self->parameters_size*sizeof(char*));
+    for(i = 0; i < PySequence_Size(pSeq); i++)
+    {
+        self->parameters_names[i] =
+            strdup(PyString_AsString(PyList_GET_ITEM(pSeq, i)));
     }
     Py_DECREF(pSeq);
     if(PyErr_Occurred()){ Modena_PyErr_Print(); }
@@ -375,7 +410,7 @@ void modena_model_argPos_check(const modena_model_t *self)
     bool allUsed = true;
     size_t j = 0;
 
-    for(j = 0; j < self->inputs_size; j++)
+    for(j = 0; j < self->inputs_internal_size; j++)
     {
         if(!self->argPos_used[j])
         {
@@ -394,6 +429,21 @@ void modena_model_argPos_check(const modena_model_t *self)
     }
 }
 
+char** modena_model_inputs_names(const modena_model_t *self)
+{
+    return self->inputs_names;
+}
+
+char** modena_model_outputs_names(const modena_model_t *self)
+{
+    return self->outputs_names;
+}
+
+char** modena_model_parameters_names(const modena_model_t *self)
+{
+    return self->parameters_names;
+}
+
 size_t modena_model_inputs_size(const modena_model_t *self)
 {
     return self->inputs_size;
@@ -402,6 +452,11 @@ size_t modena_model_inputs_size(const modena_model_t *self)
 size_t modena_model_outputs_size(const modena_model_t *self)
 {
     return self->outputs_size;
+}
+
+size_t modena_model_parameters_size(const modena_model_t *self)
+{
+    return self->parameters_size;
 }
 
 int modena_substitute_model_call
@@ -454,10 +509,10 @@ int write_outside_point
     modena_inputs_t *inputs
 )
 {
-    PyObject* pOutside = PyList_New(self->inputs_size);
+    PyObject* pOutside = PyList_New(self->inputs_internal_size);
 
     size_t j;
-    for(j = 0; j < self->inputs_size; j++)
+    for(j = 0; j < self->inputs_internal_size; j++)
     {
         PyList_SET_ITEM
         (
@@ -522,7 +577,7 @@ int modena_model_call
         if(ret){ return ret; }
     }
 
-    for(j = 0; j < self->inputs_size; j++)
+    for(j = 0; j < self->inputs_internal_size; j++)
     {
         /*
         printf
@@ -585,7 +640,7 @@ void modena_model_call_no_check
         );
     }
 
-    for(j = 0; j < self->inputs_size; j++)
+    for(j = 0; j < self->inputs_internal_size; j++)
     {
         /*
         printf
@@ -609,14 +664,14 @@ void modena_model_call_no_check
  */
 void modena_model_destroy(modena_model_t *self)
 {
-    size_t j;
-    for(j = 0; j < self->substituteModels_size; j++)
+    size_t i;
+    for(i = 0; i < self->substituteModels_size; i++)
     {
-        Py_XDECREF(self->substituteModels[j].model);
-        modena_inputs_destroy(self->substituteModels[j].inputs);
-        modena_outputs_destroy(self->substituteModels[j].outputs);
-        free(self->substituteModels[j].map_inputs);
-        free(self->substituteModels[j].map_outputs);
+        Py_XDECREF(self->substituteModels[i].model);
+        modena_inputs_destroy(self->substituteModels[i].inputs);
+        modena_outputs_destroy(self->substituteModels[i].outputs);
+        free(self->substituteModels[i].map_inputs);
+        free(self->substituteModels[i].map_outputs);
     }
     free(self->substituteModels);
 
@@ -630,6 +685,24 @@ void modena_model_destroy(modena_model_t *self)
     {
         modena_function_destroy(self->mf);
     }
+
+    for(i = 0; i < self->inputs_size; i++)
+    {
+        free(self->inputs_names[i]);
+    }
+    free(self->inputs_names);
+
+    for(i = 0; i < self->outputs_size; i++)
+    {
+        free(self->outputs_names[i]);
+    }
+    free(self->outputs_names);
+
+    for(i = 0; i < self->parameters_size; i++)
+    {
+        free(self->parameters_names[i]);
+    }
+    free(self->parameters_names);
 
     Py_XDECREF(self->pModel);
 
@@ -716,10 +789,10 @@ static PyObject *modena_model_t_call
     PyObject *pSeq = PySequence_Fast(pI, "expected a sequence");
     size_t len = PySequence_Size(pI);
 
-    if(len != self->inputs_size)
+    if(len != self->inputs_internal_size)
     {
         Py_DECREF(pSeq);
-        printf("input array has incorrect size %zu %zu\n", len, self->inputs_size);
+        printf("input array has incorrect size %zu %zu\n", len, self->inputs_internal_size);
         return NULL;
     }
 
@@ -814,10 +887,19 @@ modena_model_t_get_parameters(modena_model_t *self, void *closure)
 static int
 modena_model_t_set_parameters(modena_model_t *self, PyObject *value, void *closure)
 {
-   // TODO: Error checks for the following cases:
-   //       1. len(value) == self->parameters_size
-   //       2. type(value) == list or tuple
-   //       3. value != NULL
+    // TODO: Error checks for the following cases:
+    //       1. len(value) == self->parameters_size
+    //       2. type(value) == list or tuple
+    //       3. value != NULL
+
+    if(self->parameters_size != PySequence_Size(value))
+    {
+        printf
+        (
+            "Wrong number of parameters\n"
+        );
+        exit(1);
+    }
 
     /*if (value == NULL)
     {
@@ -910,11 +992,16 @@ static int modena_model_t_init
         Py_INCREF(pModel);
         self->pModel = pModel;
     }
-
-    modena_model_get_minMax(self);
-
+    
     //PyObject_Print(self->pModel, stdout, 0);
     //printf("\n");
+
+    // Avoiding double indirection in modena_model_call
+    // Use modena_function_new to construct, then copy function pointer
+    self->mf = modena_function_new_from_model(self);
+    self->function = self->mf->function;
+
+    modena_model_get_minMax(self);
 
     PyObject *pOutputs = PyObject_GetAttrString(self->pModel, "outputs");
     if(!pOutputs){ Modena_PyErr_Print(); }
@@ -926,14 +1013,9 @@ static int modena_model_t_init
         return -1;
     }
 
-    // Avoiding double indirection in modena_model_call
-    // Use modena_function_new to construct, then copy function pointer
-    self->mf = modena_function_new_from_model(self);
-    self->function = self->mf->function;
+    self->argPos_used = malloc(self->inputs_internal_size*sizeof(bool));
 
-    self->argPos_used = malloc(self->inputs_size*sizeof(bool));
-
-    for(j = 0; j < self->inputs_size; j++)
+    for(j = 0; j < self->inputs_internal_size; j++)
     {
         self->argPos_used[j] = false;
     }
@@ -959,7 +1041,6 @@ static int modena_model_t_init
     }
 
     PyObject *pSeq = PySequence_Fast(pParameters, "expected a sequence");
-    self->parameters_size = PySequence_Size(pParameters);
 
     if
     (
@@ -971,6 +1052,35 @@ static int modena_model_t_init
         PyObject* str = PyString_FromString
         (
             "Surrogate model does not have valid parameters"
+        );
+        PyTuple_SET_ITEM(args, 0, str);
+        PyTuple_SET_ITEM(args, 1, self->pModel);
+
+        PyErr_SetObject
+        (
+            modena_ParametersNotValid,
+            args
+        );
+
+        Py_DECREF(pSeq);
+        Py_DECREF(pParameters);
+        return -1;
+    }
+
+    if(self->parameters_size != PySequence_Size(pParameters))
+    {
+        printf
+        (
+            "Wrong number of parameters %zu %zu\n",
+            self->parameters_size,
+            PySequence_Size(pParameters)
+        );
+        exit(1);
+        
+        PyObject *args = PyTuple_New(2);
+        PyObject* str = PyString_FromString
+        (
+            "Wrong number of parameters"
         );
         PyTuple_SET_ITEM(args, 0, str);
         PyTuple_SET_ITEM(args, 1, self->pModel);
@@ -1016,6 +1126,7 @@ static PyObject * modena_model_t_new
         self->pModel = NULL;
         self->outputs_size = 0;
         self->inputs_size = 0;
+        self->inputs_internal_size = 0;
         self->inputs_min = NULL;
         self->inputs_max = NULL;
         self->argPos_used = NULL;

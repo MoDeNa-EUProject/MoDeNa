@@ -1,4 +1,4 @@
-'''
+'''@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -34,6 +34,13 @@ Authors
     Henrik Rusche
 
 Contributors
-'''
+@endcond'''
+
+"""
+@namespace SurfaceTension
+@ingroup   mod_surfacetension
+@brief     MoDeNa Module definition of the Surface Tension Model
+"""
 
 from SurfaceTension import *
+

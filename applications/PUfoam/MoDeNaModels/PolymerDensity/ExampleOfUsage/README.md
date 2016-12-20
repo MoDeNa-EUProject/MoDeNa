@@ -1,3 +1,4 @@
+@ingroup mod_ex_polymerDensity
 
 Example simulation with Density model:
 

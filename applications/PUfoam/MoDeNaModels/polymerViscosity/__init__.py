@@ -1,4 +1,4 @@
-'''
+'''@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -35,7 +35,13 @@ Authors
     Pavel Ferkl
 
 Contributors
-'''
+@endcond'''
+
+"""
+@ingroup mod_polymerViscocity
+@namespace polymerViscocity
+"""
+
 
 from polymerViscosity import f_polymerViscosity
 from polymerViscosity import m_polymerViscosity

@@ -92,7 +92,7 @@ def checkAndConvertType(kwargs, name, cls):
     """Function checking if the type of the strategy "name" provided by the
     user is correct, i.e. corresponds to "cls".
 
-    @param kwargs (dict) dictionary wher
+    @param kwargs (dict) dictionary where
     @param name (str) name of strategy
     @param cls class type
     """
@@ -376,8 +376,8 @@ class SurrogateFunction(DynamicDocument):
                 for k, v in kwargs['inputs'].iteritems():
                     if 'argPos' in v:
                         raise Exception(
-                            'argPos in function for inputs %s (old format)' +
-                            ' -- delete argPos from function' % k
+                            'argPos in function for inputs %s (old format)'  % k +
+                            ' -- delete argPos from function'
                         )
                     if not 'index' in v:
                         v['argPos'] = nInp
@@ -486,6 +486,7 @@ class CFunction(SurrogateFunction):
     def __init__(self, *args, **kwargs):
         super(CFunction, self).__init__(*args, **kwargs)
 
+
     def initKwargs(self, kwargs):
         """Method preparing meta-information about the function for the
         instantiation of a new object.
@@ -590,29 +591,29 @@ class Function(CFunction):
             if not kwargs.has_key('function'):
                 raise Exception('Algebraic representation not found')
 
-        # lambda function writing inputs, parameters
-        cDouble = lambda VAR: '\n'.join(
-            [
-                'const double %s = %s[%s];' % (
-                    V, VAR, kwargs[VAR][V]['argPos']
-                )
-                for V in kwargs[VAR]
-            ]
-        )
+            # lambda function writing inputs, parameters
+            cDouble = lambda VAR: '\n'.join(
+                [
+                    'const double %s = %s[%s];' % (
+                        V, VAR, kwargs[VAR][V]['argPos']
+                    )
+                    for V in kwargs[VAR]
+                ]
+            )
 
-        # lambda function parsing 'function' and writing outputs
-        outPut = lambda OUT: '\n'.join(
-            [
-                'outputs[%s] = %s;' % (
-                    kwargs['outputs'][O]['argPos'],
-                    self.Parse(kwargs['function'][O])
-                )
-                for O in kwargs[OUT]
-            ]
-        )
+            # lambda function parsing 'function' and writing outputs
+            outPut = lambda OUT: '\n'.join(
+                [
+                    'outputs[%s] = %s;' % (
+                        kwargs['outputs'][O]['argPos'],
+                        self.Parse(kwargs['function'][O])
+                    )
+                    for O in kwargs[OUT]
+                ]
+            )
 
-        # Main body of the Ccode
-        Ccode='''
+            # Main body of the Ccode
+            Ccode='''
 #include "modena.h"
 #include "math.h"
 
@@ -628,14 +629,14 @@ void {name}
 {outputs}
 }}
 '''
-        kwargs['Ccode'] = Ccode.format(
-            name=kwargs['function']['name'],
-            inputs=cDouble('inputs'),
-            parameters=cDouble('parameters'),
-            outputs=outPut('outputs')
-        )
+            kwargs['Ccode'] = Ccode.format(
+                name=kwargs['function']['name'],
+                inputs=cDouble('inputs'),
+                parameters=cDouble('parameters'),
+                outputs=outPut('outputs')
+            )
 
-        super(Function, self).__init__(*args, **kwargs)
+            super(Function, self).__init__(*args, **kwargs)
 
 
     def Parse(self, formula, debug=False, model='', stack={}, delim=0, \
@@ -829,6 +830,7 @@ class SurrogateModel(DynamicDocument):
 
             self.save()
 
+        #print 'model =', self._id, len(self.inputs)
         #for k, v in self.inputs.iteritems():
         #    print 'inputs in model', k, self.inputs_argPos(k)
         #for k, v in self.surrogateFunction.inputs_iterAll():
@@ -1021,8 +1023,11 @@ class SurrogateModel(DynamicDocument):
             minValues[self.inputs_argPos(k)] = v.min
             maxValues[self.inputs_argPos(k)] = v.max
 
-        #print 'min =', minValues, 'max =', maxValues, self.inputs.keys()
-        return minValues, maxValues
+        #print 'min =', minValues, 'max =', maxValues, 
+        return minValues, maxValues, \
+            self.inputs.keys(), \
+            self.outputs.keys(), \
+            self.surrogateFunction.parameters.keys()
 
 
     def updateMinMax(self):
@@ -1215,6 +1220,8 @@ class SurrogateModel(DynamicDocument):
         """Method loading a specific surrogate model."""
         # Removed temporarily, probably bug in mongo engine
         #return self.objects.exclude('fitData').get(_id=surrogateModelId)
+
+        #print self.objects.get(_id=surrogateModelId).nix
         return self.objects.get(_id=surrogateModelId)
 
 
@@ -1260,6 +1267,9 @@ class SurrogateModel(DynamicDocument):
             inst = inst_ref()
             if inst is not None:
                 yield inst
+
+    def __repr__(self):
+        return self._id
 
 
 class ForwardMappingModel(SurrogateModel):
