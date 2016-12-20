@@ -1,6 +1,8 @@
 !> @file
 !! subroutines for calculation of equivalent conductivity of the foam
 !! using Modena calls
+!! gas mixture conductivity calculated here is not actually used, it is just
+!! for testing
 !! @author    Pavel Ferkl
 !! @ingroup   foam_aging
 module conductivity
@@ -35,11 +37,8 @@ subroutine equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp)
     enddo
     cc=cc/j
     yg=cc/sum(cc)
-    kg(1)=oxyConductivity(temp)
-    kg(2)=nitrConductivity(temp)
-    kg(3)=cdConductivity(temp)
-    kg(4)=cypConductivity(temp)
     do i=1,ngas
+        kg(i)=gasConductivity(temp,i)
         if (abs(yg(i))<1e-6_dp) then
             yg(i)=0
         endif

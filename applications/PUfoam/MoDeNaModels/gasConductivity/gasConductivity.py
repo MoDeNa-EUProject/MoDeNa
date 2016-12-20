@@ -46,7 +46,7 @@ from fireworks.utilities.fw_utilities import explicit_serialize
 ## List of components, for which surrogate model is provided
 species = IndexSet(
     name= 'gas_thermal_conductivity_species',
-    names= [ 'CO2', 'CyP', 'O2', 'N2' ]
+    names= [ 'CO2', 'CyP', 'O2', 'N2', 'Air' ]
 )
 
 ## Surrogate function for thermal conductivity of blowing agents.

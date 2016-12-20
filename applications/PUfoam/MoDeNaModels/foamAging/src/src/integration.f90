@@ -36,7 +36,11 @@ subroutine integrate
     ! hardcoded for ngas=4
     ngas=4
     allocate(pp(ngas),Sg(ngas),Dg(ngas),xg(ngas),sheetSg(ngas),sheetDg(ngas))
-    allocate(pBg(ngas),kfoamXg(ngas))
+    allocate(pBg(ngas),kfoamXg(ngas),kgasXg(ngas))
+    allocate(sgModena(ngas),sgInputs(ngas),sgOutputs(ngas))
+    allocate(sgTemppos(ngas),sgxl1pos(ngas),sgxl2pos(ngas))
+    allocate(dgModena(ngas),dgInputs(ngas),dgOutputs(ngas),dgTemppos(ngas))
+    allocate(kgModena(ngas),kgInputs(ngas),kgOutputs(ngas),kgTemppos(ngas))
 ! -----------------------------------
 ! load inputs
 ! -----------------------------------
@@ -47,30 +51,14 @@ subroutine integrate
     Dgas= gasDiffusivity(temp)
     call createModels(ngas)
     eps=1-rhof/rhop
-    if (solModel(1)==1) then
-        Sg(1)=o2Solubility(temp)
-    endif
-    if (solModel(2)==1) then
-        Sg(2)=n2Solubility(temp)
-    endif
-    if (solModel(3)==1) then
-        Sg(3)=cdSolubility(temp)
-    endif
-    if (solModel(4)==1) then
-        Sg(4)=cypSolubility(temp)
-    endif
-    if (diffModel(1)==1) then
-        Dg(1)=o2Diffusivity(temp)
-    endif
-    if (diffModel(2)==1) then
-        Dg(2)=n2Diffusivity(temp)
-    endif
-    if (diffModel(3)==1) then
-        Dg(3)=cdDiffusivity(temp)
-    endif
-    if (diffModel(4)==1) then
-        Dg(4)=cypDiffusivity(temp)
-    endif
+    do i=1,ngas
+        if (solModel(i)==1) then
+            Sg(i)=Solubility(temp,i)
+        endif
+        if (diffModel(i)==1) then
+            Dg(i)=Diffusivity(temp,i)
+        endif
+    enddo
     call print_header
     Sg=Sg*Rg*temp*1100._dp/(1e5*Mg)
     sheetSg=sheetSg*Rg*temp*1100._dp/(1e5*Mg)
@@ -204,7 +192,7 @@ subroutine integrate
     enddo
     close(10)
     close(fi)
-    call destroyModels
+    call destroyModels(ngas)
 end subroutine integrate
 !***********************************END****************************************
 end module integration
