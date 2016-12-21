@@ -36,4 +36,9 @@ Authors
 Contributors
 '''
 
+"""
+@ingroup foam_aging
+@namespace foamAging
+"""
+
 from foamAging import m

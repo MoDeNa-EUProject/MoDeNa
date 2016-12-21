@@ -36,4 +36,9 @@ Authors
 Contributors
 '''
 
+"""
+@ingroup foam_cond
+@namespace foamConductivity
+"""
+
 from foamConductivity import *

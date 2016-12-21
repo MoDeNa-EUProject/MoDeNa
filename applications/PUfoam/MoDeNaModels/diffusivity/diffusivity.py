@@ -29,10 +29,9 @@ License
 @endcond'''
 
 """
-@file
-Surrogate function and model definitions for diffusivity of blowing agents in
-polymer.
-
+@ingroup mod_diffusivity
+@namespace diffusivity.diffusivity
+@brief Surrogate function and model definitions for diffusivity of blowing agents in polymer.
 @author    Erik Laurini
 @author    Pavel Ferkl
 @copyright 2014-2016, MoDeNa Project. GNU Public License.

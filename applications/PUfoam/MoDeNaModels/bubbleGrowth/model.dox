@@ -1,0 +1,7 @@
+/**
+@defgroup bblgr Bubble growth
+@ingroup  models
+@brief    Simulates the growth of an isolated bubble in polymerizing liquid
+and determines the rate of bubble growth.
+*/
+

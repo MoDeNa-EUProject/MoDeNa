@@ -29,9 +29,11 @@ License
 @endcond'''
 
 """
-@file
-Surrogate function, model definition and backward mapping FireTask for
-Foam conductivity model.
+@ingroup foam_cond
+@namespace foamConductivity.foamConductivity
+
+@brief Surrogate function, model definition and backward mapping FireTask for
+       Foam conductivity model.
 
 @author    Pavel Ferkl
 @copyright 2014-2016, MoDeNa Project. GNU Public License.

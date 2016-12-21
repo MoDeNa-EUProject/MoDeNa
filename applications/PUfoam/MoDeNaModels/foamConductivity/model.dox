@@ -1,0 +1,8 @@
+/**
+@defgroup foam_cond Foam conductivity
+@ingroup  models
+@brief    Estimates the equivalent conductivity of the foam
+*/
+
+
+

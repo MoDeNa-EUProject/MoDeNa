@@ -1,22 +1,4 @@
 /**
-  @defgroup applications
-  @brief    Polyurethane foam applications using the MoDeNa framework
-*/
-
-/**
-  @defgroup app_foaming Foam expansion
-  @ingroup  applications
-  @brief    Predicts the evolution of PU foam properties using the combination
-  of nano-, meso- and macro-scopic models.
-
-  @defgroup app_aging Foam aging simulation
-  @ingroup  applications
-  @brief    Predicts the time-varying composition of blowing agents in PU foam
-  and its thermal properties using the combination of nano-, meso- and
-  macro-scopic models.
-*/
-
-/**
   @defgroup models
   @brief    Collection of complex mathematical models
 */
@@ -44,4 +26,5 @@
   @defgroup wall_drain Wall drainage
   @ingroup  models
   @brief    Simulates the formation of wall and strut during foaming.
+
 */

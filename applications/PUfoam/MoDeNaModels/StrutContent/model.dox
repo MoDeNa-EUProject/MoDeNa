@@ -1,0 +1,11 @@
+/**
+ * @defgroup mod_strutContent Strut Content
+ * @ingroup models
+ * @brief   Integrates the Rheology model into the MoDeNa software framework
+ * @details
+ *
+ * @pre
+ * @note
+ * @warning
+*/
+

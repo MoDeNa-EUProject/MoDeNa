@@ -1,0 +1,18 @@
+/**
+ * @defgroup mod_polymerDensity Polymer Density
+ * @ingroup models
+ * @brief   Density
+ * @details
+ *
+*/
+
+/**
+ * @defgroup mod_ex_polymerDensity Polymer Density Example Workflow
+ * @ingroup mod_polymerDensity
+ * @brief   Density
+ * @details
+ *
+*/
+
+
+

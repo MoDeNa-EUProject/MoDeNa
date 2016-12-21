@@ -1,0 +1,34 @@
+/*! @page deps Dependencies
+ *  @section dep_0Dcfd Dependencies of the 0-D CFD model
+ *
+ *
+ *   | Dependency | Type                            | Version |
+ *   | ---------- | ------------------------------- | ------- |
+ *   | [BOOST]    | Libraries                       |  ?      |
+ *   | MongoDBc   | MongoDB C++ driver              |  ?      |
+ *
+ *   [BOOST]: http://www.boost.org/
+*/
+
+/**
+ * @defgroup mod_3Dcfd 3-D CFD Model
+ * @ingroup models
+ *
+ * @note
+ * @warning
+ * @author Mohsen Karimi
+ * @author Daniele Marchisio
+ * @copyright  2014-2016, MoDeNa Project. GNU Public License.
+*/
+
+/**
+ * @defgroup postProc_mod_3Dcfd 3-D CFD Model Post Processing
+ * @ingroup mod_3Dcfd
+ *
+ * @note
+ * @warning
+ * @author Mohsen Karimi
+ * @author Daniele Marchisio
+ * @copyright  2014-2016, MoDeNa Project. GNU Public License.
+*/
+

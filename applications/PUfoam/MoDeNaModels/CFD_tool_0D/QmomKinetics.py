@@ -29,9 +29,10 @@ License
 @endcond'''
 
 """
-@file
-Backward mapping Firetask for QmomKinetics model.
-Contains path to the detailed model executable.
+@ingroup mod_0Dcfd
+@namespace CFD_tool_0D.QmomKinetics
+@brief Backward mapping Firetask for QmomKinetics model.
+       Contains path to the detailed model executable.
 
 @author    Mohsen Karimi
 @copyright 2014-2016, MoDeNa Project. GNU Public License.
@@ -41,7 +42,17 @@ Contains path to the detailed model executable.
 import os
 from modena.Strategy import BackwardMappingScriptTask
 
-# Source code in src/twoTanksMacroscopicProblem.C
+## @var m
+# @brief Detailed Application Recipe
+# @details
+#
+#
+# @attention
+# @pre
+# @note
+# @todo
+# @warning
+# @bug
 m = BackwardMappingScriptTask(
     script=os.path.dirname(os.path.abspath(__file__))+'/src/QmomKinetics' +
         ' && cp *.txt ../results/CFD0D/'

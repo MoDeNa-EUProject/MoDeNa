@@ -1,0 +1,11 @@
+/**
+ * @defgroup mod_rheologyArrhenius Rheology model with Arrhenius Temperature Dependency
+ * @ingroup models
+ * @brief   Integrates the Rheology model into the MoDeNa software framework
+ * @details
+ *
+ * @pre
+ * @note
+ * @warning
+*/
+

@@ -9,3 +9,9 @@
   @brief    Two-Tank example
 */
 
+/**
+  @defgroup ex_multiComponent Multicomponent Diffusion
+  @ingroup  examples
+  @brief    Multicomponent Diffusion
+*/
+

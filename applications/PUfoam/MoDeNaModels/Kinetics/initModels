@@ -30,7 +30,7 @@ License
 @endcond'''
 
 """
-@file      Initialisation script for the kinetics model.
+@brief     Initialisation script for the kinetics model.
 @author    Andreas Daiss
 @copyright 2014-2016, MoDeNa Project. GNU Public License.
 @ingroup   app_foaming

@@ -43,8 +43,8 @@ from fireworks import LaunchPad, Workflow
 from fireworks.core.rocket_launcher import rapidfire
 from pymongo import MongoClient
 
-# import polymerViscosity # imported by Rheology_Arrhenius
-# import SurfaceTension # imported by Rheology_Arrhenius
+import polymerViscosity # imported by Rheology_Arrhenius
+import SurfaceTension # imported by Rheology_Arrhenius
 import PolymerDensity
 import Solubility
 import PolymerDensity_units
@@ -71,32 +71,6 @@ rapidfire(launchpad)
 url = 'mongodb://localhost:27017/'
 client = MongoClient(url)
 collection = client.test.surrogate_model
-# PCSAFT surface tension model has problems with large temperatures
-doc=collection.find({'_id': 'SurfaceTension[A=AIR,B=THF]'})
-for key in doc:
-    inputs=key['inputs']
-    inputs['T']['max']=550
-collection.update(
-    {'_id': 'SurfaceTension[A=AIR,B=THF]'},
-    {
-        '$set': {
-            'inputs': inputs
-        }
-    }
-)
-doc=collection.find({'_id': 'SurfaceTension[A=AIR,B=PU]'})
-for key in doc:
-    inputs=key['inputs']
-    inputs['T']['min']=270
-    inputs['T']['max']=550
-collection.update(
-    {'_id': 'SurfaceTension[A=AIR,B=PU]'},
-    {
-        '$set': {
-            'inputs': inputs
-        }
-    }
-)
 # Rheology model has problems with large conversion (beyond gel point)
 doc=collection.find({'_id': 'Rheology'})
 for key in doc:

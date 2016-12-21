@@ -68,7 +68,28 @@ main(int argc, char *argv[])
     try
     {
         // Instantiate a model
-        modenaModel model("flowRate");
+        Modena::modenaModel model("flowRate");
+
+        cout << "inputs:" << endl;
+        std::vector<std::string> iNames = model.inputs_names();
+        for(int i=0; i<model.inputs_size(); i++)
+        {
+            cout << iNames[i] << endl;
+        }
+
+        cout << "outputs:" << endl;
+        std::vector<std::string> oNames = model.outputs_names();
+        for(int i=0; i<model.outputs_size(); i++)
+        {
+            cout << oNames[i] << endl;
+        }
+
+        cout << "parameters:" << endl;
+        std::vector<std::string> pNames = model.parameters_names();
+        for(int i=0; i<model.parameters_size(); i++)
+        {
+            cout << pNames[i] << endl;
+        }
 
         size_t Dpos = model.inputs_argPos("D");
         size_t rho0Pos = model.inputs_argPos("rho0");
@@ -124,7 +145,7 @@ main(int argc, char *argv[])
             cout << "t = " << t << " rho0 = " << rho0 << " p0 = " << p0 << " p1 = " << p1 << endl;
         }
     }
-    catch(const modenaException& e)
+    catch(const Modena::modenaException& e)
     {
         return e.errorCode();
     }
