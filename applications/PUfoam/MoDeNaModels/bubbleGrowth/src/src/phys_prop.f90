@@ -164,9 +164,9 @@ subroutine physical_properties(temp,conv,radius)
         case(2) !pcsaft
             ! TODO: implement properly
             call modena_inputs_set(solInputs(i), solTpos(i), temp)
-            ! call modena_inputs_set(solInputs(i), solXgasPos(i), 1.0e-4_dp)
-            ! call modena_inputs_set(solInputs(i), solXmdiPos(i), 0.5_dp)
-            ! call modena_inputs_set(solInputs(i), solXpolyolPos(i), 0.5_dp)
+            call modena_inputs_set(solInputs(i), solXgasPos(i), 1.0e-4_dp)
+            call modena_inputs_set(solInputs(i), solXmdiPos(i), 0.5_dp)
+            call modena_inputs_set(solInputs(i), solXpolyolPos(i), 0.5_dp)
             ret = modena_model_call(solModena(i), solInputs(i), solOutputs(i))
             if(ret /= 0) then
                 call exit(ret)
@@ -174,11 +174,6 @@ subroutine physical_properties(temp,conv,radius)
             KH(i) = modena_outputs_get(solOutputs(i), 0_c_size_t)
             ! KH(i)=rhop/Mbl(i)/KH(i)
         case(3) !n-pentane, Gupta, 10.1002/pen.11405
-            ! KH(i)=rhop/Mbl(i)/pamb*3.3e-4_dp*(exp((2.09e4_dp-67.5_dp*(temp-&
-            !     35.8_dp*log(pamb/1e5_dp)))/(8.68e4_dp-(temp-35.8_dp*&
-            !     log(pamb/1e5_dp))))-1.01_dp)**(-1)
-            ! KH(i)=-rhop/Mbl(i)/pamb*3.3e-4_dp/(exp((2.09e4_dp-67.5_dp*temp)/&
-            !     (8.69e4_dp-temp))-1.01_dp)
             call modena_inputs_set(solInputs(i), solTpos(i), temp)
             ret = modena_model_call(solModena(i), solInputs(i), solOutputs(i))
             if(ret /= 0) then
@@ -199,11 +194,6 @@ subroutine physical_properties(temp,conv,radius)
                 call exit(ret)
             endif
             KH(i) = modena_outputs_get(solOutputs(i), 0_c_size_t)
-            ! print*, KH(i),rhop,Mbl(i),pamb
-            ! KH(i)=rhop/Mbl(i)/pamb*(1e-7_dp+4.2934_dp*&
-            !     exp(-(temp-203.3556_dp)**2/(2*40.016_dp**2)))
-            ! print*, KH(i)
-            ! stop
         case(7) !pentane, Winkler Ph.D.
             KH(i)=rhop/Mbl(i)/pamb*(0.0064_dp+0.0551_dp*exp(-(temp-298)**2/&
                 (2*17.8_dp**2)))
