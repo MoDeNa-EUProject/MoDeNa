@@ -1,7 +1,43 @@
-/**
-@defgroup bblgr Bubble growth
-@ingroup  models
-@brief    Simulates the growth of an isolated bubble in polymerizing liquid
-and determines the rate of bubble growth.
+/*! @page deps Dependencies
+ *  @section dep_bubbleGrowth Dependencies of Bubble growth model
+ *
+ *
+ *   | Dependency      | Type                            | Tested Version |
+ *   | --------------- | ------------------------------- | -------------- |
+ *   | gfortran        | compiler                        | 5.4            |
+ *   | BLAS            | Library - Basic Linear Algebra  | 3.4.2          |
+ *   | LAPACK          | Toolkit - Linear algebra        | 3.4.2          |
+ *   | sundials        | Library - ODE integrators       | 2.6.2          |
+ *   | bspline-fortran | Library - Interpolation         | 9aeadb4*       |
+ *   | fson            | Library - JSON reader           | 750341b*       |
+ *   * Library releases are not versioned. Commit ID is provided.
 */
 
+/**
+ * @defgroup mod_bubbleGrowth Bubble growth MoDeNa Module
+ * @ingroup  models
+ * @brief    Integrates Bubble growth model into the MoDeNa software framework
+ * @details
+ *
+ * @ref bubbleGrowth.bubbleGrowth.m Backward mapping FireTask
+ *
+ * @remark
+ * @attention
+ * @pre
+ * @note
+ * @warning
+*/
+
+/**
+ * @defgroup src_mod_bubbleGrowth Fortran Source Code
+ * @ingroup  mod_bubbleGrowth
+ * @brief    Source Code Documentation
+ * @details
+ *
+ *
+ * @remark
+ * @attention
+ * @pre
+ * @note
+ * @warning
+*/

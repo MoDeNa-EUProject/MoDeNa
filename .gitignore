@@ -114,6 +114,8 @@ func_*/
 
 # Documentation
 html/
+*.tmp
+doc.log
 
 # build folders of OpenFOAM - anywhere
 linux*Clang*/

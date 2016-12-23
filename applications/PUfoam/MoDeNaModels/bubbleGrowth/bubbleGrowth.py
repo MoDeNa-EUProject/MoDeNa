@@ -29,14 +29,24 @@ License
 @endcond'''
 
 """
-@ingroup bblgr
-@namespace bubbleGrowth.bubbleGrowth
-@brief Backward mapping Firetask for Bubble growth model.
-       Contains path to the detailed model executable.
+@file       bubbleGrowth.py
+@namespace  bubbleGrowth.bubbleGrowth
+@ingroup    mod_bubbleGrowth
+@brief      Backward mapping Firetask for Bubble growth model.
+@author     Pavel Ferkl
+@copyright  2014-2016, MoDeNa Project. GNU Public License.
+@details
 
-@author    Pavel Ferkl
-@copyright 2014-2016, MoDeNa Project. GNU Public License.
-@ingroup   app_foaming
+# Bubble growth python module.
+
+Contains a FireTask, which runs the detailed model and copies the results into
+the results folder. The relative path and name of the detailed model executable
+are hard coded. The FireTask is BackwardMapping, which means that if one of the
+lower scale backward mapping models will get out of validity range that model
+will be re-fitted to larger range and the detailed model will be re-run. This is
+repeated until the detailed model succesfully finishes (or possibly crashes for
+other reason, in which case an error is printed out).
+
 """
 
 import os
@@ -55,6 +65,7 @@ from modena.Strategy import BackwardMappingScriptTask
 # @warning
 # @bug
 m = BackwardMappingScriptTask(
-    script=os.path.dirname(os.path.abspath(__file__))+'/src/bblgrExact' +
-        ' && cp *.out *.txt ../results/bubbleGrowth/'
+    script=os.path.dirname(os.path.abspath(__file__))
+    + '/src/bblgrExact'
+    + ' && cp *.out *.txt ../results/bubbleGrowth/'
 )
