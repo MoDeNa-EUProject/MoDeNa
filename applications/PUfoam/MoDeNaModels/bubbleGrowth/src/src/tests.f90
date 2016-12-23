@@ -1,8 +1,6 @@
-!>
-!! @defgroup  src_mod_bubbleGrowth_tests tests
-!! @{
-!! @ingroup   src_mod_bubbleGrowth
+!> @file      bubbleGrowth/src/src/tests.f90
 !! @author    Pavel Ferkl
+!! @ingroup   src_mod_bubbleGrowth
 !! @brief     Top level subroutines.
 !! @details
 !! Subroutines for growth of a single bubble and various parametric studies.
@@ -212,5 +210,3 @@ real(dp) function bub_vf(t)
 endfunction bub_vf
 !***********************************END****************************************
 end module tests
-!>
-!! @}

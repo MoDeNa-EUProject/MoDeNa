@@ -1,6 +1,5 @@
 !> @file      bubbleGrowth/src/src/hbrd.f90
 !! @ingroup   src_mod_bubbleGrowth
-!! @author    Alan Miller
 !! @brief     Hybrid Powell method for SNAE.
 !! @details
 !! Solver for system of nonlinear algebraic equations.
