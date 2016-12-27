@@ -1,9 +1,11 @@
-!> @file
-!! contains model subroutines for bubble growth model
-!! non-dimensional subroutines
-!! not updated to latest version, still needs work to be used
+!> @file      bubbleGrowth/src/src/model_nd.f90
 !! @author    Pavel Ferkl
-!! @ingroup   bblgr
+!! @ingroup   src_mod_bubbleGrowth
+!! @brief     Physical model of bubble growth.
+!! @details
+!! Model is a collection of momentum, mass and enthalpy balances.
+!! Non-dimensional version. Not updated to latest version.
+!! Still needs work to be used.
 module model_nd
     use iso_c_binding
     use constants

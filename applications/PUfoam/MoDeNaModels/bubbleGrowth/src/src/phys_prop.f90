@@ -1,8 +1,9 @@
-!> @file
-!! calculates material properties of the system
-!! results are stored in global variables
+!> @file      bubbleGrowth/src/src/phys_prop.f90
 !! @author    Pavel Ferkl
-!! @ingroup   bblgr
+!! @ingroup   src_mod_bubbleGrowth
+!! @brief     Calculates material properties of the system.
+!! @details
+!! Results are stored in global variables.
 module phys_prop
     use constants
     use globals
@@ -19,7 +20,10 @@ module phys_prop
         Rb_initialized
 contains
 !********************************BEGINNING*************************************
-!> determine physical properties
+!> Determines physical properties at the beginning.
+!!
+!! Some properties can be set only at the beginning and they don't need to be
+!! updated durin the integration.
 subroutine set_initial_physical_properties
     time=tstart
     if (.not. firstrun) R0=Rb(time)
@@ -97,9 +101,13 @@ end subroutine set_initial_physical_properties
 
 
 !********************************BEGINNING*************************************
-!> calculates values of physical properties
+!> Calculates values of physical properties.
+!!
+!! Updates viscosity, solubility, etc.
 subroutine physical_properties(temp,conv,radius)
-    real(dp), intent(in) :: temp,conv,radius
+    real(dp), intent(in) :: temp !< temperature
+    real(dp), intent(in) :: conv !< conversion
+    real(dp), intent(in) :: radius !< bubble radius
     integer :: i
     real(dp) :: Aeta,Eeta,Cg,AA,B !viscosity model constants
     if (temp>500) then
@@ -213,10 +221,12 @@ end subroutine physical_properties
 
 
 !********************************BEGINNING*************************************
-!> time derivation of bubble radius as function of time
+!> Time derivation of bubble radius as a function of time.
+!!
+!! Interpolates using a spline.
 real(dp) function Rderiv(t)
     use bspline_module
-    real(dp) :: t
+    real(dp), intent(in) :: t !< time
     real(dp) :: dt
     integer :: nx,idx,iflag
     ! dt=timestep/100
@@ -237,11 +247,13 @@ endfunction Rderiv
 
 
 !********************************BEGINNING*************************************
-!> bubble radius as function of time
+!> Bubble radius as function of time.
+!!
+!! Interpolates using a spline.
 real(dp) function Rb(t)
     use bspline_module
     use interpolation
-    real(dp) :: t
+    real(dp), intent(in) :: t !< time
     integer :: nx,idx,iflag
     integer :: ni=1   !number of points, where we want to interpolate
     real(dp) :: xi(1)   !x-values of points, where we want to interpolate
@@ -264,7 +276,9 @@ endfunction Rb
 
 
 !********************************BEGINNING*************************************
-!> initialization of spline
+!> Initialization of spline for bubble radius.
+!!
+!! Automatically called the first time the spline is used. 
 subroutine Rb_spline_ini
     use bspline_module
     integer :: nx,iflag

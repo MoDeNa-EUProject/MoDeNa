@@ -40,10 +40,12 @@ module globals
         ngas,& !<number of dissolved gases
         co2_pos,& !<carbon dioxide position
         fceq,& !<first concentration equation (index)
-        fpeq,lpeq,& !<first and last pressure equation (index)
+        fpeq,& !<first pressure equation (index)
+        lpeq,& !<last pressure equation (index)
         req,& !<radius equation (index)
         teq,& !<temperature equation (index)
-        xOHeq,xWeq !<conversion equations (indexes)
+        xOHeq,& !<polyol conversion equation (index)
+        xWeq !<water conversion equation (index)
     real(dp) :: &
         mshco,& !<mesh coarsening parameter
         temp0,& !<initial temperature

@@ -1,7 +1,9 @@
-!> @file
-!! contains model subroutines for bubble growth model
+!> @file      bubbleGrowth/src/src/model.f90
 !! @author    Pavel Ferkl
-!! @ingroup   bblgr
+!! @ingroup   src_mod_bubbleGrowth
+!! @brief     Physical model of bubble growth.
+!! @details
+!! Model is a collection of momentum, mass and enthalpy balances.
 module model
     use constants
     use globals
@@ -13,12 +15,17 @@ module model
     public molar_balance,kinModel,odesystem,dim_var
 contains
 !********************************BEGINNING*************************************
-!> model supplied to integrator, FVM, nonequidistant mesh
+!> Model supplied to integrator.
+!!
+!! Bubble grrowth model. Discretized by FVM, nonequidistant mesh.
 subroutine  odesystem (neq, t, y, ydot)
     use phys_prop, only:Rderiv
-    integer :: neq,i,j
-    real(dp) :: t,y(neq),ydot(neq),z,zw,ze,zww,zee,lamw,lame,cw,ce,cww,cee,&
-        c,dcw,dce,dil,bll
+    integer, intent(in) :: neq !< number of equations
+    real(dp), intent(in) :: t !< time
+    real(dp), intent(in) :: y(neq) !< integrated variables
+    real(dp), intent(out) :: ydot(neq) !< derivatives of integrated variables
+    integer :: i,j
+    real(dp) :: z,zw,ze,zww,zee,lamw,lame,cw,ce,cww,cee,c,dcw,dce,dil,bll
     call dim_var(t,y)
     call molar_balance(y)
     ydot=0
@@ -37,10 +44,14 @@ subroutine  odesystem (neq, t, y, ydot)
         ydot(xOHeq) = AOH*exp(-EOH/Rg/temp)*(1-y(xOHeq))*&
             (NCO0-2*W0*y(xWeq)-OH0*y(xOHeq)) !polyol conversion
         if (kin_model==3) then
-            if (y(xOHeq)>0.5_dp .and. y(xOHeq)<0.87_dp) ydot(xOHeq)=ydot(xOHeq)*&
-                (-2.027_dp*y(xOHeq)+2.013_dp) !gelling influence on kinetics
-            if (y(xOHeq)>0.87_dp) ydot(xOHeq)=ydot(xOHeq)*&
-                (3.461_dp*y(xOHeq)-2.761_dp)
+            ! gelling influence on kinetics
+            if (y(xOHeq)>0.5_dp .and. y(xOHeq)<0.87_dp) then
+                ydot(xOHeq)=ydot(xOHeq)*&
+                    (-2.027_dp*y(xOHeq)+2.013_dp)
+            endif
+            if (y(xOHeq)>0.87_dp) then
+                ydot(xOHeq)=ydot(xOHeq)*(3.461_dp*y(xOHeq)-2.761_dp)
+            endif
         endif
         if (W0>1e-3) then
             ! water conversion
@@ -188,10 +199,12 @@ end subroutine odesystem
 
 
 !********************************BEGINNING*************************************
-!> calculates molar amount of blowing agents in bubble and shell
+!> Calculates molar amount of blowing agents in bubble and shell.
+!!
+!! Can be used to check that we don't lose physical blowing agent.
 subroutine molar_balance(y)
+    real(dp), intent(in) :: y(:) !< integrated variables
     integer :: i,j
-    real(dp) :: y(:)
     !numerical integration
     mb=0e0_dp
     !rectangle rule
@@ -218,11 +231,15 @@ end subroutine molar_balance
 
 
 !********************************BEGINNING*************************************
-!> calculate dimensional variables
+!> Calculates dimensional variables.
+!!
+!! Transforms integrated variables to human readable format with easy to
+!! remember names.
 subroutine dim_var(t,y)
     use phys_prop, only:physical_properties,Rb
+    real(dp), intent(in) :: t !< time
+    real(dp), intent(in) :: y(:) !< integrated variables
 	integer :: i
-    real(dp) :: t,y(:)
     time=t
     if (firstrun) then
         radius=y(req) ! calculate bubble radius
@@ -258,10 +275,12 @@ end subroutine dim_var
 
 
 !********************************BEGINNING*************************************
-!> evaluates kinetic source terms
-!! modena models
+!> Evaluates kinetic source terms.
+!!
+!! Uses Modena model. Other kinetic models are implemented directly in the
+!! model subroutine.
 subroutine kinModel(y)
-    real(dp), intent(in) :: y(:)
+    real(dp), intent(in) :: y(:) !< integrated variables
     integer :: i
     if (kin_model==4) then
         do i=1,size(kineq)

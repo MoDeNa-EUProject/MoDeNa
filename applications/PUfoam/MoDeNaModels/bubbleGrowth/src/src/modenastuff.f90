@@ -1,8 +1,9 @@
-!> @file
-!! contains definitions of modena variables
-!! creates and destroys modena models
+!> @file      bubbleGrowth/src/src/modenastuff.f90
 !! @author    Pavel Ferkl
-!! @ingroup   bblgr
+!! @ingroup   src_mod_bubbleGrowth
+!! @brief     Definitions of modena variables.
+!! @details
+!! All communcation with Modena framework except calls of the Modena models.
 module modenastuff
     use globals
     use iso_c_binding
@@ -52,7 +53,9 @@ module modenastuff
         kinModena,kinInputs,kinOutputs
 contains
 !********************************BEGINNING*************************************
-!> creates Modena models
+!> Creates Modena models.
+!!
+!! Names of the models and inputs are hardcoded here.
 subroutine createModenaModels
     integer :: i
     character(len=3) gasname(2)
@@ -296,7 +299,9 @@ end subroutine createModenaModels
 
 
 !********************************BEGINNING*************************************
-!> destroys Modena models
+!> Destroys Modena models.
+!!
+!! Deallocates memory used for models, inputs and outputs.
 subroutine destroyModenaModels
     integer :: i
     if (visc_model==3) then

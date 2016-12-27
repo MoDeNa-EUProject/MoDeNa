@@ -1,7 +1,9 @@
-!> @file
-!! sets up and integrates the bubble growth model
+!> @file      bubbleGrowth/src/src/integration.f90
 !! @author    Pavel Ferkl
-!! @ingroup   bblgr
+!! @ingroup   src_mod_bubbleGrowth
+!! @brief     Controls the integration.
+!! @details
+!! Subroutines for setting up and controlling the integrator.
 module integration
     use constants
     use globals
@@ -31,11 +33,13 @@ module integration
             real(dp) ::  t, y(neq), ydot(neq)
         end subroutine sub
     end interface
-    procedure (sub), pointer :: sub_ptr => odesystem
+    procedure (sub), pointer :: sub_ptr => odesystem !< pointer to model
     public bblpreproc,bblinteg,neq
 contains
 !********************************BEGINNING*************************************
-!> prepares integration
+!> Prepares the integration.
+!!
+!! Calls all subroutines needed to set up the integrator.
 subroutine bblpreproc
     write(*,*) 'preparing simulation...'
     call checks
@@ -51,7 +55,10 @@ end subroutine bblpreproc
 
 
 !********************************BEGINNING*************************************
-!> performs some checks on the validity of input
+!> Performs some checks on the validity of input.
+!!
+!! This subroutine is called at the start. Implements some checks on
+!! the validity of the inputs.
 subroutine checks
     select case (kin_model)
     case(1)
@@ -69,14 +76,16 @@ end subroutine checks
 
 
 !********************************BEGINNING*************************************
-!> calculate spatial grid points
-!! point positions are stored in global array dz(p+1)
+!> Sets up the computational mesh.
+!!
+!! Calculates the spatial grid points.
+!! Point positions are stored in global array dz(p+1).
 subroutine create_mesh(a,b,p,s)
-    integer, intent(in) :: p ! number of inner points
+    integer, intent(in) :: p !< number of inner points
     real(dp), intent(in) :: &
-        a,& ! lower bound
-        b,& ! upper bound
-        s ! point spacing increase
+        a,& !< lower bound
+        b,& !< upper bound
+        s !< point spacing increase
 	integer :: i,info
     real(dp),allocatable :: atri(:),btri(:),ctri(:),rtri(:),utri(:)
     allocate(atri(p),btri(p),ctri(p),rtri(p),utri(p),dz(p+1))
@@ -100,7 +109,10 @@ end subroutine create_mesh
 
 
 !********************************BEGINNING*************************************
-!> determine number of equations and their indexes
+!> Determines the number of equations and their indexes.
+!!
+!! Number of equation depends on the number of gases, number of grid points
+!! and whether the inertial term in momentum balance is used.
 subroutine set_equation_order
     integer :: i
     neq=(p+1)*ngas
@@ -136,7 +148,9 @@ end subroutine set_equation_order
 
 
 !********************************BEGINNING*************************************
-!> choose and set integrator
+!> Sets integrator specific variables.
+!!
+!! Implements stiff and non-stiff integrators from ODEPACK and SUNDIALS.
 subroutine set_integrator
     if (integrator==1 .or. integrator==2) then
         mf=int_meth
@@ -240,7 +254,9 @@ end subroutine set_integrator
 
 
 !********************************BEGINNING*************************************
-!> set initial conditions
+!> Set initial conditions.
+!!
+!! Implements the initial conditions and fills the integrating array.
 subroutine set_initial_conditions
     integer :: i,j
     t = tstart
@@ -279,8 +295,9 @@ end subroutine set_initial_conditions
 
 
 !********************************BEGINNING*************************************
-!> calculate growth rate
-!! should be called once per timestep
+!> Calculates growth rate.
+!!
+!! Should be called only once per timestep.
 subroutine growth_rate
 	integer :: i
     do i=1,ngas
@@ -294,7 +311,9 @@ end subroutine growth_rate
 
 
 !********************************BEGINNING*************************************
-!> performs integration
+!> Performs integration.
+!!
+!! Implements the main integration loop.
 subroutine bblinteg
     write(*,*) 'integrating...'
     if (firstrun) then
@@ -351,8 +370,10 @@ end subroutine bblinteg
 end module integration
 
 !********************************beginning*************************************
-!> model interface for sundials
-!! must be outside of module
+!> Model interface for sundials.
+!!
+!! Must be outside of the module. The name cannot be changed.
+!! The name of the model subroutine is hardcoded in here.
 subroutine  fcvfun(t, y, ydot, ipar, rpar, ier)
     use iso_c_binding
     use constants, only:dp

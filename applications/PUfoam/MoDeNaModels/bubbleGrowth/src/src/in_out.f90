@@ -1,7 +1,9 @@
-!> @file
-!! handles input and output
+!> @file      bubbleGrowth/src/src/in_out.f90
 !! @author    Pavel Ferkl
-!! @ingroup   bblgr
+!! @ingroup   src_mod_bubbleGrowth
+!! @brief     Subroutines controlling input and output.
+!! @details
+!! All input and output should be handled through this module.
 module in_out
     use foaming_globals_m
     use constants
@@ -13,7 +15,9 @@ module in_out
         save_integration_step,save_integration_close,load_old_results
 contains
 !********************************BEGINNING*************************************
-!> set paths to all files
+!> Sets paths to all files.
+!!
+!! Holds the names and paths of all files.
 subroutine set_paths
     fileplacein='../inputs/'
     fileplaceout='./'
@@ -33,8 +37,9 @@ subroutine set_paths
     outputs_af=TRIM(ADJUSTL(fileplaceout))//TRIM(ADJUSTL(outputs_af))
 end subroutine set_paths
 !***********************************END****************************************
-!> reads input values from a file
-!! save them to global variables
+!> Sets input values from the input file.
+!!
+!! Quantites are saved in global variables.
 subroutine read_inputs
     use fson
     use fson_value_m, only: fson_value_get
@@ -80,7 +85,9 @@ subroutine read_inputs
     call fson_get(json_data, "bubbleGrowth.meshCoarseningParameter", mshco)
     call fson_get(json_data, "bubbleGrowth.internalNodes", p)
     call fson_get(json_data, "bubbleGrowth.initialTime", tstart)
-    if (firstrun .and. .not. shooting) call fson_get(json_data, "bubbleGrowth.finalTime", tend)
+    if (firstrun .and. .not. shooting) then
+        call fson_get(json_data, "bubbleGrowth.finalTime", tend)
+    endif
     call fson_get(json_data, "bubbleGrowth.outerTimeSteps", its)
     call fson_get(json_data, "bubbleGrowth.maxInnerTimeSteps", maxts)
     call fson_get(json_data, "bubbleGrowth.relativeTolerance", rel_tol)
@@ -90,18 +97,39 @@ subroutine read_inputs
         diff_model(ngas),sol_model(ngas),cpblg(ngas),cpbll(ngas),&
         wblpol(ngas),D0(ngas))
     call fson_get(json_data, "physicalProperties.pressure", pamb)
-    call fson_get(json_data, "physicalProperties.blowingAgents.PBL.molarMass", Mbl(1))
-    call fson_get(json_data, "physicalProperties.blowingAgents.CO2.molarMass", Mbl(2))
+    call fson_get(&
+        json_data, "physicalProperties.blowingAgents.PBL.molarMass", Mbl(1))
+    call fson_get(&
+        json_data, "physicalProperties.blowingAgents.CO2.molarMass", Mbl(2))
     call fson_get(json_data, "physicalProperties.polymer.heatCapacity", cppol)
-    call fson_get(json_data, "physicalProperties.blowingAgents.PBL.heatCapacityInLiquidPhase", cpbll(1))
-    call fson_get(json_data, "physicalProperties.blowingAgents.CO2.heatCapacityInLiquidPhase", cpbll(2))
-    call fson_get(json_data, "physicalProperties.blowingAgents.PBL.heatCapacityInGaseousPhase", cpblg(1))
-    call fson_get(json_data, "physicalProperties.blowingAgents.CO2.heatCapacityInGaseousPhase", cpblg(2))
-    call fson_get(json_data, "physicalProperties.blowingAgents.PBL.evaporationHeat", dHv(1))
-    call fson_get(json_data, "physicalProperties.blowingAgents.CO2.evaporationHeat", dHv(2))
-    call fson_get(json_data, "physicalProperties.blowingAgents.PBL.density", rhobl)
+    call fson_get(&
+        json_data, &
+        "physicalProperties.blowingAgents.PBL.heatCapacityInLiquidPhase", &
+        cpbll(1))
+    call fson_get(&
+        json_data, &
+        "physicalProperties.blowingAgents.CO2.heatCapacityInLiquidPhase", &
+        cpbll(2))
+    call fson_get(&
+        json_data, &
+        "physicalProperties.blowingAgents.PBL.heatCapacityInGaseousPhase", &
+        cpblg(1))
+    call fson_get(&
+        json_data, &
+        "physicalProperties.blowingAgents.CO2.heatCapacityInGaseousPhase", &
+        cpblg(2))
+    call fson_get(&
+        json_data, &
+        "physicalProperties.blowingAgents.PBL.evaporationHeat", dHv(1))
+    call fson_get(&
+        json_data, &
+        "physicalProperties.blowingAgents.CO2.evaporationHeat", dHv(2))
+    call fson_get(&
+        json_data, "physicalProperties.blowingAgents.PBL.density", rhobl)
     call fson_get(json_data, "initialConditions.temperature", temp0)
-    if (.not. shooting) call fson_get(json_data, "initialConditions.bubbleRadius", R0)
+    if (.not. shooting) then
+        call fson_get(json_data, "initialConditions.bubbleRadius", R0)
+    endif
     call fson_get(json_data, "initialConditions.numberBubbleDensity", nb0)
     call fson_get(json_data, "kinetics.kineticModel", strval)
     if (strval=='Baser') then
@@ -117,29 +145,52 @@ subroutine read_inputs
     call fson_get(json_data, "kinetics.gelPoint", gelpointconv)
     if (kin_model==1 .or. kin_model==3) then
         call fson_get(json_data, "kinetics.useDilution", dilution)
-        call fson_get(json_data, "initialConditions.concentrations.polyol", OH0)
-        call fson_get(json_data, "initialConditions.concentrations.isocyanate", NCO0)
-        call fson_get(json_data, "kinetics.gellingReaction.frequentialFactor", AOH)
-        call fson_get(json_data, "kinetics.gellingReaction.activationEnergy", EOH)
-        call fson_get(json_data, "kinetics.blowingReaction.frequentialFactor", AW)
-        call fson_get(json_data, "kinetics.blowingReaction.activationEnergy", EW)
+        call fson_get(&
+            json_data, "initialConditions.concentrations.polyol", OH0)
+        call fson_get(&
+            json_data, "initialConditions.concentrations.isocyanate", NCO0)
+        call fson_get(&
+            json_data, "kinetics.gellingReaction.frequentialFactor", AOH)
+        call fson_get(&
+            json_data, "kinetics.gellingReaction.activationEnergy", EOH)
+        call fson_get(&
+            json_data, "kinetics.blowingReaction.frequentialFactor", AW)
+        call fson_get(&
+            json_data, "kinetics.blowingReaction.activationEnergy", EW)
     elseif (kin_model==4) then
-        call fson_get(json_data, "initialConditions.concentrations.catalyst", catalyst)
-        call fson_get(json_data, "initialConditions.concentrations.polyol1", polyol1_ini)
-        call fson_get(json_data, "initialConditions.concentrations.polyol2", polyol2_ini)
-        call fson_get(json_data, "initialConditions.concentrations.amine", amine_ini)
-        call fson_get(json_data, "initialConditions.concentrations.isocyanate1", isocyanate1_ini)
-        call fson_get(json_data, "initialConditions.concentrations.isocyanate2", isocyanate2_ini)
-        call fson_get(json_data, "initialConditions.concentrations.isocyanate3", isocyanate3_ini)
+        call fson_get(&
+            json_data, "initialConditions.concentrations.catalyst", catalyst)
+        call fson_get(&
+            json_data, "initialConditions.concentrations.polyol1", polyol1_ini)
+        call fson_get(&
+            json_data, "initialConditions.concentrations.polyol2", polyol2_ini)
+        call fson_get(&
+            json_data, "initialConditions.concentrations.amine", amine_ini)
+        call fson_get(&
+            json_data, "initialConditions.concentrations.isocyanate1", &
+            isocyanate1_ini)
+        call fson_get(&
+            json_data, "initialConditions.concentrations.isocyanate2", &
+            isocyanate2_ini)
+        call fson_get(&
+            json_data, "initialConditions.concentrations.isocyanate3", &
+            isocyanate3_ini)
         OH0=polyol1_ini+polyol2_ini
     endif
-    call fson_get(json_data, "initialConditions.concentrations.blowingAgents.PBL", cbl(1))
-    call fson_get(json_data, "initialConditions.concentrations.blowingAgents.CO2", cbl(2))
+    call fson_get(&
+        json_data, &
+        "initialConditions.concentrations.blowingAgents.PBL", cbl(1))
+    call fson_get(&
+        json_data, &
+        "initialConditions.concentrations.blowingAgents.CO2", cbl(2))
     if (kin_model==1 .or. kin_model==3 .or. kin_model==4) then
-        call fson_get(json_data, "kinetics.gellingReaction.reactionEnthalpy", dHOH)
-        call fson_get(json_data, "kinetics.blowingReaction.reactionEnthalpy", dHW)
+        call fson_get(&
+            json_data, "kinetics.gellingReaction.reactionEnthalpy", dHOH)
+        call fson_get(&
+            json_data, "kinetics.blowingReaction.reactionEnthalpy", dHW)
     endif
-    call fson_get(json_data, "physicalProperties.polymer.polymerDensityModel", strval)
+    call fson_get(&
+        json_data, "physicalProperties.polymer.polymerDensityModel", strval)
     if (strval=="constant") then
         rhop_model=1
         call fson_get(json_data, "physicalProperties.polymer.density", rhop)
@@ -156,32 +207,45 @@ subroutine read_inputs
         call fson_get(json_data, "physicalProperties.surfaceTension", sigma)
     elseif (strval=="pcsaft") then
         itens_model=2
-        call fson_get(json_data, "physicalProperties.surfactant", surfactantPresent)
+        call fson_get(&
+            json_data, "physicalProperties.surfactant", surfactantPresent)
     else
         stop 'unknown interfacial tension model'
     endif
-    call fson_get(json_data, "physicalProperties.blowingAgents.PBL.diffusivityModel", strval)
+    call fson_get(&
+        json_data, &
+        "physicalProperties.blowingAgents.PBL.diffusivityModel", strval)
     if (strval=="constant") then
         diff_model(1)=1
-        call fson_get(json_data, "physicalProperties.blowingAgents.PBL.diffusivity", D(1))
+        call fson_get(&
+            json_data, &
+            "physicalProperties.blowingAgents.PBL.diffusivity", D(1))
     elseif (strval=="nanotools") then
         diff_model(1)=2
     else
         stop 'unknown diffusivity model'
     endif
-    call fson_get(json_data, "physicalProperties.blowingAgents.CO2.diffusivityModel", strval)
+    call fson_get(&
+        json_data, &
+        "physicalProperties.blowingAgents.CO2.diffusivityModel", strval)
     if (strval=="constant") then
         diff_model(2)=1
-        call fson_get(json_data, "physicalProperties.blowingAgents.CO2.diffusivity", D(2))
+        call fson_get(&
+            json_data, &
+            "physicalProperties.blowingAgents.CO2.diffusivity", D(2))
     elseif (strval=="nanotools") then
         diff_model(2)=2
     else
         stop 'unknown diffusivity model'
     endif
-    call fson_get(json_data, "physicalProperties.blowingAgents.PBL.solubilityModel", strval)
+    call fson_get(&
+        json_data, &
+        "physicalProperties.blowingAgents.PBL.solubilityModel", strval)
     if (strval=="constant") then
         sol_model(1)=1
-        call fson_get(json_data, "physicalProperties.blowingAgents.PBL.solubility", KH(1))
+        call fson_get(&
+            json_data, &
+            "physicalProperties.blowingAgents.PBL.solubility", KH(1))
     elseif (strval=="pcsaft") then
         sol_model(1)=2
     elseif (strval=="Gupta") then
@@ -195,18 +259,23 @@ subroutine read_inputs
     else
         stop 'unknown solubility model'
     endif
-    call fson_get(json_data, "physicalProperties.blowingAgents.CO2.solubilityModel", strval)
+    call fson_get(&
+        json_data, &
+        "physicalProperties.blowingAgents.CO2.solubilityModel", strval)
     if (strval=="constant") then
         sol_model(2)=1
     elseif (strval=="pcsaft") then
         sol_model(2)=2
     elseif (strval=="hardcodedconstant") then
         sol_model(2)=8
-        call fson_get(json_data, "physicalProperties.blowingAgents.CO2.solubility", KH(2))
+        call fson_get(&
+            json_data, &
+            "physicalProperties.blowingAgents.CO2.solubility", KH(2))
     else
         stop 'unknown solubility model'
     endif
-    call fson_get(json_data, "physicalProperties.polymer.viscosityModel", strval)
+    call fson_get(&
+        json_data, "physicalProperties.polymer.viscosityModel", strval)
     if (strval=="constant") then
         visc_model=1
         call fson_get(json_data, "physicalProperties.polymer.viscosity", eta)
@@ -225,7 +294,10 @@ end subroutine read_inputs
 
 
 !********************************BEGINNING*************************************
-!> opens output files and writes a header
+!> Opens output files and writes a header.
+!!
+!! Names of variables are written on the first line in the file.
+!! Soubroutine is called before the integration commences.
 subroutine save_integration_header
     open (unit=newunit(fi1), file = outputs_1d)
     write(fi1,'(1000A24)') '#time', 'radius','pressure1', 'pressure2',&
@@ -252,9 +324,12 @@ end subroutine save_integration_header
 
 
 !********************************BEGINNING*************************************
-!> writes an integration step to output file
+!> Writes an integration step to output file.
+!!
+!! Subroutine is called once per time step.
 subroutine save_integration_step(iout)
-    integer :: i,iout
+    integer, intent(in) :: iout !< number of the time step
+    integer :: i
     write(fi1,"(1000es24.15e3)") time,radius,pressure,Y(xOHeq),Y(xWeq),&
         eqconc,Y(fceq),eta,mb(1),mb2(1),mb3(1),st,temp,rhofoam,&
         wblpol,porosity
@@ -280,9 +355,11 @@ end subroutine save_integration_step
 
 
 !********************************BEGINNING*************************************
-!> closes output files
+!> Closes output files.
+!!
+!! Soubroutine is called after the integration finishes.
 subroutine save_integration_close(iout)
-    integer :: iout
+    integer, intent(in) :: iout !< number of the time step
     real(dp), dimension(:,:), allocatable :: matr
     close(fi1)
     close(fi2)
@@ -318,7 +395,9 @@ end subroutine save_integration_close
 
 
 !********************************BEGINNING*************************************
-!> loads old results
+!> Loads old results.
+!!
+!! Reads the precalculated evolution of bubble radius.
 subroutine load_old_results
     integer :: i,j,ios,fi
     real(dp), dimension(:,:), allocatable :: matrix
