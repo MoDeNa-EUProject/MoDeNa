@@ -18,14 +18,7 @@
  * @ingroup  models
  * @brief    Integrates Bubble growth model into the MoDeNa software framework
  * @details
- *
  * @ref bubbleGrowth.bubbleGrowth.m Backward mapping FireTask
- *
- * @remark
- * @attention
- * @pre
- * @note
- * @warning
 */
 
 /**
@@ -33,11 +26,4 @@
  * @ingroup  mod_bubbleGrowth
  * @brief    Source Code Documentation
  * @details
- *
- *
- * @remark
- * @attention
- * @pre
- * @note
- * @warning
 */

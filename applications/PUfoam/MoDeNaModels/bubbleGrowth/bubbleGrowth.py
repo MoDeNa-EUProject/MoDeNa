@@ -55,15 +55,7 @@ from modena.Strategy import BackwardMappingScriptTask
 ## @var m
 # @brief Bubble Growth Application Recipe
 # @details
-#
-#
-#
-# @attention
-# @pre
-# @note
-# @todo
-# @warning
-# @bug
+# Runs the detailed model and saves the results.
 m = BackwardMappingScriptTask(
     script=os.path.dirname(os.path.abspath(__file__))
     + '/src/bblgrExact'

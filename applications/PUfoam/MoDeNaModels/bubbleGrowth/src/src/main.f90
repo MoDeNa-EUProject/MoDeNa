@@ -1,4 +1,4 @@
-!>
+!> @file      bubbleGrowth/src/src/main.f90
 !! @ingroup   src_mod_bubbleGrowth
 !! @author    Pavel Ferkl
 !! @brief     Main executable program.
