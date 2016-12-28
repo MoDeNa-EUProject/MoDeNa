@@ -29,8 +29,10 @@ module integration
     abstract interface
         subroutine sub (neq, t, y, ydot)
             use constants
-            integer :: neq
-            real(dp) ::  t, y(neq), ydot(neq)
+            integer, intent(in) :: neq
+            real(dp), intent(in) :: t
+            real(dp), intent(in) :: y(neq)
+            real(dp), intent(out) :: ydot(neq)
         end subroutine sub
     end interface
     procedure (sub), pointer :: sub_ptr => odesystem !< pointer to model
@@ -368,20 +370,3 @@ subroutine bblinteg
 end subroutine bblinteg
 !***********************************END****************************************
 end module integration
-
-!********************************beginning*************************************
-!> Model interface for sundials.
-!!
-!! Must be outside of the module. The name cannot be changed.
-!! The name of the model subroutine is hardcoded in here.
-subroutine  fcvfun(t, y, ydot, ipar, rpar, ier)
-    use iso_c_binding
-    use constants, only:dp
-    use integration, only:neq
-    use model, only: odesystem
-    integer :: ier
-    integer(c_long) :: ipar(1)
-    real(dp) ::  t, y(neq), ydot(neq), rpar(1)
-    call odesystem(neq, t, y, ydot)
-end subroutine fcvfun
-!***********************************end****************************************
