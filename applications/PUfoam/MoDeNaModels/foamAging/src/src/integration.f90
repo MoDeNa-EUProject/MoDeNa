@@ -1,15 +1,20 @@
-!> @file
-!! Integration subroutines.
+!> @file      foamAging/src/src/integration.f90
 !! @author    Michal Vonka
 !! @author    Pavel Ferkl
-!! @ingroup   foam_aging
+!! @ingroup   src_mod_foamAging
+!! @brief     Controls the integration.
+!! @details
+!! Integration is done by ODEPACK.
 module integration
     implicit none
     private
     public integrate
 contains
 !********************************BEGINNING*************************************
-!> calculates the evolution of concentrations of gases
+!> Calculates the evolution of concentrations of gases.
+!!
+!! Loads the inputs, prepares the integration and holds the main integration
+!! loop. And cleans up afterwards.
 subroutine integrate
     use constants
     use globals

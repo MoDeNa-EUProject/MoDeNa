@@ -46,7 +46,6 @@ lower scale backward mapping models will get out of validity range that model
 will be re-fitted to larger range and the detailed model will be re-run. This is
 repeated until the detailed model succesfully finishes (or possibly crashes for
 other reason, in which case an error is printed out).
-
 """
 
 import os

@@ -1,8 +1,27 @@
-/**
-@defgroup foam_cond Foam conductivity
-@ingroup  models
-@brief    Estimates the equivalent conductivity of the foam
+/*! @page deps Dependencies
+ *  @section dep_foamConductivity Dependencies of Foam conductivity model
+ *
+ *
+ *   | Dependency      | Type                            | Tested Version |
+ *   | --------------- | ------------------------------- | -------------- |
+ *   | gfortran        | compiler                        | 5.4            |
+ *   | BLAS            | Library - Basic Linear Algebra  | 3.4.2          |
+ *   | LAPACK          | Toolkit - Linear algebra        | 3.4.2          |
+ *   | fson            | Library - JSON reader           | 750341b*       |
+ *   * Library releases are not versioned. Commit ID is provided.
 */
 
+/**
+ * @defgroup mod_foamConductivity Foam conductivity MoDeNa Module
+ * @ingroup  models
+ * @brief    Integrates Foam conductivity model into the MoDeNa software framework
+ * @details
+ * @ref foamConductivity.foamConductivity.m_simulation Backward mapping FireTask
+*/
 
-
+/**
+ * @defgroup src_mod_foamConductivity Fortran Source Code
+ * @ingroup  mod_foamConductivity
+ * @brief    Source Code Documentation
+ * @details
+*/

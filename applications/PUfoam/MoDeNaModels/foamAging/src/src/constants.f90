@@ -1,7 +1,9 @@
-!> @file
-!! stores parameters and commonly used variables as globals
+!> @file      foamAging/src/src/constants.f90
 !! @author    Pavel Ferkl
-!! @ingroup   foam_aging
+!! @ingroup   src_mod_foamAging
+!! @brief     Physical constants and other parameters.
+!! @details
+!! Names of gases and heat capacity need to be loaded first.
 module constants
     use,intrinsic :: iso_fortran_env, only: dp => real64
     implicit none

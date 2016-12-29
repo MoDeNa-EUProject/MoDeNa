@@ -1,9 +1,10 @@
-!> @file
-!! subroutines for calculation of physical properties of polymer and blowing
-!! agents using Modena calls
+!> @file      foamAging/src/src/physicalProperties.f90
+!! @ingroup   src_mod_foamAging
 !! @author    Michal Vonka
 !! @author    Pavel Ferkl
-!! @ingroup   foam_aging
+!! @brief     Calculates material properties of the system.
+!! @details
+!! Also defines all Modena variables and models.
 module physicalProperties
     use constants
     use globals, only: solModel,diffModel
@@ -44,7 +45,9 @@ module physicalProperties
     integer(c_size_t), dimension(:), allocatable :: kgTemppos
 contains
 !********************************BEGINNING*************************************
-!> creates Modena models
+!> Creates Modena models.
+!!
+!! Names of models and inputs are hardcoded here.
 subroutine createModels(ngas)
     integer :: ngas
     integer :: i
@@ -129,7 +132,9 @@ end subroutine createModels
 
 
 !********************************BEGINNING*************************************
-!> destroys Modena models
+!> Destroys Modena models.
+!!
+!! Cleans Modena models, inputs and outputs from memory.
 subroutine destroyModels(ngas)
     integer, intent(in) :: ngas
     integer :: i
@@ -159,9 +164,11 @@ end subroutine destroyModels
 
 
 !********************************BEGINNING*************************************
-!> calculation of density of polymer
+!> Calculation of density of polymer.
+!!
+!! Modena call.
 real(dp) function polymerDensity(temp)
-    real(dp), intent(in) :: temp
+    real(dp), intent(in) :: temp !< temperature
     call modena_inputs_set(rhopInputs, rhopTemppos, temp)
     ret = modena_model_call (rhopModena, rhopInputs, rhopOutputs)
     if(ret /= 0) then
@@ -173,10 +180,13 @@ end function polymerDensity
 
 
 !********************************BEGINNING*************************************
-!> thermal conductivity of mixture of blowing agents
+!> Thermal conductivity of mixture of blowing agents.
+!!
+!! Modena call.
 real(dp) function gasMixtureConductivity(temp,xg,ngas)
-    integer, intent(in) :: ngas
-    real(dp), intent(in) :: temp,xg(:)
+    integer, intent(in) :: ngas !< number of gases
+    real(dp), intent(in) :: temp !< temperature
+    real(dp), intent(in) :: xg(:) !< molar fractions  of gases
     integer :: i
     call modena_inputs_set(kgasInputs, kgasTemppos, temp)
     do i=1,ngas
@@ -192,10 +202,12 @@ end function gasMixtureConductivity
 
 
 !********************************BEGINNING*************************************
-!> thermal conductivity of carbon dioxide
+!> Thermal conductivity of carbon dioxide.
+!!
+!! Modena call.
 real(dp) function gasConductivity(temp,index)
-    integer, intent(in) :: index
-    real(dp), intent(in) :: temp
+    integer, intent(in) :: index !< index of gas
+    real(dp), intent(in) :: temp !< temperature
     call modena_inputs_set(kgInputs(index), kgTemppos(index), temp)
     ret = modena_model_call (kgModena(index), kgInputs(index), kgOutputs(index))
     if(ret /= 0) then
@@ -207,10 +219,12 @@ end function gasConductivity
 
 
 !********************************BEGINNING*************************************
-!> solubility of gas
+!> Solubility of gas.
+!!
+!! Modena call.
 real(dp) function Solubility(temp,index)
-    integer, intent(in) :: index
-    real(dp), intent(in) :: temp
+    integer, intent(in) :: index !< index of gas
+    real(dp), intent(in) :: temp !< temperature
     real(dp) :: xl1,xl2
     xl1=1.0e-3_dp
     xl2=1-xl1
@@ -227,10 +241,12 @@ end function Solubility
 
 
 !********************************BEGINNING*************************************
-!> diffusivity of gas
+!> Diffusivity of gas.
+!!
+!! Modena call.
 real(dp) function Diffusivity(temp,index)
-    integer, intent(in) :: index
-    real(dp), intent(in) :: temp
+    integer, intent(in) :: index !< index of gas
+    real(dp), intent(in) :: temp !< temperature
     call modena_inputs_set(dgInputs(index), dgTemppos(index), temp)
     ret = modena_model_call (dgModena(index), dgInputs(index), dgOutputs(index))
     if(ret /= 0) then
@@ -242,11 +258,12 @@ end function Diffusivity
 
 
 !********************************BEGINNING*************************************
-!> diffusivity of gases in gas phase
-!! accoriding to Bird 1975, p.505, eq. 16.3-1
+!> Diffusivity of gases in gas phase.
+!!
+!! Accoriding to Bird 1975, p.505, eq. 16.3-1.
 real(dp) function gasDiffusivity(temp)
     use globals, only: pressure
-    real(dp), intent(in) :: temp
+    real(dp), intent(in) :: temp !< temperature
 	real(dp) :: pcA, pcB, pcApcB, TcA, TcB, TcATcB
 	real(dp) :: MA, MB, Mterm ,a, b, aToverTcsb
     pcA = 33.5e0_dp      !  N2
@@ -269,10 +286,11 @@ end function gasDiffusivity
 
 
 !********************************BEGINNING*************************************
-!> heat capacity of carbon dioxide at constant pressure (J/mol/K)
+!> Heat capacity of carbon dioxide at constant pressure (J/mol/K).
+!!
 !! [link](http://webbook.nist.gov/cgi/cbook.cgi?ID=C124389&Units=SI&Mask=1#Thermo-Gas)
 real(dp) function cdHeatCapacity(temp)
-    real(dp), intent(in) :: temp
+    real(dp), intent(in) :: temp !< temperature
     real(dp) :: &
         t,&
         a=24.99735_dp,&
@@ -287,10 +305,11 @@ end function cdHeatCapacity
 
 
 !********************************BEGINNING*************************************
-!> heat capacity of cyclo-pentane at constant pressure (J/mol/K)
-!! fitted to data from [link](http://webbook.nist.gov/cgi/cbook.cgi?ID=C287923&Units=SI&Mask=1#Thermo-Gas)
+!> Heat capacity of cyclo-pentane at constant pressure (J/mol/K).
+!!
+!! Fitted to data from [link](http://webbook.nist.gov/cgi/cbook.cgi?ID=C287923&Units=SI&Mask=1#Thermo-Gas)
 real(dp) function cypHeatCapacity(temp)
-    real(dp), intent(in) :: temp
+    real(dp), intent(in) :: temp !< temperature
     real(dp) :: &
         t,&
         a=-25.6132057_dp,&
@@ -305,19 +324,22 @@ end function cypHeatCapacity
 
 
 !********************************BEGINNING*************************************
-!> heat capacity of air at constant pressure (J/mol/K)
+!> Heat capacity of air at constant pressure (J/mol/K).
+!!
+!! Calculated from oxygen and nitrogen.
 real(dp) function airHeatCapacity(temp)
-    real(dp), intent(in) :: temp
+    real(dp), intent(in) :: temp !< temperature
     airHeatCapacity=0.21_dp*oxyHeatCapacity(temp)+0.79_dp*nitrHeatCapacity(temp)
 end function airHeatCapacity
 !***********************************END****************************************
 
 
 !********************************BEGINNING*************************************
-!> heat capacity of nitrogen at constant pressure (J/mol/K)
+!> Heat capacity of nitrogen at constant pressure (J/mol/K).
+!!
 !! [link](http://webbook.nist.gov/cgi/cbook.cgi?ID=C7727379&Units=SI&Mask=1#Thermo-Gas)
 real(dp) function nitrHeatCapacity(temp)
-    real(dp), intent(in) :: temp
+    real(dp), intent(in) :: temp !< temperature
     real(dp) :: &
         t,&
         a=28.98641_dp,&
@@ -332,10 +354,11 @@ end function nitrHeatCapacity
 
 
 !********************************BEGINNING*************************************
-!> heat capacity of oxygen at constant pressure (J/mol/K)
+!> Heat capacity of oxygen at constant pressure (J/mol/K).
+!!
 !! [link](http://webbook.nist.gov/cgi/cbook.cgi?ID=C7782447&Units=SI&Mask=1#Thermo-Gas)
 real(dp) function oxyHeatCapacity(temp)
-    real(dp), intent(in) :: temp
+    real(dp), intent(in) :: temp !< temperature
     real(dp) :: &
         t,&
         a=31.32234_dp,&
@@ -350,10 +373,12 @@ end function oxyHeatCapacity
 
 
 !********************************BEGINNING*************************************
-!> calculation of strut content
+!> Calculation of strut content.
+!!
+!! Modena call.
 subroutine strutContent(strut_content,foam_density)
-    real(dp), intent(out) :: strut_content
-    real(dp), intent(in) :: foam_density
+    real(dp), intent(out) :: strut_content !< strut content
+    real(dp), intent(in) :: foam_density !< foam density
     !modena variables
     integer(c_size_t) :: fspos
     integer(c_size_t) :: rhopos

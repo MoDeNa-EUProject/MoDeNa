@@ -29,15 +29,29 @@ License
 @endcond'''
 
 """
-@ingroup foam_cond
-@namespace foamConductivity.foamConductivity
+@file       foamConductivity.py
+@namespace  foamConductivity.foamConductivity
+@ingroup    mod_foamConductivity
+@brief      Surrogate model and Firetasks for Foam conductivity model.
+@author     Pavel Ferkl
+@copyright  2014-2016, MoDeNa Project. GNU Public License.
+@details
 
-@brief Surrogate function, model definition and backward mapping FireTask for
-       Foam conductivity model.
+# Foam conductivity python module.
 
-@author    Pavel Ferkl
-@copyright 2014-2016, MoDeNa Project. GNU Public License.
-@ingroup   app_aging
+Contains a FireTask, which runs the detailed model and copies the results into
+the results folder. The relative path and name of the detailed model executable
+are hard coded. The FireTask is BackwardMapping, which means that if one of the
+lower scale backward mapping models will get out of validity range that model
+will be re-fitted to larger range and the detailed model will be re-run. This is
+repeated until the detailed model succesfully finishes (or possibly crashes for
+other reason, in which case an error is printed out).
+
+Also contains a definition of surrogate function and surrogate model. The
+surrogate model is Backward mapping. Thus, it can be automatically re-fitted
+using the prepared ExactTask, which executes the detailed model, reads the
+results and stores them in the database.
+
 """
 
 import os
@@ -50,14 +64,31 @@ import polymerConductivity
 import gasConductivity
 import gasMixtureConductivity
 import json
+## adjust precision of floats when saving json files
 json.encoder.FLOAT_REPR = lambda o: format(o, '.12g')
 
 @explicit_serialize
 class FoamConductivityExactTask(ModenaFireTask):
     """
-    A FireTask that starts a microscopic code and updates the database.
+    @brief    Recipe for Foam conductivity application.
+    @details
+    This FireTask controls the execution of the detailed model of the
+    Foam conductivity model. The detailed model is based on homogeneous phase
+    approach. It predicts the conductivite and radiative properties of
+    an effective homogenous medium and then simulates coupled
+    conductive-radiative heat transfer in this medium.
+
+    In order to start the detailed model, the input values for the model are
+    first written to the file "foamConductivity.json". The detailed model code
+    picks them up from this file and performs the according calculation. Once it
+    is done, the output value is written to the file "foamConductivity.out".
+    This FireTask then reads in the calculated foam conductivity from the output
+    file and inserts this value into the database.
     """
     def task(self, fw_spec):
+        """
+        @brief    This task is executed when fitting the surrogate model.
+        """
         eps = self['point']['eps']
         dcell = self['point']['dcell']
         fstrut = self['point']['fstrut']
@@ -185,9 +216,10 @@ except IOError: #automatic initialization
     with open("../inputs/init_foamConductivity.json") as fl:
         foaming_ini=json.load(fl)
 
-## Surrogate model for foam conductivity
+## Surrogate model for foam conductivity.
 #
-# Backward mapping model is used.
+# Backward mapping model is used. Gas and polymer conductivity are taken
+# from substitute models.
 m_foamConductivity = BackwardMappingModel(
     _id='foamConductivity',
     surrogateFunction=f_foamConductivity,
@@ -212,8 +244,9 @@ m_foamConductivity = BackwardMappingModel(
     ),
 )
 
-## Foam conductivity simulation
+## Foam conductivity simulation.
 #
+# Runs the detailed model and saves the results.
 # For the case, when only foam conductivity and no aging is needed.
 m_simulation = Strategy.BackwardMappingScriptTask(
     script=os.path.dirname(os.path.abspath(__file__))+'/src/kfoam' +

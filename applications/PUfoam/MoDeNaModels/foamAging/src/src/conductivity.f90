@@ -1,29 +1,36 @@
-!> @file
-!! subroutines for calculation of equivalent conductivity of the foam
-!! using Modena calls
-!! gas mixture conductivity calculated here is not actually used, it is just
-!! for testing
+!> @file      foamAging/src/src/conductivity.f90
 !! @author    Pavel Ferkl
-!! @ingroup   foam_aging
+!! @ingroup   src_mod_foamAging
+!! @brief     Calculation of thermal conductivity.
+!! @details
+!! Subroutines for prediction of thermal conductivity of foam and gas phase.
 module conductivity
     use constants
     use fmodena
     use physicalProperties
     implicit none
-    integer :: gasModel=2
     private
     public equcond
 contains
 !********************************BEGINNING*************************************
-!> determine equivalent conductivity of the foam
+!> Determines equivalent conductivity of the foam.
+!!
+!! Calls the Modena model. Also tests different mixing rules for gas mixture
+!! conductivity.
 subroutine equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp)
-    real(dp), intent(out) :: keq
-    real(dp), dimension(:), intent(in) :: ystate
-    integer, intent(in) :: ngas,nfv,mor(:)
-    real(dp), intent(in) :: temp,eps,dcell,fstrut
+    real(dp), intent(out) :: keq !< equivalent conductivity of foam
+    real(dp), dimension(:), intent(in) :: ystate !< integrated variables
+    integer, intent(in) :: ngas !< number of gases
+    integer, intent(in) :: nfv !< number of grid points
+    integer, intent(in) :: mor(:) !< phase information
+    real(dp), intent(in) :: temp !< temperature
+    real(dp), intent(in) :: eps !< porosity
+    real(dp), intent(in) :: dcell !< cell size
+    real(dp), intent(in) :: fstrut !< strut content
     real(dp) :: kgas
     real(dp), dimension(ngas) :: kg,yg,cc
     integer :: i,j,k
+    integer :: gasModel=2
     !calculate average concentrations
     cpg(1)=oxyHeatCapacity(temp)
     cpg(2)=nitrHeatCapacity(temp)
@@ -76,8 +83,9 @@ end subroutine equcond
 
 
 !********************************BEGINNING*************************************
-!> determine thermal conductivity of a mixture
-!! simple weighted average
+!> Determine thermal conductivity of a mixture.
+!!
+!! Simple weighted average.
 real(dp) function weightedAverage(k,yin) result(kmix)
     real(dp), dimension(:), intent(in) :: k !thermal conductivities
     real(dp), dimension(:), intent(in) :: yin !molar fractions
@@ -101,10 +109,11 @@ end function weightedAverage
 
 
 !********************************BEGINNING*************************************
-!> determine thermal conductivity of a mixture
-!! extended Wassiljewa model (Dohrn)
-!! parameters calculated according to Mason and Saxena
-!! [link](http://dx.doi.org/10.1016/j.fluid.2007.07.059)
+!> Determine thermal conductivity of a mixture.
+!!
+!! Extended Wassiljewa model (Dohrn).
+!! Parameters calculated according to Mason and Saxena
+!! [link](http://dx.doi.org/10.1016/j.fluid.2007.07.059).
 real(dp) function extWassiljewa(k,yin,Tc,pc,M,T,eps) result(kmix)
     real(dp), dimension(:), intent(in) :: k !thermal conductivities
     real(dp), dimension(:), intent(in) :: yin !molar fractions
@@ -148,9 +157,10 @@ end function extWassiljewa
 
 
 !********************************BEGINNING*************************************
-!> determine thermal conductivity of a mixture
-!! Lindsay-Bromley model
-!! see [link](http://dx.doi.org/10.1021/ie50488a017)
+!> Determine thermal conductivity of a mixture
+!!
+!! Lindsay-Bromley model,
+!! see [link](http://dx.doi.org/10.1021/ie50488a017).
 real(dp) function lindsayBromley(k,yin,Tb,cp,M,T) result(kmix)
     real(dp), dimension(:), intent(in) :: &
         k,& !thermal conductivities
@@ -203,9 +213,10 @@ end function lindsayBromley
 
 
 !********************************BEGINNING*************************************
-!> determine thermal conductivity of a mixture
-!! Pandey-Prajapati model
-!! see [link](http://www.new1.dli.ernet.in/data1/upload/insa/INSA_1/20005baf_372.pdf)
+!> Determine thermal conductivity of a mixture.
+!!
+!! Pandey-Prajapati model,
+!! see [link](http://www.new1.dli.ernet.in/data1/upload/insa/INSA_1/20005baf_372.pdf).
 real(dp) function pandeyPrajapati(k,yin,Tb,M,T) result(kmix)
     real(dp), dimension(:), intent(in) :: &
         k,& !thermal conductivities

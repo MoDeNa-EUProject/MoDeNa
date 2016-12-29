@@ -1,15 +1,19 @@
-!> @file
-!! subroutines for file input and output
+!> @file      foamAging/src/src/InOut.f90
 !! @author    Michal Vonka
 !! @author    Pavel Ferkl
-!! @ingroup   foam_aging
+!! @ingroup   src_mod_foamAging
+!! @brief     File input and output.
+!! @details
+!! Inputs are loaded from JSON file, pressure profiles are saved in text files.
 module inout
 	implicit none
 	private
 	public input,output,print_header
 contains
 !********************************BEGINNING*************************************
-!> reads input file, packs variables to rpar and ipar variables
+!> Reads input file.
+!!
+!! Inputs are saved to global variables.
 subroutine input()
 	use constants
 	use globals
@@ -291,17 +295,22 @@ end subroutine input
 
 
 !********************************BEGINNING*************************************
-!> saves results to file
+!> Saves results to file.
+!!
+!! Saves partial pressure profiles in whole foam and in gas phase only.
+!! @param [in] time time
 subroutine output(iprof, time, ystate, neq, pp)
 	use constants
 	use globals
 	use model, only: ngas,dz,mor,nfv,sol
-	integer :: i, j, iprof
-	integer :: neq, spp
-
-	real(dp) :: time,pos
-	real(dp) :: ystate(:)
-	real(dp) :: pp(:) ! partial pressure
+	integer, intent(in) :: iprof !< number time step
+	integer, intent(in) :: neq !< number of equations
+	real(dp), intent(in) :: time !< time
+	real(dp), intent(in) :: ystate(:) !< integrated variables
+	real(dp), intent(in) :: pp(:) !< partial pressure
+	integer :: i, j
+	integer :: spp
+	real(dp) :: pos
 
 	character(len=1) :: name_1	! one character
 	character(len=2) :: name_2	! two characters
@@ -359,6 +368,9 @@ end subroutine output
 
 
 !********************************BEGINNING*************************************
+!> Prints header to console.
+!!
+!! Outputs useful information, which identifies, which foam is simulated.
 subroutine print_header
 	use globals
 	use model, only: nfv

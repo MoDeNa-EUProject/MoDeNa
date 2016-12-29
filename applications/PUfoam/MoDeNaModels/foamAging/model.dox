@@ -1,7 +1,27 @@
-/**
-@defgroup foam_aging Foam aging
-@ingroup  models
-@brief    Predicts the evolution of composition of gas phase in foam and
-determines the change in thermal properties.
+/*! @page deps Dependencies
+ *  @section dep_foamAging Dependencies of Foam aging model
+ *
+ *
+ *   | Dependency      | Type                            | Tested Version |
+ *   | --------------- | ------------------------------- | -------------- |
+ *   | gfortran        | compiler                        | 5.4            |
+ *   | fson            | Library - JSON reader           | 750341b*       |
+ *   * Library releases are not versioned. Commit ID is provided.
 */
 
+/**
+ * @defgroup mod_foamAging Foam aging MoDeNa Module
+ * @ingroup  models
+ * @brief    Integrates Foam aging model into the MoDeNa software framework
+ * @details
+ * Predicts the evolution of composition of gas phase in foam and
+ * determines the change in thermal properties.
+ * @ref foamAging.foamAging.m Backward mapping FireTask
+*/
+
+/**
+ * @defgroup src_mod_foamAging Fortran Source Code
+ * @ingroup  mod_foamAging
+ * @brief    Source Code Documentation
+ * @details
+*/
