@@ -1,8 +1,9 @@
-!> @file
-!! subroutines for calculation of equivalent conductivity of foam, loading of
-!! parameters and several parametric studies
+!> @file      foamConductivity/src/src/tests.f90
+!! @ingroup   src_mod_foamConductivity
 !! @author    Pavel Ferkl
-!! @ingroup   foam_cond
+!! @brief     Top level routines.
+!! @details
+!! Main subroutines and test functions.
 module tests
     use constants
     use ioutils
@@ -26,8 +27,9 @@ module tests
     character(len=99) :: qmom3D_res='../../foamExpansion/results/CFD3D/'
 contains
 !********************************BEGINNING*************************************
-!> calculate equivalent conductivity for one specific foam
+!> Calculates equivalent conductivity for one specific foam.
 subroutine eqcond(regions)
+    !> number of regions, on which the foam is divided.
     integer, intent(in) :: regions
     integer :: i,j,fi
     real(dp), dimension(:), allocatable :: regbound,regcond
@@ -82,7 +84,7 @@ end subroutine eqcond
 
 
 !********************************BEGINNING*************************************
-!> calculate dependance of equivalent conductivity on porosity
+!> Calculate dependance of equivalent conductivity on porosity.
 subroutine eqcond_por
     integer :: fi,npoints,i
     real(dp) :: pormin,pormax,dpor
@@ -107,7 +109,7 @@ end subroutine eqcond_por
 
 
 !********************************BEGINNING*************************************
-!> calculate dependance of equivalent conductivity on cell size
+!> Calculate dependance of equivalent conductivity on cell size.
 subroutine eqcond_dcell
     integer :: fi,npoints,i
     real(dp) :: dcellmin,dcellmax,ddcell
@@ -128,7 +130,7 @@ end subroutine eqcond_dcell
 
 
 !********************************BEGINNING*************************************
-!> calculate dependance of equivalent conductivity on strut content
+!> Calculate dependance of equivalent conductivity on strut content.
 subroutine eqcond_strut
     integer :: fi,npoints,i
     real(dp) :: strutmin,strutmax,dstrut
@@ -149,7 +151,7 @@ end subroutine eqcond_strut
 
 
 !********************************BEGINNING*************************************
-!> loads parameters, usually from text file
+!> Loads parameters, usually from text file.
 subroutine loadParameters
     use physicalProperties
     use fson

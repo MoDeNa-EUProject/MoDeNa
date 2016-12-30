@@ -8,7 +8,6 @@ module globals
 	use constants, only: dp
 	implicit none
 	logical :: sheet !< determines if sheet is used on the outside of the foam
-	logical :: sheet !< determines if sheet is used on the outside of the foam
 	integer :: nroutputs !< number of outer endme steps
 	integer :: divwall !< number of grid points in wall
 	integer :: divcell !< number of grid points in cell

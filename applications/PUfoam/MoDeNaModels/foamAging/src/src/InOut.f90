@@ -307,7 +307,7 @@ subroutine output(iprof, time, ystate, neq, pp)
 	integer, intent(in) :: neq !< number of equations
 	real(dp), intent(in) :: time !< time
 	real(dp), intent(in) :: ystate(:) !< integrated variables
-	real(dp), intent(in) :: pp(:) !< partial pressure
+	real(dp), intent(out) :: pp(:) !< partial pressure
 	integer :: i, j
 	integer :: spp
 	real(dp) :: pos

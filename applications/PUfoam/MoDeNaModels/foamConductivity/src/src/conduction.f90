@@ -1,8 +1,10 @@
-!> @file
-!! subroutines for calculation of effective conductivity of the foam
-!! (conduction-only)
+!> @file      foamConductivity/src/src/conduction.f90
+!! @ingroup   src_mod_foamConductivity
 !! @author    Pavel Ferkl
-!! @ingroup   foam_cond
+!! @brief     Conductive heat transfer simulations.
+!! @details
+!! Determination of effective conductivity through analytical and numerical
+!! models.
 module conduction
     use constants
     use ioutils
@@ -33,7 +35,9 @@ module conduction
         tfiel       !<temperature field
 contains
 !********************************BEGINNING*************************************
-!> determine effective conductivity of the foam
+!> Determines effective conductivity of the foam.
+!!
+!! Analytical model is always used, numerical is used only when enabled.
 subroutine effcond
     real(dp) :: xw,xs,f
     character(len=30) :: fmt='(2x,A,1x,es9.3,1x,A)'
@@ -75,12 +79,13 @@ end subroutine effcond
 
 
 !********************************BEGINNING*************************************
-!> loads structure from text file (vtk)
+!> Loads structure from text file (vtk).
+!!
 !! Beware of dimension reading.
-!! May give wrong results for very large or very small numbers
+!! May give wrong results for very large or very small numbers.
 subroutine loadStructure_vtk(filename)
     implicit none
-    character(len=80), intent(in) :: filename
+    character(len=80), intent(in) :: filename !< foam morphology file name
     character(len=80) :: dummy_char,datatype
     real(dp) :: a,b,c
     integer, dimension(:), allocatable :: bmat
@@ -169,7 +174,7 @@ end subroutine loadStructure_vtk
 
 
 !********************************BEGINNING*************************************
-!> saves structure to text file (vtk)
+!> Saves structure to text file (vtk).
 subroutine saveStructure_vtk(filename)
     implicit none
     character(len=80), intent(in) :: filename
@@ -197,7 +202,9 @@ end subroutine saveStructure_vtk
 
 
 !********************************BEGINNING*************************************
-!> saves structure to text file (vtk)
+!> Saves 3D field to text file (vtk).
+!!
+!! Can be used to save for example temperature profile.
 subroutine save3DField_vtk(filename,field)
     implicit none
     character(len=80), intent(in) :: filename
@@ -226,7 +233,7 @@ end subroutine save3DField_vtk
 
 
 !********************************BEGINNING*************************************
-!> Initializes vectors and fields for numerical calculation
+!> Initializes vectors and fields for numerical calculation.
 subroutine initialization_oc_ss
     integer :: i,j,k,l
     !assign conductivity to voxels
@@ -296,7 +303,7 @@ end subroutine initialization_oc_ss
 
 
 !********************************BEGINNING*************************************
-!> main loop for numerical simulation of effective conductivity
+!> Main loop for numerical simulation of effective conductivity.
 subroutine calculation_oc_ss
     integer :: iter !maximum number of multigrid iterations
     allocate(ta(7*tnode),tja(7*tnode),tia(tnode+1),trhs(tnode))
@@ -315,7 +322,7 @@ end subroutine calculation_oc_ss
 
 
 !********************************BEGINNING*************************************
-!> creates matrix for calculation of temperature
+!> Creates matrix for calculation of temperature.
 subroutine make_tmtrx_oc_ss
     integer :: i,j,k,l,m
     l=1
@@ -404,7 +411,7 @@ end subroutine make_tmtrx_oc_ss
 
 
 !********************************BEGINNING*************************************
-!creates right hand side for calculation of temperature
+!> Creates right hand side for calculation of temperature.
 subroutine make_trhs_oc_ss
     integer :: i,j,k,l
     l=1
@@ -433,7 +440,7 @@ end subroutine make_trhs_oc_ss
 
 
 !********************************BEGINNING*************************************
-!calculates heat flux
+!> Calculates heat flux.
 subroutine heatFlux_oc_ss
     integer :: i,j,k,l
     real(dp) :: xxx,area
