@@ -12,11 +12,11 @@
 /**
  * @defgroup mod_foamAging Foam aging MoDeNa Module
  * @ingroup  models
- * @brief    Integrates Foam aging model into the MoDeNa software framework
+ * @brief    Integrates Foam aging model into the MoDeNa software framework.
  * @details
  * Predicts the evolution of composition of gas phase in foam and
  * determines the change in thermal properties.
- * @ref foamAging.foamAging.m Backward mapping FireTask
+ * * @ref foamAging.foamAging.m Backward mapping FireTask
 */
 
 /**

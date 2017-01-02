@@ -14,9 +14,11 @@
 /**
  * @defgroup mod_foamConductivity Foam conductivity MoDeNa Module
  * @ingroup  models
- * @brief    Integrates Foam conductivity model into the MoDeNa software framework
+ * @brief    Integrates Foam conductivity model into the MoDeNa software framework.
  * @details
- * @ref foamConductivity.foamConductivity.m_simulation Backward mapping FireTask
+ * * @ref foamConductivity.foamConductivity.m_simulation Backward mapping FireTask
+ * * @ref foamConductivity.foamConductivity.m_foamConductivity Backward mapping model
+ * * @ref foamConductivity.foamConductivity.f_foamConductivity Surrogate function
 */
 
 /**

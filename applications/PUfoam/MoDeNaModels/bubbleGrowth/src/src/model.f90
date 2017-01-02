@@ -17,7 +17,7 @@ contains
 !********************************BEGINNING*************************************
 !> Model supplied to integrator.
 !!
-!! Bubble grrowth model. Discretized by FVM, nonequidistant mesh.
+!! Bubble growth model. Discretized by FVM, nonequidistant mesh.
 subroutine  odesystem (neq, t, y, ydot)
     use phys_prop, only:Rderiv
     integer, intent(in) :: neq !< number of equations

@@ -11,7 +11,7 @@ This module contains the detailed model for the foam aging simulation. It is a t
 
 First make sure you have all dependencies listed in @ref dep_foamAging. A step by step guide is provided in @ref app_aging.
 
-The compilation is done by CMake. You can do
+The compilation of the model is done by CMake. You can do
 ```
 cd src
 cmake .

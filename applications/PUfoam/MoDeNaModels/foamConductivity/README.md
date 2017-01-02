@@ -5,13 +5,13 @@ Foam aging
 
 ## Scope of this module
 
-This module contains the detailed model for the foam conductivity simulation. It can be run as a top level application. However, it also contains a surrogate model, which can be embedded into other models.
+This module contains the detailed model for the foam conductivity simulation. It can be run as a top level application. However, it also contains the surrogate model, which can be embedded into other models.
 
 ## Installation
 
 First make sure you have all dependencies listed in @ref dep_foamConductivity. A step by step guide is provided in @ref app_aging.
 
-The compilation is done by CMake. You can do
+The compilation of the model is done by CMake. You can do
 ```
 cd src
 cmake .

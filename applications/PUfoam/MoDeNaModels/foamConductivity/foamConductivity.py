@@ -37,7 +37,7 @@ License
 @copyright  2014-2016, MoDeNa Project. GNU Public License.
 @details
 
-# Foam conductivity python module.
+# Foam conductivity python module
 
 Contains a FireTask, which runs the detailed model and copies the results into
 the results folder. The relative path and name of the detailed model executable

@@ -11,7 +11,7 @@ This module contains the detailed model for the bubble growth simulation. A litt
 
 First make sure you have all dependencies listed in @ref dep_bubbleGrowth. A step by step guide is provided in @ref app_foaming.
 
-The compilation is done by CMake. You can do
+The compilation of the model is done by CMake. You can do
 ```
 cd src
 cmake .

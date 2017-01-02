@@ -1,7 +1,9 @@
-!> @file
-!! sets up and integrates the models
+!> @file      wallDrainage/src/integration.f90
+!! @ingroup   src_mod_wallDrainage
 !! @author    Pavel Ferkl
-!! @ingroup   wall_drain
+!! @brief     Sets up and integrates the models.
+!! @details
+!! Prepares for and uses the ODEPACK solver..
 module integration
     use globals
     implicit none
@@ -16,16 +18,19 @@ module integration
     abstract interface
         subroutine sub (neq, t, y, ydot)
             use constants
-            integer :: neq
-            real(dp) ::  t, y(neq), ydot(neq)
+            integer, intent(in) :: neq
+            real(dp), intent(in) :: t
+            real(dp), intent(in) :: y(neq)
+            real(dp), intent(out) :: ydot(neq)
         end subroutine sub
     end interface
+    !> pointer to the subroutine with the system of ODEs
     procedure (sub), pointer :: odesystem_ptr => null()
     real(dp) :: vt0,told
     real(dp), dimension(:), allocatable :: yold
 contains
 !********************************BEGINNING*************************************
-!> prepares integration
+!> Prepares integration.
 subroutine preprocess
     use in_out, only: read_inputs
     use phys_prop, only: volume_balance
@@ -63,7 +68,7 @@ end subroutine preprocess
 
 
 !********************************BEGINNING*************************************
-!> integration
+!> Performes the main integration loop.
 subroutine integrate
     use model, only: q
     use Solve_NonLin, only: hbrd
@@ -101,14 +106,14 @@ end subroutine integrate
 
 
 !********************************BEGINNING*************************************
-!> residual function for the draininng
+!> Residual function for the draininng.
 subroutine drain_residual(n,x,fvec,iflag)
     use model, only: q,update_domain_size
     use phys_prop, only: volume_balance,Rb
-    integer, intent(in) :: n
-    integer, intent(inout) :: iflag
-    real(dp), dimension(n), intent(in) :: x
-    real(dp), dimension(n), intent(out) :: fvec
+    integer, intent(in) :: n !< number of equations
+    integer, intent(inout) :: iflag !< error flag
+    real(dp), dimension(n), intent(in) :: x !< independent variables
+    real(dp), dimension(n), intent(out) :: fvec !< function values
     real(dp) :: vt,fs
     q=x(1)
     t=told
