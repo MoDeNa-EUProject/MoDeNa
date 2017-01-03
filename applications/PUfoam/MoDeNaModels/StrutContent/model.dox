@@ -1,5 +1,5 @@
 /*! @page deps Dependencies
- *  @section dep_foamConductivity Dependencies of Strut content model
+ *  @section dep_strutContent Dependencies of Strut content model
  *
  *
  *   | Dependency      | Type                            | Tested Version |
