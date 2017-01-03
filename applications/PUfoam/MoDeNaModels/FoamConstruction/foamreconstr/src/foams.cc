@@ -1,10 +1,11 @@
-/*! \file
-	\brief Main reconstruction algorithm
-
-	Version: v0.3
-	\author Pavel Ferkl
-	\author Juraj Kosek
-	\ingroup foam_constr
+/** \file    
+	\author  Pavel Ferkl
+	\author  Juraj Kosek
+	\ingroup src_mod_foamConstruction
+	\brief   Main reconstruction algorithm.
+	\details
+	Reads the input file and creates the desired foam image.
+	Can create a foam with just walls or foam with walls and struts.
 */
 #include "globals.hh"
 #include <iostream>

@@ -1,7 +1,7 @@
 /*! \file
-	\brief Helpful geometric and mathematical functions.
-	\author Pavel Ferkl
-	\ingroup foam_constr
+	\ingroup src_mod_foamConstruction
+	\brief   Helpful geometric and mathematical functions.
+	\author  Pavel Ferkl
 */
 #include "globals.hh"
 using namespace globals;

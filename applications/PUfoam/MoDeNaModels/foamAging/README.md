@@ -1,4 +1,4 @@
-@ingroup mod_bubbleGrowth
+@ingroup mod_foamAging
 
 Foam aging
 ==========

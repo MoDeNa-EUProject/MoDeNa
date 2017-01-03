@@ -1,8 +1,8 @@
 /*! \file
-	\brief Shorthand functions for allocation of matrices
-	\author Pavel Ferkl
-	\author Juraj Kosek
-	\ingroup foam_constr
+	\ingroup src_mod_foamConstruction
+	\author  Pavel Ferkl
+	\author  Juraj Kosek
+	\brief   Shorthand functions for allocation of matrices
 */
 #include <stdlib.h>
 //! allocate 3D double matrix
@@ -148,7 +148,7 @@ double **free_dmatrix (double **amat /**< [in,out] matrix */)
 	amat = NULL;
 	return amat;
 }
-//! allocate 2D integer matrix
+//! allocate 2D float matrix
 float **alloc_fmatrix (\
 	int nx /**< [in] number of elements in 1st direction */, \
 	int ny /**< [in] number of elements in 2nd direction */)
@@ -172,7 +172,7 @@ float **alloc_fmatrix (\
 
 	return amat;
 }
-//! free 2D integer matrix
+//! free 2D float matrix
 float **free_fmatrix (float **amat /**< [in,out] matrix */)
 {
 	free ((void *)*amat);
@@ -180,7 +180,7 @@ float **free_fmatrix (float **amat /**< [in,out] matrix */)
 	amat = NULL;
 	return amat;
 }
-
+//! allocate 2D integer matrix
 int **alloc_matrix (\
 	int nx /**< [in] number of elements in 1st direction */, \
 	int ny /**< [in] number of elements in 2nd direction */)
@@ -204,7 +204,7 @@ int **alloc_matrix (\
 
 	return amat;
 }
-
+//! free 2D integer matrix
 int **free_matrix (int **amat /**< [in,out] matrix */)
 {
 	free ((void *)*amat);
