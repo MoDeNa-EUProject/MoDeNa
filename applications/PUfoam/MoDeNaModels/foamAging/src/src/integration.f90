@@ -1,15 +1,20 @@
-!> @file
-!! Integration subroutines.
+!> @file      foamAging/src/src/integration.f90
 !! @author    Michal Vonka
 !! @author    Pavel Ferkl
-!! @ingroup   foam_aging
+!! @ingroup   src_mod_foamAging
+!! @brief     Controls the integration.
+!! @details
+!! Integration is done by ODEPACK.
 module integration
     implicit none
     private
     public integrate
 contains
 !********************************BEGINNING*************************************
-!> calculates the evolution of concentrations of gases
+!> Calculates the evolution of concentrations of gases.
+!!
+!! Loads the inputs, prepares the integration and holds the main integration
+!! loop. And cleans up afterwards.
 subroutine integrate
     use constants
     use globals
@@ -18,7 +23,7 @@ subroutine integrate
     use ioutils, only: newunit
     use model, only: modelPU,ngas,nfv,dz,dif,sol,bc,mor
     use inout, only: input,output,print_header
-    integer :: i, j, k, counter, fi
+    integer :: i, j, k, l, counter, fi
 	integer :: multiplicator
     integer :: itol, itask, istate, iopt
     integer :: MF, ML, MU, LRW, LIW, LENRAT, NNZ, LWM, NEQ
@@ -30,10 +35,22 @@ subroutine integrate
     real(dp), allocatable :: ystate(:), yprime(:) ! vector of state
     real(dp), allocatable :: RWORK(:)
     real(dp), allocatable :: yinit(:)
+    real(dp), allocatable :: pp(:) ! partial pressure
 
     ! model should be general, but physical properties and conductivity are
     ! hardcoded for ngas=4
     ngas=4
+    gasname(1)="O2"
+    gasname(2)="N2"
+    gasname(3)="CO2"
+    gasname(4)="CyP"
+    allocate(solModel(ngas),diffModel(ngas))
+    allocate(pp(ngas),Sg(ngas),Dg(ngas),xg(ngas),sheetSg(ngas),sheetDg(ngas))
+    allocate(pBg(ngas),kfoamXg(ngas),kgasXg(ngas))
+    allocate(sgModena(ngas),sgInputs(ngas),sgOutputs(ngas))
+    allocate(sgTemppos(ngas),sgxl1pos(ngas),sgxl2pos(ngas))
+    allocate(dgModena(ngas),dgInputs(ngas),dgOutputs(ngas),dgTemppos(ngas))
+    allocate(kgModena(ngas),kgInputs(ngas),kgOutputs(ngas),kgTemppos(ngas))
 ! -----------------------------------
 ! load inputs
 ! -----------------------------------
@@ -42,41 +59,19 @@ subroutine integrate
 ! find out physical properties
 ! -----------------------------------
     Dgas= gasDiffusivity(temp)
-    call createModels
+    call createModels(ngas)
     eps=1-rhof/rhop
-    if (solModel(1)==1) then
-        SO2=o2Solubility(temp)
-    endif
-    if (solModel(2)==1) then
-        SN2=n2Solubility(temp)
-    endif
-    if (solModel(3)==1) then
-        SCO2=cdSolubility(temp)
-    endif
-    if (solModel(4)==1) then
-        Scyp=cypSolubility(temp)
-    endif
-    if (diffModel(1)==1) then
-        DO2=o2Diffusivity(temp)
-    endif
-    if (diffModel(2)==1) then
-        DN2=n2Diffusivity(temp)
-    endif
-    if (diffModel(3)==1) then
-        DCO2=cdDiffusivity(temp)
-    endif
-    if (diffModel(4)==1) then
-        Dcyp=cypDiffusivity(temp)
-    endif
+    do i=1,ngas
+        if (solModel(i)==1) then
+            Sg(i)=Solubility(temp,i)
+        endif
+        if (diffModel(i)==1) then
+            Dg(i)=Diffusivity(temp,i)
+        endif
+    enddo
     call print_header
-    SO2=SO2*Rg*temp*1100._dp/(1e5*Mg(3))
-    SN2=SN2*Rg*temp*1100._dp/(1e5*Mg(2))
-    SCO2=SCO2*Rg*temp*1100._dp/(1e5*Mg(1))
-    Scyp=Scyp*Rg*temp*1100._dp/(1e5*Mg(4))
-    sheetSO2=sheetSO2*Rg*temp*1100._dp/(1e5*Mg(3))
-    sheetSN2=sheetSN2*Rg*temp*1100._dp/(1e5*Mg(2))
-    sheetSCO2=sheetSCO2*Rg*temp*1100._dp/(1e5*Mg(1))
-    sheetScyp=sheetScyp*Rg*temp*1100._dp/(1e5*Mg(4))
+    Sg=Sg*Rg*temp*1100._dp/(1e5*Mg)
+    sheetSg=sheetSg*Rg*temp*1100._dp/(1e5*Mg)
 ! -----------------------------------
 ! Allocate memory for working arrays
 ! -----------------------------------
@@ -104,70 +99,39 @@ subroutine integrate
     do i=1,divsheet
         dz(k)=dsheet/divsheet
         mor(k)=3
-        dif(ngas*(k-1)+1)=sheetDO2
-        dif(ngas*(k-1)+2)=sheetDN2
-        dif(ngas*(k-1)+3)=sheetDCO2
-        dif(ngas*(k-1)+4)=sheetDcyp
-        sol(ngas*(k-1)+1)=sheetSO2
-        sol(ngas*(k-1)+2)=sheetSN2
-        sol(ngas*(k-1)+3)=sheetSCO2
-        sol(ngas*(k-1)+4)=sheetScyp
-        ystate(ngas*(k-1)+1)=xO2*pressure/Rg/temp
-        ystate(ngas*(k-1)+2)=xN2*pressure/Rg/temp
-        ystate(ngas*(k-1)+3)=xCO2*pressure/Rg/temp
-        ystate(ngas*(k-1)+4)=xCyP*pressure/Rg/temp
+        do l=1,ngas
+            dif(ngas*(k-1)+l)=sheetDg(l)
+            sol(ngas*(k-1)+l)=sheetSg(l)
+            ystate(ngas*(k-1)+l)=xg(l)*pressure/Rg/temp
+        enddo
         k=k+1
     enddo
     do i = 1, ncell
         do j=1,divcell
             dz(k)=dcell/divcell
             mor(k)=1
-            dif(ngas*(k-1)+1)=Dgas
-            dif(ngas*(k-1)+2)=Dgas
-            dif(ngas*(k-1)+3)=Dgas
-            dif(ngas*(k-1)+4)=Dgas
-            sol(ngas*(k-1)+1)=1
-            sol(ngas*(k-1)+2)=1
-            sol(ngas*(k-1)+3)=1
-            sol(ngas*(k-1)+4)=1
-            ystate(ngas*(k-1)+1)=xO2*pressure/Rg/temp
-            ystate(ngas*(k-1)+2)=xN2*pressure/Rg/temp
-            ystate(ngas*(k-1)+3)=xCO2*pressure/Rg/temp
-            ystate(ngas*(k-1)+4)=xCyP*pressure/Rg/temp
+            do l=1,ngas
+                dif(ngas*(k-1)+l)=Dgas
+                sol(ngas*(k-1)+l)=1
+                ystate(ngas*(k-1)+l)=xg(l)*pressure/Rg/temp
+            enddo
             k=k+1
         enddo
         do j=1,divwall
             dz(k)=dwall/divwall
             mor(k)=2
-            dif(ngas*(k-1)+1)=DO2
-            dif(ngas*(k-1)+2)=DN2
-            dif(ngas*(k-1)+3)=DCO2
-            dif(ngas*(k-1)+4)=Dcyp
-            sol(ngas*(k-1)+1)=SO2
-            sol(ngas*(k-1)+2)=SN2
-            sol(ngas*(k-1)+3)=SCO2
-            sol(ngas*(k-1)+4)=Scyp
-            ystate(ngas*(k-1)+1)=xO2*pressure/Rg/temp
-            ystate(ngas*(k-1)+2)=xN2*pressure/Rg/temp
-            ystate(ngas*(k-1)+3)=xCO2*pressure/Rg/temp
-            ystate(ngas*(k-1)+4)=xCyP*pressure/Rg/temp
+            do l=1,ngas
+                dif(ngas*(k-1)+l)=Dg(l)
+                sol(ngas*(k-1)+l)=Sg(l)
+                ystate(ngas*(k-1)+l)=xg(l)*pressure/Rg/temp
+            enddo
             k=k+1
         enddo
     end do
 ! ----------------------------------
 ! boundary conditions
 ! ----------------------------------
-    if (sheet) then
-        bc(1)=pBCO2/Rg/temp
-        bc(2)=pBCN2/Rg/temp
-        bc(3)=pBCCO2/Rg/temp
-        bc(4)=pBCcyp/Rg/temp
-    else
-        bc(1)=pBCO2/Rg/temp
-        bc(2)=pBCN2/Rg/temp
-        bc(3)=pBCCO2/Rg/temp
-        bc(4)=pBCcyp/Rg/temp
-    endif
+    bc=pBg/Rg/temp
 ! ----------------------------------
 ! initialize integration
 ! ----------------------------------
@@ -194,10 +158,11 @@ subroutine integrate
 ! Integration loop
 ! ----------------------------------
     open (newunit(fi),file='keq_time.out')
-    write(fi,'(10A23)') '#time', 'eq.conductivity'
-    call output(0, 0.0_dp, ystate, neq)
+    write(fi,'(10A23)') '#time', 'eq_conductivity', 'total_pressure', 'p_O2', &
+        'p_N2', 'p_CO2', 'p_CP'
+    call output(0, 0.0_dp, ystate, neq, pp)
     call equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp_cond)
-    write(fi,'(10es23.15)') tbeg/(3600*24),keq*1.0e3_dp
+    write(fi,'(10es23.15)') tbeg/(3600*24),keq*1.0e3_dp,sum(pp),pp
     do i = 1, nroutputs*multiplicator       ! stabilizing multiplicator
         tin  = dble(i-1)*(tend-tbeg)/dble(nroutputs*multiplicator)+tbeg
         tout = dble(i  )*(tend-tbeg)/dble(nroutputs*multiplicator)+tbeg
@@ -230,14 +195,14 @@ subroutine integrate
         if (mod(i,multiplicator).eq.0) then
             write(*,'(2x,A,1x,f6.1,1x,A)') 'time:', tout/(3600*24),'days'
             write(10,'(2x,A,1x,es9.3,1x,A)') 'time:', tout/(3600*24),'days'
-            call output(i/multiplicator, tout, ystate, neq)
+            call output(i/multiplicator, tout, ystate, neq, pp)
             call equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp_cond)
-            write(fi,'(10es23.15)') tout/(3600*24),keq*1e3
+            write(fi,'(10es23.15)') tout/(3600*24),keq*1e3,sum(pp),pp
         endif
     enddo
     close(10)
     close(fi)
-    call destroyModels
+    call destroyModels(ngas)
 end subroutine integrate
 !***********************************END****************************************
 end module integration

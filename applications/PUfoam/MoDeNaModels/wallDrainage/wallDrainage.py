@@ -29,24 +29,34 @@ License
 @endcond'''
 
 """
-@ingroup wall_drain Wall
-@namespace wallDrainage.wallDrainage
-@brief Backward mapping FireTask for Wall drainage model.
+@file       wallDrainage.py
+@namespace  wallDrainage.wallDrainage
+@ingroup    mod_wallDrainage
+@brief      Backward mapping Firetask for Wall drainage model.
+@author     Pavel Ferkl
+@copyright  2014-2016, MoDeNa Project. GNU Public License.
+@details
 
-@author    Pavel Ferkl
-@copyright 2014-2016, MoDeNa Project. GNU Public License.
-@ingroup   app_foaming
+# Wall drainage python module
+
+Contains a FireTask, which runs the detailed model and copies the results into
+the results folder. The relative path and name of the detailed model executable
+are hard coded. The FireTask is BackwardMapping, which means that if one of the
+lower scale backward mapping models will get out of validity range that model
+will be re-fitted to larger range and the detailed model will be re-run. This is
+repeated until the detailed model succesfully finishes (or possibly crashes for
+other reason, in which case an error is printed out).
+
 """
 
 import os
-from modena import *
-import modena.Strategy as Strategy
-from fireworks.utilities.fw_utilities import explicit_serialize
-from jinja2 import Template
+from modena.Strategy import BackwardMappingScriptTask
 
-## Wall drainage simulation
+## Wall drainage application recipe
+#
+# Runs the detailed model and saves the results.
 m_simulation = Strategy.BackwardMappingScriptTask(
-    script=os.path.dirname(os.path.abspath(__file__))+'/wallDrainage' +
-        ' && cp filmthickness.csv ../results/wallDrainage/' +
-        ' && cp results_1d.csv ../results/wallDrainage/'
+    script=os.path.dirname(os.path.abspath(__file__))+'/wallDrainage'
+    + ' && cp filmthickness.csv ../results/wallDrainage/'
+    + ' && cp results_1d.csv ../results/wallDrainage/'
 )

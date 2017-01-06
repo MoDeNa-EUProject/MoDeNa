@@ -9,18 +9,12 @@
  *
  * @section modena_models MoDeNa Models used in the Application:
  *
- * * @ref foam_aging
- * * @ref mod_surfacetension
- * * @ref bblgr
- * * @ref foam_cond
- * * @ref foam_constr
- *
- * @attention
- * @pre
- * @note
- * @todo
- * @warning
- * @bug
+ * * @ref mod_foamAging
+ * * @ref mod_foamConductivity
+ * * @ref mod_solubility
+ * * @ref mod_diffusivity
+ * * @ref mod_gasConductivity
+ * * @ref mod_gasMixConductivity
+ * * @ref mod_polymerConductivity
+ * * @ref mod_foamConstruction
 */
-
-

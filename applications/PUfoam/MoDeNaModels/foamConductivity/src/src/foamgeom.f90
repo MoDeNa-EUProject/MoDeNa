@@ -1,7 +1,9 @@
-!> @file
-!! subroutines for calculation of geometric properties of the foam
+!> @file      foamConductivity/src/src/foamgeom.f90
+!! @ingroup   src_mod_foamConductivity
 !! @author    Pavel Ferkl
-!! @ingroup   foam_cond
+!! @brief     Morphology descriptors.
+!! @details
+!! Estimates missing information about foam morphology.
 module foamgeom
     use constants
     use Solve_NonLin
@@ -10,7 +12,7 @@ module foamgeom
     public foam_morpholgy
 contains
 !********************************BEGINNING*************************************
-!> determine all geometric parameters of the foam
+!> Determine all geometric parameters of the foam.
 subroutine foam_morpholgy
     integer, parameter :: n=2
     integer :: info,i
@@ -141,7 +143,7 @@ end subroutine foam_morpholgy
 
 
 !********************************BEGINNING*************************************
-!> residual function for fs and dstrut
+!> Residual function for fs and dstrut.
 subroutine fcn_dwall(n,x,fvec,iflag)
     integer, intent(in) :: n
     real (dp), intent(in) :: x(n)
@@ -162,7 +164,7 @@ end subroutine fcn_dwall
 
 
 !********************************BEGINNING*************************************
-!> residual function for dwall and dstrut
+!> Residual function for dwall and dstrut.
 subroutine fcn_fs(n,x,fvec,iflag)
     integer, intent(in) :: n
     real (dp), intent(in) :: x(n)
@@ -183,7 +185,7 @@ end subroutine fcn_fs
 
 
 !********************************BEGINNING*************************************
-!> residual function for dwall and fs
+!> Residual function for dwall and fs.
 subroutine fcn_dstrut(n,x,fvec,iflag)
     integer, intent(in) :: n
     real (dp), intent(in) :: x(n)
@@ -204,8 +206,9 @@ end subroutine fcn_dstrut
 
 
 !********************************BEGINNING*************************************
-!> residual function for dwall and dstrut
-!! based on Kaemmerlen (10.1016/j.jqsrt.2009.11.018)
+!> Residual function for dwall and dstrut.
+!!
+!! Based on Kaemmerlen (10.1016/j.jqsrt.2009.11.018).
 subroutine fcn_fs2(n,x,fvec,iflag)
     integer, intent(in) :: n
     real (dp), intent(in) :: x(n)

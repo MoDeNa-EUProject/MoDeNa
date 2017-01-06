@@ -1,15 +1,13 @@
-@ingroup foam_constr
+@ingroup mod_foamConstruction
 
 Foam Construction
 =================
 
+## Scope of this module
+This module contains an utility, which can create a spatially three-dimensional image of foam morphology with desired foam density, cell size distribution and strut content. This module does not contain any MoDeNa model.
+
 ## Installation
-The code depends on several third-party applications:
-- `neper` and `voro++` for tessellation
-- `POV-Ray` for visualization of tessellation
-- `gmsh`, `vtk` and `meshconv` for mesh manipulation
-- `binvox` for voxelization
-- `foamreconstr` for creation of voxelized foams with struts
+The code depends on several third-party applications. They are listed in @ref dep_foamConstruction. 
 
 To install all of these on Ubuntu, do:
 ```

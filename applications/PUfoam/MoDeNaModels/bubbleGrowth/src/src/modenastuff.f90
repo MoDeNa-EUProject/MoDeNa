@@ -1,8 +1,9 @@
-!> @file
-!! contains definitions of modena variables
-!! creates and destroys modena models
+!> @file      bubbleGrowth/src/src/modenastuff.f90
 !! @author    Pavel Ferkl
-!! @ingroup   bblgr
+!! @ingroup   src_mod_bubbleGrowth
+!! @brief     Definitions of modena variables.
+!! @details
+!! All communcation with Modena framework except calls of the Modena models.
 module modenastuff
     use globals
     use iso_c_binding
@@ -52,7 +53,9 @@ module modenastuff
         kinModena,kinInputs,kinOutputs
 contains
 !********************************BEGINNING*************************************
-!> creates Modena models
+!> Creates Modena models.
+!!
+!! Names of the models and inputs are hardcoded here.
 subroutine createModenaModels
     integer :: i
     character(len=3) gasname(2)
@@ -155,12 +158,12 @@ subroutine createModenaModels
             solOutputs(i) = modena_outputs_new (solModena(i));
             solTpos(i) = modena_model_inputs_argPos(solModena(i), &
                 c_char_"T"//c_null_char);
-            ! solXgasPos(i) = modena_model_inputs_argPos(solModena(i), &
-            !     c_char_"xl1"//c_null_char);
-            ! solXpolyolPos(i) = modena_model_inputs_argPos(solModena(i), &
-            !     c_char_"xl2"//c_null_char);
-            ! solXmdiPos(i) = modena_model_inputs_argPos(solModena(i), &
-            !     c_char_"xl3"//c_null_char);
+            solXgasPos(i) = modena_model_inputs_argPos(solModena(i), &
+                c_char_"xl1"//c_null_char);
+            solXpolyolPos(i) = modena_model_inputs_argPos(solModena(i), &
+                c_char_"xl2"//c_null_char);
+            solXmdiPos(i) = modena_model_inputs_argPos(solModena(i), &
+                c_char_"xl3"//c_null_char);
             call modena_model_argPos_check(solModena(i))
         endif
         if (sol_model(i)==3) then
@@ -296,7 +299,9 @@ end subroutine createModenaModels
 
 
 !********************************BEGINNING*************************************
-!> destroys Modena models
+!> Destroys Modena models.
+!!
+!! Deallocates memory used for models, inputs and outputs.
 subroutine destroyModenaModels
     integer :: i
     if (visc_model==3) then

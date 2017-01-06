@@ -1,5 +1,10 @@
-!downloaded from http://jblevins.org/mirror/amiller/
-!(Code converted from the Naval Surface Warfare Center Math. Library)
+!> @file      foamConductivity/src/src/hbrd.f90
+!! @ingroup   src_mod_foamConductivity
+!! @brief     Hybrid Powell method for SNAE.
+!! @details
+!! Solver for system of nonlinear algebraic equations.
+!! Downloaded from http://jblevins.org/mirror/amiller/
+!! Code converted from the Naval Surface Warfare Center Math. Library.
 MODULE Solve_NonLin
 use constants, only:dp
 ! Corrections to FUNCTION Enorm - 28 November 2003

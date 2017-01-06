@@ -1,7 +1,9 @@
-!> @file
-!! stores parameters and commonly used variables as globals
+!> @file      foamConductivity/src/src/constants.f90
+!! @ingroup   src_mod_foamConductivity
 !! @author    Pavel Ferkl
-!! @ingroup   foam_cond
+!! @brief     Physical constants and global variables.
+!! @details
+!! Stores variables, which are used by many modules.
 module constants
     use,intrinsic :: iso_fortran_env, only: dp => real64
     implicit none
@@ -38,13 +40,19 @@ module constants
                               !<(3 is recommended others can
                               !<have multiple solutions)
     real(dp) :: lambda,&      !<wavelength
-        temp1,temp2,&         !<temperatures at boundaries
+        temp1,&               !<temperature at boundary 1
+        temp2,&               !<temperature at boundary 2
         kappa2,&              !<absorption coefficient of solid
-        cond1,cond2,&         !<conductivities
-        n1,n2,&               !<real part of refractive indices
-        k1,k2,&               !<imaginary part of refractive indices
-        rhog,rhos,&           !<densities of gas and solid
-        emi1,emi2,&           !<wall emittances
+        cond1,&               !<conductivity of gas
+        cond2,&               !<conductivity of polymer
+        n1,&                  !<real part of refractive indice of gas
+        n2,&                  !<real part of refractive indice of polymer
+        k1,&                  !<imaginary part of refractive indice of gas
+        k2,&                  !<imaginary part of refractive indice of polymer
+        rhog,&                !<density of gas
+        rhos,&                !<density of solid
+        emi1,&                !<wall emittances at boundary 1
+        emi2,&                !<wall emittances at boundary 2
         tmean,&               !<mean temperature
         eqc,&                 !<equivalent conductivity
         eqc_ross,&            !<Rosseland equivalent conductivity
@@ -70,9 +78,12 @@ module constants
         wsdev,&               !<wall thickness standard deviation
         tm(10)                !<for time measurements
     real(dp), dimension(:), allocatable :: &
-        lambdan,nwl,&       !<wavelength and real part of refractive index
-        lambdak,kwl,&       !<wavelength and imaginary part of refractive index
-        lambdagas,acgas,&   !<wavelength and absorption coefficient of gas
+        lambdan,&           !<wavelength of real part of refractive index
+        nwl,&               !<real part of refractive index
+        lambdak,&           !<wavelength of imaginary part of refractive index
+        kwl,&               !<imaginary part of refractive index
+        lambdagas,&         !<wavelength of absorption coefficient of gas
+        acgas,&             !<absorption coefficient of gas
         lambdabox,&         !<boundaries of gray boxes
         trextcoeffbox,&     !<transport extinction coefficients of gray boxes
         albedobox,&         !<scattering albedos of gray boxes

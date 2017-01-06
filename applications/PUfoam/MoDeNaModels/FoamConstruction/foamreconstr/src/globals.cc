@@ -1,3 +1,8 @@
+/** \file
+	\author  Pavel Ferkl
+	\ingroup src_mod_foamConstruction
+	\brief   Global variables.
+*/
 namespace globals {
     bool createNodes; //create struts at cell vertices
     bool createEdges; //create struts at cell edges

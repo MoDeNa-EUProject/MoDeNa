@@ -29,28 +29,27 @@ License
 @endcond'''
 
 """
-@file      Surrogate function and model definitions for polymer viscosity model.
-@ingroup mod_polymerViscocity
-@namespace polymerViscocity.polymerViscocity
-@author    Pavel Ferkl
-@copyright 2014-2016, MoDeNa Project. GNU Public License.
-@ingroup   app_foaming
+@file       Surrogate function and model definitions for polymer viscosity model.
+@namespace  polymerViscosity.polymerViscosity
+@ingroup    mod_polymerViscosity
+@brief      Surrogate function and model for Polymer viscosity.
+@author     Pavel Ferkl
+@copyright  2014-2016, MoDeNa Project. GNU Public License.
+@details
+
+# Polymer viscosity python module
+
+Contains a definition of surrogate function and surrogate model. The surrogate
+model is Forward mapping. Thus, no detail model is present. The parameters of
+the model are provided instead. Several sets of parameters based on literature
+and experiments are provided and can be selected. Model needs to be
+re-initialized after the change of parameters.
+
 """
 
 import os
 import json
-import modena
-from modena import CFunction, IndexSet, \
-    ForwardMappingModel, BackwardMappingModel, SurrogateModel
-import modena.Strategy as Strategy
-from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
-from fireworks import Firework, Workflow, FWAction
-from fireworks.utilities.fw_utilities import explicit_serialize
-from blessings import Terminal
-from jinja2 import Template
-
-## Create terminal for colour output
-term = Terminal()
+from modena import *
 
 ## Surrogate function for polymer viscosity.
 #
@@ -101,7 +100,9 @@ void viscosity_SM
     },
 )
 with open(os.getcwd()+'/inputs/unifiedInput.json') as jsonfile:
+    ## contents of unifiedInput.json
     inputs=json.load(jsonfile)
+    ## gel point
     X_gel=inputs['kinetics']['gelPoint']
 
 ## [literature data](http://dx.doi.org/10.1002/aic.690280213)

@@ -1,15 +1,15 @@
-!> @file
-!! simulation of bubble growth;
-!! summary in [Ferkl et al., 2016](dx.doi.org/10.1016/j.ces.2016.03.040)
+!> @file      bubbleGrowth/src/src/main.f90
+!! @ingroup   src_mod_bubbleGrowth
 !! @author    Pavel Ferkl
-!! @ingroup   bblgr
-!! @page deps Dependencies
-!! @section dep_bblgr  Dependencies of Bubble growth model
-!! - LAPACK 3.4.2 or higher
-!! - BLAS 3.4.2 or higher
-!! - bspline-fortran
-!! - fson
-!! - sundials
+!! @brief     Main executable program.
+!! @details
+!! Simulation of growth of a single bubble in a shell of PU reaction mixture.
+!! Summary of the model is provided in \cite Ferkl2016.
+
+
+!> Calls the appropriate subroutine, depending on what we want to simulate.
+!!
+!! Changes to this program are for testing purposes only.
 program singlebubblegrowth
     use tests, only:onegrowth,secondgrowth,shooting_method,shooting_method_test
     use foaming_globals_m

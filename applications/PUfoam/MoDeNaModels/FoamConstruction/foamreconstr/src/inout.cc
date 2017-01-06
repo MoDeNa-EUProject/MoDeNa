@@ -1,7 +1,7 @@
 /*! \file
-	\brief Functions for input and output operations.
-	\author Pavel Ferkl
-	\ingroup foam_constr
+	\ingroup src_mod_foamConstruction
+    \author  Pavel Ferkl
+    \brief   Functions for input and output operations.
 */
 #include "globals.hh"
 #include <fstream>

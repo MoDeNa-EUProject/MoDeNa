@@ -139,8 +139,7 @@ steps should be executed:
 ```
 ./initModels
 ```
-
-    *Note:* foamConductivity takes initial points from `init_foamConductivity.json`. This file can be prepared using `prep_init_foamConductivity.py`.
+Note that foamConductivity takes initial points from `init_foamConductivity.json`. This file can be prepared using `prep_init_foamConductivity.py`.
 2.  Execute meso-scopic bubble growth simulation:
 ```
 ./workflow_bubbleGrowth

@@ -26,37 +26,20 @@ License
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
+
+Description
+    Python package import definition for a MoDeNa surrogate model
+
+Authors
+    Henrik Rusche
+
+Contributors
 @endcond'''
 
 """
-@file       foamAging.py
-@namespace  foamAging.foamAging
-@ingroup    mod_foamAging
-@brief      Backward mapping Firetask for Foam aging model.
-@author     Pavel Ferkl
-@copyright  2014-2016, MoDeNa Project. GNU Public License.
-@details
-
-# Foam aging python module
-
-Contains a FireTask, which runs the detailed model and copies the results into
-the results folder. The relative path and name of the detailed model executable
-are hard coded. The FireTask is BackwardMapping, which means that if one of the
-lower scale backward mapping models will get out of validity range that model
-will be re-fitted to larger range and the detailed model will be re-run. This is
-repeated until the detailed model succesfully finishes (or possibly crashes for
-other reason, in which case an error is printed out).
+@namespace FoamConstruction
+@ingroup   mod_foamConstruction
+@brief     Module definition of the Foam construction utility
 """
 
-import os
-from modena.Strategy import BackwardMappingScriptTask
-
-## @var m
-# @brief Foam Aging Application Recipe
-# @details
-# Runs the detailed model and saves the results.
-m = BackwardMappingScriptTask(
-    script = os.path.dirname(os.path.abspath(__file__))+'/src/degas' +
-        ' && cp *.dat ../results/foamAging/' +
-        ' && cp *.out ../results/foamAging/'
-)
+from run import *

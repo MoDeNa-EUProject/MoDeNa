@@ -1,26 +1,34 @@
-!> @file
-!! contains physical model for wall drainage
+!> @file      wallDrainage/src/model.f90
+!! @ingroup   src_mod_wallDrainage
 !! @author    Pavel Ferkl
-!! @ingroup   wall_drain
+!! @brief     Physical model for wall formation.
+!! @details
+!! Holds the discretized model for the wall formation simulation.
 module model
     use constants, only: dp
     implicit none
     private
     real(dp), parameter :: &
-        s=1/sqrt(3._dp) !film thickness derivative at outer domain boundary
-    real(dp) :: q !flux into domain from strut
+        s=1/sqrt(3._dp) !<film thickness derivative at outer domain boundary
+    real(dp) :: q !<flux into domain from strut
+    !> results of bubble growth simulation
     real(dp), dimension(:,:), allocatable :: bblgr_res
     public odesystem,set_initial_conditions,update_domain_size,q
 contains
 !********************************BEGINNING*************************************
-!> fvm, equidistant mesh
+!> Implementation of the ODEs.
+!!
+!! FVM, equidistant mesh,
 !! cylindrical geometry, sin(alpha)=(dh/dr)/(1+(dh/dr)**2)
 subroutine odesystem(neq, t, y, ydot)
     use constants, only: pi
     use globals
     use phys_prop, only: dispress,Rb,visc
-    integer :: neq,i
-    real(dp) :: t, y(neq), ydot(neq)
+    integer, intent(in) :: neq !< number of equations
+    real(dp), intent(in) :: t !< time
+    real(dp), intent(in) :: y(neq) !< integrated variables
+    real(dp), intent(out) :: ydot(neq) !< derivatives of integrated variables
+    integer :: i
     real(dp) :: z,ze,zw,zee,zww
     real(dp) :: lame,lamw
     real(dp) :: h,he,hw,hee,hww,heee,hwww
@@ -114,12 +122,12 @@ end subroutine odesystem
 
 
 !********************************BEGINNING*************************************
-!> disjoining pressure
+!> Disjoining pressure.
 subroutine set_initial_conditions(y)
     use globals
     use in_out, only: load_bubble_growth
     use phys_prop, only: Rb_spline_ini,visc_spline_ini,porosity_spline_ini
-    real(dp), dimension(:), intent(out) :: y
+    real(dp), dimension(:), intent(out) :: y !< integrated variables
     integer :: i,neq,cp_por_ind
     real(dp) :: rs,ri,cp_por
     neq=size(y)
@@ -164,13 +172,14 @@ end subroutine set_initial_conditions
 
 
 !********************************BEGINNING*************************************
-!> recalculates domain size and mesh spacing
-!! calculates rc,rd,dr
+!> Recalculates domain size and mesh spacing.
+!!
+!! Calculates rc,rd,dr.
 subroutine update_domain_size(t,y)
     use globals
     use phys_prop, only: Rb
-    real(dp), intent(in) :: t
-    real(dp), dimension(:), intent(in) :: y
+    real(dp), intent(in) :: t !< time
+    real(dp), dimension(:), intent(in) :: y !< integrated variables
     integer :: neq
     neq=size(y)
     if (growthRateModel=="constantGrowth") then

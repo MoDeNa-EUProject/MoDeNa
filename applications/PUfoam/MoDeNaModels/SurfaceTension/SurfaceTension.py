@@ -172,34 +172,8 @@ class SurfaceTensionExactSim(ModenaFireTask):
 
     def generate_inputfile(self):
         """
-        @brief   Generate a input file using the Jinja2 template engine.
+        @brief   Generate a input file.
         """
-        Template("""
-            {#
-                 Write inputs to the template, one per line.
-            #}
-            {% for k,v in s['point'].iteritems() %}
-                 {{ v }}
-            {% endfor %}
-            {#
-                 The number of species, one integer.
-            #}
-                  {{ s['indices'].__len__() }}
-            {#
-                 Write the species (lower case) one per line.
-            #}
-            {% for k,v in s['indices'].iteritems() %}
-                   {{ v.lower() }}
-            {% endfor %}
-            {#
-                    Set initial feed molar fractions to zero.
-            #}
-            {% for k,v in s['indices'].iteritems() %}
-                {{ 0.0 }}
-            {% endfor %}
-            """, trim_blocks=True,
-               lstrip_blocks=True).stream(s=self).dump('in.txt')
-
         with open('in.txt','w') as f:
             f.write("{}\n".format(self['point']['T']))
             if self['indices']['C']=='no_surfactant':
@@ -215,6 +189,8 @@ class SurfaceTensionExactSim(ModenaFireTask):
                 f.write("{}\n".format(self['indices']['C'].lower()))
             for i in range(ncomp):
                 f.write("{}\n".format(0.0))
+        with open('out.txt','w+') as FILE:
+            pass
 
     def analyse_output(self):
         """ analysing the output of the file.
