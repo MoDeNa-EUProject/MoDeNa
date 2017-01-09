@@ -1,5 +1,7 @@
-/** @file readParameters.h
-	@brief reads the inputs from the input files.
+/**
+@ingroup mod_0Dcfd
+@file readParameters.h
+@brief reads the inputs from input files.
 */
 #include <rapidjson/document.h>
 #include <rapidjson/filereadstream.h>

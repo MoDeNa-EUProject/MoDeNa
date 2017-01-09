@@ -1,3 +1,14 @@
+/**
+@ingroup mod_0Dcfd
+@file HankelHadamard.h
+@brief checks for moments realizability
+@fn int HankelHadamard(const double *m, int nNodes)
+@brief Hankel-Hadamard function
+@param m moments of different orders
+@param nNodes number of nodes
+@return 1 if the momets are realizable
+
+*/
 int HankelHadamard(const double *m, int nNodes);
 
 int HankelHadamard(const double *m, int nNodes)

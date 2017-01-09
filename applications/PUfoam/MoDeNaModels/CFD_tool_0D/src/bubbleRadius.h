@@ -1,18 +1,19 @@
 /**
+@ingroup mod_0Dcfd
 @file bubbleRadius.h
 @brief functions related to the calculations of bubble radius.
 @fn bool isNaN(double var)
-@brief chech if the passed argument is not a number
-@param double var - input variable
+@brief checks if the passed argument is not a number
+@param var input variable
 @return true, if the argument is NaN
 @fn double bubbleRadius (const double m0, const double m1)
-@brief radius of bubbles based on the moments 
-@param const double m0 - moment of order zero
-@param const double m1 - moment of order one
+@brief radius of bubbles based on the moments
+@param m0 moment of order zero
+@param m1 moment of order one
 @return bubble radius
 @fn double nodeRadius(const double &v)
 @brief radius of bubbles at each node
-@param const double v - volume of bubble
+@param v volume of bubble
 @return radius of bubble at the node
 */
 bool isNaN(double var);

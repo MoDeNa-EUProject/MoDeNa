@@ -1,5 +1,7 @@
-/** @file modenaCalls.h
-	@brief Allocate memory for the surrogate models
+/**
+@ingroup mod_0Dcfd
+@file modenaData.h
+@brief allocate memory for the surrogate models
 */
 #ifndef MODENADATA_H
 #define MODENADATA_H
