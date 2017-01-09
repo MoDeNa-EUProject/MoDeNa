@@ -1,11 +1,17 @@
-/**
- * @defgroup mod_strutContent Strut Content
- * @ingroup models
- * @brief   Integrates the Rheology model into the MoDeNa software framework
- * @details
+/*! @page deps Dependencies
+ *  @section dep_strutContent Dependencies of Strut content model
  *
- * @pre
- * @note
- * @warning
+ *
+ *   | Dependency      | Type                            | Tested Version |
+ *   | --------------- | ------------------------------- | -------------- |
+ *   | None            | -                               | -              |
 */
 
+/**
+ * @defgroup mod_strutContent Strut Content MoDeNa Module
+ * @ingroup  models
+ * @brief    Integrates the Strut content model into the MoDeNa software framework.
+ * @details
+ * * @ref StrutContent.StrutContent.m Forward mapping model
+ * * @ref StrutContent.StrutContent.f Surrogate function
+*/

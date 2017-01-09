@@ -1,18 +1,29 @@
 """
-@file
+@file       periodicBox.py
+@namespace  FoamConstruction.periodicBox
+@ingroup    mod_foamConstruction
+@brief      Moves foam into a periodic box.
+@author     Pavel Ferkl
+@copyright  2014-2016, MoDeNa Project. GNU Public License.
+@details
 Takes the representative volume element and moves it into a box with
 periodic boundary conditions.
-
-@author    Pavel Ferkl
-@copyright 2014-2016, MoDeNa Project. GNU Public License.
-@ingroup   foam_constr
 """
 import vtk
-## Main function for manipulation with RVE
-#
-#  Uses VTK to create foam in box with periodic boundary conditions.
-#  Divides the foam to 27 parts and reflects them over boundaries.
 def main(filenameIn,filenameOut,xmin,ymin,zmin,dx,dy,dz,render):
+    """Main function for manipulation with RVE
+
+    Uses VTK to create foam in box with periodic boundary conditions.
+    Divides the foam to 27 parts and reflects them over boundaries.
+    @param[in] filenameIn file name of foam with all closed cells
+    @param[in] filenameOut file name of foam fully inside the box
+    @param[in] xmin origin @a x coordinate
+    @param[in] ymin origin @a y coordinate
+    @param[in] zmin origin @a z coordinate
+    @param[in] dx size of foam in @a x
+    @param[in] dy size of foam in @a y
+    @param[in] dz size of foam in @a z
+    """
     # print vtk.VTK_MAJOR_VERSION # Check the version
     # Read the file and create polydata
     reader = vtk.vtkSTLReader()

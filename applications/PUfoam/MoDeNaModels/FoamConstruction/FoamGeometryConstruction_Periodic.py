@@ -1,11 +1,13 @@
 """
-@file
-Packing and tesselation. Prepares representative volume element (RVE) of foam.
-
-@author    Mohammad Marvi-Mashhadi (IMDEA Materials)
-@author    Pavel Ferkl
-@copyright 2014-2016, MoDeNa Project. GNU Public License.
-@ingroup   foam_constr
+@file       FoamGeometryConstruction_Periodic.py
+@namespace  FoamConstruction.FoamGeometryConstruction_Periodic
+@ingroup    mod_foamConstruction
+@brief      Packing and tesselation.
+@author     Mohammad Marvi-Mashhadi
+@author     Pavel Ferkl
+@copyright  2014-2016, MoDeNa Project. GNU Public License.
+@details
+Prepares representative volume element (RVE) of foam.
 """
 import os
 import os.path
@@ -14,16 +16,18 @@ import re
 import time
 import random
 import math
+## current directory
 mypath=os.getcwd()
-## Main function.
-#
-#  Packing algorithm for creation of seeds for tessellation.
-#  Tessellation by NEPER.
-#  Saves `.geo` and `.gnu` files with tessellation for later voxelization.
-#  Prepares input file for Hypermesh.
 def main(MU,SIGMA,NumOfCells,filenameOut,packing,alternativePackingAlgorithm,
     tesselation,visualizeTesselation,geometry,statistics,hypermesh,deleteFiles,
     dx,dy,dz):
+    """Main function.
+
+    Packing algorithm for creation of seeds for tessellation.
+    Tessellation by NEPER.
+    Saves `.geo` and `.gnu` files with tessellation for later voxelization.
+    Prepares input file for Hypermesh.
+    """
     #####To create input file for SpherePack
     if packing:
         NumSpheres=NumOfCells

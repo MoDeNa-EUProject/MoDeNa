@@ -1,7 +1,7 @@
 /*! \file
-	\brief Functions for creating struts at cell vertices.
-	\author Pavel Ferkl
-	\ingroup foam_constr
+	\ingroup src_mod_foamConstruction
+    \author  Pavel Ferkl
+    \brief   Functions for creating struts at cell vertices.
 */
 #include "globals.hh"
 #include <iostream>

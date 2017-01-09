@@ -1,7 +1,9 @@
-!> @file
-!! handles input and output
+!> @file      wallDrainage/src/in_out.f90
+!! @ingroup   src_mod_wallDrainage
 !! @author    Pavel Ferkl
-!! @ingroup   wall_drain
+!! @brief     File input and output.
+!! @details
+!! All file input and output should be handled through this module.
 module in_out
     implicit none
     private
@@ -10,7 +12,7 @@ module in_out
         load_bubble_growth
 contains
 !********************************BEGINNING*************************************
-!> reads inputs from json file
+!> Reads inputs from json file.
 subroutine read_inputs
     use globals
     use fson
@@ -67,7 +69,7 @@ end subroutine read_inputs
 
 
 !********************************BEGINNING*************************************
-!> creates headers for outputs
+!> Creates headers for outputs.
 subroutine save_int_header
     use ioutils, only: newunit
     allocate(fi(10))
@@ -82,13 +84,13 @@ end subroutine save_int_header
 
 
 !********************************BEGINNING*************************************
-!> saves results at current time
+!> Saves results at current time.
 subroutine save_int_step(y,t)
     use constants, only: dp
     use globals, only: dr
     use phys_prop, only: volume_balance,min_film_thickness
-    real(dp), intent(in) :: t
-    real(dp), dimension(:), intent(in) :: y
+    real(dp), intent(in) :: t !< time
+    real(dp), dimension(:), intent(in) :: y !< integrated variables
     integer :: neq
     real(dp) :: fs,vt,hmin,hloc,havg
     neq=size(y)
@@ -103,7 +105,7 @@ end subroutine save_int_step
 
 
 !********************************BEGINNING*************************************
-!> closes files
+!> Closes files.
 subroutine save_int_close
     close(fi(1))
     close(fi(2))
@@ -112,12 +114,13 @@ end subroutine save_int_close
 
 
 !********************************BEGINNING*************************************
-!> loads evolution of bubble growth and
+!> Loads evolution of bubble growth and polymer viscosity.
 subroutine load_bubble_growth(matrix)
     use constants, only: dp
     use ioutils, only: newunit
+    !> results of bubble growth simulation
+    real(dp), dimension(:,:), allocatable, intent(inout) :: matrix
     integer :: i,j,ios,fi
-    real(dp), dimension(:,:), allocatable :: matrix
     j=0
     open(newunit(fi),file='../results/bubbleGrowth/bblgr_2_drain.out')
         do  !find number of points

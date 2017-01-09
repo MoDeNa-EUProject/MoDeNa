@@ -1,7 +1,7 @@
 /*! \file
-	\brief Functions for geometric tessellation. Vertices and edges are used.
-	\author Pavel Ferkl
-	\ingroup foam_constr
+    \ingroup src_mod_foamConstruction
+	\author  Pavel Ferkl
+    \brief   Functions for geometric tessellation. Vertices and edges are used.
 */
 #include "globals.hh"
 #include <iostream>

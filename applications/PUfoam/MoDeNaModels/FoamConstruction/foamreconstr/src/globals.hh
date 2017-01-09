@@ -1,7 +1,7 @@
 /*! \file
-	\brief Defines global variables, macros, templates and namespace.
-	\author Pavel Ferkl
-	\ingroup foam_constr
+    \ingroup src_mod_foamConstruction
+	\author  Pavel Ferkl
+    \brief   Defines global variables, macros, templates and namespace.
 */
 #ifndef GLOBALS_H
 #define GLOBALS_H

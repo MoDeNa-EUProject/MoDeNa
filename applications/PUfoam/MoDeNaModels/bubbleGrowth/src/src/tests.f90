@@ -1,7 +1,11 @@
-!> @file
-!! subroutines for growth of a single bubble and various parametric studies
+!> @file      bubbleGrowth/src/src/tests.f90
 !! @author    Pavel Ferkl
-!! @ingroup   bblgr
+!! @ingroup   src_mod_bubbleGrowth
+!! @brief     Top level subroutines.
+!! @details
+!! Subroutines for growth of a single bubble and various parametric studies.
+!! Also subroutines, which we want to make public in case the model is compiled
+!! into a library.
 module tests
     use foaming_globals_m
     use constants
@@ -13,14 +17,11 @@ module tests
         shooting_method_test
 contains
 !********************************BEGINNING*************************************
-!> simulates growth of a single bubble
-!! you must set firstrun variable before calling this subroutine
-!! if firstrun==.true.:
-!!     no need to set anything
-!! if firstrun==.false.:
-!!     set tend
-!!     set bub_rad
-!!     set bub_inx
+!> Simulates growth of a single bubble.
+!!
+!! You must set firstrun variable before calling this subroutine.\n
+!! firstrun==.true. => no need to set anything else\n
+!! firstrun==.false.: => set tend, bub_ra, bub_inx
 subroutine onegrowth
     use phys_prop, only:Rb_initialized
     Rb_initialized=.false.
@@ -34,8 +35,10 @@ end subroutine onegrowth
 
 
 !********************************BEGINNING*************************************
-!> simulates growth of a single bubble
-!! uses precalculated evolution of bubble radius to calculate bubble pressure
+!> Simulates growth of a single bubble.
+!!
+!! Uses precalculated evolution of bubble radius to calculate bubble pressure.
+!! Does not use momentum balance in the system of equations.
 subroutine secondgrowth
     use globals
     use fson
@@ -59,11 +62,15 @@ end subroutine secondgrowth
 
 
 !********************************BEGINNING*************************************
-!> function calculates bubble radius based on initial bubble radius
+!> Function calculates bubble radius based on initial bubble radius.
+!!
+!! Sets the initial radius to first element of \p rad_ini, makes the simulation
+!! and returns the bubble radius at the end.
 real(dp) function nextRadius(n,rad_ini)
     use globals
-    integer :: n
-    real(dp), dimension(n), intent(in) :: rad_ini
+    integer, intent(in) :: n !< length of \p rad_ini
+    real(dp), dimension(n), intent(in) :: rad_ini !< array holding the
+    !! previously calculated evolution of bubble radius
     R0=rad_ini(1)
     call onegrowth
     nextRadius=radius
@@ -72,13 +79,16 @@ end function nextRadius
 
 
 !********************************BEGINNING*************************************
-!> residual function for the shooting method
+!> Residual function for the shooting method.
+!!
+!! Residual function for the Powell method as implemented in
+!! @ref bubbleGrowth/src/src/hbrd.f90
 subroutine rad_residual(n,x,fvec,iflag)
     use globals
-    integer, intent(in) :: n
-    integer, intent(inout) :: iflag
-    real(dp), dimension(n), intent(in) :: x
-    real(dp), dimension(n), intent(out) :: fvec
+    integer, intent(in) :: n !< number of equations
+    integer, intent(inout) :: iflag !< should not be changed in this function
+    real(dp), dimension(n), intent(in) :: x !< array with independent variables
+    real(dp), dimension(n), intent(out) :: fvec !< function values
     fvec(1)=sqrt((nextRadius(n,x)-goalRadius)**2)
     print*, x(1),fvec(1)
 end subroutine rad_residual
@@ -86,8 +96,10 @@ end subroutine rad_residual
 
 
 !********************************BEGINNING*************************************
-!> shooting method to find foaming conditions, which end with desired bubble
-!! radius
+!> Finds foaming conditions that end with desired bubble radius.
+!!
+!! Uses shooting method to find the initial bubble radius, which leads to
+!! the desired final radius.
 subroutine shooting_method
     use globals
     use Solve_NonLin
@@ -126,8 +138,10 @@ end subroutine shooting_method
 
 
 !********************************BEGINNING*************************************
-!> shooting method to find foaming conditions, which end with desired bubble
-!! radius
+!> Test for the shooting_method.
+!!
+!! Runs the simulation and then tries to determine initial radius, which would
+!! lead to a slightly larger final radius.
 subroutine shooting_method_test
     use globals
     use Solve_NonLin
@@ -163,10 +177,12 @@ end subroutine shooting_method_test
 
 
 !********************************BEGINNING*************************************
-!> viscosity of reaction mixture as function of time
+!> Viscosity of reaction mixture as function of time.
+!!
+!! Uses linear interpolation on \p etat array.
 real(dp) function eta_rm(t)
     use interpolation
-    real(dp) :: t
+    real(dp), intent(in) :: t !< time
     integer :: n
     integer :: ni=1   !number of points, where we want to interpolate
     real(dp) :: xi(1)   !x-values of points, where we want to interpolate
@@ -179,10 +195,12 @@ endfunction eta_rm
 
 
 !********************************BEGINNING*************************************
-!> volume fraction of bubbles as function of time
+!> Volume fraction of bubbles as function of time.
+!!
+!! Uses linear interpolation on \p port array.
 real(dp) function bub_vf(t)
     use interpolation
-    real(dp) :: t
+    real(dp), intent(in) :: t !< time
     integer :: ni=1   !number of points, where we want to interpolate
     real(dp) :: xi(1)   !x-values of points, where we want to interpolate
     real(dp) :: yi(1)   !interpolated y-values

@@ -1,16 +1,20 @@
-!> @file
-!! i/o utilities
+!> @file      bubbleGrowth/src/src/ioutils.f90
 !! @author    Pavel Ferkl
-!! @ingroup   bblgr
+!! @ingroup   src_mod_bubbleGrowth
+!! @brief     Tools for file input/output.
+!! @details
+!! Defines several useful funcions for fortran file i/o.
 module ioutils
     implicit none
     private
     public newunit,str
 contains
 !********************************BEGINNING*************************************
-!> returns lowest i/o unit number not in use
+!> Returns lowest i/o unit number not in use.
+!!
+!! Can be used direcly in the open statement.
 integer function newunit(unit) result(n)
-    integer, intent(out), optional :: unit
+    integer, intent(out), optional :: unit !< unit number
     logical inuse
     integer, parameter :: &
         nmin=123,&   ! avoid lower numbers which are sometimes reserved
@@ -28,9 +32,10 @@ end function newunit
 !***********************************END****************************************
 
 
-
 !********************************BEGINNING*************************************
-!> converts integer to string
+!> Converts integer to string.
+!!
+!! Uses write function for the conversion.
 function str(k)
     character(len=20) :: str
     integer, intent(in) :: k
