@@ -37,8 +37,9 @@ Contributors
 @endcond'''
 
 """
-@ingroup wall_drain Wall
 @namespace wallDrainage
+@ingroup   mod_wallDrainage
+@brief     MoDeNa Module definition of the Wall drainage model
 """
 
 from wallDrainage import *

@@ -811,9 +811,11 @@ INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.c \
                          *.cpp \
                          *.C \
+                         *.cc \
                          *.c++ \
                          *.h \
                          *.H \
+                         *.hh \
                          *.hpp \
                          *.h++ \
                          *.markdown \
@@ -1183,9 +1185,10 @@ HTML_STYLESHEET        =
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
 #HTML_EXTRA_STYLESHEET  = doc/highlight.js/highlight.pack.js \
-#                         doc/highlight.js/styles/solarized-light.css
-HTML_EXTRA_STYLESHEET  =  doc/highlight.js/styles/solarized-light.css \
-                          doc/css/modified_stylesheet.css
+#                         doc/highlight.js/styles/solarized-light.css \
+#                         doc/css/modified_stylesheet.css
+
+HTML_EXTRA_STYLESHEET  =
 
 # The HTML_EXTRA_FILES tag can be used to specify one or more extra images or
 # other source files which should be copied to the HTML output directory. Note
@@ -1556,7 +1559,7 @@ MATHJAX_RELPATH        = http://cdn.mathjax.org/mathjax/latest
 # MATHJAX_EXTENSIONS = TeX/AMSmath TeX/AMSsymbols
 # This tag requires that the tag USE_MATHJAX is set to YES.
 
-MATHJAX_EXTENSIONS     = 
+MATHJAX_EXTENSIONS     =
 
 # The MATHJAX_CODEFILE tag can be used to specify a file with javascript pieces
 # of code that will be used on startup of the MathJax code. See the MathJax site

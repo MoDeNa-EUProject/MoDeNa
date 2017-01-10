@@ -1,14 +1,17 @@
-!> @file
-!! simulation of film drainage in foam between growing bubbles
-!! predicts wall thickness profile and strut size and shape
-!! drainage is caused by capillary forces
-!! additional stretching is caused by bubble growth
+!> @file      wallDrainage/src/main.f90
+!! @ingroup   src_mod_wallDrainage
 !! @author    Pavel Ferkl
-!! @ingroup   wall_drain
-!! @page deps Dependencies
-!! @section dep_wall_drain  Dependencies of Wall drainage model
-!! - bspline-fortran
-!! - fson
+!! @brief     Main executable program.
+!! @details
+!! Simulation of film drainage in foam between growing bubbles.
+!! Predicts wall thickness profile and strut size and shape.
+!! Drainage is caused by capillary forces.
+!! Wall and strut formation is caused by drainage and bubble growth (wall
+!! stretching).
+
+!> Calls the appropriate subroutine, depending on what we want to simulate.
+!!
+!! Changes to this program are for testing purposes only.
 !TODO add condition for film breakage
 program drainage
     use integration, only: preprocess,integrate

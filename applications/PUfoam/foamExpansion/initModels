@@ -66,7 +66,6 @@ for m in SurrogateModel.get_instances():
 launchpad.add_wf(initWfs)
 rapidfire(launchpad)
 
-# Surface tension has outsidePoint after initialization. Delete it.
 # Create connections to database
 url = 'mongodb://localhost:27017/'
 client = MongoClient(url)

@@ -1,8 +1,10 @@
-!> @file
-!! subroutines for calculation of physical properties of polymer and blowing
-!! agents (using Modena calls)
+!> @file      foamConductivity/src/src/physicalProperties.f90
+!! @ingroup   src_mod_foamConductivity
 !! @author    Pavel Ferkl
-!! @ingroup   foam_cond
+!! @brief     Properties of gas and solid phase.
+!! @details
+!! Contains Modena models for determiantion of conductivity.
+!! Also contains a Modena model for strut content.
 module physicalProperties
     use constants
     use fmodena
@@ -11,10 +13,10 @@ module physicalProperties
     public polymerConductivity,gasConductivity,strutContent
 contains
 !********************************BEGINNING*************************************
-!> calculation of thermal conductivity of polymer
+!> Calculation of thermal conductivity of polymer.
 subroutine polymerConductivity(ksol,temp)
-    real(dp), intent(out) :: ksol
-    real(dp), intent(in) :: temp
+    real(dp), intent(out) :: ksol !< thermal conductivity
+    real(dp), intent(in) :: temp !< temperature
     !modena variables
     integer(c_size_t) :: ksolTemppos
 
@@ -47,10 +49,14 @@ end subroutine polymerConductivity
 
 
 !********************************BEGINNING*************************************
-!> calculation of thermal conductivity of gas
+!> Calculation of thermal conductivity of gas.
 subroutine gasConductivity(kgas,temp,xO2,xN2,xCO2,xCyP)
-    real(dp), intent(out) :: kgas
-    real(dp), intent(in) :: temp,xO2,xN2,xCO2,xCyP
+    real(dp), intent(out) :: kgas !< thermal conductivity
+    real(dp), intent(in) :: temp !< temperature
+    real(dp), intent(in) :: xO2 !< molar fraction of O2
+    real(dp), intent(in) :: xN2 !< molar fraction of N2
+    real(dp), intent(in) :: xCO2 !< molar fraction of CO2
+    real(dp), intent(in) :: xCyP !< molar fraction of cyclopentane
     !modena variables
     integer(c_size_t) :: kgasTemppos
     integer(c_size_t) :: kgasXCO2pos
@@ -99,10 +105,10 @@ end subroutine gasConductivity
 
 
 !********************************BEGINNING*************************************
-!> calculation of strut content
+!> Calculation of strut content.
 subroutine strutContent(strut_content,foam_density)
-    real(dp), intent(out) :: strut_content
-    real(dp), intent(in) :: foam_density
+    real(dp), intent(out) :: strut_content !< strut content
+    real(dp), intent(in) :: foam_density !< foam density
     !modena variables
     integer(c_size_t) :: fspos
     integer(c_size_t) :: rhopos

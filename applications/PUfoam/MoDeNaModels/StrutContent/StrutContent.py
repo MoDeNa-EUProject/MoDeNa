@@ -29,19 +29,27 @@ License
 @endcond'''
 
 """
-@file
-Surrogate function and model definitions for the strut content
-@ingroup mod_strutContent
-@namespace StrutContent.StrutContent
-@author    Pavel Ferkl
-@author    Mohsen Karimi
-@copyright 2014-2016, MoDeNa Project. GNU Public License.
-@ingroup   app_aging
+@file       Surrogate function and model definitions for strut content model.
+@namespace  StrutContent.StrutContent
+@ingroup    mod_strutContent
+@brief      Surrogate function and model for Strut content.
+@author     Pavel Ferkl
+@copyright  2014-2016, MoDeNa Project. GNU Public License.
+@details
+
+# Strut content python module
+
+Contains a definition of surrogate function and surrogate model. The surrogate
+model is Forward mapping. Thus, no detail model is present. The parameters of
+the model are provided instead. Model needs to be re-initialized after the
+change of parameters.
+
 """
 
 import os
 import modena
 from modena import CFunction, ForwardMappingModel
+
 ## Surrogate function for strut content.
 #
 # Strut content is a assumed to be a function of foam density.
@@ -80,6 +88,7 @@ void strutContent
         'param2': { 'min': -9e99, 'max': +9e99, 'argPos': 2 },
     },
 )
+
 ## Surrogate model for density_reaction_mixture
 #
 # Forward mapping model is used.

@@ -1,8 +1,8 @@
 /*! \file
-	\brief Functions for creation of walls from Voronoi tessellation.
-	\author Pavel Ferkl
-	\author Juraj Kosek
-	\ingroup foam_constr
+	\ingroup src_mod_foamConstruction
+	\author  Pavel Ferkl
+	\author  Juraj Kosek
+	\brief   Functions for creation of walls from Voronoi tessellation.
 */
 #include "globals.hh"
 #include <stdio.h>

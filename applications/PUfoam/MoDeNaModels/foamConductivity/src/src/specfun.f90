@@ -1,7 +1,9 @@
-!> @file
-!! subroutines for special mathematical functions
+!> @file      foamConductivity/src/src/specfun.f90
+!! @ingroup   src_mod_foamConductivity
 !! @author    Pavel Ferkl
-!! @ingroup   foam_cond
+!! @brief     Special mathematical functions.
+!! @details
+!! Bessel and other mathematical functions.
 module specfun
     use constants, only: dp,pi,iu,eulergamma
     implicit none
@@ -9,7 +11,9 @@ module specfun
     public factorial,digamma,bessel,hankel
 contains
 !********************************BEGINNING*************************************
-!> calculates Bessel functions of the first and second kind and
+!> Bessel functions.
+!!
+!! Calculates Bessel functions of the first and second kind and
 !! their derivatives for complex argument
 subroutine bessel(n,x,tol,j,dj,y,dy)
     use besselj, only: ZBESJ
@@ -69,8 +73,10 @@ end subroutine bessel
 
 
 !********************************BEGINNING*************************************
-!> calculates Hankel functions of the first and second kind and
-!! their derivatives for complex argument
+!> Hankel functions.
+!!
+!! Calculates Hankel functions of the first and second kind and
+!! their derivatives for complex argument.
 subroutine hankel(n,x,tol,h1,dh1,h2,dh2)
     integer, intent(in) :: n  !maximum order calculated
     complex(dp), intent(in) :: x  !argument
@@ -97,7 +103,7 @@ end subroutine hankel
 
 
 !********************************BEGINNING*************************************
-!> calculates factorial
+!> Calculates factorial.
 recursive function factorial(n) result(fact)
     integer, intent(in) :: n  !argument
     real(dp) :: fact
@@ -113,7 +119,8 @@ end function factorial
 
 
 !********************************BEGINNING*************************************
-!> calculates digamma function
+!> Calculates digamma function.
+!!
 !! taken from http://mathworld.wolfram.com/DigammaFunction.html
 real(dp) function digamma(n)
     integer, intent(in) :: n  !argument

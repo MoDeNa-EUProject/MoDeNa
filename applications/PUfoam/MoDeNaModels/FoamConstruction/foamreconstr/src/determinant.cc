@@ -1,6 +1,6 @@
 /*! \file
-	\brief Functions for calculating determinant
-	\ingroup foam_constr
+    \ingroup src_mod_foamConstruction
+	\brief   Functions for calculating determinant
 
     http://paulbourke.net/miscellaneous/determinant/determinant.c
 */

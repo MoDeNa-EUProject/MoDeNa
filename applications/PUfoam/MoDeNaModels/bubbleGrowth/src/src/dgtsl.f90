@@ -1,3 +1,9 @@
+!> @file      bubbleGrowth/src/src/dgtsl.f90
+!! @ingroup   src_mod_bubbleGrowth
+!! @brief     Solver for tridiagonal SLAE.
+!! @details
+!! Solves tridiagonal system of linear algebraic equations.
+!! FORTRAN90 version by John Burkardt. Originally from LINPACK.
 subroutine dgtsl ( n, c, d, e, b, info )
 
 !*****************************************************************************80
@@ -47,13 +53,17 @@ subroutine dgtsl ( n, c, d, e, b, info )
 !
   implicit none
 
-  integer ( kind = 4 ) n
+  integer ( kind = 4 ) n !< order of the tridiagonal matrix
 
-  real ( kind = 8 ) b(n)
-  real ( kind = 8 ) c(n)
-  real ( kind = 8 ) d(n)
-  real ( kind = 8 ) e(n)
-  integer ( kind = 4 ) info
+  real ( kind = 8 ) b(n) !< On input, the right hand side.
+  !!    On output, the solution.
+  real ( kind = 8 ) c(n) !< contains the subdiagonal of the
+  !!    tridiagonal matrix in entries C(2:N).  On output, C is destroyed.
+  real ( kind = 8 ) d(n) !< On input, the diagonal of the
+  !!    matrix.  On output, D is destroyed.
+  real ( kind = 8 ) e(n) !< contains the superdiagonal of the
+  !!    tridiagonal matrix in entries E(1:N-1).  On output E is destroyed.
+  integer ( kind = 4 ) info !< error flag
   integer ( kind = 4 ) k
   real ( kind = 8 ) t
 

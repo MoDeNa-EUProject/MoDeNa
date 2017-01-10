@@ -37,8 +37,9 @@ Contributors
 @endcond'''
 
 """
-@ingroup bblgr
 @namespace bubbleGrowth
+@ingroup   mod_bubbleGrowth
+@brief     MoDeNa Module definition of the Bubble growth model
 """
 
 from bubbleGrowth import m

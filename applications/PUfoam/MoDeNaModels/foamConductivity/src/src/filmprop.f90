@@ -1,7 +1,9 @@
-!> @file
-!! subroutines for evaluation of film radiative properties
+!> @file      foamConductivity/src/src/filmprop.f90
+!! @ingroup   src_mod_foamConductivity
 !! @author    Pavel Ferkl
-!! @ingroup   foam_cond
+!! @brief     Estimation of effect of walls on radiative properties.
+!! @details
+!! Determines probability of absorption, scattering and transmittion.
 module filmprop
     use constants
     use solidprop
@@ -11,16 +13,14 @@ module filmprop
         trextcoeffintwall,abscoeffintwall,filmconst
 contains
 !********************************BEGINNING*************************************
-!> determine film reflectance, transmittance and absorbance
+!> Determine film reflectance, transmittance and absorbance.
 subroutine filmconst(lambda,theta,h,Rwin,Twin,Awin)
-    real(dp), intent(in) :: &
-        lambda,&  !wavelength
-        theta,&  !incident angle
-        h  !film thickness
-    real(dp), intent(out) :: &
-        Rwin,&    !reflectance
-        Twin,&    !transmittance
-        Awin    !absorptance
+    real(dp), intent(in) :: lambda  !< wavelength
+    real(dp), intent(in) :: theta  !< incident angle
+    real(dp), intent(in) :: h  !< film thickness
+    real(dp), intent(out) :: Rwin    !< reflectance
+    real(dp), intent(out) :: Twin    !< transmittance
+    real(dp), intent(out) :: Awin    !< absorptance
     integer :: &
         method=1 !1 is recommended, 3 and 4 should work; 2 is for no interference;
         ! 1,3,4 give similar results
@@ -128,10 +128,10 @@ end subroutine filmconst
 
 
 !********************************BEGINNING*************************************
-!> evaluates scattering coefficient as a function of wall thickness
+!> Evaluates scattering coefficient as a function of wall thickness.
 real(dp) function scattwall ( dw )
     use quadpack
-    real(dp), intent(in) :: dw
+    real(dp), intent(in) :: dw !< wall thickness
     real(dp) :: wtweight,dwold
     !qags variables
     real(dp) :: a !start point of integration
@@ -162,10 +162,10 @@ end function scattwall
 
 
 !********************************BEGINNING*************************************
-!> evaluates scattering coefficient as a function of wall thickness
+!> Evaluates scattering coefficient as a function of wall thickness.
 real(dp) function trextwall ( dw )
     use quadpack
-    real(dp), intent(in) :: dw
+    real(dp), intent(in) :: dw !< wall thickness
     real(dp) :: wtweight,dwold
     !qags variables
     real(dp) :: a !start point of integration
@@ -196,10 +196,10 @@ end function trextwall
 
 
 !********************************BEGINNING*************************************
-!> evaluates absorption coefficient as a function of wall thickness
+!> Evaluates absorption coefficient as a function of wall thickness.
 real(dp) function absorwall ( dw )
     use quadpack
-    real(dp), intent(in) :: dw
+    real(dp), intent(in) :: dw !< wall thickness
     real(dp) :: wtweight,dwold
     !qags variables
     real(dp) :: a !start point of integration
@@ -230,9 +230,9 @@ end function absorwall
 
 
 !********************************BEGINNING*************************************
-!> evaluates scattering coefficient of wall integrand
+!> Evaluates scattering coefficient of wall integrand.
 real(dp) function scattcoeffintwall ( theta )
-    real(dp), intent(in) :: theta
+    real(dp), intent(in) :: theta !< angle of incidence
     real(dp) :: Rwin,Twin,Awin
     call filmconst(lambda,theta,dwall,Rwin,Twin,Awin)
     scattcoeffintwall=Rwin*sin(theta)*cos(theta)
@@ -241,9 +241,9 @@ end function scattcoeffintwall
 
 
 !********************************BEGINNING*************************************
-!> evaluates transport extinction coefficient of wall integrand
+!> Evaluates transport extinction coefficient of wall integrand.
 real(dp) function trextcoeffintwall ( theta )
-    real(dp), intent(in) :: theta
+    real(dp), intent(in) :: theta !< angle of incidence
     real(dp) :: Rwin,Twin,Awin
     call filmconst(lambda,theta,dwall,Rwin,Twin,Awin)
     trextcoeffintwall=(1-Twin+Rwin*cos(2*theta))*sin(theta)*cos(theta)
@@ -252,9 +252,9 @@ end function trextcoeffintwall
 
 
 !********************************BEGINNING*************************************
-!> evaluates absorption coefficient of wall integrand
+!> Evaluates absorption coefficient of wall integrand.
 real(dp) function abscoeffintwall ( theta )
-    real(dp), intent(in) :: theta
+    real(dp), intent(in) :: theta !< angle of incidence
     real(dp) :: Rwin,Twin,Awin
     call filmconst(lambda,theta,dwall,Rwin,Twin,Awin)
     abscoeffintwall=Awin*sin(theta)*cos(theta)
