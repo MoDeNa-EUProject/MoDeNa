@@ -1,3 +1,9 @@
+/**
+* @ingroup mod_3Dcfd
+* @file alphaEqnsSubCycle.H
+* @sa http://www.openfoam.com/documentation/cpp-guide/html/compressibleInterFoam_2alphaEqnsSubCycle_8H.html
+*/
+///@cond
 {
     #include "alphaControls.H"
 
@@ -38,3 +44,4 @@
         #include "alphaEqns.H"
     }
 }
+///@endcond

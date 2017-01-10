@@ -1,3 +1,17 @@
+/**
+* @ingroup mod_3Dcfd
+* @file TSSource.H
+* @brief builds the RHS of temperature equation
+*
+* @detail
+* This file implements the source term for the temperature equation.
+* It considers the application of different surrogate models. Also, it has
+* been foreseen whether the PBE switch is selected. Further, the source term
+* has been adapted for usage of two different blowing agents: _R-11_ and _n-pentane_.
+*
+*/
+
+///@cond
 double dXOHdt,XOH_C,XOH_Old,dWdt,XW_C,XW_Old,dLdt,alphaFO,
     rhoFO,C_TOT, L_l_C, L_l_Old, T_C,T_O, wBA_g_val, xBL_val, rhoPolyMixture;
 
@@ -263,3 +277,4 @@ forAll(mesh.C(), celli)
       + alpha2[celli]*thermalDiff_foam[celli];
 }
 thermalDiffusivity.correctBoundaryConditions();
+///@endcond

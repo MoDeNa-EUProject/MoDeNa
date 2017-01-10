@@ -1,11 +1,14 @@
-/** @file initializeMoments.h
-	@brief Initialize the moments
-	@fn void mom_init(double *momz, double &size_0, int &n, double &sigma, double &NN)
-	@param double &size_0 - initial bubble diameter  
-	@param int &n - number of moments
-	@param  double &sigma - correlated to variance of initial distribution
-	@param double &NN - correlated to number of initial bubbles per unit volume
-	@return void
+/**
+@ingroup mod_0Dcfd
+@file initializeMoments.h
+@brief initializes the moments
+@fn void mom_init(double *momz, double &size_0, int &n, double &sigma, double &NN)
+@param momz moments of different orders
+@param size_0 initial bubble diameter
+@param n number of moments
+@param sigma correlated to the variance of initial distribution
+@param NN correlated to the number of initial bubbles per unit volume
+@return void
 */
 void mom_init(double *, double &, int &, double &, double &);
 

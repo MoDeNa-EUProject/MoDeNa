@@ -1,3 +1,19 @@
+/**
+* @ingroup mod_3Dcfd
+* @file KineticsFields.H
+* @brief creates the field variables related to the PU kinetics
+
+* @detail
+* This file firstly creates an `IOdictionary` labeled as `kineticsProperties`.
+* Two different kinetics models have been introduced. The first one _generic_
+* follows the work of [Baser and Khakhar](http://onlinelibrary.wiley.com/doi/10.1002/pen.760340804/abstract)
+* by solving PDEs for the conversion of polyol and isocyanate.
+* However, the second model, `RF-1`, applies a surrogate model derived from
+*_Predici_ results. Additionally, all the required fields including the sources
+* have been created in this file
+*
+*/
+///@cond
 IOdictionary kineticsProperties
 (
     IOobject
@@ -9,6 +25,7 @@ IOdictionary kineticsProperties
         IOobject::NO_WRITE
     )
 );
+
 word KineticsModel(kineticsProperties.lookup("KineticsModel"));
 
 if
@@ -26,6 +43,7 @@ if
     }
 scalar AOH, EOH, COH_0, CNCO_0, CW_0, AW, EW;
 AOH=EOH=COH_0=CNCO_0=CW_0=AW=EW=0.0;
+
 if (KineticsModel == "generic")
 {
     AOH =
@@ -1028,3 +1046,4 @@ if (KineticsModel == "RF-1")
     reduce(CW_0,maxOp<scalar>());
     reduce(COH_0,maxOp<scalar>());
 }
+///@endcond

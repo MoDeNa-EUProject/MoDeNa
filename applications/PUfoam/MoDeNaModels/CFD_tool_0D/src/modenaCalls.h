@@ -1,16 +1,16 @@
-/** @file modenaCalls.h
-    @brief instantiates the surrogate models
-*/
-#ifndef MODENACALLS_H
-#define MODENACALLS_H
-/*
-instantiate the surrogate models:
+/**
+@ingroup mod_0Dcfd
+@file modenaCalls.h
+@brief instantiate the surrogate models:
     - bubbleGrowth1,
     - bubbleGrowth2,
     - density_reaction_mixture,
     - rheology,
     - simpleKinetics
 */
+#ifndef MODENACALLS_H
+#define MODENACALLS_H
+
 
 bblgr1 = modena_model_new("bubbleGrowth1");
 if (modena_error_occurred())

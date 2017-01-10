@@ -1,18 +1,22 @@
-// Source term due to Growth
-// growthSource - source term for the bubble growth
-// @param - double *sgBA - source of growth due to blowing agent
-// @param - double *sgCO2 - source of growth due to CO2
-// @param - double *we - weights of quadrature
-// @param - duoble *vi - nodes of quadrature
-// @param - int &nNodes - number of nodes
-// @param - int *mOrder - order of moments
-// @param - double &CO2_l_val - weight fraction of CO2 in liquid
-// @param - double &L_l_val - weight fraction of liquid blowing agent in liquid
-// @param - double &tmp_val - temperature
-// @param - double &wCO2_Max - weight fraction of maximum allowable CO2 in liquid
-// @param - double &cc1_val - constant
-// @param - double &LMAX - weight fraction of maximum allowable blowing agent in liquid
-// Returns void
+/**
+@ingroup mod_3Dcfd
+@file growthSource.H
+@brief source term due to bubble growth
+@fn void growthSource(double *sgBA, double *sgCO2, double *we, double *vi, int &nNodes, int *mOrder, double &CO2_l_val, double &L_l_val, double &tmp_val, double &wCO2_Max,double &cc1_val, double &LMAX, double *volumeGrowthBA, double *volumeGrowthCO2)
+@param  sgBA source of growth due to blowing agent
+@param  sgCO2 source of growth due to CO2
+@param  we weights of quadrature
+@param  vi nodes of quadrature
+@param  nNodes number of nodes
+@param  mOrder order of moments
+@param  CO2_l_val weight fraction of CO2 in liquid
+@param  L_l_val weight fraction of liquid blowing agent in liquid
+@param  tmp_val temperature
+@param  wCO2_Max weight fraction of maximum allowable CO2 in liquid
+@param  cc1_val constant
+@param  LMAX weight fraction of maximum allowable blowing agent in liquid
+@return void
+*/
 void growthSource(double *, double *, double *, double *, int &, int *, double &, double &, double &, double &, double &, double &, double *, double *);
 
 void growthSource

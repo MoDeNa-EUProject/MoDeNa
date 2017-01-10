@@ -1,8 +1,11 @@
-/** @file momentsConverter.h
-	@brief Converts moments based on the unit volume of foam
-	@fn void momentsConverter(const state_type &y , const double t)
-	@param const state_type &y -  vector of all the variables
-	@param const double t - time
+/**
+@ingroup mod_0Dcfd
+@file momentsConverter.h
+@brief Converts moments based on the unit volume of foam
+@fn void momentsConverter(const state_type &y , const double t)
+@param y vector of all the variables
+@param t time
+@return void
 */
 void momentsConverter(const state_type &y , const double t);
 

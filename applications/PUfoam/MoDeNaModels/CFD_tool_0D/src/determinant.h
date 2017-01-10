@@ -1,4 +1,12 @@
-
+/**
+@ingroup mod_0Dcfd
+@file determinant.h
+@brief Calcualte the determinant of an n by n matrix
+@fn double determinant(double **in_matrix, int n)
+@param in_matrix  input matrix
+@param n  matrix order
+@return determinant value of the input matrix.
+*/
 double determinant(double **in_matrix, int n);
 
 double determinant(double **in_matrix, int n)

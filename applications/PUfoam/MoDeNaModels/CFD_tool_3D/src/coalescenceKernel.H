@@ -1,6 +1,10 @@
-// constant coalescence kernel
-// 
-// Return: constant
+/**
+* @ingroup mod_3Dcfd
+* @file coalescenceKernel.H
+* @brief constant coalescence kernel
+* @fn double coalescenceKernel()
+* @return constant value
+*/
 double coalescenceKernel();
 double coalescenceKernel()
 {

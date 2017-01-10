@@ -29,14 +29,15 @@ License
 @endcond
 
 @ingroup    mod_0Dcfd
+@file QmomKinetics.cpp
 @brief      macro-scale tool for the foaming process.
 @details
-    This is a macro-scale modeling tool for the foaming process. The code utilizes
-    the MoDeNa interface library to connect different models including nano, and
+    This is a macro-scale modeling tool for the foaming process. The code utilizes the MoDeNa interface library to connect different models including nano, and
     meso scale models. The code returns the evolution of foam properties such as
     density, temperature and bubble/cell size distribution.
 
 @authors    Mohsen Karimi, Daniele Marchisio, Pavel Ferkl
+@sa http://onlinelibrary.wiley.com/doi/10.1002/mats.201500014/abstract
 @copyright  2014-2016, MoDeNa Project. GNU Public License.
 */
 
@@ -100,9 +101,9 @@ double pOld[2] = {};
 /**
 @fn QmomKinetics(const state_type &y , state_type &dydt , double t)
 @brief This is to calculate the RHD of all the ODEs.
-@param [in] const state_type &y - vector<double> to hold the results.
-@param [in] state_type &dydt -  vector<double> to hold the RHDs of ODEs.
-@param [in] double t - time
+@param [in] y  vector<double> to hold the results.
+@param [in] dydt   vector<double> to hold the RHDs of ODEs.
+@param [in] t  time
 @return void.
 */
 void QmomKinetics( const state_type &y , state_type &dydt , double t )

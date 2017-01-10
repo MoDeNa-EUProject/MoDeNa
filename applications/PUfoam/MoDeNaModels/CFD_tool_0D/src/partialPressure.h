@@ -1,23 +1,30 @@
-/** @file partialPressure.h
-    @brief functions related to the calculations of partial pressures
-    @fn void ddtpartialPressure(const state_type &y , const double t , const double dt , double *dpdt , double *pOld, const double p_1, const double p_2, const double R)
-    @brief time derivative of partial pressure
-    @param  const state_type &y -  vector of all the variables
-    @param  const double t - time
-    @param  double *dpdt - time derivative of pressure
-    @param  double *pOld - pressure values at the previous time step
-    @param  const double p_1 - partial pressure of blowing agent
-    @param  const double p_2 - partial pressure of CO2
-    @param  const double R - bubble radius
-    @return void
-    @fn double partialPressureBA(const state_type &y)
-    @brief partial pressure of the physical blowing agent
-    @param const state_type &y vector of all the variables
-    @return partial pressure of the physical blowing agent
-    @fn double partialPressureCO2(const state_type &y)
-    @brief partial pressure of CO2
-    @param const state_type &y - vector of all the variables
-    @return partial pressure of CO2
+/**
+@ingroup mod_0Dcfd
+@file partialPressure.h
+@brief functions related to the calculations of partial pressures
+@fn void ddtpartialPressure(const state_type &y , const double t , const double dt , double *dpdt , double *pOld, const double p_1, const double p_2, const double R)
+@brief time derivative of partial pressure
+@param  y vector of all the variables
+@param  t time
+@param  dpdt time derivative of pressure
+@param  pOld pressure values at the previous time step
+@param  p_1  partial pressure of blowing agent
+@param  p_2  partial pressure of CO2
+@param  R  bubble radius
+@return void
+@fn bool isNaN(double var)
+@brief checks if the input is valid
+@param var input variable
+@return true if the value is valid
+@fn double partialPressureBA(const state_type &y)
+@brief partial pressure of the physical blowing agent
+@param y vector of all the variables
+@return partial pressure of the physical blowing agent
+@fn double partialPressureCO2(const state_type &y)
+@brief partial pressure of CO2
+@param y vector of all the variables
+@return partial pressure of CO2
+
 */
 void 	ddtpartialPressure(const state_type &y , const double t , const double dt , double *dpdt , double *pOld, const double p_1, const double p_2, const double R);
 bool isNaN(double var);

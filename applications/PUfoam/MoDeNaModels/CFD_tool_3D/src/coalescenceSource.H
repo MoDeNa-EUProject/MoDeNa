@@ -1,10 +1,15 @@
-// source term due to bubbles coalescence
-// @param - double *sc - source of coalescence
-// @param - double *we - weights of quadrature
-// @param - duoble *vi - nodes of quadrature
-// @param - int &nNodes - number of nodes
-// @param - int *mOrder - order of moments
-// Returns - void
+/**
+@ingroup mod_3Dcfd
+@file coalescenceSource.H
+@brief source term due to bubbles coalescence
+@fn void coalescenceSource(double *sc, double *we, double *vi, int &nNodes, int *mOrder)
+@param sc source of coalescence
+@param we weights of quadrature
+@param vi nodes of quadrature
+@param nNodes number of nodes
+@param mOrder order of moments
+@returns void
+*/
 void coalescenceSource(double *, double *, double *, int &, int *);
 
 void coalescenceSource

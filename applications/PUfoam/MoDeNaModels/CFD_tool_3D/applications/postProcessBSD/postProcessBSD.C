@@ -28,13 +28,21 @@ Description
     This is a post-processing application to analyze the results of population balance equation. It calcualtes the mean and variance of bubble size distribution at each time step and write the results as field variables in each time directory. They can be further processed using "postProcess -func probe" to probe the values on the required points.
 
 \*---------------------------------------------------------------------------*/
+
+
 #include "twoPhaseMixtureThermo.H"
 #include "fvCFD.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+/**
+* @class BSDProperties
+* @brief this class is meant to compute the mean and variance of bubble/cell
+* size distribution.
+*/
 class BSDProperties
 {
+
 private:
     volScalarField& M0;
     volScalarField& M1;
@@ -43,7 +51,14 @@ private:
     const fvMesh& mesh;
 
 public:
-    // constructors
+    /** constructor based on three moments and phase volume fraction
+    * @fn BSDProperties(volScalarField &M0_, volScalarField &M1_, volScalarField &M2_, volScalarField &alpha1_, const fvMesh &mesh_)
+    * @param volScalarField M0_ moment of order zero
+    * @param volScalarField M1_ moment of order one
+    * @param volScalarField M2_ moment of order two
+    * @param volScalarField alpha1_ phase volume fraction
+    * @param const fvMesh mesh_ geometrical information
+    */
     BSDProperties
     (
         volScalarField &M0_, volScalarField &M1_,
@@ -58,7 +73,11 @@ public:
     mesh(mesh_)
     {}
 
-    // member functions
+    /**
+    * @fn volScalarField meanBSD()
+    * @brief member function to calculate the mean of bubble size distribution
+    * @return mean value of bubble size distribution
+    */
     volScalarField meanBSD()
     {
         volScalarField alphaCutOff
@@ -96,7 +115,11 @@ public:
         }
         return (insideFoam*mean_);
     }
-
+    /**
+    * @fn volScalarField varianceBSD()
+    * @brief member function to compute the variance of bubble size distribution
+    * @return value of variance for bubble size distribution
+    */
     volScalarField varianceBSD()
     {
         volScalarField alphaCutOff
@@ -144,6 +167,21 @@ public:
         return (insideFoam*variance_);
     }
 };
+
+/**
+@ingroup mod_3Dcfd
+@file postProcessBSD.C
+@brief post-processing application to calculate the mean and variance of bubble size distribution
+@details
+* This is a post-processing application to analyze the results of population balance equation.
+* It calculates the mean and variance of bubble size distribution at each
+* time step and write the results as field variables in each time directory.
+* They can be further processed using `postProcess -func probe` to probe the
+* values on the required points.
+* @sa https://github.com/MoDeNa-EUProject/MoDeNa/blob/nextRelease/applications/PUfoam/MoDeNaModels/CFD_tool_3D/applications/postProcessBSD/README.md
+@authors Mohsen Karimi, Daniele Marchisio
+@copyright  2014-2016, MoDeNa Project. GNU Public License.
+*/
 
 int main(int argc, char *argv[])
 {

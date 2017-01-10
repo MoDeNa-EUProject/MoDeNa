@@ -1,3 +1,13 @@
+/**
+* @ingroup mod_3Dcfd
+* @file continuityErrors.H
+* @brief calculates and reports the continuity error
+*
+* @detail
+* This file calculates the continuity error based on the initial mass of foam
+* `initialFoamMass`  and the amount of foam at each time  step`fvc::domainIntegrate(rho_foam*alpha2)`.
+*/
+///@cond
 {
     dimensionedScalar continuityError;
     continuityError =
@@ -8,3 +18,4 @@
     Info<< "Continuity error: "
         << continuityError.value() << " %" << endl;
 }
+///@endcond
