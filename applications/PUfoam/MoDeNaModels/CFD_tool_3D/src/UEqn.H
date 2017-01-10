@@ -1,3 +1,14 @@
+/**
+* @ingroup mod_3Dcfd
+* @file UEqn.H
+* @brief momentum equation
+
+* @detail
+* This is the __OpeFOAM__  implementation of momentum equation.
+* @sa http://www.openfoam.com/documentation/cpp-guide/html/multiphase_2compressibleInterFoam_2UEqn_8H.html
+*/
+
+///@cond
 volTensorField gradU = fvc::grad(U);
 fvVectorMatrix UEqn
 (
@@ -27,3 +38,4 @@ if (pimple.momentumPredictor())
 
     K = 0.5*magSqr(U);
 }
+///@endcond

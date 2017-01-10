@@ -1,3 +1,9 @@
+/**
+* @ingroup mod_3Dcfd
+* @file thermalFields.H
+* @brief creates the field variables for the temperature equation
+*/
+///@cond
 volScalarField thermalConductivity
 (
     IOobject
@@ -81,3 +87,4 @@ volScalarField thermalDiff_gas
     mesh,
     dimensionedScalar("thermalDiff_gas", dimensionSet(0, 2, -1, 0, 0, 0, 0), 1e-1)
 );
+///@endcond

@@ -1,3 +1,15 @@
+/**
+* @ingroup mod_3Dcfd
+* @file conversionSources.H
+* @brief builds the RHS of conversion equations based on the kinetics model chosen.
+*
+* @detail
+* Based on the choice of `KineticsModel`, this file implements the source term
+* for the conversion equations. It should be noted that the availability of
+* surrogate models has been accounted for.
+*/
+
+///@cond
 if (KineticsModel == "generic")
 {
     scalar temp_current,
@@ -246,3 +258,4 @@ if (KineticsModel == "RF-1")
     source_R_1_temp_RF1.correctBoundaryConditions();
     source_R_1_vol_RF1.correctBoundaryConditions();
 }
+///@endcond

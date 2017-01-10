@@ -1,3 +1,10 @@
+/**
+@ingroup mod_3Dcfd
+@file pEqn.H
+@brief builds and solves pressure equation
+@sa http://www.openfoam.com/documentation/cpp-guide/html/multiphase_2compressibleInterFoam_2pEqn_8H.html
+*/
+///@cond
 {
     Psi1 = rho_gas/p_rgh;
     Psi2 = rho_foam/p_rgh;
@@ -126,3 +133,4 @@
     Info<< "max(U) " << max(mag(U)).value() << endl;
     Info<< "min(p_rgh) " << min(p_rgh).value() << endl;
 }
+///@endcond

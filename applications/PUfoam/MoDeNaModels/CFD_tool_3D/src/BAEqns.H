@@ -1,3 +1,9 @@
+/**
+@ingroup mod_3Dcfd
+@file BAEqns.H
+@brief builds the PDEs for the presence of different blowing agents. It also considers the user choice for the solution of PBE.
+*/
+
 if (PBESwitch)
 {
     if (blowingAgent == "no")

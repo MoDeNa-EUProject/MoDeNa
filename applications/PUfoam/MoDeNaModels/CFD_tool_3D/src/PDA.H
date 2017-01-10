@@ -1,14 +1,21 @@
-// Product Difference Algorithm
-// @param double *we - weights of quadrature approximation
-// @param double *vi - nodes of quadrature approximation
-// @param double *mom - moments
-// @param int &n - number of nodes
-// @return void
+/**
+* @ingroup mod_3Dcfd
+* @file PDA.H
+* @brief product difference algorithm
+* @fn void PDA(double *we, double *vi, double *mom, int &n)
+* @param we weights of quadrature approximation
+* @param vi nodes of quadrature approximation
+* @param mom moments
+* @param n number of nodes
+* @return void
+*/
+
+///@cond
 void PDA(double *, double *, double *, int &);
 
 void PDA(double *we, double *vi, double *mom, int &n)
 {
-// Construct P Matrix
+
     int i,j;
     double p[2*n + 1][2*n + 1];
 
@@ -21,20 +28,20 @@ void PDA(double *we, double *vi, double *mom, int &n)
     }
 
     double norm_mom[2*n];
-// Normalize the moments
+
     for (i = 0; i < 2*n; i++)
     {
         norm_mom[i] = mom[i]/(max(mom[0],1.0e-10));
     }
-// First column of P matrix
+
     p[0][0] = 1.0;
     p[0][1] = 1.0;
-// Second column of P matrix
+
     for (i = 1; i < 2*n; i++)
     {
         p[i][1] = Foam::pow(-1,double (i))*norm_mom[i];
     }
-// Recursion method for calculation of P
+
     for (j = 2; j < 2*n+1; j++)
     {
         for(i = 0; i < 2*n+2-j; i++)
@@ -43,7 +50,7 @@ void PDA(double *we, double *vi, double *mom, int &n)
         }
     }
 
-// Computing zeta
+
     double zeta[2*n];
     for (i = 0; i < 2*n; i++)
     {
@@ -61,7 +68,7 @@ void PDA(double *we, double *vi, double *mom, int &n)
             zeta[i] = 0.0;
         }
     }
-// Coefficients of Jacobi matrix
+
     double aa[n];
     double bb[n-1], cc[n-1];
 
@@ -85,7 +92,7 @@ void PDA(double *we, double *vi, double *mom, int &n)
         cc[i - 1] = Foam::sqrt(fabs(bb[i - 1]));
     }
 
-// Eigenvalues and Eigenvectors of Jacobi matrix
+
     double evec[n][n];
     for (i = 0; i < n; i++)
     {
@@ -120,4 +127,5 @@ void PDA(double *we, double *vi, double *mom, int &n)
             we[j] = 0.0;
         }
     }
-} // End of PDA
+}
+///@endcond

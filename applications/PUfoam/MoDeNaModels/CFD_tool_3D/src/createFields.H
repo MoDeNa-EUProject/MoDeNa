@@ -1,3 +1,9 @@
+/**
+@ingroup mod_3Dcfd
+@file createFields.H
+@brief creates all the required field variables.
+*/
+///@cond
     Info<< "Reading field p_rgh\n" << endl;
     volScalarField p_rgh
     (
@@ -185,3 +191,4 @@
             + densityDimension*L0*rhoPoly*fvc::domainIntegrate(alpha2)
         );
     dimensionedScalar cumulativeContinuityError = 0.0;
+///@endcond

@@ -1,69 +1,110 @@
-// Functions for kinetics calculations
-//
-// LliqMax - maximum allowable amount of liquid blowing agent (n-pentane) in liquid
-// @param - double &tmptr, the input temperature.
-// ddT_LliqMax - derivative of LliqMax with respect to temperature
-// @param - double &tmptr, the input temperature.
-// arrhenius - Arrhenius function
-// @param - double& AOH - pre-exponential factor
-// @param - double& EOH - activation energy
-// @param - double& tempt - temperature
-// BAdilution - dilution term for the blowing agent (n-pentane)
-// @param - double& L_l - weight fraction of liquid blowing agent
-// @param - double& rhoPoly - density of liquid mixture (polymer)
-// @param - double& rhoBL - density of blowing agent
-// QKinW - arrhenius term times by dilution term
-// @param - similar to arrehenius and BAdilution functions
-// henryCoefficient - Henry coefficient for CO2
-// @param - double &T - Temperature
-// bubbleRadius - radius of bubbles based on moments
-// @param - const double m0 - moment of order zero
-// @param - const double m1 - moment of order one
-// partialPressureCO2 - partial pressure of CO2
-// @param - double &M_CO2 - molecular weight of CO2
-// @param - double &M_B - molecular weight of blowing agent
-// @param - double &surfaceTension - surface tenstion
-// @param - double &wCO2_g - weight fraction of CO2 in gas
-// @param - double &wBA_g - weight frcation of blowing agent in gas
-// @param - double &p - ambient pressure
-// @param - double &R - bubble radius
-// partialPressureBA - partial pressure of blowing agent
-// @param - double &M_B - molecular weight of blowing agent
-// @param - double &M_CO2 - molecular weight of CO2
-// @param - double &surfaceTension - surface tenstion
-// @param - double &wBA_g - weight frcation of blowing agent in gas
-// @param - double &wCO2_g - weight fraction of CO2 in gas
-// @param - double &p - ambient pressure
-// @param - double &R - bubble radius
-
-// wCO2Max - dissolved amount of CO2 in liquid
-// @param - double &M_CO2 - molecular weight of CO2
-// @param - double &M_liq - molecular weight of liquid mixture
-// @param - double &pCO2 - partial pressure of CO2
-// @param - double &henryCoeff - Henry coefficient
-// xBL - mole fraction of blowing agent (R-11) in liquid polymer
-// @param - double &T - temperature
-// @param - double &dxdT - constant
-// wBL_D - weight fraction of maximum allowable blowing agent (R-11) in liquid
-// @param - double &xBL - mole fraction of blowing agent (R-11)
-// @param - double &M_B - molecular weight of blowing agent (R-11)
-// @param - double &M_NCO - molecular weight of NCO
-// creamTemperature - The temperature that foaming process starts
-// @param - double &xBL0 - initial mole fraction of the blowing agent (R-11)
-// @param - double &dxdT - constant
-// dTdtFirstOrder - first order accurate dTdt
-// @param - Tc - current value of temperature
-// @param - To - old value of temperature
-// @param - timeStep - time step
-// dTdtSecondOrder - second order accurate dTdt
-// @param - Tc - current value of temperature
-// @param - To - old value of temperature
-// @param - Too - old-old value of temperature
-// @param - timeStep - time step
-// thermalDiffusivityGas - return thermal diffusivity of gas as a function of T
-// @param = double &T - Temperature
-// nodeRadius - bubble radius at the node
-// @param - const double &v - bubble volume
+/**
+@ingroup mod_3Dcfd
+@file KineticsFunctions.H
+@brief functions for kinetics calculations
+@fn LliqMax(double &)
+@brief maximum allowable amount of liquid blowing agent (n-pentane) in liquid
+@param tmptr input temperature
+@return equilibrium value of blowing agent in liquid
+@fn ddT_LliqMax(double &)
+@brief derivative of LliqMax with respect to temperature
+@param tmptr input temperature
+@return value of derivative for input temperature
+@fn arrhenius(double &, double &, double &)
+@brief Arrhenius function
+@param AOH pre-exponential factor
+@param EOH activation energy
+@param tempt temperature
+@return arrhenius value
+@fn BAdilution(double &, double &, double &)
+@brief dilution term for the blowing agent (n-pentane)
+@param L_l weight fraction of liquid blowing agent
+@param rhoPoly density of liquid mixture (polymer)
+@param rhoBL density of blowing agent
+@return dilution term
+@fn QKinW(double& AW, double& EW, double& tempi, double& Lliq, double& rhoPoly, double& rhoBL)
+@brief arrhenius term times by dilution term
+@param AW pre-exponential factor
+@param EW activation energy
+@param tempi temperature
+@param Lliq weight fraction of liquid blowing agent
+@param rhoPoly density of liquid mixture (polymer)
+@param rhoBL density of blowing agent
+@return source term
+@fn henryCoefficient(double &T)
+@brief Henry coefficient for CO2
+@param T temperature
+@return Henry coefficient
+@fn bubbleRadius(const double m0, const double m1)
+@brief radius of bubbles based on moments
+@param m0 moment of order zero
+@param m1 moment of order one
+@return bubble radius
+@fn partialPressureCO2(double &M_CO2, double &M_B, double &surfaceTension, double &wCO2_g,double &wBA_g, double &p, double &R);
+@brief partial pressure of CO2
+@param M_CO2 molecular weight of CO2
+@param M_B molecular weight of blowing agent
+@param surfaceTension surface tension
+@param wCO2_g weight fraction of CO2 in gas
+@param wBA_g weight frcation of blowing agent in gas
+@param p ambient pressure
+@param R bubble radius
+@return partial pressure of CO2
+@fn partialPressureBA(double &M_B, double &M_CO2, double &surfaceTension, double &wBA_g_val, double &wCO2_g_val, double &prsr, double &bubble_radius)
+@brief partial pressure of blowing agent
+@param M_B molecular weight of blowing agent
+@param M_CO2 molecular weight of CO2
+@param surfaceTension surface tension
+@param wBA_g weight fraction of blowing agent in gas
+@param wCO2_g weight fraction of CO2 in gas
+@param p ambient pressure
+@param R bubble radius
+@return partial pressure of blowing agent
+@fn wCO2Max(double &M_CO2, double &M_liq, double &pCO2, double &henryCoeff)
+@brief dissolved amount of CO2 in liquid
+@param  M_CO2 molecular weight of CO2
+@param  M_liq molecular weight of liquid mixture
+@param  pCO2 partial pressure of CO2
+@param  henryCoeff Henry coefficient
+@return maximum solubility of CO2 in liquid
+@fn xBL(double &T, double &dxdT)
+@brief mole fraction of blowing agent (R-11) in liquid polymer
+@param T temperature
+@param dxdT model constant
+@return mole fraction of R-11 in liquid
+@fn wBL_D(double &xBL, double &M_B, double &M_NCO, double &L0)
+@brief weight fraction of maximum allowable blowing agent (R-11) in liquid
+@param xBL mole fraction of blowing agent (R-11)
+@param M_B molecular weight of blowing agent (R-11)
+@param M_NCO molecular weight of NCO
+@return maximum solubility of R-11 in liquid
+@fn creamTemperature(double &xBL0, double &dxdT)
+@brief criticall temperature that foaming process starts
+@param xBL0 initial mole fraction of the blowing agent (R-11)
+@param dxdT constant
+@return cream temperature
+@fn dTdtFirstOrder(double &Tc, double &To, double &timeStep)
+@brief first order accurate dTdt
+@param Tc current value of temperature
+@param To old value of temperature
+@param timeStep time step
+@return first order derivative
+@fn dTdtSecondOrder(double &Tc, double &To, double &Too, double &timeStep)
+@brief second order accurate dTdt
+@param Tc current value of temperature
+@param To old value of temperature
+@param Too old-old value of temperature
+@param timeStep time step
+@return second order derivative
+@fn thermalDiffusivityGas(double &T)
+@brief thermal diffusivity of gas as a function of temperature
+@param T temperature
+@return thermal diffusivity of gas
+@fn nodeRadius(const double &v)
+@brief bubble radius at the node
+@param v bubble volume
+@return bubble radius
+*/
 double LliqMax (double &);
 double ddT_LliqMax (double &);
 double arrhenius (double &, double &, double &);

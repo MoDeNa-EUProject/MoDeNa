@@ -1,3 +1,9 @@
+/**
+* @ingroup mod_3Dcfd
+* @file readControls.H
+* @brief read controls
+*/
+///@cond
     #include "readTimeControls.H"
     label nAlphaCorr(readLabel(pimple.dict().lookup("nAlphaCorr")));
 
@@ -10,3 +16,4 @@
                "i.e. when the number of outer-correctors = 1"
             << exit(FatalError);
     }
+///@endcond

@@ -1,3 +1,23 @@
+/**
+* @ingroup mod_3Dcfd
+* @file MomSources.H
+* @brief builds the RHS of PDEs for the moments.
+
+* @detail
+* This file creates the source terms for moments equations. Based on number of
+* nodes the corresponding sources are computed. Also, the choice of surrogate
+* models has been accounted for within this file. For example the first bubble
+* growth surrogate model is called using the following code snippet:
+```
+size_t Tbblgr1pos = modena_model_inputs_argPos(bblgr1, "T");
+size_t Rbblgr1pos = modena_model_inputs_argPos(bblgr1, "R");
+size_t c_1bblgr1pos = modena_model_inputs_argPos(bblgr1, "c");
+size_t p_1bblgr1pos = modena_model_inputs_argPos(bblgr1, "p");
+```
+* Nonetheless, alternative models have been implemented in case of excluding the 
+* the surrogate models.
+*/
+///@cond
 if (PBESwitch)
 {
     if
@@ -620,3 +640,4 @@ if (PBESwitch)
         } //end of forAll
     }
 }
+///@endcond
