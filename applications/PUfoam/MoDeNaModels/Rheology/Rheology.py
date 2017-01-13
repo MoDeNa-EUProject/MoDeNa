@@ -111,7 +111,7 @@ def link_files(src, dst):
 
 # -------------- Surrogate Functions AND Exact Tasks ------------------------ #
 
-## >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Dummy model
+# ----------------------------------------------------------------- Dummy model
 @explicit_serialize
 class RheologyExactTask_dummy(ModenaFireTask):
     """
@@ -145,7 +145,7 @@ class RheologyExactTask_dummy(ModenaFireTask):
         remove(self.INPUT_FILE)
         remove(self.OUTPUT_FILE)
 
-## Surrogate Function
+# Surrogate Function
 #
 f_dummy = CFunction(
     Ccode= '''
@@ -212,7 +212,7 @@ void rheology_dummy_SM
    },
 )
 
-## >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> tFEM model
+# ------------------------------------------------------------------ tFEM model
 @explicit_serialize
 class RheologyExactTask_tFEM(ModenaFireTask):
     """
