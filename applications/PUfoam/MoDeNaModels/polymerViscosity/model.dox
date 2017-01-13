@@ -1,11 +1,17 @@
-/**
- * @defgroup mod_polymerViscocity Polymer Viscocity
- * @ingroup models
- * @brief   Density
- * @details
+/*! @page deps Dependencies
+ *  @section dep_polymerViscosity Dependencies of Polymer viscosity model
  *
+ *
+ *   | Dependency      | Type                            | Tested Version |
+ *   | --------------- | ------------------------------- | -------------- |
+ *   | None            | -                               | -              |
 */
 
-
-
-
+/**
+ * @defgroup mod_polymerViscosity Polymer viscosity MoDeNa Module
+ * @ingroup  models
+ * @brief    Integrates Polymer viscosity model into the MoDeNa software framework.
+ * @details
+ * * @ref polymerViscosity.polymerViscosity.m_polymerViscosity Forward mapping model
+ * * @ref polymerViscosity.polymerViscosity.f_polymerViscosity Surrogate function
+*/

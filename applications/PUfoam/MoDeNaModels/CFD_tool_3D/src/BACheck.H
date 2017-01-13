@@ -1,3 +1,8 @@
+/**
+@ingroup mod_3Dcfd
+@file BACheck.H
+@brief checks the boundedness of field variables related to the physical and chemical blowing agents.
+*/
 forAll(mesh.C(), celli)
 {
     if (wBA_l[celli] > L0)

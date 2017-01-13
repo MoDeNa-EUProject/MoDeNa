@@ -1,3 +1,9 @@
+/**
+@ingroup mod_3Dcfd
+@file BASources.H
+@brief builds the RHS of PDEs for the blowing agents.
+*/
+
 if (PBESwitch)
 {
     scalar prsr, tmpt, alpha_f, g1_BA_val,

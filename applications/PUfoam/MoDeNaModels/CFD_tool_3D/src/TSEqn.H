@@ -1,3 +1,9 @@
+/**
+@ingroup mod_3Dcfd
+@file TSEqn.H
+@brief builds and solves the temperature equation
+*/
+///@cond
 {
 
     fvScalarMatrix TSEqn
@@ -13,3 +19,4 @@
     TSEqn.relax();
     TSEqn.solve();
 }
+///@endcond

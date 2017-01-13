@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    QmomKinetics
+    MODENAFoam
 
 Description
     Solver for 2 compressible, non-isothermal immiscible fluids using a VOF
@@ -44,7 +44,17 @@ Description
     of foaming process.
 
 \*---------------------------------------------------------------------------*/
+/**
+@ingroup    mod_3Dcfd
+@file PUFoam.C
+@brief macro-scale CFD tool for 3D simulation of foam expansion
+@details Solver for 2 compressible, non-isothermal immiscible fluids using a VOF (volume of fluid) phase-fraction based interface capturing approach. The momentum and other fluid properties are of the _mixture_ and a single momentum equation is solved. Turbulence modelling is generic, i.e.  laminar, RAS or LES may be selected. The solver has been adapted for modeling of Polyurethane foams (PU). In that, it includes the Quadrature Method of Moments (QMOM) to solve a __Population Balance Equation__ (PBE) determining the bubble size distribution inside PU foams. Moreover, the kinetics of the reactions including gelling, blowing and evaporation of the physical blowing agent are incorporated into the solver. Finally, the kinetics and PBE has been coupled to describe the time evolution of foaming process.
+@authors Mohsen Karimi, Daniele Marchisio
+@sa http://onlinelibrary.wiley.com/doi/10.1002/masy.201500108/abstract
+@copyright  2014-2016, MoDeNa Project. GNU Public License.
+*/
 
+///@cond
 #include "fvCFD.H"
 #include "MULES.H"
 #include "subCycle.H"
@@ -60,7 +70,7 @@ Description
 extern "C"{void dsteqr_(char &, int *, double *, double *, double *, int *, double *, int *); }
 // MoDeNa
 #include "modena.h"
-#include "modenaData.h"
+#include "modenaData.H"
 // Kinetics headers
 #include "KineticsFunctions.H"
 // Moments headers
@@ -74,7 +84,7 @@ extern "C"{void dsteqr_(char &, int *, double *, double *, double *, int *, doub
 
 int main(int argc, char *argv[])
 {
-    #include "modenaCalls.h"
+    #include "modenaCalls.H"
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"
@@ -230,3 +240,4 @@ int main(int argc, char *argv[])
     return 0;
 }
 // ************************************************************************* //
+///@endcond

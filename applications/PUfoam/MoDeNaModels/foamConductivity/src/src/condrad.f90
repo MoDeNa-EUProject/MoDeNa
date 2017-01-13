@@ -1,9 +1,10 @@
-!> @file
-!! subroutines for calculation of equivalent conductivity of the foam
-!! coupled conduction-radiation simulation
-!! non-gray 1D P1-approximation
+!> @file      foamConductivity/src/src/condrad.f90
+!! @ingroup   src_mod_foamConductivity
 !! @author    Pavel Ferkl
-!! @ingroup   foam_cond
+!! @brief     Conductive-radiative heat transfer simulation.
+!! @details
+!! Contains subroutines for heat transfer simulation in effective homogenous
+!! medium.
 module condrad
     use constants
     use ioutils
@@ -20,11 +21,15 @@ module condrad
     real(dp), dimension(:,:), allocatable :: tmatrix,gmatrix
     !end of lapack variables
     real(dp) :: dz
-    real(dp), dimension(:), allocatable :: tvec,qcon,qrad,qtot,gqrad,cond
-    real(dp), dimension(:,:), allocatable :: alpha,sigma
+    real(dp), dimension(:), allocatable :: tvec,qcon,qrad,qtot,gqrad
+    real(dp), dimension(:), allocatable :: cond !< effective conductivity
+    real(dp), dimension(:,:), allocatable :: alpha !< absorption coefficient
+    real(dp), dimension(:,:), allocatable :: sigma !< scattering coefficient
 contains
 !********************************BEGINNING*************************************
-!> determines equivalent conductivity of the foam, main algorithm
+!> Determines equivalent conductivity of the foam.
+!!
+!! It is a heat transfer in spatially one-dimensional domain.
 subroutine equcond
     integer :: i,maxiter=20,fi
     real(dp) :: tol=1e-5_dp,res
@@ -74,7 +79,7 @@ end subroutine equcond
 
 
 !********************************BEGINNING*************************************
-!> creates matrix for calculation of incidence radiation
+!> Creates matrix for calculation of incidence radiation.
 subroutine make_gmatrix
     integer :: i,j,k,l
     gmatrix=0
@@ -115,7 +120,7 @@ end subroutine make_gmatrix
 
 
 !********************************BEGINNING*************************************
-!> creates right hand side for calculation of incidence radiation
+!> Creates right hand side for calculation of incidence radiation.
 subroutine make_grhs
     integer :: i,j,k
     k=0
@@ -136,7 +141,7 @@ end subroutine make_grhs
 
 
 !********************************BEGINNING*************************************
-!> creates matrix for calculation of temperature
+!> Creates matrix for calculation of temperature.
 subroutine make_tmatrix
     integer :: i,j
     tmatrix=0
@@ -167,7 +172,7 @@ end subroutine make_tmatrix
 
 
 !********************************BEGINNING*************************************
-!> creates right hand side for calculation of temperature
+!> Creates right hand side for calculation of temperature.
 subroutine make_trhs
     call make_gqrad
     trhs=gqrad
@@ -178,7 +183,7 @@ end subroutine make_trhs
 
 
 !********************************BEGINNING*************************************
-!> creates gradient of radiative heat flux (radiative source)
+!> Creates gradient of radiative heat flux (radiative source).
 subroutine make_gqrad
     integer :: i,j,k
     call make_grhs
@@ -197,7 +202,7 @@ end subroutine make_gqrad
 
 
 !********************************BEGINNING*************************************
-!> calculate heat flux
+!> Calculates heat flux.
 subroutine heatflux
     integer :: i,j,k
     qcon(1)=-2*cond(1)*cond(2)/(cond(1)+cond(2))*(tvec(2)-tvec(1))/dz

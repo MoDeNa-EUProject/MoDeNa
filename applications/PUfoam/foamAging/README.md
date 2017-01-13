@@ -33,22 +33,17 @@ make install
 ```
 ./initModels
 ```
-
-    *Note:* foamConductivity takes initial points from `init_foamConductivity.json`. This file can be prepared using `prep_init_foamConductivity.py`.
+Note that foamConductivity takes initial points from `init_foamConductivity.json`. This file can be prepared using `prep_init_foamConductivity.py`.
 - The heat insulation properties can be predicted by running
 ```
 ./workflow_foamConductivity
 ```
-Input morphology and gas composition can be specified manually or taken from results of Bubble growth or 0D or 3D simulation.
-
-    *Note:* Running this script will delete the parameters of `foamConductivity` from the database. You should run `initModels` again before you run the aging simulation.
+Input morphology and gas composition can be specified manually or taken from results of Bubble growth or 0D or 3D simulation. Note that running this script will delete the parameters of `foamConductivity` from the database. You should run `initModels` again before you run the aging simulation.
 - The evolution of heat insulation properties in time can be predicted by running
 ```
 ./workflow_foamAging
 ```
-Input morphology and gas composition can be specified manually or taken from results of Bubble growth or 0D or 3D simulation.
-
-    *Note:* It is often advantageous to initialize the foamConductivity only for morphology, which would be used in the aging simulation. This can be achieved by running `./prep_init_foamConductivity.py 1`, which will prepare initial points for the initialization based on input file for the aging simulation.
+Input morphology and gas composition can be specified manually or taken from results of Bubble growth or 0D or 3D simulation. Note that it is often advantageous to initialize the foamConductivity only for morphology, which would be used in the aging simulation. This can be achieved by running `./prep_init_foamConductivity.py 1`, which will prepare initial points for the initialization based on input file for the aging simulation. However, note that foamConductivity will be re-fitted several times during the simulation, because the gas composition will change and the surrogate model will get out of range. If you don't want any re-fitting during the simulation, then run `./prep_init_foamConductivity.py 2`, which will still use the foam morphology for the initialization of the foamConductivity, but also a whole range of possible gas compositions.
 
 ## Results
 The results can be found in the `results` folder. They can be visualized using python scripts and VEUSZ.

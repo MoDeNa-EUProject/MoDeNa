@@ -38,10 +38,9 @@ Contributors
 @endcond'''
 
 """
-@ingroup mod_polymerViscocity
-@namespace polymerViscocity
+@namespace polymerViscosity
+@ingroup   mod_polymerViscosity
+@brief     MoDeNa Module definition of the Polymer viscosity model
 """
 
-
-from polymerViscosity import f_polymerViscosity
-from polymerViscosity import m_polymerViscosity
+from polymerViscosity import *

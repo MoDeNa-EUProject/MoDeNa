@@ -1,3 +1,9 @@
+/**
+@ingroup mod_3Dcfd
+@file rheologyModel.H
+@brief implementatino of three rheology models including constant, Newtonian, and non-Newtonian
+*/
+///@cond
 // Constant viscosity (Newtonian)
 if (viscosityModel == "constant")
 {
@@ -124,3 +130,4 @@ if (viscosityModel == "MoDeNaRheology")
 muMixture = alpha1*muAir + alpha2*muFoamCorr;
 muMixture.correctBoundaryConditions();
 
+///@endcond

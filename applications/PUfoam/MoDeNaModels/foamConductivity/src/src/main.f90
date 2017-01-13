@@ -1,12 +1,15 @@
-!> @file
-!! Main program. Homogenization approach to heat transfer in polymer foams
+!> @file      foamConductivity/src/src/main.f90
+!! @ingroup   src_mod_foamConductivity
 !! @author    Pavel Ferkl
-!! @ingroup   foam_cond
-!! @page deps Dependencies
-!! @section dep_foam_cond  Dependencies of Foam conductivity model
-!! - LAPACK 3.4.2 or higher
-!! - BLAS 3.4.2 or higher
-!! - fson
+!! @brief     Main executable program.
+!! @details
+!! Simulation of conductive-radiative heat transfer in polymer closed-cell foam.
+!! Output is the equivalent foam conductivity.
+
+
+!> Calls the appropriate subroutine, depending on what we want to simulate.
+!!
+!! Changes to this program are for testing purposes only.
 program hahtf
     use tests, only: loadParameters,eqcond,eqcond_por
     use ioutils, only: newunit

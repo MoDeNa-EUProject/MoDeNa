@@ -1,8 +1,9 @@
-!> @file
-!! calculates material properties of the system
-!! results are stored in global variables
+!> @file      bubbleGrowth/src/src/phys_prop.f90
 !! @author    Pavel Ferkl
-!! @ingroup   bblgr
+!! @ingroup   src_mod_bubbleGrowth
+!! @brief     Calculates material properties of the system.
+!! @details
+!! Results are stored in global variables.
 module phys_prop
     use constants
     use globals
@@ -19,7 +20,10 @@ module phys_prop
         Rb_initialized
 contains
 !********************************BEGINNING*************************************
-!> determine physical properties
+!> Determines physical properties at the beginning.
+!!
+!! Some properties can be set only at the beginning and they don't need to be
+!! updated durin the integration.
 subroutine set_initial_physical_properties
     time=tstart
     if (.not. firstrun) R0=Rb(time)
@@ -97,9 +101,13 @@ end subroutine set_initial_physical_properties
 
 
 !********************************BEGINNING*************************************
-!> calculates values of physical properties
+!> Calculates values of physical properties.
+!!
+!! Updates viscosity, solubility, etc.
 subroutine physical_properties(temp,conv,radius)
-    real(dp), intent(in) :: temp,conv,radius
+    real(dp), intent(in) :: temp !< temperature
+    real(dp), intent(in) :: conv !< conversion
+    real(dp), intent(in) :: radius !< bubble radius
     integer :: i
     real(dp) :: Aeta,Eeta,Cg,AA,B !viscosity model constants
     if (temp>500) then
@@ -164,9 +172,9 @@ subroutine physical_properties(temp,conv,radius)
         case(2) !pcsaft
             ! TODO: implement properly
             call modena_inputs_set(solInputs(i), solTpos(i), temp)
-            ! call modena_inputs_set(solInputs(i), solXgasPos(i), 1.0e-4_dp)
-            ! call modena_inputs_set(solInputs(i), solXmdiPos(i), 0.5_dp)
-            ! call modena_inputs_set(solInputs(i), solXpolyolPos(i), 0.5_dp)
+            call modena_inputs_set(solInputs(i), solXgasPos(i), 1.0e-4_dp)
+            call modena_inputs_set(solInputs(i), solXmdiPos(i), 0.5_dp)
+            call modena_inputs_set(solInputs(i), solXpolyolPos(i), 0.5_dp)
             ret = modena_model_call(solModena(i), solInputs(i), solOutputs(i))
             if(ret /= 0) then
                 call exit(ret)
@@ -174,11 +182,6 @@ subroutine physical_properties(temp,conv,radius)
             KH(i) = modena_outputs_get(solOutputs(i), 0_c_size_t)
             ! KH(i)=rhop/Mbl(i)/KH(i)
         case(3) !n-pentane, Gupta, 10.1002/pen.11405
-            ! KH(i)=rhop/Mbl(i)/pamb*3.3e-4_dp*(exp((2.09e4_dp-67.5_dp*(temp-&
-            !     35.8_dp*log(pamb/1e5_dp)))/(8.68e4_dp-(temp-35.8_dp*&
-            !     log(pamb/1e5_dp))))-1.01_dp)**(-1)
-            ! KH(i)=-rhop/Mbl(i)/pamb*3.3e-4_dp/(exp((2.09e4_dp-67.5_dp*temp)/&
-            !     (8.69e4_dp-temp))-1.01_dp)
             call modena_inputs_set(solInputs(i), solTpos(i), temp)
             ret = modena_model_call(solModena(i), solInputs(i), solOutputs(i))
             if(ret /= 0) then
@@ -199,11 +202,6 @@ subroutine physical_properties(temp,conv,radius)
                 call exit(ret)
             endif
             KH(i) = modena_outputs_get(solOutputs(i), 0_c_size_t)
-            ! print*, KH(i),rhop,Mbl(i),pamb
-            ! KH(i)=rhop/Mbl(i)/pamb*(1e-7_dp+4.2934_dp*&
-            !     exp(-(temp-203.3556_dp)**2/(2*40.016_dp**2)))
-            ! print*, KH(i)
-            ! stop
         case(7) !pentane, Winkler Ph.D.
             KH(i)=rhop/Mbl(i)/pamb*(0.0064_dp+0.0551_dp*exp(-(temp-298)**2/&
                 (2*17.8_dp**2)))
@@ -223,10 +221,12 @@ end subroutine physical_properties
 
 
 !********************************BEGINNING*************************************
-!> time derivation of bubble radius as function of time
+!> Time derivation of bubble radius as a function of time.
+!!
+!! Interpolates using a spline.
 real(dp) function Rderiv(t)
     use bspline_module
-    real(dp) :: t
+    real(dp), intent(in) :: t !< time
     real(dp) :: dt
     integer :: nx,idx,iflag
     ! dt=timestep/100
@@ -247,11 +247,13 @@ endfunction Rderiv
 
 
 !********************************BEGINNING*************************************
-!> bubble radius as function of time
+!> Bubble radius as function of time.
+!!
+!! Interpolates using a spline.
 real(dp) function Rb(t)
     use bspline_module
     use interpolation
-    real(dp) :: t
+    real(dp), intent(in) :: t !< time
     integer :: nx,idx,iflag
     integer :: ni=1   !number of points, where we want to interpolate
     real(dp) :: xi(1)   !x-values of points, where we want to interpolate
@@ -274,7 +276,9 @@ endfunction Rb
 
 
 !********************************BEGINNING*************************************
-!> initialization of spline
+!> Initialization of spline for bubble radius.
+!!
+!! Automatically called the first time the spline is used. 
 subroutine Rb_spline_ini
     use bspline_module
     integer :: nx,iflag

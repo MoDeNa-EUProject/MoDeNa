@@ -1,3 +1,21 @@
+/**
+* @ingroup mod_3Dcfd
+* @file rheologyFields.H
+* @brief creates the field variables for the rheology
+*
+* @detail
+* This file creates the required variables for the rheology model. The
+* `rheologyProperties` dictionary is where the user can define the
+* `viscosityModel`. Four choices has been identified. The first one uses
+* a constant value and treats the PU foam similar to water. The
+* `castro-macosko` model applies a Newtonian approach relating the foam
+* viscosity to the temperature and conversion. The thirs choice `bird-carreau`
+* ,however , computes the foam apparent viscocity based on a non-Newtonian
+* method. The last option, `MoDeNaRheology`, applies a surrogate model for the
+* foam apparent viscosity.
+*/
+
+///@cond
 IOdictionary rheologyProperties
 (
     IOobject
@@ -121,3 +139,4 @@ volScalarField muFoamCorr
     mesh,
     dimensionedScalar("muFoamCorr", dimensionSet(1,-1,-1,0,0,0,0), 1e-5)
 );
+///@endcond

@@ -1,3 +1,15 @@
+/**
+* @ingroup mod_3Dcfd
+* @file MomEqns.H
+* @brief builds and solves moments equations
+
+* @detail
+* This file builds the moments equations. Firstly, it checks the number of
+* nodes and based on that the corresponding moments equations will be created.
+* For example, for 2 nodes the moments of order __zero to third__ will be solved.
+*/
+
+///@cond
 if
 (
     PBESwitch
@@ -127,3 +139,4 @@ if
     mFourEqn.solve();
     mFiveEqn.solve();
 }
+///@endcond

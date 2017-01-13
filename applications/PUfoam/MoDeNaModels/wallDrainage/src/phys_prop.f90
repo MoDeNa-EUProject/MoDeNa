@@ -1,7 +1,10 @@
-!> @file
-!! auxilliary subroutines for calculation of state properties
+!> @file      wallDrainage/src/phys_prop.f90
+!! @ingroup   src_mod_wallDrainage
 !! @author    Pavel Ferkl
-!! @ingroup   wall_drain
+!! @brief     Physical properties.
+!! @details
+!! Holds subroutines, which evaluate the current value of physical or foam
+!! properties.
 module phys_prop
     use constants, only: dp
     implicit none
@@ -16,11 +19,12 @@ module phys_prop
         Rb,Rb_der,porosity_spline_ini,porosity,visc_spline_ini,visc
 contains
 !********************************BEGINNING*************************************
-!> checks whether we are losing some mass or not
+!> Checks whether we are losing some mass or not.
 pure subroutine  volume_balance(y,vt,fs)
     use globals
-    real(dp), intent(out) :: vt,fs
-    real(dp), dimension(:), intent(in) :: y
+    real(dp), intent(out) :: fs !< strut content
+    real(dp), intent(out) :: vt !< total volume
+    real(dp), dimension(:), intent(in) :: y !< integrated variables
     integer :: i,neq
     real(dp) :: vf,vs
     neq=size(y)
@@ -41,12 +45,12 @@ end subroutine volume_balance
 
 
 !********************************BEGINNING*************************************
-!> disjoining pressure
+!> Disjoining pressure.
 pure subroutine dispress(h,dispr,dph)
     use globals
-    real(dp), intent(in) :: h
-    real(dp), intent(out) :: dispr !disjoining pressure
-    real(dp), intent(out) :: dph !derivative of disjoining pressure
+    real(dp), intent(in) :: h !< film half-thickness
+    real(dp), intent(out) :: dispr !< disjoining pressure
+    real(dp), intent(out) :: dph !< derivative of disjoining pressure
     dispr=bdp*((hdp/h)**(ndp-1)-(hdp/h)**(mdp-1))*(hdp-cdp)
     dph=(bdp*(hdp/h)**mdp*(hdp*mdp+cdp*(h-h*mdp))-&
         bdp*(hdp/h)**ndp*(hdp*ndp+cdp*(h-h*ndp)))/(h*hdp)
@@ -55,13 +59,13 @@ end subroutine dispress
 
 
 !********************************BEGINNING*************************************
-!> minimum film thickness and its distance from the center
+!> Minimum film thickness and its distance from the center.
 subroutine min_film_thickness(y,hmin,hloc,havg)
     use globals
-    real(dp), dimension(:), intent(in) :: y
-    real(dp), intent(out) :: hmin
-    real(dp), intent(out) :: hloc
-    real(dp), intent(out) :: havg
+    real(dp), dimension(:), intent(in) :: y !< integrated variables
+    real(dp), intent(out) :: hmin !< minimum film half-thickness
+    real(dp), intent(out) :: hloc !< radius at minumum film half-thickness
+    real(dp), intent(out) :: havg !< average film half-thickness
     integer :: i,n
     hmin=minval(y,dim=1)
     hloc=minloc(y,dim=1)*dr
@@ -80,10 +84,10 @@ end subroutine min_film_thickness
 
 
 !********************************BEGINNING*************************************
-!> time derivation of bubble radius as function of time
+!> Time derivation of bubble radius as function of time.
 real(dp) function Rb_der(t)
     use bspline_module
-    real(dp), intent(in) :: t
+    real(dp), intent(in) :: t !< time
     integer :: idx,iflag
     idx=1
     call db1val(t,idx,Rb_tx,Rb_nx,Rb_kx,Rb_coef,Rb_der,iflag,Rb_inbvx)
@@ -97,10 +101,10 @@ endfunction Rb_der
 
 
 !********************************BEGINNING*************************************
-!> bubble radius as function of time
+!> Bubble radius as function of time.
 real(dp) function Rb(t)
     use bspline_module
-    real(dp), intent(in) :: t
+    real(dp), intent(in) :: t !< time
     integer :: idx,iflag
     idx=0
     call db1val(t,idx,Rb_tx,Rb_nx,Rb_kx,Rb_coef,Rb,iflag,Rb_inbvx)
@@ -113,9 +117,10 @@ endfunction Rb
 
 
 !********************************BEGINNING*************************************
-!> initialization of spline for bubble radius
+!> Initialization of spline for bubble radius.
 subroutine Rb_spline_ini(bblgr_res)
     use bspline_module
+    !> results of the bubble growth simulation
     real(dp), dimension(:,:), intent(in) :: bblgr_res
     integer :: iflag
     Rb_nx=size(bblgr_res(:,1))
@@ -135,10 +140,10 @@ end subroutine Rb_spline_ini
 
 
 !********************************BEGINNING*************************************
-!> porosity as function of time
+!> Porosity as function of time.
 real(dp) function porosity(t)
     use bspline_module
-    real(dp), intent(in) :: t
+    real(dp), intent(in) :: t !< time
     integer :: idx,iflag
     idx=0
     call db1val(t,idx,por_tx,por_nx,por_kx,por_coef,porosity,iflag,por_inbvx)
@@ -151,9 +156,10 @@ endfunction porosity
 
 
 !********************************BEGINNING*************************************
-!> initialization of spline for porosity
+!> Initialization of spline for porosity.
 subroutine porosity_spline_ini(bblgr_res)
     use bspline_module
+    !> results of the bubble growth simulation
     real(dp), dimension(:,:), intent(in) :: bblgr_res
     integer :: iflag
     por_nx=size(bblgr_res(:,1))
@@ -173,10 +179,10 @@ end subroutine porosity_spline_ini
 
 
 !********************************BEGINNING*************************************
-!> viscosity as function of time
+!> Viscosity as function of time.
 real(dp) function visc(t)
     use bspline_module
-    real(dp), intent(in) :: t
+    real(dp), intent(in) :: t !< time
     integer :: idx,iflag
     idx=0
     call db1val(t,idx,visc_tx,visc_nx,visc_kx,visc_coef,visc,iflag,visc_inbvx)
@@ -189,9 +195,10 @@ endfunction visc
 
 
 !********************************BEGINNING*************************************
-!> initialization of spline for viscosity
+!> Initialization of spline for viscosity.
 subroutine visc_spline_ini(bblgr_res)
     use bspline_module
+    !> results of the bubble growth simulation
     real(dp), dimension(:,:), intent(in) :: bblgr_res
     integer :: iflag
     visc_nx=size(bblgr_res(:,1))

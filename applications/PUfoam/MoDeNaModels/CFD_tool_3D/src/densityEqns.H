@@ -1,3 +1,17 @@
+/**
+* @ingroup mod_3Dcfd
+* @file densityEqns.H
+* @brief calculates the PU foam density
+*
+* @detail
+* This file calculates the foam density evolution based on two different
+* scenarios. The first case computes the foam evolution based on the value of
+* moments.
+* The second scenario, on the other hand, uses a kinetics based equation for
+* the foam calculations.
+* @sa http://onlinelibrary.wiley.com/doi/10.1002/mats.201500014/abstract
+*/
+///@cond
 dimensionedScalar oneTwo
 (
     "oneTwo",
@@ -140,3 +154,4 @@ else
       + (scalar(1.0)/rhoPolySM)*dumVar2)
     );
 }
+///@endcond

@@ -1,3 +1,10 @@
+/**
+* @ingroup mod_3Dcfd
+* @file alphaEqns.H
+* @brief builds and solves the phase volume fraction equation.
+* @sa http://www.openfoam.com/documentation/cpp-guide/html/compressibleInterFoam_2alphaEqns_8H.html
+*/
+///@cond
 {
     word alphaScheme("div(phi,alpha)");
     word alpharScheme("div(phirb,alpha)");
@@ -85,3 +92,4 @@
         << "  Min(alpha2) = " << min(alpha2).value()
         << endl;
 }
+///@endcond

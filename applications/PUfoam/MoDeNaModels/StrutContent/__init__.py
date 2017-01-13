@@ -37,8 +37,9 @@ Contributors
 @endcond'''
 
 """
-@ingroup mod_strutContent
-@namespace StrutContent
+@namespace strutContent
+@ingroup   mod_strutContent
+@brief     MoDeNa Module definition of the Strut content model
 """
 
-from StrutContent import m
+from StrutContent import *

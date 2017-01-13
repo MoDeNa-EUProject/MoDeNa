@@ -1,7 +1,7 @@
 /*! \file
-	\brief Functions governing creation of struts
-	\author Pavel Ferkl
-	\ingroup foam_constr
+	\ingroup src_mod_foamConstruction
+	\author  Pavel Ferkl
+	\brief   Functions governing creation of struts
 */
 #include "globals.hh"
 #include "geometry.hh"

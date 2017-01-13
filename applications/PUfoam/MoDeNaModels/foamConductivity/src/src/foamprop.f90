@@ -1,7 +1,9 @@
-!> @file
-!! subroutines for evaluation of effective radiative properties of foam
+!> @file      foamConductivity/src/src/foamprop.f90
+!! @ingroup   src_mod_foamConductivity
 !! @author    Pavel Ferkl
-!! @ingroup   foam_cond
+!! @brief     Effective properties of the foam.
+!! @details
+!! Determines effective conductive and radiative properties of the foam.
 module foamprop
     use constants
     use ioutils
@@ -24,10 +26,10 @@ module foamprop
         kappaf,sigmaf,betaf,omegaf,betatrf
 contains
 !********************************BEGINNING*************************************
-!> determine effective radiative properties of foam
+!> Determine effective radiative properties of foam.
 subroutine effrad(spectra)
     use quadpack
-    character(len=*), intent(in) :: spectra
+    character(len=*), intent(in) :: spectra !< filename of specral results
     integer :: i,j,fi,nwawel=100
 !    real(dp) :: theta  !incident angle
 !    real(dp) :: Rwin    !reflectance
@@ -378,10 +380,10 @@ end subroutine effrad
 
 
 !********************************BEGINNING*************************************
-!> evaluate integrand for Rosseland extinction coefficient
+!> Evaluate integrand for Rosseland extinction coefficient.
 real(dp) function rosextc(lambda)
     use interpolation
-    real(dp), intent(in) :: lambda  !wavelength
+    real(dp), intent(in) :: lambda  !< wavelength
     real(dp) :: beta
     real(dp) :: n  !refractive index
     integer :: ni=1   !number of points, where we want to interpolate
@@ -410,10 +412,10 @@ end function rosextc
 
 
 !********************************BEGINNING*************************************
-!> evaluate integrand for Planck mean extinction coefficient
+!> Evaluate integrand for Planck mean extinction coefficient.
 real(dp) function planckextc(lambda)
     use interpolation
-    real(dp), intent(in) :: lambda  !wavelength
+    real(dp), intent(in) :: lambda  !< wavelength
     real(dp) :: beta
     real(dp) :: n  !refractive index
     integer :: ni=1   !number of points, where we want to interpolate
@@ -442,10 +444,10 @@ end function planckextc
 
 
 !********************************BEGINNING*************************************
-!> evaluate integrand for scattering albedo - Planck style
+!> Evaluate integrand for scattering albedo - Planck style.
 real(dp) function planckalbedo(lambda)
     use interpolation
-    real(dp), intent(in) :: lambda  !wavelength
+    real(dp), intent(in) :: lambda  !< wavelength
     real(dp) :: omega
     real(dp) :: n  !refractive index
     integer :: ni=1   !number of points, where we want to interpolate
@@ -474,11 +476,15 @@ end function planckalbedo
 
 
 !********************************BEGINNING*************************************
-!> fraction of blackbody radiation according to eq. (1-33) in Siegel's and
-!! Howell's 4th Thermal Radiation Heat Transfer
+!> Fraction of blackbody radiation.
+!!
+!! According to eq. (1-33) in Siegel's and
+!! Howell's 4th Thermal Radiation Heat Transfer.
 real(dp) function fbep(n,lambda,T)
+    real(dp), intent(in) :: n !< index of refraction
+    real(dp), intent(in) :: lambda !< wavelength
+    real(dp), intent(in) :: T !< temperature
     integer :: i,maxit=100
-    real(dp), intent(in) :: n,lambda,T !index of refraction,wavelength,temperature
     real(dp) :: dzeta,old,res,tol=1e-12_dp
     dzeta=C2/(n*lambda*T)
     old=0

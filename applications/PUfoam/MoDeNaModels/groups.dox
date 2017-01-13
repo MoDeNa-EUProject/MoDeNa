@@ -2,29 +2,3 @@
   @defgroup models
   @brief    Collection of complex mathematical models
 */
-
-/**
-  @defgroup foam_cond Foam conductivity
-  @ingroup  models
-  @brief    Estimates the equivalent conductivity of the foam
-
-  @defgroup foam_aging Foam aging
-  @ingroup  models
-  @brief    Predicts the evolution of composition of gas phase in foam and
-  determines the change in thermal properties.
-
-  @defgroup bblgr Bubble growth
-  @ingroup  models
-  @brief    Simulates the growth of an isolated bubble in polymerizing liquid
-  and determines the rate of bubble growth.
-
-  @defgroup foam_constr Foam construction
-  @ingroup  models
-  @brief    Creates files describing the morphology of foam with desired
-  number of cells, cell size distribution, porosity and strut content.
-
-  @defgroup wall_drain Wall drainage
-  @ingroup  models
-  @brief    Simulates the formation of wall and strut during foaming.
-
-*/

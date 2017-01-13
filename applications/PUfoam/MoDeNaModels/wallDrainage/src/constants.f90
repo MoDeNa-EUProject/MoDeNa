@@ -1,15 +1,15 @@
-!> @file
-!! stores parameters and commonly used variables
+!> @file      wallDrainage/src/constants.f90
+!! @ingroup   src_mod_wallDrainage
 !! @author    Pavel Ferkl
-!! @ingroup   wall_drain
+!! @brief     Physical constants.
+!! @details
+!! Stores physical constants and type definitions.
 module constants
+    use,intrinsic :: iso_fortran_env, only: dp => real64
     implicit none
-
-    integer, parameter:: dp=selected_real_kind(15)       ! double precision (don't change, lsode integrators are not implemented for arbitrary precision)
-
-    real(dp), parameter :: pi=3.141592653589793238462_dp !pi
-    real(dp), parameter :: sigmaB=5.67037321e-8_dp       !Stefan-Boltzmann constant
-    real(dp), parameter :: kb=1.380648813e-23_dp         !Boltzmann constant
-    real(dp), parameter :: Rg=8.31446218_dp              !gas constant
-    real(dp), parameter :: NA=Rg/kb                      !Avogadro constant
+    real(dp), parameter :: pi=3.141592653589793238462_dp !< pi
+    real(dp), parameter :: sigmaB=5.67037321e-8_dp       !< Stefan-Boltzmann constant
+    real(dp), parameter :: kb=1.380648813e-23_dp         !< Boltzmann constant
+    real(dp), parameter :: Rg=8.31446218_dp              !< gas constant
+    real(dp), parameter :: NA=Rg/kb                      !< Avogadro constant
 end module constants

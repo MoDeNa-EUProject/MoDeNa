@@ -1,3 +1,18 @@
+/**
+* @ingroup mod_3Dcfd
+* @file MomFields.H
+* @brief creates the field variables related to the moments
+
+* @detail
+* This file creates an `IOdictionary` labeled as `PBEProperties`. This file
+* enables user to define the details of population balance solution including
+* number of nodes, application of surrogate models and etc.
+* The `PBESwitch` defines whether the the PBE solution would be applied for
+* computation of foam density. The additional field variables including the
+* sources as well as moments have been created in this header file.
+*
+*/
+///@cond
 IOdictionary PBEProperties
 (
     IOobject
@@ -411,4 +426,4 @@ volScalarField node2
     mesh
 );
 Info<< "End of \"MomFields\"\n" << endl;
-// End of MomFields
+///@endcond

@@ -1,8 +1,8 @@
 /*! \file
-	\brief Functions for the initialization of seeds.
-	\author Pavel Ferkl
-    \author Juraj Kosek
-	\ingroup foam_constr
+    \ingroup src_mod_foamConstruction
+	\author  Pavel Ferkl
+    \author  Juraj Kosek
+    \brief   Functions for the initialization of seeds.
 */
 #include "globals.hh"
 #include <stdlib.h>

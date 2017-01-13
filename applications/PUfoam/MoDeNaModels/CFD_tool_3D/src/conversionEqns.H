@@ -1,3 +1,16 @@
+/**
+* @ingroup mod_3Dcfd
+* @file conversionEqns.H
+* @brief builds and solves conversion equations based on the kinetic model chosen.
+*
+* @detail
+* Based on the `KineticsModel` defined by the user this file builds the
+* conversion equations. For the `generic` case, it only includes the
+* conversions of water and polyol, while for the `RF-1` surrogate model twenty
+* extra PDEs will be solved.
+*/
+
+///@cond
 alpha1phir = fvc::interpolate(alpha1)*phir;
 
 rhoFoamAlpha2  = rho_foam*alpha2;
@@ -260,3 +273,4 @@ if (KineticsModel == "RF-1")
     R_1_temp_RF1Eqn.relax();
     R_1_temp_RF1Eqn.solve();
 }
+///@endcond

@@ -30,6 +30,16 @@ License
     This file should help to compile models on systems, where MoDeNa is not
     installed.
 */
+/**
+    @file      bubbleGrowth/src/src/fake_modena.c
+    @author    Pavel Ferkl
+    @ingroup   src_mod_bubbleGrowth
+    @brief     MoDeNa bindings used when MoDeNa library is not installed.
+    @details
+    These bindings are used when MoDeNa is not installed. Useful when you
+    want to compile the model, but you don't have the MoDeNa library. Use only
+    when you are not calling any MoDeNa functions.
+*/
 #include <stddef.h>
 #include <stdbool.h>
 int *modena_inputs_new(int *self);

@@ -1,9 +1,11 @@
-/** @file write_kinetics.h
-    @brief write the results into text files
-    @fn void write_kinetics( const state_type &y , const double t )
-    @param const state_type &y -  vector of all the variables
-    @param const double t - time
-    @return void
+/**
+@ingroup mod_0Dcfd
+@file write_kinetics.h
+@brief write the results into text files
+@fn void write_kinetics( const state_type &y , const double t )
+@param y vector of all the variables
+@param t time
+@return void
 */
 void write_kinetics( const state_type &y , const double t );
 
