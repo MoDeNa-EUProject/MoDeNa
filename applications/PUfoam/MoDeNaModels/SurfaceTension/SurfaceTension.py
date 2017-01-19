@@ -108,7 +108,7 @@ monomers = IndexSet(
 # The index set contains four elements:
 #
 # @f[
-#   \mathbb{C}= \left\{ \text{surfactant}, \text{no_surfactant} \right\}
+#   \mathbb{C}= \left\{ \text{surfactant}, \text{no\_surfactant} \right\}
 # @f]
 #
 surfactant = IndexSet(
@@ -305,7 +305,7 @@ m = BackwardMappingModel(
 # @details
 #
 # @f[
-#    \hat{\mathcal{M}} := f_{\text{Air},\text{PU},\text{no_surfactant}}( T; \theta_1, \theta_2, \theta_3)
+#    \hat{\mathcal{M}} := f_{\text{Air},\text{PU},\text{no\_surfactant}}( T; \theta_1, \theta_2, \theta_3)
 # @f]
 #
 # @note
