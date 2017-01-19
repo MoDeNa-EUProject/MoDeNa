@@ -72,15 +72,16 @@ client = MongoClient(url)
 collection = client.test.surrogate_model
 # Rheology model has problems with large conversion (beyond gel point)
 doc=collection.find({'_id': 'Rheology'})
-for key in doc:
-    inputs=key['inputs']
-    inputs['T']['max']=550
-    inputs['X']['max']=1.0
-collection.update(
-    {'_id': 'Rheology'},
-    {
-        '$set': {
-            'inputs': inputs
+if list(doc): # Don't try to change anything if you don't find it in database
+    for key in doc:
+        inputs=key['inputs']
+        inputs['T']['max']=550
+        inputs['X']['max']=1.0
+    collection.update(
+        {'_id': 'Rheology'},
+        {
+            '$set': {
+                'inputs': inputs
+            }
         }
-    }
-)
+    )
