@@ -38,17 +38,10 @@ License
 """
 
 import os
-import modena
-from modena import ForwardMappingModel,BackwardMappingModel,SurrogateModel,CFunction,IndexSet,ModenaFireTask
-import modena.Strategy as Strategy
-from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
-from fireworks import Firework, Workflow, FWAction
-from fireworks.utilities.fw_utilities import explicit_serialize
-from blessings import Terminal
 from jinja2 import Template
-
-# Create terminal for colour output
-term = Terminal()
+from fireworks.utilities.fw_utilities import explicit_serialize
+from modena import CFunction, BackwardMappingModel, IndexSet, ModenaFireTask
+from modena import Strategy
 
 
 blowing_agents = IndexSet(

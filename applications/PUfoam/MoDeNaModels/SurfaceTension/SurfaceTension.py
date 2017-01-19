@@ -66,9 +66,10 @@ surrogate model parameters.
 """
 
 import os
-from modena import *
-from fireworks.utilities.fw_utilities import explicit_serialize
 from jinja2 import Template
+from fireworks.utilities.fw_utilities import explicit_serialize
+from modena import CFunction, BackwardMappingModel, IndexSet, ModenaFireTask
+from modena import Strategy
 
 ## @var blowing_agents
 # @brief (MoDeNa) Index Set for the Blowing Agents that are valid for the model

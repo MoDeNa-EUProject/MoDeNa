@@ -49,7 +49,7 @@ re-initialized after the change of parameters.
 
 import os
 import json
-from modena import *
+from modena import CFunction, ForwardMappingModel
 
 ## Surrogate function for polymer viscosity.
 #
