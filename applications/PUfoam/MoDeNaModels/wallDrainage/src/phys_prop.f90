@@ -51,7 +51,7 @@ pure subroutine dispress(h,dispr,dph)
     real(dp), intent(in) :: h !< film half-thickness
     real(dp), intent(out) :: dispr !< disjoining pressure
     real(dp), intent(out) :: dph !< derivative of disjoining pressure
-    dispr=bdp*((hdp/h)**(ndp-1)-(hdp/h)**(mdp-1))*(hdp-cdp)
+    dispr=bdp*((hdp/h)**(ndp-1)-(hdp/h)**(mdp-1))*(hdp/h-cdp)
     dph=(bdp*(hdp/h)**mdp*(hdp*mdp+cdp*(h-h*mdp))-&
         bdp*(hdp/h)**ndp*(hdp*ndp+cdp*(h-h*ndp)))/(h*hdp)
 end subroutine dispress
