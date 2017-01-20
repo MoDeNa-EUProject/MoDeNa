@@ -546,7 +546,7 @@ if 'argPos' in inputsExp['T']: #added by previous CFunction
 fPentWinkler = CFunction(Ccode=CcodePentWinkler,
     inputs=inputsExp,
     outputs=outputs,
-    parameters=parameters5
+    parameters=parameters4
 )
 ## n-pentane, Winkler
 parPentWinkler = [0.0064,0.0551,298.0,17.8]
