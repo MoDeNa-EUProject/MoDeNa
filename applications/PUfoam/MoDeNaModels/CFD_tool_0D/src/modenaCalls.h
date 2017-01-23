@@ -43,10 +43,13 @@ if (denMod==1) {
         return modena_error();
     }
 }
-rheologymodel = modena_model_new("Rheology_Arrhenius");
-if (modena_error_occurred())
-{
-    return modena_error();
+
+if (apparentViscosity) {
+    rheologymodel = modena_model_new("Rheology_Arrhenius");
+    if (modena_error_occurred())
+    {
+        return modena_error();
+    }
 }
 
 strutContentmodel = modena_model_new("strutContent");
@@ -75,8 +78,10 @@ if (denMod==1 || denMod == 3) {
     outputs_den = modena_outputs_new (density_reaction_mixturemodel);
 }
 
-inputs_rheo = modena_inputs_new (rheologymodel);
-outputs_rheo = modena_outputs_new (rheologymodel);
+if (apparentViscosity) {
+    inputs_rheo = modena_inputs_new (rheologymodel);
+    outputs_rheo = modena_outputs_new (rheologymodel);
+}
 
 inputs_strutContent = modena_inputs_new (strutContentmodel);
 outputs_strutContent = modena_outputs_new (strutContentmodel);
