@@ -71,7 +71,7 @@ def get_rho(inputs, results):
             rho0,dcell,xCyP,xCO2=loadtxt(fl2,skiprows=1,unpack=True)
     elif inputs['sourceOfProperty']['foamDensity']=='Qmom0D':
         with open(results+"/CFD0D/after_foaming.txt") as fl2:
-            rho0,dcell,var,xCyP,xCO2=loadtxt(fl2,skiprows=1,unpack=True)
+            rho0,dcell,xCyP,xCO2=loadtxt(fl2,skiprows=1,unpack=True)
     elif inputs['sourceOfProperty']['foamDensity']=='Qmom3D':
         with open(results+"/CFD3D/after_foaming.txt") as fl2:
             rho0,dcell,xCyP,xCO2=loadtxt(fl2,skiprows=1,unpack=True)
@@ -86,7 +86,7 @@ def get_dcell(inputs, results):
             rho,dcell0,xCyP,xCO2=loadtxt(fl2,skiprows=1,unpack=True)
     elif inputs['sourceOfProperty']['cellSize']=='Qmom0D':
         with open(results+"/CFD0D/after_foaming.txt") as fl2:
-            rho,dcell0,var,xCyP,xCO2=loadtxt(fl2,skiprows=1,unpack=True)
+            rho,dcell0,xCyP,xCO2=loadtxt(fl2,skiprows=1,unpack=True)
     elif inputs['sourceOfProperty']['cellSize']=='Qmom3D':
         with open(results+"/CFD3D/after_foaming.txt") as fl2:
             rho,dcell0,xCyP,xCO2=loadtxt(fl2,skiprows=1,unpack=True)
@@ -105,7 +105,7 @@ def get_gas_comp(inputs, results):
             xO20=xN20=0
     elif inputs['sourceOfProperty']['gasComposition']=='Qmom0D':
         with open(results+"/CFD0D/after_foaming.txt") as fl2:
-            rho,dcell,var,xCyP0,xCO20=loadtxt(fl2,skiprows=1,unpack=True)
+            rho,dcell,xCyP0,xCO20=loadtxt(fl2,skiprows=1,unpack=True)
             xO20=xN20=0
     elif inputs['sourceOfProperty']['gasComposition']=='Qmom3D':
         with open(results+"/CFD3D/after_foaming.txt") as fl2:

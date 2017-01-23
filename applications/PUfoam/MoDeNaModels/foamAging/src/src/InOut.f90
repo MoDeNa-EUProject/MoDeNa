@@ -31,14 +31,16 @@ subroutine input()
 	integer :: fi
 	! Read input parameters
 	json_data => fson_parse("../inputs/foamAging.json")
+	call fson_get(json_data, "foamCondition.inProtectiveSheet", sheet)
 	call fson_get(json_data, "numerics.timeStart", tbeg)
 	call fson_get(json_data, "numerics.timeEnd", tend)
 	call fson_get(json_data, "numerics.numberOfOutputs", nroutputs)
 	call fson_get(json_data, "numerics.wallDiscretization", divwall)
 	call fson_get(json_data, "numerics.cellDiscretization", divcell)
-	call fson_get(json_data, "numerics.sheetDiscretization", divsheet)
+	if (sheet) then
+		call fson_get(json_data, "numerics.sheetDiscretization", divsheet)
+	endif
 	call fson_get(json_data, "foamCondition.foamHalfThickness", dfoam)
-	call fson_get(json_data, "foamCondition.inProtectiveSheet", sheet)
 	if (sheet) then
 		call fson_get(&
 			json_data, "foamCondition.sheetThickness", dsheet)
