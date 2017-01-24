@@ -284,7 +284,7 @@ m = BackwardMappingModel(
     initialisationStrategy= Strategy.InitialPoints(
         initialPoints=
         {
-            'T': [290.0, 300.0, 350.0, 500.0],
+            'T': [290.0, 300.0, 315.0, 350.0, 375.0, 400.0, 450.0, 500.0],
         },
     ),
     outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(
@@ -321,7 +321,7 @@ m2 = BackwardMappingModel(
     initialisationStrategy= Strategy.InitialPoints(
         initialPoints=
         {
-            'T': [290.0, 300.0, 350.0, 500.0],
+            'T': [290.0, 300.0, 315.0, 350.0, 375.0, 400.0, 450.0, 500.0],
         },
     ),
     outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(
