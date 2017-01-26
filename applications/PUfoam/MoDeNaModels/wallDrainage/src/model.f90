@@ -57,8 +57,8 @@ subroutine odesystem(neq, t, y, ydot)
             fluxw=0
             call dispress(2*he,dispr,dph)
             fluxe=gam*he**3*(2*he1**3/ze+he1**5/ze+he1*(1+3*ze**2*he2**2)/ze-&
-                he2-ze*he3-he1**2*(he2+ze*he3))/(1+he1**2)**2.5_dp+&
-                dph*he1*he**3*ze
+                he2-ze*he3-he1**2*(he2+ze*he3))/(1+he1**2)**2.5_dp-&
+                2*dph*he1*he**3*ze
         elseif (i==neq) then
             zww=z
             zw=ze
@@ -74,8 +74,8 @@ subroutine odesystem(neq, t, y, ydot)
             hw3=(he-2*h+2*hww-hwww)/(dr**3/4)
             call dispress(2*hw,dispr,dph)
             fluxw=gam*hw**3*(2*hw1**3/zw+hw1**5/zw+hw1*(1+3*zw**2*hw2**2)/zw-&
-                hw2-zw*hw3-hw1**2*(hw2+zw*hw3))/(1+hw1**2)**2.5_dp+&
-                dph*hw1*hw**3*zw
+                hw2-zw*hw3-hw1**2*(hw2+zw*hw3))/(1+hw1**2)**2.5_dp-&
+                2*dph*hw1*hw**3*zw
             fluxe=-q*3*mu/2/pi
         else
             zww=z
@@ -108,12 +108,12 @@ subroutine odesystem(neq, t, y, ydot)
             he3=(heee-2*hee+2*h-hw)/(dr**3/4)
             call dispress(2*hw,dispr,dph)
             fluxw=gam*hw**3*(2*hw1**3/zw+hw1**5/zw+hw1*(1+3*zw**2*hw2**2)/zw-&
-                hw2-zw*hw3-hw1**2*(hw2+zw*hw3))/(1+hw1**2)**2.5_dp+&
-                dph*hw1*hw**3*zw
+                hw2-zw*hw3-hw1**2*(hw2+zw*hw3))/(1+hw1**2)**2.5_dp-&
+                2*dph*hw1*hw**3*zw
             call dispress(2*he,dispr,dph)
             fluxe=gam*he**3*(2*he1**3/ze+he1**5/ze+he1*(1+3*ze**2*he2**2)/ze-&
-                he2-ze*he3-he1**2*(he2+ze*he3))/(1+he1**2)**2.5_dp+&
-                dph*he1*he**3*ze
+                he2-ze*he3-he1**2*(he2+ze*he3))/(1+he1**2)**2.5_dp-&
+                2*dph*he1*he**3*ze
         endif
         ydot(i)=(fluxe-fluxw)/(z*dr)/3/mu
     enddo
