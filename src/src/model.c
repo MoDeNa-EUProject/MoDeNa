@@ -304,7 +304,7 @@ modena_model_t *modena_model_new
          || PyErr_ExceptionMatches(modena_ParametersNotValid)
         )
         {
-            PyErr_Clear();
+            // PyErr_Print();
 
             PyObject *pRet = NULL;
             if
@@ -312,6 +312,7 @@ modena_model_t *modena_model_new
                 PyErr_ExceptionMatches(modena_DoesNotExist)
             )
             {
+                PyErr_Clear();
                 fprintf
                 (
                     stderr,
@@ -330,6 +331,7 @@ modena_model_t *modena_model_new
             }
             else
             {
+                PyErr_Clear();
                 fprintf
                 (
                     stderr,
