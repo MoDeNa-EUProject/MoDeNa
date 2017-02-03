@@ -97,6 +97,7 @@ subroutine eqcond_por
         kgas,ksol,krad'
     do i=1,npoints
         por=pormin+(i-1)*dpor
+        rhof=(1-por)*rhos
         call eqcond(1)
         write(fi,'(1x,es23.15,7(",",es23.15))') &
             por,rhof,eqc,eqc_ross,kgas,ksol,krad
@@ -117,12 +118,14 @@ subroutine eqcond_dcell
     dcellmax=1000e-6_dp
     npoints=7
     ddcell=log10(dcellmax/dcellmin)/(npoints-1)
-    open(newunit(fi),file='eqcond_dcell.out')
-    write(fi,'(1000A23)') '#porosity','eq. conductivity'
+    open(newunit(fi),file='eqcond_dcell.csv')
+    write(fi,*) 'porosity,foam_density,eq_cond,Ross_eq_cond,&
+        kgas,ksol,krad,dcell,fstrut'
     do i=1,npoints
         dcell=dcellmin*10**((i-1)*ddcell)
         call eqcond(1)
-        write(fi,'(1000es23.15)') dcell,eqc
+        write(fi,'(1x,es23.15,9(",",es23.15))') &
+            por,rhof,eqc,eqc_ross,kgas,ksol,krad,dcell,fs
     enddo
     close(fi)
 end subroutine eqcond_dcell
@@ -134,16 +137,18 @@ end subroutine eqcond_dcell
 subroutine eqcond_strut
     integer :: fi,npoints,i
     real(dp) :: strutmin,strutmax,dstrut
-    strutmin=0.0_dp
+    strutmin=0.3_dp
     strutmax=0.9_dp
     npoints=19
     dstrut=(strutmax-strutmin)/(npoints-1)
-    open(newunit(fi),file='eqcond_strut.out')
-    write(fi,'(1000A23)') '#strut content','eq. conductivity','Ross. eq. cond.'
+    open(newunit(fi),file='eqcond_strut.csv')
+    write(fi,*) 'porosity,foam_density,eq_cond,Ross_eq_cond,&
+        kgas,ksol,krad,dcell,fstrut'
     do i=1,npoints
         fs=strutmin+(i-1)*dstrut
         call eqcond(1)
-        write(fi,'(1000es23.15)') fs,eqc,eqc_ross
+        write(fi,'(1x,es23.15,9(",",es23.15))') &
+            por,rhof,eqc,eqc_ross,kgas,ksol,krad,dcell,fs
     enddo
     close(fi)
 end subroutine eqcond_strut

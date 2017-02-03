@@ -246,7 +246,8 @@ m_foamConductivity = BackwardMappingModel(
 # Runs the detailed model and saves the results.
 # For the case, when only foam conductivity and no aging is needed.
 m_simulation = Strategy.BackwardMappingScriptTask(
-    script=os.path.dirname(os.path.abspath(__file__))+'/src/kfoam' +
-        ' && cp foamConductivity.out ../results/foamConductivity' +
-        ' && cp hahtf.out ../results/foamConductivity'
+    script=os.path.dirname(os.path.abspath(__file__))+'/src/kfoam'
+        + ' && cp foamConductivity.out ../results/foamConductivity'
+        + ' && cp hahtf.out ../results/foamConductivity'
+        + ' && cp *.csv ../results/foamConductivity/'
 )

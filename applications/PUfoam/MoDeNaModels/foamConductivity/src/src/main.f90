@@ -11,7 +11,7 @@
 !!
 !! Changes to this program are for testing purposes only.
 program hahtf
-    use tests, only: loadParameters,eqcond,eqcond_por
+    use tests, only: loadParameters,eqcond,eqcond_por,eqcond_dcell,eqcond_strut
     use ioutils, only: newunit
     use constants, only: mfi
     implicit none
