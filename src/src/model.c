@@ -1073,12 +1073,13 @@ static int modena_model_t_init
     {
         printf
         (
-            "Wrong number of parameters %zu %zu\n",
+            "Wrong number of parameters in '%s'. Requires %zu -- Given %zu\n",
+            modelId,
             self->parameters_size,
             PySequence_Size(pParameters)
         );
         exit(1);
-        
+
         PyObject *args = PyTuple_New(2);
         PyObject* str = PyString_FromString
         (

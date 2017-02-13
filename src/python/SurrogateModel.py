@@ -29,8 +29,10 @@ License
 @endcond'''
 
 """
-@file
-Module providing functions and models
+
+@namespace python.SurrogateModel
+@brief     Module providing functions and models
+@details
 
 @author    Henrik Rusche
 @author    Sigve Karolius
@@ -339,19 +341,19 @@ class IOP(DictField):
 class SurrogateFunction(DynamicDocument):
     """Base class for surrogate functions.
 
-    @brief A surrogate function contains the algebraic representation of the
-           surrogate model, i.e. the actual code that is employed by the
-           surrogate model. It also contains the global boundaries defining
-           the space in which the surrogate model is valid.
+    @brief   A surrogate function contains the algebraic representation of the
+             surrogate model, i.e. the actual code that is employed by the
+             surrogate model. It also contains the global boundaries defining
+             the space in which the surrogate model is valid.
 
-    @var name (str) Name of the surrogate function ('_id' of the function)
-    @var parameters (field) Maps a embedded document field.
-    @var functionName (string) Name of the surrogate function.
-    @var libraryName (string) Collection name.
-    @var indices (field) Reference to 'IndexSet' document.
-    @var meta implies "child" of SurrogateFunction saved in the same collection
+    @var     name (str) Name of the surrogate function ('_id' of the function)
+    @var     parameters (field) Maps a embedded document field.
+    @var     functionName (string) Name of the surrogate function.
+    @var     libraryName (string) Collection name.
+    @var     indices (field) Reference to 'IndexSet' document.
+    @var     meta mongoengine-specific variable
     """
-    # Database definition
+
     name = StringField(primary_key=True)
     inputs = MapField(EmbeddedDocumentField(MinMaxArgPosOpt))
     outputs = MapField(EmbeddedDocumentField(MinMaxArgPos))
@@ -363,7 +365,8 @@ class SurrogateFunction(DynamicDocument):
 
     @abc.abstractmethod
     def __init__(self, *args, **kwargs):
-        """Constructor.
+        """
+        @brief   Initialise a surrogate model from module or database.
         """
         if kwargs.has_key('_cls'):
             super(SurrogateFunction, self).__init__(*args, **kwargs)
@@ -420,27 +423,34 @@ class SurrogateFunction(DynamicDocument):
 
     @abc.abstractmethod
     def initKwargs(self, kwargs):
-        """Method that is overwritten by children."""
+        """
+        @brief   Method that is overwritten by children.
+        """
         raise NotImplementedError('initKwargs not implemented!')
 
 
     def indexSet(self, name):
-        """Method returning index for a specie in IndexSet.
-        @param name (str) Name of a specie in 'IndexSet'.
-        @returns index (int) of specie 'name'.
+        """
+        @brief   Method returning index for a specie in IndexSet.
+        @param   name (str) Name of a specie in 'IndexSet'.
+        @return  index (int) of specie 'name'.
         """
         return self.indices[name]
 
 
     def checkVariableName(self, name):
-        """Method checking whether 'name' exists in the 'IndexSet'"""
+        """
+        @brief   Method checking whether 'name' exists in the 'IndexSet'
+        """
         m = re.search(r'[(.*)]', name)
         if m and not m.group(1) in self.indices:
             raise Exception('Index %s not defined' % m.group(1))
 
 
     def inputs_iterAll(self):
-        """Method returning an iterator over the SurrogateFunction inputs."""
+        """
+        @brief   Method returning an iterator over the SurrogateFunction inputs
+        """
         for k, v in self.inputs.iteritems():
             if 'index' in v:
                 for idx in v.index.names:
@@ -450,7 +460,10 @@ class SurrogateFunction(DynamicDocument):
 
 
     def inputs_size(self):
-        """Method calculating the size of the input vector."""
+        """
+        @brief   Calculate the size of the input vector
+        @return  (int) number of arguments the function takes
+        """
         size = 0
         for k, v in self.inputs.iteritems():
             if 'index' in v:
@@ -480,21 +493,20 @@ class SurrogateFunction(DynamicDocument):
 
 
 class CFunction(SurrogateFunction):
-    """Class for defining Surrogate Functions where the executable code is a C-
-    function.
+    """
+    @brief   Class for defining Surrogate Functions where the executable code
+             is a C-function.
     """
     def __init__(self, *args, **kwargs):
         super(CFunction, self).__init__(*args, **kwargs)
 
 
     def initKwargs(self, kwargs):
-        """Method preparing meta-information about the function for the
-        instantiation of a new object.
+        """
+        @brief   Prepare meta-information about the function for the purpose of
+                 instantiating a new object.
 
-        @param kwargs (dict) initialisation dictionary.
-
-        @var ln (str) library name
-        @var fn (str) function name
+        @param   kwargs (dict) initialisation dictionary.
         """
         if not kwargs.has_key('Ccode'):
             raise Exception('Need Ccode')
@@ -515,7 +527,10 @@ class CFunction(SurrogateFunction):
 
 
     def compileCcode(self, kwargs):
-        """Helper function to compile a model into local library."""
+        """
+        @brief   Helper function to compile a model into local library.
+        @return  (str) name of the compiled function, i.e. the shared library.
+        """
 
         m = hashlib.md5()
         m.update(kwargs['Ccode'])
@@ -711,9 +726,8 @@ void {name}
 
 
 class SurrogateModel(DynamicDocument):
-    """Base class for surrogate models.
-
-    @brief The surrogate model is the workhorse of the MoDeNa framework.
+    """
+    @brief  The surrogate model is the workhorse of the MoDeNa framework.
             It contains strategies for:
               * Initialisation
               * Parameter fitting
@@ -724,24 +738,28 @@ class SurrogateModel(DynamicDocument):
             parameters of the surrogate model has been fitted and validated,
             for inputs, outputs and parameters.
 
-    @var ___refs___ (list) list of references to all instances of the class.
-    @var _id (str) database collection definition
-    @var surrogateFunction reference to 'modena.SurrogateFunction' object.
-    @var parameters (list) parameter values for surrogate function from MBDoE.
-    @var meta ensures surrogate models are saved in the same collection.
+    @var    ___refs___ (list) list of references to all instances of the class
+    @var    _id (str) database collection definition
+    @var    surrogateFunction reference to 'modena.SurrogateFunction' object
+    @var    parameters (list) parameter values surrogate function from MBDoE
+    @var    meta ensures surrogate models are saved in the same collection
     """
-    # List of all instances (for initialisation)
     ___refs___ = []
 
-    # Database definition
     _id = StringField(primary_key=True)
     surrogateFunction = ReferenceField(SurrogateFunction, required=True)
     parameters = ListField(FloatField())
     meta = {'allow_inheritance': True}
 
     def __init__(self, *args, **kwargs):
-        """Constructor."""
+        """
+        @brief     Create a new Surrogate Model instance
+        @details
+                   This method is called also when a surrogate model is loaded
+                   from the database.
+        """
         self.___refs___.append(weakref.ref(self))
+
 
         if kwargs.has_key('_cls'):
             super(SurrogateModel, self).__init__(*args, **kwargs)
@@ -830,7 +848,6 @@ class SurrogateModel(DynamicDocument):
 
             self.save()
 
-        #print 'model =', self._id, len(self.inputs)
         #for k, v in self.inputs.iteritems():
         #    print 'inputs in model', k, self.inputs_argPos(k)
         #for k, v in self.surrogateFunction.inputs_iterAll():
@@ -844,10 +861,11 @@ class SurrogateModel(DynamicDocument):
 
 
     def parseIndices(self, name):
-        """Method parsing the name of a function to determine the species, i.e.
-        indexes, that are present.
-        @param name (str) name of a function, may or may not contain indexes.
-        @returns (dict)
+        """
+        @brief    Parse the name of a function to determine the species, i.e.
+                  indices, defined in the surrogate model '_id'.
+        @param    name (str) name of a function, may or may not contain indexes
+        @returns  (dict) indices {"A": "..."}
         """
         indices = {}
         m = re.search('\[(.*)\]', name)
@@ -863,10 +881,10 @@ class SurrogateModel(DynamicDocument):
 
 
     def expandIndices(self, name):
-        """Method expending the indexes of a function name.
-
-        @param name (str) name of a function, may or may not contain indexes.
-        @returns name
+        """
+        @brief    Method expanding the index sets in the surrogate model '_id'
+        @param    name (str) name of a function, may or may not contain indexes
+        @returns  name 
         """
         m = re.search('\[(.*)\]', name)
         if m:
@@ -886,6 +904,9 @@ class SurrogateModel(DynamicDocument):
 
 
     def expandIndicesWithName(self, name):
+        """
+        @brief   Parse "_id"
+        """
         m = re.search('\[(.*)\]', name)
         if m:
             try:
@@ -904,7 +925,8 @@ class SurrogateModel(DynamicDocument):
 
 
     def outputsToModels(self):
-        """Method mapping outputs to substitute models.
+        """
+        @brief   Map outputs to substitute models.
         @returns (dict) outputs from the surrogate model.
         """
         o = { k: self for k in self.outputs.keys() }
@@ -914,14 +936,15 @@ class SurrogateModel(DynamicDocument):
 
 
     def inputsMinMax(self):
-        """Method determining min and max input taking substitute models into
-        account.
-        @returns (dict) dictionary of MinMax objects for each input.
+        """
+        @brief    Determine input min and max accounting for substitute models
+        @returns  (dict) dictionary of MinMax objects for each input.
         """
 
         def new(Min, Max):
-            """Function creating a instance of a 'MinMax' object
-            @returns (obj) instance of MinMax
+            """
+            @brief    Function creating a instance of a 'MinMax' object
+            @returns  (obj) instance of MinMax
             """
             obj = type('MinMax', (object,), {})
             obj.min = Min
@@ -942,7 +965,8 @@ class SurrogateModel(DynamicDocument):
 
 
     def inputs_argPos(self, name):
-        """Method mapping input argument position.
+        """
+        @brief   Method mapping input argument position.
         """
         m = re.search('(.*)\[(.*=)?(.*)]', name)
         if m:
@@ -963,7 +987,9 @@ class SurrogateModel(DynamicDocument):
 
 
     def outputs_argPos(self, name):
-        """Method mapping output argument positions."""
+        """
+        @brief   Method mapping output argument positions.
+        """
         try:
             return existsAndHasArgPos(self.outputs, name)
         except:
@@ -977,7 +1003,9 @@ class SurrogateModel(DynamicDocument):
 
 
     def parameters_argPos(self, name):
-        """Method mapping parameter argument position."""
+        """
+        @brief   Mapping parameter argument position.
+        """
         try:
             return existsAndHasArgPos(self.parameters, name)
         except:
@@ -991,7 +1019,9 @@ class SurrogateModel(DynamicDocument):
 
 
     def calculate_maps(self, sm):
-        """Method mapping outputs to inputs wrt. 'substitute models'."""
+        """
+        @brief   Method mapping outputs to inputs wrt. 'substitute models'
+        """
         map_outputs = []
         map_inputs = []
 
@@ -1014,7 +1044,9 @@ class SurrogateModel(DynamicDocument):
 
 
     def minMax(self):
-        """Method returning min and max of input variables."""
+        """
+        @brief   Return min and max of input variables
+        """
         l = self.surrogateFunction.inputs_size()
         minValues = [-9e99] * l
         maxValues = [9e99] * l
@@ -1031,7 +1063,9 @@ class SurrogateModel(DynamicDocument):
 
 
     def updateMinMax(self):
-        """Method updating min and max values"""
+        """
+        @brief   Update min and max bounds of the design and response space
+        """
         if not self.nSamples:
             for v in self.inputs.values():
                 v.min = 9e99
@@ -1051,10 +1085,11 @@ class SurrogateModel(DynamicDocument):
 
 
     def error(self, cModel, **kwargs):
-        """Method generating an iterator that yields the error of every 
+        """
+        @brief Generate an iterator that yields the error
 
         @param cModel (modena_model_t)
-        @param kwargs idxGenerator checkBounds
+        @param idxGenerator 
         @returns (iterator) iterator object
         """
         idxGenerator = kwargs.pop('idxGenerator', xrange(self.nSamples))
@@ -1081,7 +1116,7 @@ class SurrogateModel(DynamicDocument):
             #print '%i %g - %g = %g' % (
             #    idx, out[0], output[idx], out[0] - output[idx]
             #)
-            yield out[0] - output[idx]
+            yield output[idx] - out[0]
 
 
     def __getattribute__(self, name):
@@ -1100,7 +1135,6 @@ class SurrogateModel(DynamicDocument):
         """Modified magic method. Call __setattribute__ from parent class, i.e.
         DynamocDocument, when accessing instance variables not starting with
         '___', e.g. ___index___ and ___references___.
-
         """
         if name.startswith( '___' ):
             object.__setattribute__(self, name, value)
@@ -1109,9 +1143,8 @@ class SurrogateModel(DynamicDocument):
 
 
     def exceptionOutOfBounds(self, oPoint):
-        """Method returning exception when a surrogate function is out of
-        bounds.
-
+        """
+        @brief Returning exception when a surrogate function is out of bounds
         @returns (int) error code
         """
         oPointDict = {
@@ -1123,17 +1156,16 @@ class SurrogateModel(DynamicDocument):
 
 
     @classmethod
-    def exceptionLoad(self, surrogateModelId):
-        """Method returning exception when a surrogate function is not
-        instantiated.
-
-        @todo Finding the 'unintialised' models using this method will fail
-              eventually fail when running in parallel. Need to pass id of
-              calling FireTask. However, this requires additional code in the
-              library as well as cooperation of the recipie
-        @returns (int) error code
+    def exceptionLoad(cls, surrogateModelId):
         """
-        collection = self._get_collection()
+        @brief  Return exception when a surrogate function is not instantiated
+        @todo   Finding the 'unintialised' models using this method will fail
+                eventually fail when running in parallel. Need to pass id of
+                calling FireTask. However, this requires additional code in the
+                library as well as cooperation of the recipie
+        @return (int) error code
+        """
+        collection = cls._get_collection()
         collection.update(
             { '_id': surrogateModelId },
             { '_id': surrogateModelId },
@@ -1143,17 +1175,20 @@ class SurrogateModel(DynamicDocument):
 
 
     @classmethod
-    def exceptionParametersNotValid(self, surrogateModelId):
-        """Method raising a exception when a surrogate model has no valid
-           parameters after loading it
+    def exceptionParametersNotValid(cls, surrogateModelId):
+        """
+        @brief Return error code implying SurrogateModel parameters are invalid
         """
         return 202
 
 
     def callModel(self, inputs):
-        """Method for calling the surrogate function.
-        @param inputs (dict) inputs to the surrogate model
-        @returns outputs (dict) outputs from the surrogate model
+        """
+        @brief    Calling surrogate model with dictionary inputs
+        @param    inputs (dict) inputs to the surrogate model
+        @details
+                  The surrogate model is called
+        @returns  outputs (dict) outputs from the surrogate model
         """
         #print 'In callModel', self._id
         # Instantiate the surrogate model
@@ -1184,14 +1219,24 @@ class SurrogateModel(DynamicDocument):
 
 
     def updateFitDataFromFwSpec(self, fw_spec):
-        """Method updating the parameters of the surrogate model."""
+        """
+        @brief   Updating parameters of the surrogate model
+        """
         # Load the fitting data
         # Removed temporarily, probably bug in mongo engine
-        #self.reload('fitData')
+
+        #  %%%
+        #  %%%
+        #  %%%
+        # %%%%%
+        #  %%%
+        #   %
+        #if not self["fitData"]:
+        #    self.reload("fitData")
 
         for k, v in self.inputs.iteritems():
             if fw_spec[k][0].__class__ == list:
-                self.fitData[k].extend(fw_spec[k][0])
+                self["fitData"][k].extend(fw_spec[k][0])
             else:
                 self.fitData[k].extend(fw_spec[k])
 
@@ -1207,42 +1252,107 @@ class SurrogateModel(DynamicDocument):
 
 
     def initialisationStrategy(self):
-        """Method loading the initialisation strategy."""
-        return loadType(
-            self,
-            'initialisationStrategy',
-            InitialisationStrategy
-        )
+        """
+        @brief   Load and return the initialisation strategy
+        """
+        return loadType(self, 'initialisationStrategy', InitialisationStrategy)
+
+
+    def puts(self):
+        """
+        """
+        print "# " + "- - - "*10 + "#"
+        print "Surrogate model id: %s" %(self._id)
+        print "Model type:         %s" %(self.__class__.__name__)
+
+        sf = self.surrogateFunction.name
+        if self.surrogateFunction.indices:
+            sf = sf + "[" + ", ".join(self.surrogateFunction.indices.keys())  + "]"
+            g = [ " "*20 + "%s : { " %(i) +  ", ".join(self.surrogateFunction.indices[i].names) + " }"  for i in self.surrogateFunction.indices ]
+            print "Surrogate Function: %s" %(sf)
+            for gi in g:
+                print gi
+        else:
+            print "Surrogate Function: %s" %(sf)
+
+        print
+        print "Input-Output mapping:"
+        print "\t" + self._id + " : [" + ", ".join(self["inputs"].keys()) + \
+        "] --> [" + ", ".join(self["outputs"].keys()) + "]"
+
+        print
+        sms = self.substituteModels
+        if sms:
+            for sm in sms:
+                print "\t" + sm._id + " : [" + ", ".join(sm["inputs"].keys()) + \
+        "] --> [" + ", ".join(sm["outputs"].keys()) + "]"
+
+
+        print
+        print "Function Signature:"
+        print "\t" + ", ".join(self["outputs"].keys()) + \
+       " = " + self.surrogateFunction.name + \
+       "(" + ", ".join(self["inputs"].keys()) + \
+       " ; " + ", ".join(self.surrogateFunction.parameters.keys()) + ")"
+
+        print
+        print "Inputs:"
+
+        for (inp, mmp) in self.inputs.iteritems():
+            k = inp
+            cmi = mmp["min"]
+            cma = mmp["max"]
+            mi = self.surrogateFunction.inputs[inp]["min"]
+            ma = self.surrogateFunction.inputs[inp]["max"]
+            po = self.surrogateFunction.inputs[inp]["argPos"]
+
+            print " "*8 + inp + " = " + "[ %g, %g ]" %(mmp["min"], mmp["max"]) + " \subset " + "[ %g, %g ]" %(self.surrogateFunction.inputs[inp]["min"], self.surrogateFunction.inputs[inp]["max"])
+
+
+            self.reload("fitData")
+        print
+        print "Outputs:"
+        for (inp, mmp) in self.outputs.iteritems():
+            print " "*8 + inp + "[ %g, %g ]" %(self.surrogateFunction.outputs[inp]["min"], self.surrogateFunction.outputs[inp]["max"])
+
+        #print inp + " = " + "[ %.3f, %.3f ]" %(mmp["min"], mmp["max"]) + " \subset " + "[ %g, %g ]" %(self.surrogateFunction.outputs[inp]["min"], self.surrogateFunction.outputs[inp]["max"])
 
 
     @classmethod
-    def load(self, surrogateModelId):
-        """Method loading a specific surrogate model."""
-        # Removed temporarily, probably bug in mongo engine
-        #return self.objects.exclude('fitData').get(_id=surrogateModelId)
-
-        #print self.objects.get(_id=surrogateModelId).nix
-        return self.objects.get(_id=surrogateModelId)
+    def load(cls, surrogateModelId):
+        """
+        @brief     Load SurrogateModel from database by "_id"
+        @parameter surrogateModelId string _id field of the surrogate model
+        @details
+                   The load method excludes the 'fitData' field of the SM in
+                   order to reduce the network traffic.
+        @return    Surrogate Model
+        """
+        #return cls.objects.exclude('fitData').get(_id=surrogateModelId)
+        return cls.objects.get( _id=surrogateModelId )
 
 
     @classmethod
-    def loadFailing(self):
-        """Method returning all objects that have a 'outside point' key"""
+    def loadFailing(cls):
+        """
+        @brief   Load all objects that have a 'outside point' key
+        """
         # Removed temporarily, probably bug in mongo engine
         #return self.objects(
         #    __raw__={'outsidePoint': { '$exists': True}}
         #).exclude('fitData').first()
-        return self.objects(
-            __raw__={'outsidePoint': { '$exists': True}}
-        ).first()
+        return cls.objects(__raw__={'outsidePoint': {'$exists':True} }).first()
 
 
     @classmethod
-    def loadFromModule(self):
-        """Method importing a surrogate model module."""
-        collection = self._get_collection()
+    def loadFromModule(cls):
+        """
+        @brief   Import surrogate model Python module
+        """
+        collection = cls._get_collection()
         doc = collection.find_one({ '_cls': { '$exists': False}})
-        modName = re.search('(.*)(\[.*\])?', doc['_id']).group(1)
+        #modName = re.search('(.*)(\[.*\])?', doc['_id']).group(1)
+        modName = re.search('(\w+)(|\[.*\])', doc['_id']).group(1)
         # TODO:
         # Give a better name to the variable a model is imported from
         try:
@@ -1253,39 +1363,40 @@ class SurrogateModel(DynamicDocument):
 
 
     @classmethod
-    def loadParametersNotValid(self):
-        """Method importing a surrogate model module."""
-        return self.objects(
-            __raw__={ 'parameters': { '$size': 0 } }
-        ).first()
+    def loadParametersNotValid(cls):
+        """
+        @brief   Method importing a surrogate model module.
+        """
+        return cls.objects( __raw__={ 'parameters': { '$size': 0 } } ).first()
 
 
     @classmethod
-    def get_instances(self):
-        """Method returning an iterator over all SurrogateModel instances."""
-        for inst_ref in self.___refs___:
+    def get_instances(cls):
+        """
+        @brief   Iterate over all instances of SurrogateModel
+        """
+        for inst_ref in cls.___refs___:
             inst = inst_ref()
             if inst is not None:
                 yield inst
 
-    def __repr__(self):
-        return self._id
 
 
 class ForwardMappingModel(SurrogateModel):
-    """Class for defining 'forward mapping' models.
-
-    @brief A forward mapping model can be thought of as a constitutive
-    equation, or a scaling function.
-    @verbatim
-                  f(X) => Y = 2 * X
-           +---------------------+
-           |                     |
-         |-+---|             |---v------|
-               X                        Y
-    @endverbatim
     """
-    # Database definition
+    @brief    A forward mapping model can be thought of as a constitutive
+              equation, or a scaling function.
+    @details
+              @verbatim
+                            f(X) => Y = 2 * X
+                     +---------------------+
+                     |                     |
+                     |                     v
+                   |-o---|             |---x------|
+                      U                      Y
+              @endverbatim
+    """
+
     inputs = MapField(EmbeddedDocumentField(MinMaxArgPosOpt))
     outputs = MapField(EmbeddedDocumentField(MinMaxArgPosOpt))
     substituteModels = ListField(ReferenceField(SurrogateModel))
@@ -1303,13 +1414,20 @@ class ForwardMappingModel(SurrogateModel):
 
     def exactTasks(self, points):
         """
-        Return an empty workflow
+        @brief    Return Empty Fireworks workflow
+        @details
+                  In the SurrogateModel the exact task is responsible for
+                  returning a computational workflow of detailed simulations.
+                  However, Forward Mapping Models are **not** associated with
+                  a detailed model. Consequently, this method should return an
+                  empty workflow.
         """
         return Workflow([])
 
 
 class BackwardMappingModel(SurrogateModel):
-    """Class for defining 'backward mapping' models.
+    """
+    @brief   Definition of 'backward mapping' models.
     """
     # Database definition
     inputs = IOP(EmbeddedDocumentField(MinMaxArgPosOpt))
@@ -1325,16 +1443,14 @@ class BackwardMappingModel(SurrogateModel):
 
 
     def initKwargs(self, kwargs):
+        """
+        @brief   Prepare arguments
+        """
         checkAndConvertType(kwargs, 'exactTask', FireTaskBase)
 
-        checkAndConvertType(
-            kwargs,
-            'outOfBoundsStrategy',
-            OutOfBoundsStrategy
-        )
+        checkAndConvertType(kwargs, 'outOfBoundsStrategy', OutOfBoundsStrategy)
 
-        checkAndConvertType(
-            kwargs,
+        checkAndConvertType(kwargs,
             'parameterFittingStrategy',
             ParameterFittingStrategy
         )
@@ -1342,7 +1458,11 @@ class BackwardMappingModel(SurrogateModel):
 
     def exactTasks(self, points):
         """
-        Build a workflow to excute an exactTask for each point
+        @brief     Build a workflow, execute detailed simulation for each point
+        @parameter points list new points
+        @details
+                   The input point is sent to the detailed simulation through
+                   Fireworks 'fw_spec' variable.
         """
 
         # De-serialise the exact task from dict
@@ -1365,6 +1485,9 @@ class BackwardMappingModel(SurrogateModel):
 
 
     def parameterFittingStrategy(self):
+        """
+        @brief  Load parameter fitting strategy
+        """
         pfs = loadType(
             self,
             'parameterFittingStrategy',
@@ -1373,18 +1496,14 @@ class BackwardMappingModel(SurrogateModel):
 
         # Nasty hack to work around a bug somewhere in mongoengine or fireworks
         self._changed_fields = filter(
-            lambda a: a != u'improveErrorStrategy._fw_name', self._changed_fields
+          lambda a: a != u'improveErrorStrategy._fw_name', self._changed_fields
         )
 
         return pfs
 
 
     def outOfBoundsStrategy(self):
-        return loadType(
-            self,
-            'outOfBoundsStrategy',
-            OutOfBoundsStrategy
-        )
+        return loadType(self, 'outOfBoundsStrategy', OutOfBoundsStrategy)
 
 
     def extendedRange(self, outsidePoint, expansion_factor=1.2):
