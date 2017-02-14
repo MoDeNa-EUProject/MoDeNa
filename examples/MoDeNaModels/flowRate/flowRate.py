@@ -78,6 +78,10 @@ class FlowRateExactSim(ModenaFireTask):
         f.close()
 
 
+
+
+
+
 f = CFunction(
     Ccode= '''
 #include "modena.h"
@@ -116,6 +120,33 @@ void two_tank_flowRate
     },
 )
 
+
+import rpy2.rinterface as rinterface
+from rpy2.robjects.packages import importr
+from numpy import array
+from numpy.random import normal
+
+rinterface.initr()
+lhs = importr('lhs')
+
+
+class TemporaryClass(modena.Strategy.StochasticSampling):
+
+    def samplePoints(self, model, sr, nPoints):
+        """
+        """
+        sampleRange = { k: {'min': min(model.fitData[k]) , 'max': max(model.fitData[k]) } for k in model.inputs.keys() }
+
+        points = array(lhs.randomLHS(nPoints, len(model.inputs))).tolist()
+        points[0] = [ normal(0.5, p) for p in point[0] ]
+        points[1] = [ normal(0.5, p) for p in point[1] ]
+
+        return { key: [ sr[key]['min'] + (sr[key]['min'] - sr[key]['min'])*points[j][i] for j in xrange(nPoints) ] for (i, key) in enumerate(sr) }
+
+
+
+
+
 m = BackwardMappingModel(
     _id= 'flowRate',
     surrogateFunction= f,
@@ -133,12 +164,14 @@ m = BackwardMappingModel(
     outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(
         nNewPoints= 4
     ),
-    parameterFittingStrategy= Strategy.NonLinFitWithErrorContol(
+    parameterFittingStrategy= Strategy.Test(
         testDataPercentage= 0.2,
         maxError= 0.5,
-        improveErrorStrategy= Strategy.StochasticSampling(
-            nNewPoints= 2
+        improveErrorStrategy= TemporaryClass(
+            nNewPoints= 2,
+            constraints = "p0 / p1 > 0"
         ),
         maxIterations= 5 # Currently not used
     ),
 )
+
