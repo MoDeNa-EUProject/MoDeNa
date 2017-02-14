@@ -304,7 +304,7 @@ modena_model_t *modena_model_new
          || PyErr_ExceptionMatches(modena_ParametersNotValid)
         )
         {
-            PyErr_Clear();
+            // PyErr_Print();
 
             PyObject *pRet = NULL;
             if
@@ -312,6 +312,7 @@ modena_model_t *modena_model_new
                 PyErr_ExceptionMatches(modena_DoesNotExist)
             )
             {
+                PyErr_Clear();
                 fprintf
                 (
                     stderr,
@@ -330,6 +331,7 @@ modena_model_t *modena_model_new
             }
             else
             {
+                PyErr_Clear();
                 fprintf
                 (
                     stderr,
@@ -1071,12 +1073,13 @@ static int modena_model_t_init
     {
         printf
         (
-            "Wrong number of parameters %zu %zu\n",
+            "Wrong number of parameters in '%s'. Requires %zu -- Given %zu\n",
+            modelId,
             self->parameters_size,
             PySequence_Size(pParameters)
         );
         exit(1);
-        
+
         PyObject *args = PyTuple_New(2);
         PyObject* str = PyString_FromString
         (
