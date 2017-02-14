@@ -50,6 +50,7 @@ other reason, in which case an error is printed out).
 """
 
 import os
+from modena import Strategy
 from modena.Strategy import BackwardMappingScriptTask
 
 ## Wall drainage application recipe

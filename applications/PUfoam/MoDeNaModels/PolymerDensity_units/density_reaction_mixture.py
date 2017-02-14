@@ -41,19 +41,8 @@ Surrogate function and model definitions for the density of the reaction mixture
 @ingroup   app_aging
 """
 
-import os
-import modena
-from modena import CFunction, IndexSet, \
-    ForwardMappingModel, BackwardMappingModel, SurrogateModel
-import modena.Strategy as Strategy
-from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
-from fireworks import Firework, Workflow, FWAction
-from fireworks.utilities.fw_utilities import explicit_serialize
-from blessings import Terminal
-from jinja2 import Template
+from modena import CFunction, ForwardMappingModel
 
-## Create terminal for colour output
-term = Terminal()
 ## Surrogate function for density of the reaction mixture.
 #
 # Density is a function of temperature and conversion of gelling reaction.

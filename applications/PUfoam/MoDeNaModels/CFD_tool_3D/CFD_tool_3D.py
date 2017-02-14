@@ -37,15 +37,8 @@ License
 @ingroup   app_foaming
 """
 
-import modena
-from fireworks import Firework, Workflow, LaunchPad
-from fireworks.core.rocket_launcher import rapidfire
-from modulefinder import ModuleFinder
-
 from modena.Strategy import BackwardMappingScriptTask
-import os
 
-# Source code in src/twoTanksMacroscopicProblem.C
 SIMULATION = BackwardMappingScriptTask(
     script='../inputs/run.sh'
 )

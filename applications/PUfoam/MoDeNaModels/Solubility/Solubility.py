@@ -63,18 +63,10 @@ surrogate model parameters.
 """
 
 import os
-from modena import *
-from modena import ForwardMappingModel,BackwardMappingModel,SurrogateModel,\
-    CFunction,IndexSet
-import modena.Strategy as Strategy
-from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
-from fireworks import Firework, Workflow, FWAction
 from fireworks.utilities.fw_utilities import explicit_serialize
-from blessings import Terminal
-from jinja2 import Template
+from modena import CFunction, BackwardMappingModel, IndexSet, ModenaFireTask
+from modena import Strategy, ForwardMappingModel
 
-# Create terminal for colour output
-term = Terminal()
 
 species = IndexSet(
     name= 'solubility_pol_species',
@@ -554,7 +546,7 @@ if 'argPos' in inputsExp['T']: #added by previous CFunction
 fPentWinkler = CFunction(Ccode=CcodePentWinkler,
     inputs=inputsExp,
     outputs=outputs,
-    parameters=parameters5
+    parameters=parameters4
 )
 ## n-pentane, Winkler
 parPentWinkler = [0.0064,0.0551,298.0,17.8]

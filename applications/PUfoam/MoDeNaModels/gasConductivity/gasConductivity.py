@@ -40,9 +40,7 @@ License
 @ingroup   app_aging
 """
 
-import os
-from modena import *
-from fireworks.utilities.fw_utilities import explicit_serialize
+from modena import CFunction, ForwardMappingModel, IndexSet
 
 ## List of components, for which surrogate model is provided
 species = IndexSet(

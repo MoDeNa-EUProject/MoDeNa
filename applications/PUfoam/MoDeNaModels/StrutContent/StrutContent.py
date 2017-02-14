@@ -46,8 +46,6 @@ change of parameters.
 
 """
 
-import os
-import modena
 from modena import CFunction, ForwardMappingModel
 
 ## Surrogate function for strut content.

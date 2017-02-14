@@ -55,15 +55,12 @@ results and stores them in the database.
 """
 
 import os
-from modena import *
-import modena.Strategy as Strategy
-from fireworks.utilities.fw_utilities import explicit_serialize
-from jinja2 import Template
 import json
+from fireworks.utilities.fw_utilities import explicit_serialize
+from modena import CFunction, BackwardMappingModel, ModenaFireTask, Strategy
 import polymerConductivity
 import gasConductivity
 import gasMixtureConductivity
-import json
 ## adjust precision of floats when saving json files
 json.encoder.FLOAT_REPR = lambda o: format(o, '.12g')
 
@@ -249,7 +246,8 @@ m_foamConductivity = BackwardMappingModel(
 # Runs the detailed model and saves the results.
 # For the case, when only foam conductivity and no aging is needed.
 m_simulation = Strategy.BackwardMappingScriptTask(
-    script=os.path.dirname(os.path.abspath(__file__))+'/src/kfoam' +
-        ' && cp foamConductivity.out ../results/foamConductivity' +
-        ' && cp hahtf.out ../results/foamConductivity'
+    script=os.path.dirname(os.path.abspath(__file__))+'/src/kfoam'
+        + ' && cp foamConductivity.out ../results/foamConductivity'
+        + ' && cp hahtf.out ../results/foamConductivity'
+        + ' && cp *.csv ../results/foamConductivity/'
 )

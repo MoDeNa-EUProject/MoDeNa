@@ -38,9 +38,7 @@ License
 @ingroup   app_aging
 """
 
-import os
-from modena import *
-from fireworks.utilities.fw_utilities import explicit_serialize
+from modena import CFunction, ForwardMappingModel
 import gasConductivity
 
 ## simple weighted average

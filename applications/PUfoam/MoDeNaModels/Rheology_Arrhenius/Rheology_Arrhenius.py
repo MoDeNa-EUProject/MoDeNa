@@ -37,16 +37,8 @@ License
 @ingroup   app_foaming
 """
 
-import os
-import modena
-import SurfaceTension, polymerViscosity
+from modena import CFunction, ForwardMappingModel
 import Rheology
-from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, CFunction, ModenaFireTask
-import modena.Strategy as Strategy
-from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
-from fireworks import Firework, Workflow, FWAction
-from fireworks.utilities.fw_utilities import explicit_serialize
-from jinja2 import Template
 
 f = CFunction(
     Ccode= '''

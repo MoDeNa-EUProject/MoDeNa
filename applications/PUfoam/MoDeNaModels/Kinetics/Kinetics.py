@@ -38,12 +38,7 @@ License
 """
 
 import os
-import modena
-from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, CFunction, IndexSet, ModenaFireTask
-import modena.Strategy as Strategy
-from fireworks import Firework, Workflow, FWAction
-from fireworks.utilities.fw_utilities import explicit_serialize
-from jinja2 import Template
+from modena import ForwardMappingModel
 from PrediciKinetics import PrediciKinetics
 
 k = PrediciKinetics(

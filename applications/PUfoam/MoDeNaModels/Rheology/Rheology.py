@@ -48,9 +48,8 @@ from numpy import sin, cos, pi, matrix, array, dot
 
 import modena
 import SurfaceTension
-import polymerViscosity 
-from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, CFunction, ModenaFireTask
-import modena.Strategy as Strategy
+import polymerViscosity
+from modena import CFunction, BackwardMappingModel, ModenaFireTask, Strategy
 
 from fireworks.utilities.fw_utilities import explicit_serialize
 from jinja2 import Template
@@ -76,24 +75,24 @@ def link_files(src, dst):
     for dirpath,_,filenames in walk(src):
         dstpth = join(dst, dirpath[len(src)+1:])
         relpth = relpath(dirpath, dstpth)
-    
+
         #print "In ", dirpath
         #print "dstPth = ", dstpth
         #print "relpath = ", relpth
         #print filenames
-    
+
         try:
             makedirs(dstpth)
         except:
             pass
-    
+
         lines = []
         try:
             with open(join(dirpath,".filesToCopy")) as FILE:
                 lines = FILE.read().splitlines()
         except:
             pass
-    
+
         for fn in filenames:
             if any(fnmatch.fnmatch(fn, gl) for gl in lines):
                 dstfn = join(dstpth, fn)
@@ -223,7 +222,7 @@ class RheologyExactTask_tFEM(ModenaFireTask):
                 {{ s['point']['X'] }}
                 {{ s['point']['mu'] }}
                 {{ s['point']['ST'] * 0.001 }}
-                {{ s['point']['m0'] }}	
+                {{ s['point']['m0'] }}
                 {{ s['point']['m1'] }}'''.strip())
 
     def post_processing(self, fname="RheologyExact.out"):
@@ -304,7 +303,7 @@ void rheology_tFEM_SM
     const double* inputs,
     double *outputs
 )
-{    
+{
     {% block variables %}{% endblock %}
 
     const double lambda = parameters[0];
@@ -319,7 +318,7 @@ void rheology_tFEM_SM
     const double mu_c = 0;
     const double mu_d = 0.001;
     const double X_gel = 0.615;
-    const double mu_0_const = 0.195; 
+    const double mu_0_const = 0.195;
     const double mu_inf_const = 0.266;
 //    const double lambda = 11.35 ;
 //    const double alpha = 2;
@@ -328,7 +327,7 @@ void rheology_tFEM_SM
     double mu_0, mu_inf, f_t;
     double mu_car;
 
-    mu_0 = (log(X+mu_d) - log(mu_d) + pow(X_gel / ( X_gel - X ), mu_a + X*mu_b + mu_c*pow(X,2))) * mu_0_const; 
+    mu_0 = (log(X+mu_d) - log(mu_d) + pow(X_gel / ( X_gel - X ), mu_a + X*mu_b + mu_c*pow(X,2))) * mu_0_const;
     mu_inf = (log(X+mu_d) - log(mu_d) + pow(X_gel / ( X_gel - X ), mu_a + X*mu_b + mu_c*pow(X,2)))* mu_inf_const;
     f_t = A_mu * exp(E_mu / R_rh / T );
 
@@ -388,4 +387,3 @@ m = BackwardMappingModel(
         maxIterations= 5 # Currently not used
     ),
 )
-

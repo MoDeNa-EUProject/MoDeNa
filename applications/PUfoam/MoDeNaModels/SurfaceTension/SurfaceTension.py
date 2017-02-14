@@ -66,9 +66,10 @@ surrogate model parameters.
 """
 
 import os
-from modena import *
-from fireworks.utilities.fw_utilities import explicit_serialize
 from jinja2 import Template
+from fireworks.utilities.fw_utilities import explicit_serialize
+from modena import CFunction, BackwardMappingModel, IndexSet, ModenaFireTask
+from modena import Strategy
 
 ## @var blowing_agents
 # @brief (MoDeNa) Index Set for the Blowing Agents that are valid for the model
@@ -283,7 +284,7 @@ m = BackwardMappingModel(
     initialisationStrategy= Strategy.InitialPoints(
         initialPoints=
         {
-            'T': [290.0, 300.0, 350.0, 500.0],
+            'T': [290.0, 300.0, 315.0, 350.0, 375.0, 400.0, 450.0, 500.0],
         },
     ),
     outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(
@@ -320,7 +321,7 @@ m2 = BackwardMappingModel(
     initialisationStrategy= Strategy.InitialPoints(
         initialPoints=
         {
-            'T': [290.0, 300.0, 350.0, 500.0],
+            'T': [290.0, 300.0, 315.0, 350.0, 375.0, 400.0, 450.0, 500.0],
         },
     ),
     outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(
