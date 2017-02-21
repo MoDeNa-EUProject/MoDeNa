@@ -1,0 +1,104 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2.3.1                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+convertToMeters 0.01;
+
+vertices
+(
+    (0 0 0)     // Vertex 0
+    (1 0 0)     // Vertex 1
+    (5 0 0)     // Vertex 2
+    (0 5 0)     // Vertex 3
+    (0 1 0)     // Vertex 4
+    (0 0.5 0)   // Vertex 5
+    (0 0 20)    // Vertex 6
+    (1 0 20)    // Vertex 7    
+    (5 0 20)    // Vertex 8
+    (0 5 20)    // Vertex 9
+    (0 1 20)    // Vertex 10
+    (0 0.5 20)  // Vertex 11
+);
+
+blocks
+(
+    hex (0 1 4 5 6 7 10 11) (10 10 1) simpleGrading (1 1 1)
+    hex (1 2 3 4 7 8 9 10) (10 10 1) simpleGrading (1 1 1)
+);
+
+edges
+(
+    arc 2 3 (3.535534 3.535534 0)
+    arc 8 9 (3.535534 3.535534 20)
+
+);
+
+boundary
+(
+    
+    Wall
+    {
+        type wall;
+        faces
+        (   
+          (8 2 3 9)
+		  (0 5 4 1)
+          (4 3 2 1)
+        );
+    }
+    axis1
+    {
+        type symmetryPlane;
+        faces
+        (
+           (9 3 4 10)
+           (10 4 5 11)
+           (11 5 0 6)     
+        );
+    }
+    axis2
+    {
+        type symmetryPlane;
+        faces
+        (
+           (6 0 1 7)
+           (1 2 8 7)
+        );
+    }
+    // FrontAndBack
+    // {
+    //     type empty;
+    //     faces
+    //     (
+	   //     (0 3 2 1)
+    //      (4 5 6 7)
+	   //    );
+    // }
+    atmosphere
+    {
+	     type patch;
+	     faces
+	     (
+	       (6 7 10 11)
+           (7 8 9 10)
+	     );
+    }
+);
+
+mergePatchPairs
+(
+);
+
+// ************************************************************************* //

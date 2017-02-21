@@ -1,0 +1,38 @@
+/*! @page deps Dependencies
+ *  @section dep_foamConstruction Dependencies of Foam construction utility
+ *
+ *
+ *   | Dependency      | Type                            | Tested Version |
+ *   | --------------- | ------------------------------- | -------------- |
+ *   | gfortran        | compiler                        | 5.4            |
+ *   | Neper           | Library - Tessellation          | 2.0            |
+ *   | voro++          | Library - Tessellation          | 0.4.6          |
+ *   | gmsh            | Library - Meshing               | 2.10.1         |
+ *   | VTK             | Library - Mesh manipulation     | 5.8.0          |
+ *   | libmatheval     | Library - Symbolic mathematics  | 1.1.11         |
+ *   | GSL             | Library - Numerics              | 2.1            |
+ *   | lib3ds          | Library - 3DS files             | 1.3            |
+ *   | libjpeg         | Library - JPEG files            | 6.2            |
+ *   | freeglut        | Library - GLUT                  | 3              |
+ *   | NLOpt           | Library - Optimization          | 2.4.2          |
+ *   | meshconv        | Executable - Mesh conversion    | *              |
+ *   | binvox          | Executable - Mesh conversion    | *              |
+ *   | POV-Ray         | Library - Visualization         | 3.7.0          |
+ *   * Library releases are not versioned.
+*/
+
+/**
+ * @defgroup mod_foamConstruction Foam Construction Module
+ * @ingroup  models
+ * @brief    Integrates Foam construction utility into the MoDeNa software framework.
+ * @details
+ * Creates files describing the morphology of foam with desired
+ * number of cells, cell size distribution, porosity and strut content.
+*/
+
+/**
+ * @defgroup src_mod_foamConstruction C++ Source Code
+ * @ingroup  mod_foamConstruction
+ * @brief    Source Code Documentation
+ * @details
+*/

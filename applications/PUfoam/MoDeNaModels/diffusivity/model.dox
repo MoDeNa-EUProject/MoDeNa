@@ -1,0 +1,10 @@
+/**
+ * @defgroup mod_diffusivity Diffusivity
+ * @ingroup models
+ * @author    Erik Laurini
+ * @author    Pavel Ferkl
+ * @note
+ * @warning
+ * @copyright  2014-2016, MoDeNa Project. GNU Public License.
+*/
+

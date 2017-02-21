@@ -393,7 +393,7 @@ END SUBROUTINE binary_tp_spinodal
  residu(ncomp+1) = 1.0 - SUM( dn(1:ncomp)*dn(1:ncomp) )
  write (*,*) 'p_sp has to be handed over to the obj fct properly!'
  write (*,*) 'Can I simply set p = p_sp? In other words is p altered during the calculation?'
- stop
+ stop 5
  residu(ncomp+2) = p_sp - p_calculated
 
  write (*,'(a,4G18.10)') ' error',residu(1:4)

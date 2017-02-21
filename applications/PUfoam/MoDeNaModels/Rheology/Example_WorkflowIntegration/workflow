@@ -1,5 +1,5 @@
-#!/usr/bin/python
-'''
+#!/usr/bin/env python
+'''@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -10,7 +10,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014-2016 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -35,16 +35,19 @@ Authors
     Henrik Rusche
 
 Contributors
-'''
+@endcond'''
 
+"""
+@ingroup mod_ex_rheology
+"""
+
+from modena import SurrogateModel, MODENA_PARSED_URI
 from fireworks import Firework, Workflow, LaunchPad
 from fireworks.core.rocket_launcher import rapidfire
+
 import WorkflowTest
-from modulefinder import ModuleFinder
-
-
 # set up the LaunchPad and reset it
-launchpad = LaunchPad()
+launchpad = LaunchPad(**MODENA_PARSED_URI)
 launchpad.reset('', require_password=False)
 
 # create the individual FireWorks and Workflow

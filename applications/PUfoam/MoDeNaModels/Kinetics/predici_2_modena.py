@@ -1,4 +1,9 @@
 
+"""
+@ingroup mod_kinetics
+@namespace Kinetics.Predici_2_modena
+"""
+
 import sys
 import time
 
@@ -618,8 +623,9 @@ void predici_kinetics
     double *outputs
 )
 {
-    double time = 0.0;
-    FandA((double *) inputs, time, outputs);
+    double time = inputs[0];
+    double * inputParams = (double *) (&(inputs[1]));
+    FandA(inputParams, time, outputs);
 }
 '''
 
@@ -636,6 +642,7 @@ void predici_kinetics
     for index in range(len(namelist)):
         namelist[index] = namelist[index].replace('"',"'")
 
+    namelist.insert(0,"'kineticTime'");
     returnDict = {}
     returnDict['Ccode'] = codestring
     returnDict['inputs'] = {}
@@ -644,7 +651,8 @@ void predici_kinetics
 
     for index in range(len(namelist)):
         returnDict['inputs'][namelist[index]] = \
-            {'min': 0, 'max': 9e99, 'argPos': index}
+            {'min': -10, 'max': 9e99, 'argPos': index}
+    namelist.pop(0);
 
     # ------------ Extract output list --------------------
 

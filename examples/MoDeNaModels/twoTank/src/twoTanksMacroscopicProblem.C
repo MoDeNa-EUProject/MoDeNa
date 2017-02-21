@@ -10,7 +10,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014-2016 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -22,8 +22,8 @@ License
 
     Modena is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
+    FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+    details.
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
@@ -34,7 +34,7 @@ Solving the two tank problem the MoDeNa way.
 A prototypical macros-scopic code embeds a micro-scale model (flowRate)
 through the MoDeNa interface library.
 @author     Henrik Rusche
-@copyright  2014-2015, MoDeNa Project. GNU Public License.
+@copyright  2014-2016, MoDeNa Project. GNU Public License.
 @ingroup    twoTank
 */
 
@@ -77,6 +77,27 @@ main(int argc, char *argv[])
     // Allocate memory and fetch arg positions
     modena_inputs_t *inputs = modena_inputs_new(model);
     modena_outputs_t *outputs = modena_outputs_new(model);
+
+    cout << "inputs:" << endl;
+    char** iNames = modena_model_inputs_names(model);
+    for(int i=0; i<modena_model_inputs_size(model); i++)
+    {
+        cout << iNames[i] << endl;
+    }
+
+    cout << "outputs:" << endl;
+    char** oNames = modena_model_outputs_names(model);
+    for(int i=0; i<modena_model_outputs_size(model); i++)
+    {
+        cout << oNames[i] << endl;
+    }
+
+    cout << "parameters:" << endl;
+    char** pNames = modena_model_parameters_names(model);
+    for(int i=0; i<modena_model_parameters_size(model); i++)
+    {
+        cout << pNames[i] << endl;
+    }
 
     size_t Dpos = modena_model_inputs_argPos(model, "D");
     size_t rho0Pos = modena_model_inputs_argPos(model, "rho0");
@@ -158,4 +179,3 @@ main(int argc, char *argv[])
 
     return 0;
 }
-

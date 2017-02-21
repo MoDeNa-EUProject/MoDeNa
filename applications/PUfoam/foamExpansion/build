@@ -1,0 +1,42 @@
+#!/bin/sh
+MODELS_DIR="../MoDeNaModels"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+echo ${SCRIPT_DIR}
+
+bubbleGrowth="${MODELS_DIR}/bubbleGrowth/src"
+cmake -H${bubbleGrowth} -B${bubbleGrowth} && make --directory=${bubbleGrowth}
+
+CFD_tool_0D="${MODELS_DIR}/CFD_tool_0D/src"
+cmake -H${CFD_tool_0D} -B${CFD_tool_0D} && \
+    make --directory=${CFD_tool_0D}
+
+CFD_tool_3D="${MODELS_DIR}/CFD_tool_3D/src"
+cd $CFD_tool_3D
+./makeEigen
+# wclean
+wmake
+cd ../../../foamExpansion/
+
+solubility="${MODELS_DIR}/Solubility/src"
+make --directory=${solubility}
+
+surfaceTension="${MODELS_DIR}/SurfaceTension/src"
+make --directory=${surfaceTension} DFT
+
+foamConductivity="${MODELS_DIR}/foamConductivity/src"
+cmake -H${foamConductivity} -B${foamConductivity} && \
+  make --directory=${foamConductivity}
+
+initMoments="${CFD_tool_3D}/initMoments"
+cmake -H${initMoments} -B${initMoments} && make --directory=${initMoments}
+
+PolymerDensity="${MODELS_DIR}/PolymerDensity/src"
+cmake -H${PolymerDensity} -B${PolymerDensity} && \
+    make --directory=${PolymerDensity}
+
+wallDrainage="${MODELS_DIR}/wallDrainage"
+cmake -H${wallDrainage} -B${wallDrainage} && \
+    make --directory=${wallDrainage}
+
+foamAging="${MODELS_DIR}/foamAging/src"
+cmake -H${foamAging} -B${foamAging} && make --directory=${foamAging}

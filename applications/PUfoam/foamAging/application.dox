@@ -1,0 +1,20 @@
+/**
+ * @defgroup app_aging Foam aging simulation
+ * @ingroup  applications
+ * @brief    Predicts the time-varying composition of blowing agents in PU foam
+ * and its thermal properties using the combination of nano-, meso- and
+ * macro-scopic models.
+ *
+ * @details
+ *
+ * @section modena_models MoDeNa Models used in the Application:
+ *
+ * * @ref mod_foamAging
+ * * @ref mod_foamConductivity
+ * * @ref mod_solubility
+ * * @ref mod_diffusivity
+ * * @ref mod_gasConductivity
+ * * @ref mod_gasMixConductivity
+ * * @ref mod_polymerConductivity
+ * * @ref mod_foamConstruction
+*/

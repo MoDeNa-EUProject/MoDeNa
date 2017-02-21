@@ -10,7 +10,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014-2016 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -34,7 +34,7 @@ License
 MoDeNa low-level interface library
 
 @author Henrik Rusche
-@copyright  2014-2015, MoDeNa Project. GNU Public License.
+@copyright  2014-2016, MoDeNa Project. GNU Public License.
 */
 
 #ifndef __MODEL_H__
@@ -95,17 +95,19 @@ typedef struct modena_model_t
 {
     PyObject_HEAD
 
-    PyObject *pModel;
+    PyObject *pModel;                        /**< Reference to python object.*/
 
     size_t outputs_size;                        /**< Length of output vector.*/
 
     size_t inputs_size;                         /**< Length of input vector. */
 
+    size_t inputs_internal_size;                /**< Length of internal input vector. */
+
     double *inputs_min;            /**< Lower bounds of the input arguments. */
 
     double *inputs_max;            /**< Upper bounds of the input arguments. */
 
-    bool *argPos_used;
+    bool *argPos_used;         /**< Indicators used to track argument usage. */
 
     size_t parameters_size;                 /**< Length of parameter vector. */
 
@@ -118,11 +120,15 @@ typedef struct modena_model_t
         const struct modena_model_t* model,
         const double* i,
         double *o
-    ); /**< asdfasdfasdf*/
+    );               /**< Function pointer to pre-compiled surrogate function*/
 
     size_t substituteModels_size;    /**< Length of substitute models vector */
 
     modena_substitute_model_t *substituteModels; /**< Substitute models `modena_substitute_model_t`*/
+
+    char** inputs_names;                /**< Surrogate model inputs names */
+    char** outputs_names;               /**< Surrogate model outputs names */
+    char** parameters_names;            /**< Surrogate model parameter names */
 
 } modena_model_t;
 
@@ -294,6 +300,42 @@ size_t modena_model_outputs_argPos
 );
 
 /**
+ *  @brief Function returning the names of the inputs.
+ *
+ *The function may be used to determine the inputs of a model.
+ *
+ *  @param self pointer to surrogate model created by modena_model_new.
+*/
+char** modena_model_inputs_names
+(
+    const modena_model_t *self
+);
+
+/**
+ *  @brief Function returning the names of the outputs.
+ *
+ *The function may be used to determine the outputs of a model.
+ *
+ *  @param self pointer to surrogate model created by modena_model_new.
+*/
+char** modena_model_outputs_names
+(
+    const modena_model_t *self
+);
+
+/**
+ *  @brief Function returning the names of the parameters.
+ *
+ *The function may be used to determine the parameters of a model.
+ *
+ *  @param self pointer to surrogate model created by modena_model_new.
+*/
+char** modena_model_parameters_names
+(
+    const modena_model_t *self
+);
+
+/**
  *  @brief Function returning the size of the input vector.
  *  @param modena_model_t pointer to a surrogate model created by modena_model_new.
  *  @return size_t integer length of the input array.
@@ -306,6 +348,13 @@ size_t modena_model_inputs_size(const modena_model_t *self);
  *  @return size_t integer length of the output array.
 */
 size_t modena_model_outputs_size(const modena_model_t *self);
+
+/**
+ *  @brief Function returning the size of the parameter vector.
+ *  @param modena_model_t surrogate model created by modena_model_new.
+ *  @return size_t integer length of the parameter array.
+*/
+size_t modena_model_parameters_size(const modena_model_t *self);
 
 void modena_model_inputs_siunits
 (

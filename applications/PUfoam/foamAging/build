@@ -9,5 +9,4 @@ cmake -H${foamConductivity} -B${foamConductivity} && \
   make --directory=${foamConductivity}
 
 solubility="${MODELS_DIR}/Solubility/src"
-cmake -H${solubility} -B${solubility} && \
-  make --directory=${solubility}
+make --directory=${solubility}

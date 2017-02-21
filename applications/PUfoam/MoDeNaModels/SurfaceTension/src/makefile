@@ -1,13 +1,9 @@
  
-#include /usr/ITT/mhofer/Documents/Diss/NumericalMethods/Libraries/Petsc/petsc-3.4.4/conf/variables
-#include /usr/ITT/mhofer/Documents/Diss/NumericalMethods/Libraries/Petsc/petsc-3.4.4/conf/rules
-
-#include ~/NumLib/PETSc/petsc-3.4.4/conf/variables
-#include ~/NumLib/PETSc/petsc-3.4.4/conf/rules
-
 
 include /${PETSC_DIR}/conf/variables
 include /${PETSC_DIR}/conf/rules
+
+
 
 
 
@@ -57,8 +53,8 @@ CUTOFF    = 9.0
 BOXSIZE   = 300.0 
 
 #Solver Settings
-ITS_SNES = 20
-ITS_KSP  = 15
+ITS_SNES = 15
+ITS_KSP  = 10
 E_REL    = 1e-08
 
 #Its for Anderson Mixing
@@ -98,10 +94,10 @@ run_mf:
 	-snes_linesearch_type bt -snes_linesearch_damping $(DAMP) -snes_linesearch_monitor \
 	-snes_max_fail 1 -snes_max_linear_solve_fail 100 \
 	-ksp_gmres_cgs_refinement_type refine_always \
-	-snes_ksp_ew -snes_ksp_ew_version 1 -snes_ksp_ew_rtol0 0.5 -snes_ksp_ew_rtolmax 0.9 -snes_ksp_ew_threshold 0.1 \
 	-jac 0 \
 	-pc_type none \
 
+#	-snes_ksp_ew -snes_ksp_ew_version 1 -snes_ksp_ew_rtol0 0.5 -snes_ksp_ew_rtolmax 0.9 -snes_ksp_ew_threshold 0.1 \
 
 
 #matrix-free, AD-calculation directional derivatives (choose between trust region and line search)

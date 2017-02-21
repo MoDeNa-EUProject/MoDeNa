@@ -1,7 +1,9 @@
-!> @file
-!! i/o utilities
+!> @file      foamConductivity/src/src/ioutils.f90
 !! @author    Pavel Ferkl
-!! @ingroup   foam_aging
+!! @ingroup   src_mod_foamConductivity
+!! @brief     Tools for file input/output.
+!! @details
+!! Defines several useful funcions for fortran file i/o.
 module ioutils
     implicit none
     private

@@ -9,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014-2016 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -21,19 +21,17 @@ License
 
     Modena is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
+    FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+    details.
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
 @endcond'''
 
 """
-@file
-Python library of FireTasks
-
+@file      Implementation of flow rate model.
 @author    Henrik Rusche
-@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@copyright 2014-2016, MoDeNa Project. GNU Public License.
 @ingroup   twoTank
 """
 
@@ -46,13 +44,6 @@ from fireworks.utilities.fw_utilities import explicit_serialize
 from blessings import Terminal
 from jinja2 import Template
 
-
-__author__ = 'Henrik Rusche'
-__copyright__ = 'Copyright 2014, MoDeNa Project'
-__version__ = '0.2'
-__maintainer__ = 'Henrik Rusche'
-__email__ = 'h.rusche@wikki.co.uk.'
-__date__ = 'Sep 4, 2014'
 
 # ********************************* Class ********************************** #
 @explicit_serialize
@@ -85,6 +76,10 @@ class FlowRateExactSim(ModenaFireTask):
         f = open('out.txt', 'r')
         self['point']['flowRate'] = float(f.readline())
         f.close()
+
+
+
+
 
 
 f = CFunction(
@@ -125,6 +120,33 @@ void two_tank_flowRate
     },
 )
 
+
+import rpy2.rinterface as rinterface
+from rpy2.robjects.packages import importr
+from numpy import array
+from numpy.random import normal
+
+rinterface.initr()
+lhs = importr('lhs')
+
+
+class TemporaryClass(modena.Strategy.StochasticSampling):
+
+    def samplePoints(self, model, sr, nPoints):
+        """
+        """
+        sampleRange = { k: {'min': min(model.fitData[k]) , 'max': max(model.fitData[k]) } for k in model.inputs.keys() }
+
+        points = array(lhs.randomLHS(nPoints, len(model.inputs))).tolist()
+        points[0] = [ normal(0.5, p) for p in point[0] ]
+        points[1] = [ normal(0.5, p) for p in point[1] ]
+
+        return { key: [ sr[key]['min'] + (sr[key]['min'] - sr[key]['min'])*points[j][i] for j in xrange(nPoints) ] for (i, key) in enumerate(sr) }
+
+
+
+
+
 m = BackwardMappingModel(
     _id= 'flowRate',
     surrogateFunction= f,
@@ -142,11 +164,12 @@ m = BackwardMappingModel(
     outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(
         nNewPoints= 4
     ),
-    parameterFittingStrategy= Strategy.NonLinFitWithErrorContol(
+    parameterFittingStrategy= Strategy.Test(
         testDataPercentage= 0.2,
-        maxError= 0.05,
-        improveErrorStrategy= Strategy.StochasticSampling(
-            nNewPoints= 2
+        maxError= 0.5,
+        improveErrorStrategy= TemporaryClass(
+            nNewPoints= 2,
+            constraints = "p0 / p1 > 0"
         ),
         maxIterations= 5 # Currently not used
     ),

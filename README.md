@@ -102,7 +102,7 @@ Additional information on the software design can be found [here](http://henrus.
 - mongodb - Ideally from packages
 - pymongo - Ideally from packages
 - scipy - Ideally from packages
-- Fireworks - No packages, but pip
+- Fireworks - 1.2.5 and above, No packages, but pip
 - R - Ideally from packages
 - SWIG - Simple Wrapper and Interface Generator (optional)
 
@@ -110,9 +110,9 @@ Additional information on the software design can be found [here](http://henrus.
 
 ### Install packages
 ```
+user@machine> deb http://cran.rstudio.com/bin/linux/ubuntu trusty/
 user@machine> sudo apt-get install automake libltdl-dev libltdl7 mongodb \
-    python-rpy2 python-pip python-scipy python-rpy2 python-blessings \
-    r-base r-base-dev
+    python-pip python-scipy python-rpy2 python-blessings r-base r-base-dev
 ```
 
 ### Install packages (optional)

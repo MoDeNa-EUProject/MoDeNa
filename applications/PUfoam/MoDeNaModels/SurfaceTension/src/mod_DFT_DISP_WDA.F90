@@ -1,4 +1,5 @@
-!>This file contains the subroutines which calculate the contribution of
+!> \file mod_DFT:DISP_WDA.F90
+!!This file contains the subroutines which calculate the contribution of
 !!dispersion to the Helmholtz energy functional. 
 
 
@@ -363,8 +364,8 @@ END SUBROUTINE a_disp_pcsaft
    xh = hx(nn)
 
    if( nn >= 700 ) then
-     write(*,*) 'dF_disp_wd_pcsaft: bigger vectors hx, hy3, ... required!', nn
-     pause
+     write(*,*) 'Surface Tension Code: dF_disp_wd_pcsaft: bigger vectors hx, hy3, ... required!', nn
+     stop 5
    end if
    
    CALL spline         ( hx(1:nn), hy3(1:nn), nn, 1.E30, 1.E30, y2(1:nn) )

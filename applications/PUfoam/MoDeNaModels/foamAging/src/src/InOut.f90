@@ -1,194 +1,323 @@
-!> @file
-!! subroutines for calculation of equivalent conductivity of the foam
+!> @file      foamAging/src/src/InOut.f90
 !! @author    Michal Vonka
 !! @author    Pavel Ferkl
-!! @ingroup   foam_aging
-
-!> reads input file, packs variables to rpar and ipar variables
-subroutine input(rpar, ipar)
+!! @ingroup   src_mod_foamAging
+!! @brief     File input and output.
+!! @details
+!! Inputs are loaded from JSON file, pressure profiles are saved in text files.
+module inout
 	implicit none
-!c
-	integer i
-	integer ipar(*)
-	integer divwall, ncell
-	integer nroutputs
-	integer solModel,diffModel
-	double precision dcell, dwall, L
-	double precision pressure ! initial conds
-	double precision pBCair, pBCCO2, pBCpent 	! boundary conds
-	double precision pICair, pICCO2, pICpent 	! initial conds
-	double precision DO2, DN2, DCO2, Dpent, Dair, Dgas
-	double precision SO2, SN2, SCO2, Spent, Sair
-	double precision R, T, temp_cond, rhop
-	double precision pcA, pcB, pcApcB, TcA, TcB, TcATcB
-	double precision MA, MB, Mterm ,a, b, aToverTcsb
-	double precision fstrut,rhof
-!c
-	double precision  tend
-	double precision rpar(*)					! real param
-
-	double precision PI
-	parameter (PI = 3.1415926d0)
-	parameter (R = 8.314d0)
-
-!c Read input params - pak module params :)
-	open(2, file = '../input.in', status = 'old')
-	read(2, *) nroutputs
-	read(2, *) divwall
-	read(2, *) tend
-	read(2, *) T
-	read(2, *) temp_cond
-	read(2, *) rhop
-    read(2, *) pressure
-
-	read(2, *) pBCair, pBCCO2, pBCpent  ! boundaries
-	read(2, *) pICair, pICCO2, pICpent  ! initial C
-
-	read(2, *) L
-	read(2, *) dwall
-	read(2, *) dcell
-
-	read(2, *) fstrut
-	read(2, *) rhof
-	read(2, *) solModel
-	read(2, *) Sair,SCO2,Spent
-	read(2, *) diffModel
-	read(2, *) Dair,DCO2,Dpent
-
-	close(2)
-	continue
-
-	ncell = dint(L/(dcell+dwall))
-    continue
-	! ! computation of diffusivities and solubilities as a function of T
-	! DCO2=12.3d-4*dexp(-51180.0d0/R/T)!/1e0  ! m2/s
-	! DO2 =8.5d-4* dexp(-53300.0d0/R/T)
-	! DN2=3.24d-3*dexp(-6927.0d0/T)
-	! Dpent=1.7d-7*dexp(-4236.0d0/T)!/4e2!/2.5d0
-	! Dair=(0.21d0*DO2+0.79d0*DN2)!/3e1
-	!
-	! ! cm3STP/cm3/Pa
-	! SCO2 =  7.13d-6*T/343.0d0*dexp(-2587.0d0*(1.0d0/343.0d0-1.0d0/T))
-	! Spent = 4.45d-5*T/353.0d0*dexp(-527.45d0*(1.0d0/353.0d0-1.0d0/T))
-	! Sair  = -(5.0d-9 * T**2 - 4.0d-6 * T + 0.0007d0)/10
-	!
-	! write(*,*) 'CO2 permeability',SCO2*DCO2
-	! write(*,*) 'pentane permeability',Spent*Dpent
-	! write(*,*) 'air permeability',Sair*Dair
-
-    continue
-    ! gas difusivity accoriding to Bird 1975, p.505, eq. 16.3-1
-    pcA = 33.5d0      !  N2
-    pcB = 72.9d0      ! CO2
-    pcApcB = (pcA*pcB)**(1.0d0/3.0d0) ! CO2, N2, B-1 p. 744
-    TcA = 126.2d0     ! N2
-    TcB = 304.2d0     ! CO2
-    TcATcB = (TcA*TcB)**(5.0d0/12.0d0)
-    MA = 28.02d0
-    MB = 44.01d0
-    Mterm = dsqrt(1/MA + 1/MB)
-    a = 2.7450d-4 ! non-polar pairs
-    b = 1.823d0
-    aToverTcsb = a*(T/dsqrt(TcA*TcB))**b
-
-	! pressure in atmospheres, cm2/s
-    Dgas = (aToverTcsb*pcApcB*TcATcB*Mterm)*1.0d5/pressure
-    continue
-    Dgas = Dgas * 1.0d-4 ! m2/s
-    continue
-
-	ipar(1) = nroutputs
-	ipar(2) = ncell
-	ipar(4) = divwall+1		! FV in one cell
-	ipar(5) = (divwall+1)*ncell	! total number of FV
-	ipar(6:8) = solModel
-	ipar(9:11) = diffModel
-
-	rpar(1) = dcell
-	rpar(2) = dwall
-	rpar(3) = tend
-	rpar(4) = Dair      ! average air
-	rpar(5) = DCO2
-	rpar(6) = Sair      ! average air
-	rpar(7) = SCO2
-
-	rpar(8) = pressure
-	! rpar(9) = initpressure
-	rpar(10)= R*T
-
-	rpar(11) = Dpent
-	rpar(12) = Spent
-	rpar(13) = Dgas
-
-    rpar(14) = pBCair
-    rpar(15) = pBCCO2
-    rpar(16) = pBCpent
-
-    rpar(17) = pICair*pressure
-    rpar(18) = pICCO2*pressure
-    rpar(19) = pICpent*pressure
-
-	rpar(20)=fstrut
-	rpar(21)=rhof
-	rpar(22)=temp_cond
-	rpar(23)=rhop
-
-    continue
-
-    return
+	private
+	public input,output,print_header
+contains
+!********************************BEGINNING*************************************
+!> Reads input file.
+!!
+!! Inputs are saved to global variables.
+subroutine input()
+	use constants
+	use globals
+	use physicalProperties
+	use ioutils
+	use fson
+    use fson_value_m, only: fson_value_get
+	type(fson_value), pointer :: json_data
+	character(len=1024) :: strval
+    character(len=99) :: after_foaming,after_foaming0='after_foaming.txt'
+    character(len=99) :: bg_res='../../foamExpansion/results/bubbleGrowth/'
+    character(len=99) :: qmom0D_res='../../foamExpansion/results/CFD0D/'
+    character(len=99) :: qmom3D_res='../../foamExpansion/results/CFD3D/'
+	real(dp) :: matr(7)
+	integer :: fi
+	! Read input parameters
+	json_data => fson_parse("../inputs/foamAging.json")
+	call fson_get(json_data, "foamCondition.inProtectiveSheet", sheet)
+	call fson_get(json_data, "numerics.timeStart", tbeg)
+	call fson_get(json_data, "numerics.timeEnd", tend)
+	call fson_get(json_data, "numerics.numberOfOutputs", nroutputs)
+	call fson_get(json_data, "numerics.wallDiscretization", divwall)
+	call fson_get(json_data, "numerics.cellDiscretization", divcell)
+	if (sheet) then
+		call fson_get(json_data, "numerics.sheetDiscretization", divsheet)
+	endif
+	call fson_get(json_data, "foamCondition.foamHalfThickness", dfoam)
+	if (sheet) then
+		call fson_get(&
+			json_data, "foamCondition.sheetThickness", dsheet)
+	endif
+	call fson_get(json_data, "foamCondition.agingTemperature", temp)
+	call fson_get(json_data, "foamCondition.conductivityTemperature", temp_cond)
+	call fson_get(json_data, "foamCondition.initialPressure", pressure)
+	call fson_get(json_data, "foamCondition.boundaryPressure.O2", pBg(1))
+	call fson_get(json_data, "foamCondition.boundaryPressure.N2", pBg(2))
+	call fson_get(json_data, "foamCondition.boundaryPressure.CO2", pBg(3))
+	call fson_get(&
+		json_data, "foamCondition.boundaryPressure.Cyclopentane", pBg(4))
+	call fson_get(json_data, "sourceOfProperty.gasComposition", strval)
+    if (strval=="BubbleGrowth") then
+        after_foaming=TRIM(ADJUSTL(bg_res))//TRIM(ADJUSTL(after_foaming0))
+        open(unit=newunit(fi),file=after_foaming)
+        read(fi,*)
+        read(fi,*) matr(1:4)
+        xg(1)=0 ! no oxygen
+		xg(2)=0 ! no nitrogen
+        xg(3)=matr(4)
+		xg(4)=matr(3)
+        xg=xg/sum(xg)
+        close(fi)
+    elseif (strval=="Qmom0D") then
+        after_foaming=TRIM(ADJUSTL(qmom0D_res))//TRIM(ADJUSTL(after_foaming0))
+        open(unit=newunit(fi),file=after_foaming)
+        read(fi,*)
+        read(fi,*) matr(1:4)
+        xg(1)=0 ! no oxygen
+		xg(2)=0 ! no nitrogen
+        xg(3)=matr(4)
+		xg(4)=matr(3)
+        xg=xg/sum(xg)
+        close(fi)
+    elseif (strval=="Qmom3D") then
+        after_foaming=TRIM(ADJUSTL(qmom3D_res))//TRIM(ADJUSTL(after_foaming0))
+        open(unit=newunit(fi),file=after_foaming)
+        read(fi,*)
+        read(fi,*) matr(1:4)
+        xg(1)=0 ! no oxygen
+		xg(2)=0 ! no nitrogen
+        xg(3)=matr(4)
+		xg(4)=matr(3)
+        xg=xg/sum(xg)
+        close(fi)
+    elseif (strval=="DirectInput") then
+		call fson_get(json_data, "foamCondition.initialComposition.O2", xg(1))
+		call fson_get(json_data, "foamCondition.initialComposition.N2", xg(2))
+		call fson_get(json_data, "foamCondition.initialComposition.CO2", xg(3))
+		call fson_get(&
+			json_data, "foamCondition.initialComposition.Cyclopentane", xg(4))
+		xg=xg/sum(xg)
+    else
+        write(*,*) 'unknown source for gas composition'
+        stop
+    endif
+	call fson_get(json_data, "sourceOfProperty.foamDensity", strval)
+    if (strval=="BubbleGrowth") then
+        after_foaming=TRIM(ADJUSTL(bg_res))//TRIM(ADJUSTL(after_foaming0))
+        open(unit=newunit(fi),file=after_foaming)
+        read(fi,*)
+        read(fi,*) matr(1:4)
+        rhof=matr(1)
+        close(fi)
+    elseif (strval=="Qmom0D") then
+        after_foaming=TRIM(ADJUSTL(qmom0D_res))//TRIM(ADJUSTL(after_foaming0))
+        open(unit=newunit(fi),file=after_foaming)
+        read(fi,*)
+        read(fi,*) matr(1:4)
+        rhof=matr(1)
+        close(fi)
+    elseif (strval=="Qmom3D") then
+        after_foaming=TRIM(ADJUSTL(qmom3D_res))//TRIM(ADJUSTL(after_foaming0))
+        open(unit=newunit(fi),file=after_foaming)
+        read(fi,*)
+        read(fi,*) matr(1:4)
+        rhof=matr(1)
+        close(fi)
+    elseif (strval=="DirectInput") then
+		call fson_get(json_data, "morphology.foamDensity", rhof)
+    else
+        write(*,*) 'unknown source for foam density'
+        stop
+    endif
+	call fson_get(json_data, "sourceOfProperty.cellSize", strval)
+    if (strval=="BubbleGrowth") then
+        after_foaming=TRIM(ADJUSTL(bg_res))//TRIM(ADJUSTL(after_foaming0))
+        open(unit=newunit(fi),file=after_foaming)
+        read(fi,*)
+        read(fi,*) matr(1:4)
+        dcell=matr(2)
+        close(fi)
+    elseif (strval=="Qmom0D") then
+        after_foaming=TRIM(ADJUSTL(qmom0D_res))//TRIM(ADJUSTL(after_foaming0))
+        open(unit=newunit(fi),file=after_foaming)
+        read(fi,*)
+        read(fi,*) matr(1:4)
+        dcell=matr(2)
+        close(fi)
+    elseif (strval=="Qmom3D") then
+        after_foaming=TRIM(ADJUSTL(qmom3D_res))//TRIM(ADJUSTL(after_foaming0))
+        open(unit=newunit(fi),file=after_foaming)
+        read(fi,*)
+        read(fi,*) matr(1:4)
+        dcell=matr(2)
+        close(fi)
+    elseif (strval=="DirectInput") then
+		call fson_get(json_data, "morphology.cellSize", dcell)
+    else
+        write(*,*) 'unknown source for cell size'
+        stop
+    endif
+	call fson_get(json_data, "sourceOfProperty.strutContent", strval)
+    if (strval=="StrutContent") then
+        call strutContent(fstrut,rhof)
+    elseif (strval=="DirectInput") then
+		call fson_get(json_data, "morphology.strutContent", fstrut)
+    else
+        write(*,*) 'unknown source for strut content'
+        stop
+    endif
+	call fson_get(json_data, "sourceOfProperty.wallThickness", strval)
+    if (strval=="DirectInput") then
+		call fson_get(json_data, "morphology.wallThickness", dwall)
+    else
+        write(*,*) 'unknown source for wall thickness'
+        stop
+    endif
+	call fson_get(json_data, "physicalProperties.polymerDensity", rhop)
+	call fson_get(json_data, &
+		"physicalProperties.foam.solubilityModel.O2", strval)
+	if (strval=="constant") then
+		solModel(1)=0
+	elseif ( strval=="modena" ) then
+		solModel(1)=1
+	else
+		print*, "Solubility model must be constant or modena"
+	endif
+	call fson_get(json_data, &
+		"physicalProperties.foam.solubilityModel.N2", strval)
+	if (strval=="constant") then
+		solModel(2)=0
+	elseif ( strval=="modena" ) then
+		solModel(2)=1
+	else
+		print*, "Solubility model must be constant or modena"
+	endif
+	call fson_get(json_data, &
+		"physicalProperties.foam.solubilityModel.CO2", strval)
+	if (strval=="constant") then
+		solModel(3)=0
+	elseif ( strval=="modena" ) then
+		solModel(3)=1
+	else
+		print*, "Solubility model must be constant or modena"
+	endif
+	call fson_get(json_data, &
+		"physicalProperties.foam.solubilityModel.Cyclopentane", strval)
+	if (strval=="constant") then
+		solModel(4)=0
+	elseif ( strval=="modena" ) then
+		solModel(4)=1
+	else
+		print*, "Solubility model must be constant or modena"
+	endif
+	if (solModel(1)==0) then
+		call fson_get(json_data, "physicalProperties.foam.solubility.O2", Sg(1))
+	endif
+	if (solModel(2)==0) then
+		call fson_get(json_data, "physicalProperties.foam.solubility.N2", Sg(2))
+	endif
+	if (solModel(3)==0) then
+		call fson_get(&
+			json_data, "physicalProperties.foam.solubility.CO2", Sg(3))
+	endif
+	if (solModel(4)==0) then
+		call fson_get(&
+			json_data, "physicalProperties.foam.solubility.Cyclopentane", Sg(4))
+	endif
+	call fson_get(json_data, &
+		"physicalProperties.foam.diffusivityModel.O2", strval)
+	if (strval=="constant") then
+	    diffModel(1)=0
+	elseif ( strval=="modena" ) then
+		diffModel(1)=1
+	else
+		print*, "Diffusivity model must be constant or modena"
+	endif
+	call fson_get(json_data, &
+		"physicalProperties.foam.diffusivityModel.N2", strval)
+	if (strval=="constant") then
+	    diffModel(2)=0
+	elseif ( strval=="modena" ) then
+		diffModel(2)=1
+	else
+		print*, "Diffusivity model must be constant or modena"
+	endif
+	call fson_get(json_data, &
+		"physicalProperties.foam.diffusivityModel.CO2",strval)
+	if (strval=="constant") then
+		diffModel(3)=0
+	elseif ( strval=="modena" ) then
+		diffModel(3)=1
+	else
+		print*, "Diffusivity model must be constant or modena"
+	endif
+	call fson_get(json_data, &
+		"physicalProperties.foam.diffusivityModel.Cyclopentane", strval)
+	if (strval=="constant") then
+		diffModel(4)=0
+	elseif ( strval=="modena" ) then
+		diffModel(4)=1
+	else
+		print*, "Diffusivity model must be constant or modena"
+	endif
+	if (diffModel(1)==0) then
+		call fson_get(json_data, &
+			"physicalProperties.foam.diffusivity.O2", Dg(1))
+	endif
+	if (diffModel(2)==0) then
+		call fson_get(json_data, &
+			"physicalProperties.foam.diffusivity.N2", Dg(2))
+	endif
+	if (diffModel(3)==0) then
+		call fson_get(json_data, &
+			"physicalProperties.foam.diffusivity.CO2", Dg(3))
+	endif
+	if (diffModel(4)==0) then
+		call fson_get(json_data, &
+			"physicalProperties.foam.diffusivity.Cyclopentane", Dg(4))
+	endif
+	if (sheet) then
+		call fson_get(json_data, &
+			"physicalProperties.sheet.solubility.O2", sheetSg(1))
+		call fson_get(json_data, &
+			"physicalProperties.sheet.solubility.N2", sheetSg(2))
+		call fson_get(json_data, &
+			"physicalProperties.sheet.solubility.CO2", sheetSg(3))
+		call fson_get(json_data, &
+			"physicalProperties.sheet.solubility.Cyclopentane", sheetSg(4))
+		call fson_get(json_data, &
+			"physicalProperties.sheet.diffusivity.O2", sheetDg(1))
+		call fson_get(json_data, &
+			"physicalProperties.sheet.diffusivity.N2", sheetDg(2))
+		call fson_get(json_data, &
+			"physicalProperties.sheet.diffusivity.CO2", sheetDg(3))
+		call fson_get(json_data, &
+			"physicalProperties.sheet.diffusivity.Cyclopentane", sheetDg(4))
+	endif
+	call fson_destroy(json_data)
 end subroutine input
-!c
-!> saves results to file
-subroutine output(iprof, time, ystate, neq)
-	implicit none
-	integer i, j, iprof, job
-	integer nFV, onecell, ncell, neq
-	integer divwall
+!***********************************END****************************************
 
-	double precision time, test
-	double precision ystate(*)
-	double precision dwall, dcell, hwall
 
-	double precision pBCair, pBCCO2, pBCpent, RT 	! boundary conds
-	double precision, allocatable :: length(:)
+!********************************BEGINNING*************************************
+!> Saves results to file.
+!!
+!! Saves partial pressure profiles in whole foam and in gas phase only.
+!! @param [in] time time
+subroutine output(iprof, time, ystate, neq, pp)
+	use constants
+	use globals
+	use model, only: ngas,dz,mor,nfv,sol
+	integer, intent(in) :: iprof !< number time step
+	integer, intent(in) :: neq !< number of equations
+	real(dp), intent(in) :: time !< time
+	real(dp), intent(in) :: ystate(:) !< integrated variables
+	real(dp), intent(out) :: pp(:) !< partial pressure
+	integer :: i, j
+	integer :: spp
+	real(dp) :: pos
 
 	character(len=1) :: name_1	! one character
 	character(len=2) :: name_2	! two characters
 	character(len=3) :: name_3	! three characters
 	character(len=4) :: name_f	! final name of file
-
-	continue
-	! ipar
-    dcell = ystate(nEQ + 1)
-    dwall = ystate(nEQ + 2)
-    ncell   = dint(ystate(nEQ + 11))
-    onecell = dint(ystate(nEQ + 12))    != dble(ipar(4))
-    divwall = onecell-1
-	nFV     = ncell*onecell
-    hwall   = dwall/dble(divwall)
-
-	pBCair = ystate(nEQ + 16) != rpar(14) != pBCair
-    pBCCO2 = ystate(nEQ + 17) != rpar(15) != pBCCO2
-    pBCpent= ystate(nEQ + 18) != rpar(16) != pBCpent
-    RT     = ystate(nEQ + 10)
-
-    if (.NOT. allocated(length)) then
-        allocate (length(0:nFV))
-    endif
-
-	! compute lengths
-	continue
-
-    length(0:nFV) = 0.0d0
-    do i = 0, nFV
-        if (mod(i,onecell).eq.0) length(i) = length(i-1) + dcell/2.0d0
-        if (mod(i,onecell).eq.1) length(i) = length(i-1) + dcell/2.0d0
-        if (mod(i,onecell).gt.1) length(i) = length(i-1) + hwall
-    enddo
-
-!    continue
-!     write(*,*) length(1:nFV)
-     continue
 
     if     (iprof <  10) then
         write(name_1,'(I1)') iprof
@@ -202,21 +331,89 @@ subroutine output(iprof, time, ystate, neq)
     else
         write(name_f,'(I4)') iprof
     endif
+	open(unit=11,file='H2perm_'//trim(name_f)//'.dat')
+	open(unit=12,file='ppar_'//trim(name_f)//'.dat')
 
-    continue
-	open(unit=11,file='../results/H2perm_'//trim(name_f)//'.dat')
-
-   ! BC
-	write (11,100) time/(3600.0d0*24.0d0),length(0), pBCair/RT,pBCCO2/RT,&
-		pBCpent/RT
 	! profiles
-	do i = 1, nFV
-		write (11,100) time/(3600.0d0*24.0d0),length(i),ystate(i),&
-			ystate(nFV+i),ystate(2*nFV+i)
+	do i = 1, neq/ngas
+		write (11,100) time/(3600*24),pos,&
+			ystate(ngas*(i-1)+1)*sol(ngas*(i-1)+1),&
+			ystate(ngas*(i-1)+2)*sol(ngas*(i-1)+2),&
+			ystate(ngas*(i-1)+3)*sol(ngas*(i-1)+3),&
+			ystate(ngas*(i-1)+4)*sol(ngas*(i-1)+4)
 	enddo
-    continue
-    close (11)
-	return
-100   format (f8.2,F12.8,F12.6,F12.6,F12.6)
+	pp=0
+	spp=0
+	do i = 1,nfv
+		if (i==1) then
+		    pos=dz(1)
+		else
+			pos=pos+(dz(i-1)+dz(i))/2
+		endif
+		if (mor(i)==1) then
+			do j=1,ngas
+				pp(j)=pp(j)+ystate(ngas*(i-1)+j)*Rg*temp
+			enddo
+			spp=spp+1
+			write (12,101) time/(3600*24),pos,ystate(ngas*(i-1)+1)*Rg*temp,&
+				ystate(ngas*(i-1)+2)*Rg*temp,ystate(ngas*(i-1)+3)*Rg*temp,&
+				ystate(ngas*(i-1)+4)*Rg*temp
+		endif
+	enddo
+	pp=pp/spp
+    close(11)
+	close(12)
+100   format (f8.2,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3)
+101   format (f8.2,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3)
 end subroutine output
-!c
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> Prints header to console.
+!!
+!! Outputs useful information, which identifies, which foam is simulated.
+subroutine print_header
+	use globals
+	use model, only: nfv
+    print*, 'Foam:'
+    write(*,'(A30,EN12.3,1x,A)') 'foam density:',rhof,'kg/m3'
+    write(*,'(A30,EN12.3)') 'porosity:',eps
+    write(*,'(A30,EN12.3)') 'strut content:',fstrut
+    write(*,'(A30,EN12.3,1x,A)') 'cell size:',dcell,'m'
+    write(*,'(A30,EN12.3,1x,A)') 'wall thickness:',dwall,'m'
+    if (sheet) then
+        write(*,'(A30,EN12.3,1x,A)') 'sheet thickness:',dsheet,'m'
+    endif
+    write(*,'(A30,EN12.3,1x,A)') 'foam thickness:',dfoam,'m'
+    write(*,'(A30,I12)') 'number of cells:',ncell
+    write(*,'(A30,EN12.3,1x,A)') 'aging temperature:',temp,'K'
+    write(*,'(A30,EN12.3,1x,A)') 'conductivity temperature:',temp_cond,'K'
+    print*, 'Physical properties:'
+    write(*,'(A30,EN12.3,1x,A)') 'polymer density:',rhop,'kg/m3'
+    write(*,'(A30,EN12.3,1x,A)') 'diffusivity in gas:',Dgas,'m2/s'
+    write(*,'(A30,EN12.3,1x,A)') 'O2 diffusivity:',Dg(1),'m2/s'
+	write(*,'(A30,EN12.3,1x,A)') 'N2 diffusivity:',Dg(2),'m2/s'
+    write(*,'(A30,EN12.3,1x,A)') 'CO2 diffusivity:',Dg(3),'m2/s'
+    write(*,'(A30,EN12.3,1x,A)') 'pentane diffusivity:',Dg(4),'m2/s'
+	write(*,'(A30,EN12.3,1x,A)') 'O2 solubility:',Sg(1),'g/g/bar'
+	write(*,'(A30,EN12.3,1x,A)') 'N2 solubility:',Sg(2),'g/g/bar'
+    write(*,'(A30,EN12.3,1x,A)') 'CO2 solubility:',Sg(3),'g/g/bar'
+	write(*,'(A30,EN12.3,1x,A)') 'pentane solubility:',Sg(4),'g/g/bar'
+	write(*,'(A30,EN12.3,1x,A)') 'O2 permeability:',Sg(1)*Dg(1),'m2/s*g/g/bar'
+	write(*,'(A30,EN12.3,1x,A)') 'N2 permeability:',Sg(2)*Dg(2),'m2/s*g/g/bar'
+    write(*,'(A30,EN12.3,1x,A)') 'CO2 permeability:',Sg(3)*Dg(3),'m2/s*g/g/bar'
+	write(*,'(A30,EN12.3,1x,A)') 'pentane permeability:',Sg(4)*Dg(4),&
+        'm2/s*g/g/bar'
+    print*, 'Numerics:'
+    write(*,'(A30,I12)') 'finite volumes in wall:',divwall
+    write(*,'(A30,I12)') 'finite volumes in cell:',divcell
+    if (sheet) then
+        write(*,'(A30,I12)') 'finite volumes in sheet:',divsheet
+    endif
+    write(*,'(A30,I12)') 'finite volumes in total:',nfv
+    write(*,'(A30,EN12.3,1x,A)') 'initial time:',tbeg,'s'
+    write(*,'(A30,EN12.3,1x,A)') 'end time:',tend,'s'
+end subroutine print_header
+!***********************************END****************************************
+end module inout

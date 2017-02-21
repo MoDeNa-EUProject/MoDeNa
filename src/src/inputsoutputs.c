@@ -9,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014-2016 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -64,7 +64,7 @@ void modena_siunits_destroy(modena_siunits_t *self)
 modena_inputs_t *modena_inputs_new(const modena_model_t *self)
 {
     modena_inputs_t *i = malloc(sizeof(modena_inputs_t));
-    i->inputs = malloc(self->inputs_size*sizeof(double));
+    i->inputs = malloc(self->inputs_internal_size*sizeof(double));
     return i;
 }
 

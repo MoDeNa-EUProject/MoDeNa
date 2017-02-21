@@ -1,5 +1,5 @@
-#!/usr/bin/python
-'''
+#!/usr/bin/env python
+'''@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -10,7 +10,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014-2016 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -27,31 +27,79 @@ License
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
+@endcond'''
 
-Description
-    Initialisation script for the flowRate model. The script calculates a few
-    data points and fits the surrogate model. Then the model is inserted into
-    the database.
+"""
+@ingroup   mod_ex_rheology
+@brief     Initialisation script for the rheology model.
+@author    Christos Mitrias
+@copyright 2014-2016, MoDeNa Project. GNU Public License.
+"""
 
-Authors
-    Henrik Rusche
-
-Contributors
-    Christos Mitrias
-'''
-
-import Rheology
-from fireworks import LaunchPad
+from modena import SurrogateModel, MODENA_PARSED_URI
+from fireworks import LaunchPad, Workflow
 from fireworks.core.rocket_launcher import rapidfire
+from pymongo import MongoClient
+
+import SurfaceTension
+import Rheology
 
 # set up the LaunchPad and reset it
-launchpad = LaunchPad()
+launchpad = LaunchPad(**MODENA_PARSED_URI)
 launchpad.reset('', require_password=False)
 
-m = Rheology.m
-initWfs = m.initialisationStrategy().workflow(m)
+initWfs = Workflow([])
+for m in SurrogateModel.get_instances():
+    initWfs.append_wf(m.initialisationStrategy().workflow(m), [])
+
+
+for m in SurrogateModel.get_instances():
+    initWfs.append_wf(m.initialisationStrategy().workflow(m), [])
+
 
 # store workflow and launch it locally
 launchpad.add_wf(initWfs)
+
 rapidfire(launchpad)
 
+
+# Create connections to database
+url = 'mongodb://localhost:27017/'
+client = MongoClient(url)
+collection = client.test.surrogate_model
+# Update the model
+collection.update(
+    {'_id': 'SurfaceTension[A=AIR,B=THF]'},
+    {
+        '$unset': {
+            'outsidePoint': ""
+        }
+    }
+)
+# PCSAFT surface tension model has problems with large temperatures
+doc=collection.find({'_id': 'SurfaceTension[A=AIR,B=THF]'})
+for key in doc:
+    inputs=key['inputs']
+    inputs['T']['max']=450
+collection.update(
+    {'_id': 'SurfaceTension[A=AIR,B=THF]'},
+    {
+        '$set': {
+            'inputs': inputs
+        }
+    }
+)
+# Rheology model has problems with large conversion (beyond gel point)
+doc=collection.find({'_id': 'Rheology'})
+for key in doc:
+    inputs=key['inputs']
+    inputs['T']['max']=450
+    inputs['X']['max']=1.0
+collection.update(
+    {'_id': 'Rheology'},
+    {
+        '$set': {
+            'inputs': inputs
+        }
+    }
+)

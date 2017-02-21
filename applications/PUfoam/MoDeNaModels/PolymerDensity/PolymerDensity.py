@@ -1,5 +1,4 @@
-
-'''
+'''@cond
 
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
@@ -10,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014-2016 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -22,41 +21,27 @@ License
 
     Modena is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
+    FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+    details.
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
+@endcond'''
 
-Description
-    Python library of FireTasks
-
-Authors
-    Henrik Rusche
-
-Contributors
-'''
+"""
+@ingroup   mod_polymerDensity
+@namespace PolymerDensity.PolymerDensity
+@file      Backward mapping FireTask for rheology model.
+@author    Jonas Mairhofer
+@copyright 2014-2016, MoDeNa Project. GNU Public License.
+@ingroup   app_foaming
+"""
 
 import os
-import modena
-from modena import ForwardMappingModel,BackwardMappingModel,SurrogateModel,CFunction,IndexSet,ModenaFireTask
-import modena.Strategy as Strategy
-from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
-from fireworks import Firework, Workflow, FWAction
-from fireworks.utilities.fw_utilities import explicit_serialize
-from blessings import Terminal
 from jinja2 import Template
-
-# Create terminal for colour output
-term = Terminal()
-
-
-__author__ = 'Henrik Rusche'
-__copyright__ = 'Copyright 2014, MoDeNa Project'
-__version__ = '0.2'
-__maintainer__ = 'Henrik Rusche'
-__email__ = 'h.rusche@wikki.co.uk.'
-__date__ = 'Sep 4, 2014'
+from fireworks.utilities.fw_utilities import explicit_serialize
+from modena import CFunction, BackwardMappingModel, IndexSet, ModenaFireTask
+from modena import Strategy
 
 
 blowing_agents = IndexSet(
@@ -66,7 +51,7 @@ blowing_agents = IndexSet(
 
 monomers = IndexSet(
     name = 'monomers',
-    names = ['PU', 'THF', 'hexane']
+    names = ['PU', 'THF', 'hexane', 'surfactant']
 )
 
 
@@ -78,11 +63,6 @@ class DensityExactSim(ModenaFireTask):
     """
 
     def task(self, fw_spec):
-        print(
-            term.yellow
-          + "Performing exact simulation (microscopic code recipe)"
-          + term.normal
-        )
         # Generate input fileblock
         self.generate_inputfile()
 
@@ -156,27 +136,25 @@ void surroDensity
     const double P0 = parameters[0];
     const double P1 = parameters[1];
     const double P2 = parameters[2];
-    
-   // const double expo = 1.0 + (1.0 - T/P2);
-   // const double pwr  = pow(P1,expo);
 
-   // outputs[0] = P0 / pwr;
+    const double expo = 1.0 + (1.0 - T/P2);
+    const double pwr  = pow(P1,expo);
 
-
-    outputs[0] = P0 + T*P1 + P2*T*T;
+    outputs[0] = P0 / pwr;
+    //outputs[0] = P0 + T*P1 + P2*T*T;
 }
 ''',
     # These are global bounds for the function
     inputs={
-        'T': { 'min': 270.0, 'max': 300.0},
+        'T': { 'min': 270.0, 'max': 550.0},
     },
     outputs={
         'rho': { 'min': 9e99, 'max': -9e99, 'argPos': 0 },
     },
     parameters={
-        'param0': { 'min': -1E10, 'max': 1E10, 'argPos': 0 },    #check if boundaries are reasonable!!!
-        'param1': { 'min': -1E10, 'max': 1E10, 'argPos': 1 },
-        'param2': { 'min': -1E10, 'max': 1E10, 'argPos': 2 },
+        'param0': { 'min': -1E10, 'max': 1E10+2, 'argPos': 0 },    #check if boundaries are reasonable!!!
+        'param1': { 'min': -1E10, 'max': 1E10+2, 'argPos': 1 },
+        'param2': { 'min': -1E10, 'max': 1E10+2, 'argPos': 2 },
     },
     species={
         'A' : blowing_agents,
@@ -185,15 +163,14 @@ void surroDensity
 )
 
 m = BackwardMappingModel(
-    _id= 'PolymerDensity[A=AIR,B=PU]',    
+    _id= 'PolymerDensity[A=AIR,B=PU]',
     surrogateFunction= f,
     exactTask= DensityExactSim(),
     substituteModels= [ ],
-
     initialisationStrategy= Strategy.InitialPoints(
         initialPoints=
         {
-            'T': [270.0, 290.0, 300.0],
+            'T': [270.0, 300.0, 350.0, 400, 450, 500, 550],
                  },
     ),
     outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(
@@ -201,11 +178,10 @@ m = BackwardMappingModel(
     ),
     parameterFittingStrategy= Strategy.NonLinFitWithErrorContol(
         testDataPercentage= 0.2,
-        maxError= 300.0,
+        maxError= 10.0,
         improveErrorStrategy= Strategy.StochasticSampling(
             nNewPoints= 2
         ),
         maxIterations= 5 # Currently not used
     ),
 )
-

@@ -1,0 +1,118 @@
+@ingroup app_aging
+
+The input files should be located in the `inputs` folder. `foamAging.json` controls aging simulation, whereas `foamConductivity.json` controls foam conductivity simulation. `init_foamConductivity.json` provides initial points for the initialization of foamConductivity.
+
+### Preparing foamAging.json
+The following key-pairs should be defined:
+- `numerics`:
+    - `timeStart`: starting time (s)
+    - `timeEnd`: end time (s)
+    - `numberOfOutputs`: how many times should the intermediate results be written
+    - `wallDiscretization`: number of finite volumes in each wall
+    - `cellDiscretization`: number of finite volumes in each cell
+    - `sheetDiscretization`: number of finite volumes in sheet, if it is used
+- `sourceOfProperty`: when "DirectInput" is used, the property must be given in this file. Otherwise, it will be loaded from the results of the specified given tool.
+    - `foamDensity`: ["DirectInput","BubbleGrowth","Qmom0D","Qmom3D"]
+    - `cellSize`: ["DirectInput","BubbleGrowth","Qmom0D","Qmom3D"]
+    - `gasComposition`: ["DirectInput","BubbleGrowth","Qmom0D","Qmom3D"]
+    - `strutContent`: ["DirectInput","StrutContent"]
+    - `wallThickness`: ["DirectInput"]
+- `foamCondition`:
+    - `foamHalfThickness`: half of foam thickness (m)
+    - `inProtectiveSheet`: is foam enclosed in a sheet [true,false]
+    - `sheetThickness`: thickness of the sheet, if it is used (m)
+    - `agingTemperature`: temperature of aging (K)
+    - `conductivityTemperature`: temperature of conductivity measurements (K)
+    - `initialPressure`: initial pressure in foam (Pa)
+    - `initialComposition`:
+        - `O2`: molar fraction of oxygen in initial foam
+        - `N2`: molar fraction of nitrogen in initial foam
+        - `CO2`: molar fraction of CO2 in initial foam
+        - `Cyclopentane`: molar fraction of cyclopentane in initial foam
+    - `boundaryPressure`:
+        - `O2`: pressure of oxygen at the outer boundary (Pa)
+        - `N2`: pressure of nitrogen at the outer boundary (Pa)
+        - `CO2`: pressure of CO2 at the outer boundary (Pa)
+        - `Cyclopentane`: pressure of cyclopentane at the outer boundary (Pa)
+- `morphology`:
+    - `foamDensity`: foam density (kg/m3)
+    - `cellSize`: cell size (m)
+    - `strutContent`: strut content
+    - `wallThickness`: wall thickness (m)
+- `physicalProperties`:
+    - `polymerDensity`: polymer density (kg/m3)
+    - `foam`:
+        - `solubilityModel`:
+            - `O2`: solubility model ["constant","modena"]
+            - `N2`: solubility model ["constant","modena"]
+            - `CO2`: solubility model ["constant","modena"]
+            - `Cyclopentane`: solubility model ["constant","modena"]
+        - `solubility`:
+            - `O2`: solubility of oxygen, if "constant" model is used (g/g/bar)
+            - `N2`: solubility of nitrogen, if "constant" model is used (g/g/bar)
+            - `CO2`: solubility of CO2, if "constant" model is used (g/g/bar)
+            - `Cyclopentane`: solubility of cyclopentane, if "constant" model is used (g/g/bar)
+        - `diffusivityModel`:
+            - `O2`: diffusivity model ["constant","modena"]
+            - `N2`: diffusivity model ["constant","modena"]
+            - `CO2`: diffusivity model ["constant","modena"]
+            - `Cyclopentane`: diffusivity model ["constant","modena"]
+        - `diffusivity`:
+            - `O2`: diffusivity of oxygen, if "constant" model is used (m2/s)
+            - `N2`: diffusivity of nitrogen, if "constant" model is used (m2/s)
+            - `CO2`: diffusivity of CO2, if "constant" model is used (m2/s)
+            - `Cyclopentane`: diffusivity of cyclopentane, if "constant" model is used (m2/s)
+    - `sheet`:
+        - `solubility`:
+            - `O2`: solubility of oxygen, if "constant" model is used (g/g/bar)
+            - `N2`: solubility of nitrogen, if "constant" model is used (g/g/bar)
+            - `CO2`: solubility of CO2, if "constant" model is used (g/g/bar)
+            - `Cyclopentane`: solubility of cyclopentane, if "constant" model is used (g/g/bar)
+        - `diffusivity`:
+            - `O2`: diffusivity of oxygen, if "constant" model is used (m2/s)
+            - `N2`: diffusivity of nitrogen, if "constant" model is used (m2/s)
+            - `CO2`: diffusivity of CO2, if "constant" model is used (m2/s)
+            - `Cyclopentane`: diffusivity of cyclopentane, if "constant" model is used (m2/s)
+
+### Preparing foamConductivity.json
+- `upperBoundary`:
+    - `emittance`: numer 0-1, 0.9 recommended
+    - `temperature`: temperature (K)
+- `lowerBoundary`:
+    - `emittance`: numer 0-1, 0.9 recommended
+    - `temperature`: temperature (K)
+- `gasDensity`: gas density (kg/m3)
+- `solidDensity`: polymer density (kg/m3)
+- `sourceOfProperty`: when "DirectInput" is used, the property must be given in this file. Otherwise, it will be loaded from the results of the specified given tool.
+    - `porosity`: ["DirectInput","BubbleGrowth","Qmom0D","Qmom3D"]
+    - `cellSize`: ["DirectInput","BubbleGrowth","Qmom0D","Qmom3D"]
+    - `gasComposition`: ["DirectInput","BubbleGrowth","Qmom0D","Qmom3D"]
+    - `strutContent`: ["DirectInput","StrutContent"]
+    - `wallThickness`: ["DirectInput"]
+- `gasComposition`:
+    - `Cyclopentane`: molar fraction of cyclopentane
+    - `CO2`: molar fraction of CO2
+    - `Air`: molar fraction of air
+- `useWallThicknessDistribution`: [true,false]
+- `spatialDiscretization`: number of finite volumes for conduction-radiation simulation
+- `wallThicknessStandardDeviation`: if wall thickness distribution is used
+- `morphologyInput`: 2 is recommended (strut content is specified, wall thickness and strut size is calculated)
+- `foamThickness`: foam thickness (m)
+- `porosity`: foam porosity
+- `numericalEffectiveConductivity`: [true,false]
+- `testMode`: [true,false]
+- `numberOfGrayBoxes`: 10 is recommended
+- `strutContent`: strut content
+- `cellSize`: cell size (m)
+- `strutSize`: initial guess of strut size
+- `wallThickness`: initial guess of wall thickness
+
+### Preparing init_foamConductivity.json
+- `T`: list of temperatures (K)
+- `dcell`: list of cell sizes (m)
+- `eps`: list of porosities
+- `fstrut`: list of strut contents
+- `x[CO2]`: list of CO2 molar fractions
+- `x[CyP]`: list of cyclopentane molar fractions
+- `x[N2]`: list of nitrogen molar fractions
+- `x[O2]`: list of carbon dioxide molar fractions

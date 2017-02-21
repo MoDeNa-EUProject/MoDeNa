@@ -1,7 +1,9 @@
-!> @file
-!! stores parameters and commonly used variables as globals
+!> @file      bubbleGrowth/src/src/constants.f90
 !! @author    Pavel Ferkl
-!! @ingroup   bblgr
+!! @ingroup   src_mod_bubbleGrowth
+!! @brief     Stores physical constants and floating point precision.
+!! @details
+!! Defines only unchangable parameters.
 module constants
     use,intrinsic :: iso_fortran_env, only: dp => real64
     implicit none

@@ -49,60 +49,8 @@
  CHARACTER (LEN=50)                      :: filename
 ! ----------------------------------------------------------------------
 
-converg = 0
-
-! CALL RACHFORD_RICE (converg)
-! CALL Heidemann_Khalil
-
-! ----------------------------------------------------------------------
-! This first condition (eos >= 4) is for LJ models, not for PC-SAFT
-! ----------------------------------------------------------------------
-
-IF (eos >= 4) THEN
-  
-  ncomp = 2                   ! set number of components to 2
-  n_unkw = ncomp              ! number of quantities to be iterated
-  it(1) = 'x11'               ! iteration of mol fraction of comp.1 phase 1
-  it(2) = 'x21'               ! iteration of mol fraction of comp.1 phase 2
-  sum_rel(1) = 'x12'          ! summation relation: x12 = 1 - sum(x1j)
-  sum_rel(2) = 'x22'          ! summation relation: x22 = 1 - sum(x2j)
-  
-  filename = 'LJ_START_VAL.INC'
-  CALL file_open(filename,84)
-  READ (84,*) den1,den2
-  READ (84,*) x_1,x_2
-  CLOSE (84)
-  
-  xi(1,1) = x_1
-  xi(2,1) = x_2
-  xi(1,2) = 1.0 - xi(1,1)
-  xi(2,2) = 1.0 - xi(2,1)
-  lnx(1,1) = LOG(xi(1,1))
-  lnx(2,1) = LOG(xi(2,1))
-  lnx(1,2) = LOG(xi(1,2))
-  lnx(2,2) = LOG(xi(2,2))
-  
-  val_init(1) = den1
-  val_init(2) = den2
-  val_init(3) = t
-  val_init(4) = p
-  DO ph = 1,nphas
-    DO k = 1,ncomp
-      val_init(4+k+(ph-1)*ncomp) = LOG(xi(ph,k))
-    END DO
-  END DO
-  
-  CALL objective_ctrl (converg)
-  IF (converg == 1) WRITE (*,*) t, p/1.0E5, xi(1,1), xi(2,1)
-  IF (converg == 0) WRITE (*,*) ' weak starting values'
-  
-
-! ----------------------------------------------------------------------
-! ELSE: PC-SAFT equation of state
-! ----------------------------------------------------------------------
-
-ELSE
-  
+ converg = 0
+ 
   renormalize = .false.       ! for renormalization group theory (RGT)
   IF (num == 2) renormalize = .true.
   IF (num == 2) num = 0       ! if RGT: initial phase equilibr. is for non-renormalized model
@@ -112,11 +60,6 @@ ELSE
 
   lle_check = .true.
 
-! ----------------------------------------------------------------------
-! IF: non-polymeric system
-! ----------------------------------------------------------------------
-  IF (mm(1) < 1.0E8) THEN
-    
     DO i=1,ncomp              ! setting mole-fractions for the case that
                               ! anything goes wrong in the coming routines
       xi(1,i) = 1.0 / REAL(ncomp)
@@ -129,7 +72,7 @@ ELSE
     ! ------------------------------------------------------------------
     IF( ncomp == 2 .AND. .NOT.flashcase ) THEN
       CALL vle_min( lle_check )
-      WRITE(*,*)' INITIAL FEED-COMPOSITION',(xi(1,i), i=1,ncomp),converg
+      !WRITE(*,*)' INITIAL FEED-COMPOSITION',(xi(1,i), i=1,ncomp),converg
     END IF
     
     ! ------------------------------------------------------------------
@@ -137,7 +80,7 @@ ELSE
     ! ------------------------------------------------------------------
     ph_split = 0
     CALL phase_stability ( .false., flashcase, ph_split )
-    write (*,*) 'stability analysis I indicates phase-split is:',ph_split
+    !write (*,*) 'stability analysis I indicates phase-split is:',ph_split
 
 
     ! ------------------------------------------------------------------
@@ -169,7 +112,7 @@ ELSE
       ! --- do full phase equilibr. calculation ------------------------
       n_unkw = ncomp       ! number of quantities to be iterated
       CALL objective_ctrl (converg)
-      IF (converg == 1 ) write (*,*) ' converged (maybe a VLE)',dense(1),dense(2)
+      !IF (converg == 1 ) write (*,*) ' converged (maybe a VLE)',dense(1),dense(2)
 
     END IF
 
@@ -179,7 +122,7 @@ ELSE
     ph_split = 0
 
     IF (lle_check) CALL phase_stability (lle_check,flashcase,ph_split)
-    IF (lle_check) write (*,*) 'stability analysis II, phase-split is:',ph_split
+    !IF (lle_check) write (*,*) 'stability analysis II, phase-split is:',ph_split
 
 
     ! ------------------------------------------------------------------
@@ -187,7 +130,7 @@ ELSE
     ! ------------------------------------------------------------------
     IF (ph_split == 1) THEN
 
-      write (*,*) ' LLE-stability test indicates 2 phases (VLE or LLE)'
+     ! write (*,*) ' LLE-stability test indicates 2 phases (VLE or LLE)'
 
       ! ---  perform tangent plane minimization ------------------------
       IF (flashcase) CALL select_sum_rel (1,0,1)
@@ -207,7 +150,7 @@ ELSE
       n_unkw = ncomp       ! number of quantities to be iterated
       val_conv(2) = 0.0
       CALL objective_ctrl (converg)
-      IF (converg == 1 ) write (*,*) ' converged (maybe an LLE)',dense(1),dense(2)
+     ! IF (converg == 1 ) write (*,*) ' converged (maybe an LLE)',dense(1),dense(2)
 
     END IF
 
@@ -223,39 +166,10 @@ ELSE
         END DO
         dense(1:2) = val_conv(1:2)
     ELSE
-      WRITE (*,*) ' NO SOLUTION FOUND FOR THE STARTING VALUES'
-      STOP
+      !WRITE (*,*) ' NO SOLUTION FOUND FOR THE STARTING VALUES'
+      !STOP
     END IF
 
-
- ! ---------------------------------------------------------------------
- ! ELSE: for systems with polymers
- ! ---------------------------------------------------------------------
-
-  ELSE
-
-    ncompsav = ncomp
-    ncomp = 2            ! set number of components to 2
-    n_unkwsav = n_unkw
-    
-    CALL poly_sta_var(converg)
-    
-    IF (converg == 1) THEN
-        val_init = val_conv
-    ELSE
-      WRITE (*,*) ' NO SOLUTION FOUND FOR THE STARTING VALUES'
-      STOP
-    END IF
-    
-    ncomp = ncompsav
-    n_unkw = n_unkwsav   ! number of quantities to be iterated
-    
-  END IF
-
-! --- for RGT: set flag back to num=2 indicating an RGT calculation ----
-  IF (renormalize) num = 2
-
-END IF
 
 END SUBROUTINE start_var
 
@@ -580,6 +494,10 @@ END FUNCTION isofugacity
 ! ----------------------------------------------------------------------
 
 
+start_xl = 0.
+start_xv = 0.
+
+
 
 j = 0
 k = 0
@@ -639,23 +557,26 @@ DO i=2,steps-2
   END IF
 END DO
 
-
 IF (start_xl(1) == 0.0 .AND. start_xv(1) /= 0.0) THEN
+
   xi(1,1) = start_xv(1)
   xi(1,2) = 1.0-xi(1,1)
   lle_check=.false.
   ! write (*,*) 'VLE is likely', xi(1,1),xi(1,2)
 ELSE IF (start_xl(1) /= 0.0 .AND. start_xv(1) == 0.0) THEN
+
   xi(1,1) = start_xl(1)
   xi(1,2) = 1.0-xi(1,1)
   ! write (*,*) 'LLE is likely', xi(1,1),xi(1,2)
   lle_check=.true.
 ELSE IF (start_xl(1) /= 0.0 .AND. start_xv(1) /= 0.0) THEN
+
   xi(1,1) = start_xv(1)
   xi(1,2) = 1.0-xi(1,1)
   ! write(*,*) 'starting with VLE and check for LLE'
   lle_check=.true.
 ELSE
+
   xi(1,1) = x_sav
   xi(1,2) = 1.0 - xi(1,1)
 END IF
@@ -735,13 +656,14 @@ END SUBROUTINE vle_min
 n = ncomp
 ALLOCATE( optpara(n) )
 
-IF (lle_check) WRITE (*,*) ' stability test starting with dense phase'
+!IF (lle_check) WRITE (*,*) ' stability test starting with dense phase'
 
 DO i = 1, ncomp     ! setting feed-phase x's
   IF (.NOT.flashcase) xif(i) = xi(1,i)
   IF (flashcase) xi(1,i) = xif(i)
   xi(2,i) = xif(i)  ! feed is tested for both: V and L density
 END DO
+
 
 densta(1) = 0.45
 densta(2) = 1.d-6

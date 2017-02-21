@@ -1,4 +1,5 @@
 '''@cond
+
    ooo        ooooo           oooooooooo.             ooooo      ooo
    `88.       .888'           `888'   `Y8b            `888b.     `8'
     888b     d'888   .ooooo.   888      888  .ooooo.   8 `88b.    8   .oooo.
@@ -6,18 +7,23 @@
     8  `888'   888  888   888  888      888 888ooo888  8     `88b.8   .oP"888
     8    Y     888  888   888  888     d88' 888    .o  8       `888  d8(  888
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
+
 Copyright
-    2014 MoDeNa Consortium, All rights reserved.
+    2014-2016 MoDeNa Consortium, All rights reserved.
+
 License
     This file is part of Modena.
+
     Modena is free software; you can redistribute it and/or modify it under
     the terms of the GNU General Public License as published by the Free
     Software Foundation, either version 3 of the License, or (at your option)
     any later version.
+
     Modena is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
+    FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+    details.
+
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
 @endcond'''
@@ -25,25 +31,18 @@ License
 """
 @file
 Surrogate function and model definitions for the density of the reaction mixturemode
+
+@ingroup mod_reactionMixDensity
+@namespace PolymerDensity_units.density_reaction_mixture
+
 @author    Erik Laurini
 @author    Mohsen Karimi
-@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@copyright 2014-2016, MoDeNa Project. GNU Public License.
 @ingroup   app_aging
 """
 
-import os
-import modena
-from modena import CFunction, IndexSet, Workflow2, \
-    ForwardMappingModel, BackwardMappingModel, SurrogateModel
-import modena.Strategy as Strategy
-from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
-from fireworks import Firework, Workflow, FWAction
-from fireworks.utilities.fw_utilities import explicit_serialize
-from blessings import Terminal
-from jinja2 import Template
+from modena import CFunction, ForwardMappingModel
 
-## Create terminal for colour output
-term = Terminal()
 ## Surrogate function for density of the reaction mixture.
 #
 # Density is a function of temperature and conversion of gelling reaction.
@@ -59,7 +58,7 @@ void densityreactionmixture
 )
 {
     {% block variables %}{% endblock %}
-    
+
     const double a_L0 = parameters[0];
     const double b_L0 = parameters[1];
     const double a_P0 = parameters[2];
@@ -70,7 +69,7 @@ void densityreactionmixture
 ''',
     # These are global bounds for the function
     inputs={
-        'T': { 'min': 273, 'max': 450},
+        'T': { 'min': 273, 'max': 550},
         'XOH': { 'min': 0, 'max': 1},
     },
     outputs={
@@ -91,12 +90,4 @@ m = ForwardMappingModel(
     surrogateFunction=f,
     substituteModels= [ ],
     parameters=[-0.0006, 1287.8, -0.000048, 992.8],
-    inputs=
-    {
-    'T': { 'min': 273, 'max': 450 },
-    'XOH': { 'min': 0, 'max': 1 },
-    },
-    outputs={
-       'density_reaction_mixtureSM': { 'min': 0, 'max': 8000.0 },
-   },
 )

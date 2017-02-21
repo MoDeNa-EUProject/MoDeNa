@@ -1,19 +1,19 @@
+@ingroup mod_foamConstruction
+
 Foam Construction
-============================
+=================
+
+## Scope of this module
+This module contains an utility, which can create a spatially three-dimensional image of foam morphology with desired foam density, cell size distribution and strut content. This module does not contain any MoDeNa model.
+
 ## Installation
-The code depends on several third-party applications:
-- `wine` to have ability of running windows executable files (i.e. file.exe).
-- `neper` and `voro++` for tessellation
-- `gmsh`, `vtk` and `meshconv` for mesh manipulation
-- `binvox` for voxelization
-- `foamreconstr` for creation of voxelized foams with struts
+The code depends on several third-party applications. They are listed in @ref dep_foamConstruction. 
 
 To install all of these on Ubuntu, do:
 ```
-sudo add-apt-repository ppa:ubuntu-wine/ppa
-sudo apt-get update
-sudo apt-get install wine1.7 libmatheval-dev gmsh gsl-bin libgsl0-dev \
-    python-vtk
+sudo apt-get install libmatheval-dev gmsh gsl-bin libgsl0-dev python-vtk \
+    lib3ds-1-3 libjpeg62 freeglut3 libnlopt-dev libboost-dev \ libboost-date-time-dev libboost-thread-dev zlib1g-dev libpng12-dev \
+    libjpeg8-dev libtiff5-dev libopenexr-dev
 ```
 Then download and install `neper` from http://neper.sourceforge.net/downloads.html.
 You will need to unpack `neper`, go to its `src` folder and then:
@@ -24,13 +24,24 @@ cmake ..
 make
 sudo make install
 ```
-Download `meshconv` from http://www.cs.princeton.edu/~min/meshconv/, download
-`binvox` from http://www.cs.princeton.edu/~min/binvox/ and copy `meshconv` and `binvox` to `$PATH`. You can do this manually or in terminal using
+Install POV-Ray from sources:
 ```
-wget http://www.cs.princeton.edu/~min/meshconv/linux64/meshconv
+cd where-you-want-source-files
+git clone https://github.com/POV-Ray/povray.git
+cd povray/unix
+./prebuild.sh
+cd ..
+./configure COMPILED_BY="your name <email@address>"
+make
+sudo make install
+```
+Download `meshconv` from http://www.patrickmin.com/meshconv/, download
+`binvox` from http://www.patrickmin.com/binvox/ and copy `meshconv` and `binvox` to `$PATH`. You can do this manually or in terminal using
+```
+wget http://www.patrickmin.com/meshconv/linux64/meshconv
 chmod +x meshconv
 sudo mv meshconv /usr/local/bin/meshconv
-wget http://www.cs.princeton.edu/~min/binvox/linux64/binvox
+wget http://www.patrickmin.com/binvox/linux64/binvox
 chmod +x binvox
 sudo mv binvox /usr/local/bin/binvox
 ```
@@ -70,8 +81,10 @@ in `example_inputs` directory. Following inputs can be adjusted:
 - `deleteFiles` - delete some redundant output files after execution
 - `packing` - call packing algorithm, which creates seeds and radii for
 tessellation
+- `alternativePackingAlgorithm` - uses alternative packing algorithm from "spherepack"
 - `tesselation` - call tessellation program, which creates foam with desired
 cell size distribution based on results of packing
+- `visualizeTesselation` - visualizes tessellation using the POV-Ray
 - `geometry` - limits the foam to RVE
 - `statistics` - compute and save cell volumes, face surfaces, etc.
 - `hypermesh` - create input for `Hypermesh`

@@ -53,61 +53,7 @@ type (userctx)         user
  CHARACTER (LEN=50)                      :: filename
 ! ----------------------------------------------------------------------
 
-converg = 0
-
-! CALL RACHFORD_RICE (converg)
-! CALL Heidemann_Khalil
-
-! ----------------------------------------------------------------------
-! This first condition (eos >= 4) is for LJ models, not for PC-SAFT
-! ----------------------------------------------------------------------
-
-IF (eos >= 4) THEN
-  
-  ncomp = 2                   ! set number of components to 2
-  n_unkw = ncomp              ! number of quantities to be iterated
-  it(1) = 'x11'               ! iteration of mol fraction of comp.1 phase 1
-  it(2) = 'x21'               ! iteration of mol fraction of comp.1 phase 2
-  sum_rel(1) = 'x12'          ! summation relation: x12 = 1 - sum(x1j)
-  sum_rel(2) = 'x22'          ! summation relation: x22 = 1 - sum(x2j)
-  
-  filename = 'LJ_START_VAL.INC'
-  CALL file_open(filename,84)
-  READ (84,*) den1,den2
-  READ (84,*) x_1,x_2
-  CLOSE (84)
-  
-  xi(1,1) = x_1
-  xi(2,1) = x_2
-  xi(1,2) = 1.0 - xi(1,1)
-  xi(2,2) = 1.0 - xi(2,1)
-  lnx(1,1) = LOG(xi(1,1))
-  lnx(2,1) = LOG(xi(2,1))
-  lnx(1,2) = LOG(xi(1,2))
-  lnx(2,2) = LOG(xi(2,2))
-  
-  val_init(1) = den1
-  val_init(2) = den2
-  val_init(3) = t
-  val_init(4) = p
-  DO ph = 1,nphas
-    DO k = 1,ncomp
-      val_init(4+k+(ph-1)*ncomp) = LOG(xi(ph,k))
-    END DO
-  END DO
-  
-  CALL objective_ctrl (converg)
- 
- IF(user%rank == 0) THEN
-   IF (converg == 1) WRITE (*,*) t, p/1.0E5, xi(1,1), xi(2,1)
-   IF (converg == 0) WRITE (*,*) ' weak starting values'
- END IF 
-
-! ----------------------------------------------------------------------
-! ELSE: PC-SAFT equation of state
-! ----------------------------------------------------------------------
-
-ELSE
+ converg = 0
   
   renormalize = .false.       ! for renormalization group theory (RGT)
   IF (num == 2) renormalize = .true.
@@ -117,11 +63,6 @@ ELSE
   IF (xif(1) /= 0.0) flashcase = .true.
 
   lle_check = .true.
-
-! ----------------------------------------------------------------------
-! IF: non-polymeric system
-! ----------------------------------------------------------------------
-  IF (mm(1) < 2000.0) THEN
     
     DO i=1,ncomp              ! setting mole-fractions for the case that
                               ! anything goes wrong in the coming routines
@@ -135,9 +76,9 @@ ELSE
     ! ------------------------------------------------------------------
     IF( ncomp == 2 .AND. .NOT.flashcase ) THEN
       CALL vle_min( lle_check )
-      IF(user%rank == 0) THEN
-      WRITE(*,*)' INITIAL FEED-COMPOSITION',(xi(1,i), i=1,ncomp),converg
-      END IF   
+      !IF(user%rank == 0) THEN
+      !WRITE(*,*)' INITIAL FEED-COMPOSITION',(xi(1,i), i=1,ncomp),converg
+      !END IF   
    END IF
     
     ! ------------------------------------------------------------------
@@ -145,9 +86,9 @@ ELSE
     ! ------------------------------------------------------------------
     ph_split = 0
     CALL phase_stability ( .false., flashcase, ph_split,user )
-    IF(user%rank == 0) THEN
-     write (*,*) 'stability analysis I indicates phase-split is:',ph_split
-    END IF
+    !IF(user%rank == 0) THEN
+    ! write (*,*) 'stability analysis I indicates phase-split is:',ph_split
+    !END IF
 
     ! ------------------------------------------------------------------
     ! determine species i, for which x(i) is calc from summation relation
@@ -178,9 +119,9 @@ ELSE
       ! --- do full phase equilibr. calculation ------------------------
       n_unkw = ncomp       ! number of quantities to be iterated
       CALL objective_ctrl (converg)
-      IF(user%rank == 0) THEN
-       IF (converg == 1 ) write (*,*) ' converged (maybe a VLE)',dense(1),dense(2)
-      END IF
+      !IF(user%rank == 0) THEN
+      ! IF (converg == 1 ) write (*,*) ' converged (maybe a VLE)',dense(1),dense(2)
+      !END IF
     END IF
 
     ! ------------------------------------------------------------------
@@ -189,17 +130,17 @@ ELSE
     ph_split = 0
 
     IF (lle_check) CALL phase_stability (lle_check,flashcase,ph_split)
-    IF(user%rank == 0) THEN
-     IF (lle_check) write (*,*) 'stability analysis II, phase-split is:',ph_split
-    END IF
+    !IF(user%rank == 0) THEN
+    ! IF (lle_check) write (*,*) 'stability analysis II, phase-split is:',ph_split
+    !END IF
 
     ! ------------------------------------------------------------------
     ! if two phases (LLE)
     ! ------------------------------------------------------------------
     IF (ph_split == 1) THEN
-      IF(user%rank == 0) THEN
-       write (*,*) ' LLE-stability test indicates 2 phases (VLE or LLE)'
-      END IF
+     ! IF(user%rank == 0) THEN
+     !  write (*,*) ' LLE-stability test indicates 2 phases (VLE or LLE)'
+     ! END IF
 
       ! ---  perform tangent plane minimization ------------------------
       IF (flashcase) CALL select_sum_rel (1,0,1)
@@ -219,9 +160,9 @@ ELSE
       n_unkw = ncomp       ! number of quantities to be iterated
       val_conv(2) = 0.0
       CALL objective_ctrl (converg)
-      IF(user%rank == 0) THEN
-       IF (converg == 1 ) write (*,*) ' converged (maybe an LLE)',dense(1),dense(2)
-      END IF
+      !IF(user%rank == 0) THEN
+      ! IF (converg == 1 ) write (*,*) ' converged (maybe an LLE)',dense(1),dense(2)
+      !END IF
     END IF
 
     ! ------------------------------------------------------------------
@@ -236,44 +177,11 @@ ELSE
         END DO
         dense(1:2) = val_conv(1:2)
     ELSE
-      IF(user%rank == 0) THEN
-      WRITE (*,*) ' NO SOLUTION FOUND FOR THE STARTING VALUES'
-      END IF
-      STOP
+      !IF(user%rank == 0) THEN
+      !WRITE (*,*) 'Surface Tension Code, Phase equilibrium calculation: NO SOLUTION FOUND FOR THE STARTING VALUES'
+      !END IF
+      !STOP 5
     END IF
-
-
- ! ---------------------------------------------------------------------
- ! ELSE: for systems with polymers
- ! ---------------------------------------------------------------------
-
-  ELSE
-
-    ncompsav = ncomp
-    ncomp = 2            ! set number of components to 2
-    n_unkwsav = n_unkw
-    
-    CALL poly_sta_var(converg)
-    
-    IF (converg == 1) THEN
-        val_init = val_conv
-    ELSE
-
-      IF(user%rank == 0) THEN
-      WRITE (*,*) ' NO SOLUTION FOUND FOR THE STARTING VALUES'
-      END IF
-      STOP
-    END IF
-    
-    ncomp = ncompsav
-    n_unkw = n_unkwsav   ! number of quantities to be iterated
-    
-  END IF
-
-! --- for RGT: set flag back to num=2 indicating an RGT calculation ----
-  IF (renormalize) num = 2
-
-END IF
 
 END SUBROUTINE start_var
 
@@ -597,6 +505,10 @@ END FUNCTION isofugacity
  REAL                                   :: start_xv(0:40),start_xl(0:40),x_sav,dg_dx2
 ! ----------------------------------------------------------------------
 
+
+
+start_xl = 0.
+start_xv = 0.
 
 
 j = 0
@@ -1289,8 +1201,8 @@ END SUBROUTINE determine_flash_it2
 
     IF (converg == 1) EXIT find_equilibrium
     p = p * 0.9
-    IF ( p < (0.7*p_spec) ) WRITE (*,*) ' NO SOLUTION FOUND'
-    IF ( p < (0.7*p_spec) ) STOP
+    IF ( p < (0.7*p_spec) ) WRITE (*,*) 'Surface Tension Code, Phase equilibrium calculation: NO SOLUTION FOUND'
+    IF ( p < (0.7*p_spec) ) STOP 5
 
  END DO find_equilibrium
 
@@ -1377,8 +1289,8 @@ DO j = 1, nphas
     ! ------------------------------------------------------------------
 
   ELSE
-    WRITE (*,*) 'summation relation not defined'
-    STOP
+    WRITE (*,*) 'Surface Tension Code, Phase equilibrium calculation: summation relation not defined'
+    STOP 5
   END IF
 
 END DO
@@ -1427,7 +1339,7 @@ IF (eos < 2) THEN
     x(1:ncomp)   = xi(ph,1:ncomp)
 
     IF (p < 1.E-100) THEN
-      WRITE(*,*) ' FUGACITY: PRESSURE TOO LOW', p
+      !WRITE(*,*) ' FUGACITY: PRESSURE TOO LOW', p
       p = 1.E-6
     END IF
 
@@ -1589,8 +1501,8 @@ IF (eos <= 1) THEN
       CALL H_EOS
     ELSE
       IF(num == 1) CALL H_numerical
-      IF(num == 2) write (*,*) 'enthalpy_etc: incorporate H_EOS_RN'
-      IF(num == 2) stop
+      IF(num == 2) write (*,*) 'Surface Tension Code, Phase equilibrium calculation: enthalpy_etc: incorporate H_EOS_RN'
+      IF(num == 2) stop 5
 !      IF(num == 2) CALL H_EOS_rn
     END IF
     enthal(ph) = h_res
@@ -1644,8 +1556,8 @@ DO ph = 1, nphas
     rho_phas(ph) = eta/z3t
     
   ELSE
-    write (*,*) ' SUBROUTINE DENS_CALC not available for cubic EOS'
-    stop
+    write (*,*) 'Surface Tension Code, Phase equilibrium calculation: SUBROUTINE DENS_CALC not available for cubic EOS'
+    stop 5
   END IF
   
 END DO
@@ -1685,8 +1597,8 @@ IF (eos < 2) THEN
   ELSE IF(num == 1) THEN
     CALL F_NUMERICAL
   ELSE
-    write (*,*) 'deactivated this line when making a transition to f90'
-    stop
+    write (*,*) 'Surface Tension Code, Phase equilibrium calculation: deactivated this line when making a transition to f90'
+    stop 5
     ! CALL F_EOS_rn
   END IF
 
@@ -1695,8 +1607,8 @@ IF (eos < 2) THEN
   fden = fres * rhot  +  fden_id
   
 ELSE
-  write (*,*) ' SUBROUTINE FDEN_CALC not available for cubic EOS'
-  stop
+  write (*,*) 'Surface Tension Code, Phase equilibrium calculation: SUBROUTINE FDEN_CALC not available for cubic EOS'
+  stop 5
 END IF
 
 END SUBROUTINE fden_calc
@@ -1804,8 +1716,8 @@ END SUBROUTINE fden_calc
     IF (sol == 0) THEN
        WRITE (*,*) ' no initial solution found'
        p = p*0.9
-       IF (p < (0.7*p_spec)) WRITE (*,*) ' NO SOLUTION FOUND'
-       IF (p < (0.7*p_spec)) STOP
+       IF (p < (0.7*p_spec)) WRITE (*,*) 'Surface Tension Code, Phase equilibrium calculation: NO SOLUTION FOUND'
+       IF (p < (0.7*p_spec)) STOP 5
     ELSE IF (sol > 1) THEN
        ! write (*,*) ' '
        ! write (*,*) ' ',sol,' solutions found:'
@@ -2069,8 +1981,8 @@ ELSEIF (ensemble_flag == 'tv') THEN
   eta = eta_start
   CALL P_EOS
 ELSE
-  write (*,*) 'PHI_EOS: define ensemble, ensemble_flag == (pv) or (pt)'
-  stop
+  write (*,*) 'Surface Tension Code, Phase equilibrium calculation: PHI_EOS: define ensemble, ensemble_flag == (pv) or (pt)'
+  stop 5
 END IF
 
 
@@ -2357,8 +2269,8 @@ ELSEIF (ensemble_flag == 'tv') THEN
   eta = eta_start
   CALL P_EOS
 ELSE
-  write (*,*) 'PHI_EOS: define ensemble, ensemble_flag == (pv) or (pt)'
-  stop
+  write (*,*) 'Surface Tension Code, Phase equilibrium calculation: PHI_EOS: define ensemble, ensemble_flag == (pv) or (pt)'
+  stop 5
 END IF
 
 
@@ -2650,8 +2562,8 @@ ELSEIF (ensemble_flag == 'tv') THEN
   eta = eta_start
   CALL P_NUMERICAL
 ELSE
-  write (*,*) 'PHI_EOS: define ensemble, ensemble_flag == (tv) or (tp)'
-  stop
+  write (*,*) 'Surface Tension Code, Phase equilibrium calculation: PHI_EOS: define ensemble, ensemble_flag == (tv) or (tp)'
+  stop 5
 END IF
 
 !-----------------------------------------------------------------------
@@ -3165,8 +3077,8 @@ IF (assoc) THEN
     IF(err_sum <= tol) GO TO 10
     
   END DO
-  WRITE(6,*) 'CAL_PCSAFT: max_eval violated err_sum = ',err_sum,tol
-  STOP
+  WRITE(6,*) 'Surface Tension Code, Phase equilibrium calculation: CAL_PCSAFT: max_eval violated err_sum = ',err_sum,tol
+  STOP 5
   10   CONTINUE
   
   DO i = 1, ncomp
@@ -4461,7 +4373,7 @@ IF (assoc) THEN
   END DO
   
   IF ( ass_cnt >= max_eval .AND. err_sum > SQRT(tol) ) THEN
-    WRITE (*,'(a,2G15.7)') 'P_EOS: Max_eval violated (mx) Err_Sum= ',err_sum,tol
+   ! WRITE (*,'(a,2G15.7)') 'P_EOS: Max_eval violated (mx) Err_Sum= ',err_sum,tol
     ! stop
   END IF
 
@@ -4620,8 +4532,8 @@ END SUBROUTINE PHI_POLAR
  fdd_rk = 0.0
  z3 = eta
  DO i = 1, ncomp
-    IF ( uij(i,i) == 0.0 ) write (*,*) 'PHI_DD_GROSS_VRABEC: do not use dimensionless units'
-    IF ( uij(i,i) == 0.0 ) stop
+    IF ( uij(i,i) == 0.0 ) write (*,*) 'Surface Tension Code: PHI_DD_GROSS_VRABEC: do not use dimensionless units'
+    IF ( uij(i,i) == 0.0 ) stop 5
     my2dd(i) = (parame(i,6))**2 *1.E-49 / (uij(i,i)*KBOL*mseg(i)*sig_ij(i,i)**3 *1.E-30)
  END DO
 
@@ -6080,8 +5992,8 @@ IF (ions == 1 .AND. x_ions > 0.0) THEN
   
   IF ( j == 1 .AND. ABS(cc_error(1)) > 1.E-15 ) GO TO 131
   IF ( cc_it >= 10 ) THEN
-    WRITE (*,*) ' cc error'
-    STOP
+    WRITE (*,*) 'Surface Tension Code, Phase equilibrium calculation: cc error'
+    STOP 5
   END IF
   IF ( j /= 1 ) GO TO 13
   
@@ -6149,8 +6061,8 @@ END SUBROUTINE F_ION_ION_PrimMSA
     !CALL SEMIRESTRICTED (A_MSA,A_CC,A_CD,A_DD,U_MSA,  &
     !                    chempot,ncomp,parame,t,eta,x_export,msegm,0)
     !fdd = A_MSA
-    write (*,*) 'why are individual contrib. A_CC,A_CD,A_DD not used'
-    stop
+    write (*,*) 'Surface Tension Code, Phase equilibrium calculation: why are individual contrib. A_CC,A_CD,A_DD not used'
+    stop 5
  END IF
 
  END SUBROUTINE F_ION_ION_nonPrimMSA
@@ -6899,8 +6811,8 @@ END SUBROUTINE P_DQ_VRABEC_GROSS
     write (*,*) 'caution: not thoroughly checked and tested'
 
  ELSE
-    write (*,*) 'define the type of perturbation theory'
-    stop
+    write (*,*) 'Surface Tension Code, Phase equilibrium calculation: define the type of perturbation theory'
+    stop 5
  END IF
 
  ! I1 = I1 + 4.0/9.0*(2.5**-9 -3.0*2.5**-3 )
@@ -7168,8 +7080,8 @@ END SUBROUTINE mu_pert_theory_mix
  ddmax  = 0   ! value assigned, if polarizable compound is present
  fddm(:) = 0.0
  DO i = 1, ncomp
-    IF ( uij(i,i) == 0.0 ) write (*,*) 'F_DD_GROSS_VRABEC: do not use dimensionless units'
-    IF ( uij(i,i) == 0.0 ) stop
+    IF ( uij(i,i) == 0.0 ) write (*,*) 'Surface Tension Code: F_DD_GROSS_VRABEC: do not use dimensionless units'
+    IF ( uij(i,i) == 0.0 ) stop 5
     my2dd(i) = (parame(i,6))**2 *1.E-49 /(uij(i,i)*kbol* mseg(i)*sig_ij(i,i)**3 *1.E-30)
     alph_tst(i) = parame(i,11) / (mseg(i)*sig_ij(i,i)**3 ) * t/parame(i,3)
     IF ( alph_Tst(i) /= 0.0 ) ddmax = 25     ! set maximum number of polarizable RGT-iterations
