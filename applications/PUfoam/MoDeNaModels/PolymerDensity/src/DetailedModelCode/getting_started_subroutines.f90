@@ -645,6 +645,15 @@ DO  i = 1, ncomp
     parame(i,2) = 3.28694	!n2 and o2 according to mole fractions (weighted artihm. avg)
     parame(i,3) = 95.672	!n2 and o2 according to mole fractions (weighted artihm. avg)
 
+   Else IF(compna(i) == 'surfactant') THEN
+     mm(i) =  2655.24078
+     parame(i,1) = 78.5859962
+     parame(i,2) = 4.17006833
+     parame(i,3) = 230.284526
+     parame(i,6) = 17.9645
+    
+    
+    
   
    Else IF(compna(i) == 'mdi') THEN
      mm(i) =  2.50252E+02

@@ -9,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014-2016 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -21,8 +21,8 @@ License
 
     Modena is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
+    FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+    details.
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
@@ -30,32 +30,22 @@ License
 
 """
 @file
-Surrogate function and model definitions for thermal conductivity of blowing
-agents.
-
+@ingroup   mod_gasConductivity
+@namespace gasConductivity.gasConductivity
+@brief     Surrogate function and model definitions for thermal conductivity of
+           blowing agents.
 @author    Erik Laurini
 @author    Pavel Ferkl
-@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@copyright 2014-2016, MoDeNa Project. GNU Public License.
 @ingroup   app_aging
 """
 
-import os
-import modena
-from modena import CFunction, IndexSet, Workflow2, \
-    ForwardMappingModel, BackwardMappingModel, SurrogateModel
-import modena.Strategy as Strategy
-from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
-from fireworks import Firework, Workflow, FWAction
-from fireworks.utilities.fw_utilities import explicit_serialize
-from blessings import Terminal
-
-## Create terminal for colour output
-term = Terminal()
+from modena import CFunction, ForwardMappingModel, IndexSet
 
 ## List of components, for which surrogate model is provided
 species = IndexSet(
     name= 'gas_thermal_conductivity_species',
-    names= [ 'CO2', 'CyP', 'Air' ]
+    names= [ 'CO2', 'CyP', 'O2', 'N2' ]
 )
 
 ## Surrogate function for thermal conductivity of blowing agents.
@@ -83,7 +73,7 @@ void gas_thermal_conductivity
 ''',
     # These are global bounds for the function
     inputs={
-        'T': {'min': 273, 'max': 450},
+        'T': {'min': 273, 'max': 550},
     },
     outputs={
         'gas_thermal_conductivity[A]': {'min': 0, 'max': +9e99, 'argPos': 0},
@@ -125,4 +115,24 @@ m_CyP_thermal_conductivity = ForwardMappingModel(
     surrogateFunction=f_gas_thermal_conductivity,
     substituteModels=[],
     parameters=[0.0956e-3, -14.89e-3],
+)
+
+## Surrogate model for thermal conductivity of blowing agent
+#
+# Forward mapping model is used.
+m_O2_thermal_conductivity = ForwardMappingModel(
+    _id='gas_thermal_conductivity[A=O2]',
+    surrogateFunction=f_gas_thermal_conductivity,
+    substituteModels=[],
+    parameters=[7.79027851e-05, 3.08485612e-03],
+)
+
+## Surrogate model for thermal conductivity of blowing agent
+#
+# Forward mapping model is used.
+m_N2_thermal_conductivity = ForwardMappingModel(
+    _id='gas_thermal_conductivity[A=N2]',
+    surrogateFunction=f_gas_thermal_conductivity,
+    substituteModels=[],
+    parameters=[6.93333072e-05, 4.87189502e-03],
 )

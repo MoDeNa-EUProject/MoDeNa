@@ -1,5 +1,9 @@
-!Linear interpolation from
-!http://people.sc.fsu.edu/~jburkardt/f_src/pwl_interp_1d/pwl_interp_1d.html
+!> @file      foamConductivity/src/src/interpolation.f90
+!! @ingroup   src_mod_foamConductivity
+!! @brief     Piecewise linear interpolation.
+!! @details
+!! Subroutine for linear interpolation and extrapolation. Source:
+!! http://people.sc.fsu.edu/~jburkardt/f_src/pwl_interp_1d/pwl_interp_1d.html.
 module interpolation
     use constants, only: dp
     implicit none
@@ -69,16 +73,16 @@ subroutine pwl_interp_1d ( nd, xd, yd, ni, xi, yi )
 !
   implicit none
 
-  integer ( kind = 4 ) nd
-  integer ( kind = 4 ) ni
+  integer ( kind = 4 ) nd !< number of data points, must be at least 1
+  integer ( kind = 4 ) ni !< number of interpolation points
 
   integer ( kind = 4 ) i
   integer ( kind = 4 ) k
   real ( kind = dp ) t
-  real ( kind = dp ) xd(nd)
-  real ( kind = dp ) yd(nd)
-  real ( kind = dp ) xi(ni)
-  real ( kind = dp ) yi(ni)
+  real ( kind = dp ) xd(nd) !< data points
+  real ( kind = dp ) yd(nd) !< data values
+  real ( kind = dp ) xi(ni) !< interpolation points
+  real ( kind = dp ) yi(ni) !< interpolation values
 
   yi(1:ni) = 0.0e+00_dp
 

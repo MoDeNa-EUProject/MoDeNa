@@ -1,9 +1,10 @@
-!> @file
-!! subroutines for calculation of equivalent conductivity of the foam
-!! coupled conduction-radiation simulation
-!! non-gray 1D P1-approximation
+!> @file      foamConductivity/src/src/condrad.f90
+!! @ingroup   src_mod_foamConductivity
 !! @author    Pavel Ferkl
-!! @ingroup   foam_cond
+!! @brief     Conductive-radiative heat transfer simulation.
+!! @details
+!! Contains subroutines for heat transfer simulation in effective homogenous
+!! medium.
 module condrad
     use constants
     use ioutils
@@ -20,11 +21,15 @@ module condrad
     real(dp), dimension(:,:), allocatable :: tmatrix,gmatrix
     !end of lapack variables
     real(dp) :: dz
-    real(dp), dimension(:), allocatable :: tvec,qcon,qrad,qtot,gqrad,cond
-    real(dp), dimension(:,:), allocatable :: alpha,sigma
+    real(dp), dimension(:), allocatable :: tvec,qcon,qrad,qtot,gqrad
+    real(dp), dimension(:), allocatable :: cond !< effective conductivity
+    real(dp), dimension(:,:), allocatable :: alpha !< absorption coefficient
+    real(dp), dimension(:,:), allocatable :: sigma !< scattering coefficient
 contains
 !********************************BEGINNING*************************************
-!> determines equivalent conductivity of the foam, main algorithm
+!> Determines equivalent conductivity of the foam.
+!!
+!! It is a heat transfer in spatially one-dimensional domain.
 subroutine equcond
     integer :: i,maxiter=20,fi
     real(dp) :: tol=1e-5_dp,res
@@ -34,7 +39,7 @@ subroutine equcond
     allocate(tmatrix(ldab,nz),gmatrix(ldab,nbox*nz),tipiv(nz),gipiv(nbox*nz),&
         trhs(nz),grhs(nbox*nz),tvec(nz),qcon(nz),qrad(nz),qtot(nz),gqrad(nz))
     forall (i=1:nz)
-        tvec(i)=t1+(i-1)*(t2-t1)/(nz-1) !initial temperature profile
+        tvec(i)=temp1+(i-1)*(temp2-temp1)/(nz-1) !initial temperature profile
     end forall
     call make_tmatrix
     call dgbtrf(nz,nz,kl,ku,tmatrix,ldab,tipiv,info)
@@ -50,10 +55,13 @@ subroutine equcond
         if (res<tol) exit
     enddo
     call heatflux
-    eqc=sum(qtot)/nz*dfoam/(t1-t2)
+    eqc=sum(qtot)/nz*dfoam/(temp1-temp2)
     rcontr=sum(qrad)/sum(qtot)
     gcontr=(1-rcontr)*kgas/(kgas+ksol)
     scontr=(1-rcontr)*ksol/(kgas+ksol)
+    kgas=gcontr*eqc
+    ksol=scontr*eqc
+    krad=rcontr*eqc
     write(*,fmt) 'equivalent conductivity:',eqc*1e3_dp,'mW/m/K'
     write(*,fmt) 'contribution of gas:',gcontr*1e2_dp,'%'
     write(*,fmt) 'contribution of solid:',scontr*1e2_dp,'%'
@@ -62,7 +70,7 @@ subroutine equcond
     write(mfi,fmt) 'contribution of gas:',gcontr*1e2_dp,'%'
     write(mfi,fmt) 'contribution of solid:',scontr*1e2_dp,'%'
     write(mfi,fmt) 'contribution of radiation:',rcontr*1e2_dp,'%'
-    open(newunit(fi),file='outputs.out')
+    open(newunit(fi),file='foamConductivity.out')
     write(fi,*) eqc
     close(fi)
     deallocate(tmatrix,gmatrix,tipiv,gipiv,trhs,grhs,tvec,qcon,qrad,qtot,gqrad)
@@ -71,7 +79,7 @@ end subroutine equcond
 
 
 !********************************BEGINNING*************************************
-!> creates matrix for calculation of incidence radiation
+!> Creates matrix for calculation of incidence radiation.
 subroutine make_gmatrix
     integer :: i,j,k,l
     gmatrix=0
@@ -112,7 +120,7 @@ end subroutine make_gmatrix
 
 
 !********************************BEGINNING*************************************
-!> creates right hand side for calculation of incidence radiation
+!> Creates right hand side for calculation of incidence radiation.
 subroutine make_grhs
     integer :: i,j,k
     k=0
@@ -122,10 +130,10 @@ subroutine make_grhs
             grhs(k)=12*effn**2*sigmab*alpha(j,i)*tvec(j)**4*dz*fbepbox(i)
         enddo
         j=(i-1)*nz+1
-        grhs(j)=grhs(j) + 6*emi1/(2-emi1)*alpha(1,i)*effn**2*sigmab*t1**4/&
+        grhs(j)=grhs(j) + 6*emi1/(2-emi1)*alpha(1,i)*effn**2*sigmab*temp1**4/&
             (alpha(1,i)+sigma(1,i))*fbepbox(i)
         j=nz*i
-        grhs(j)=grhs(j) + 6*emi2/(2-emi2)*alpha(nz,i)*effn**2*sigmab*t2**4/&
+        grhs(j)=grhs(j) + 6*emi2/(2-emi2)*alpha(nz,i)*effn**2*sigmab*temp2**4/&
             (alpha(nz,i)+sigma(nz,i))*fbepbox(i)
     enddo
 end subroutine make_grhs
@@ -133,7 +141,7 @@ end subroutine make_grhs
 
 
 !********************************BEGINNING*************************************
-!> creates matrix for calculation of temperature
+!> Creates matrix for calculation of temperature.
 subroutine make_tmatrix
     integer :: i,j
     tmatrix=0
@@ -164,18 +172,18 @@ end subroutine make_tmatrix
 
 
 !********************************BEGINNING*************************************
-!> creates right hand side for calculation of temperature
+!> Creates right hand side for calculation of temperature.
 subroutine make_trhs
     call make_gqrad
     trhs=gqrad
-    trhs(1)=trhs(1)+2*cond(1)*t1/dz
-    trhs(nz)=trhs(nz)+2*cond(nz)*t2/dz
+    trhs(1)=trhs(1)+2*cond(1)*temp1/dz
+    trhs(nz)=trhs(nz)+2*cond(nz)*temp2/dz
 end subroutine make_trhs
 !***********************************END****************************************
 
 
 !********************************BEGINNING*************************************
-!> creates gradient of radiative heat flux (radiative source)
+!> Creates gradient of radiative heat flux (radiative source).
 subroutine make_gqrad
     integer :: i,j,k
     call make_grhs
@@ -194,7 +202,7 @@ end subroutine make_gqrad
 
 
 !********************************BEGINNING*************************************
-!> calculate heat flux
+!> Calculates heat flux.
 subroutine heatflux
     integer :: i,j,k
     qcon(1)=-2*cond(1)*cond(2)/(cond(1)+cond(2))*(tvec(2)-tvec(1))/dz

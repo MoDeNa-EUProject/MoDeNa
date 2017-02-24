@@ -1,4 +1,6 @@
-# Readme file for PCSAFTi\_Density
+@ingroup mod_polymerDensity
+
+# Readme file for PCSAFT_Density
 
 The program is automatically compiled and linked by executing the following two commands:
 

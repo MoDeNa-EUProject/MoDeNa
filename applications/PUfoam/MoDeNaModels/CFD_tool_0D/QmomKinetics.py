@@ -9,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014-2016 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -21,26 +21,39 @@ License
 
     Modena is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
+    FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+    details.
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
 @endcond'''
 
 """
-@file
-Backward mapping Firetask for QmomKinetics model.
-Contains path to the detailed model executable.
+@ingroup mod_0Dcfd
+@namespace CFD_tool_0D.QmomKinetics
+@brief Backward mapping Firetask for QmomKinetics model.
+       Contains path to the detailed model executable.
 
 @author    Mohsen Karimi
-@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@copyright 2014-2016, MoDeNa Project. GNU Public License.
 @ingroup   app_foaming
 """
+
 import os
 from modena.Strategy import BackwardMappingScriptTask
 
-# Source code in src/twoTanksMacroscopicProblem.C
+## @var m
+# @brief Detailed Application Recipe
+# @details
+#
+#
+# @attention
+# @pre
+# @note
+# @todo
+# @warning
+# @bug
 m = BackwardMappingScriptTask(
-    script=os.path.dirname(os.path.abspath(__file__))+'/src/QmomKinetics'
+    script=os.path.dirname(os.path.abspath(__file__))+'/src/QmomKinetics' +
+        ' && cp *.txt ../results/CFD0D/'
 )

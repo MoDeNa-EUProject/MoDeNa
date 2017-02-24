@@ -1,7 +1,9 @@
-!> @file
-!! stores parameters and commonly used variables as globals
+!> @file      foamConductivity/src/src/constants.f90
+!! @ingroup   src_mod_foamConductivity
 !! @author    Pavel Ferkl
-!! @ingroup   foam_cond
+!! @brief     Physical constants and global variables.
+!! @details
+!! Stores variables, which are used by many modules.
 module constants
     use,intrinsic :: iso_fortran_env, only: dp => real64
     implicit none
@@ -22,8 +24,11 @@ module constants
                                         !<foam has no walls if fs>1-struttol
     complex(dp), parameter :: iu=(0.0e0_dp,1.0e0_dp)       !<imaginary constant
     logical  :: &
-        wdist,&                         !<use wall thickness distribution
-        testing=.false.                 !<true disables calculation of radiation
+        wdist,&               !<use wall thickness distribution
+        testMode,&            !<true disables calculation of radiation
+        numcond               !<calcualte effective conductivity numerically
+    character(len=80) :: &
+        structureName         !<name of the file with morphology
     integer  :: &
         mfi,&                 !<main file index
         nrays,&               !<number of testing rays
@@ -31,20 +36,28 @@ module constants
         nbox,&                !<number of gray boxes
         morph_input           !<morphology input
                               !<1=wall thickness, 2=strut content,
-                              !<3=strut diameter (3 is recommended others can
+                              !<3=strut diameter, 4==strut content (alternative)
+                              !<(3 is recommended others can
                               !<have multiple solutions)
     real(dp) :: lambda,&      !<wavelength
-        t1,t2,&               !<temperatures at boundaries
+        temp1,&               !<temperature at boundary 1
+        temp2,&               !<temperature at boundary 2
         kappa2,&              !<absorption coefficient of solid
-        cond1,cond2,&         !<conductivities
-        n1,n2,&               !<real part of refractive indices
-        k1,k2,&               !<imaginary part of refractive indices
-        rho1,rho2,&           !<densities
-        emi1,emi2,&           !<wall emittances
+        cond1,&               !<conductivity of gas
+        cond2,&               !<conductivity of polymer
+        n1,&                  !<real part of refractive indice of gas
+        n2,&                  !<real part of refractive indice of polymer
+        k1,&                  !<imaginary part of refractive indice of gas
+        k2,&                  !<imaginary part of refractive indice of polymer
+        rhog,&                !<density of gas
+        rhos,&                !<density of solid
+        emi1,&                !<wall emittances at boundary 1
+        emi2,&                !<wall emittances at boundary 2
         tmean,&               !<mean temperature
         eqc,&                 !<equivalent conductivity
         eqc_ross,&            !<Rosseland equivalent conductivity
         effc,&                !<effective conductivity (only conduction)
+        effc_num,&            !<effective conductivity from numerical simulation
         kgas,&                !<gas conductivity
         ksol,&                !<solid conductivity
         krad,&                !<radiative conductivity
@@ -56,7 +69,7 @@ module constants
         albedo,&              !<scattering albedo
         effn,&                !<effective index of refraction (real part)
         por,&                 !<porosity
-        rho,&                 !<foam density
+        rhof,&                !<foam density
         dcell,&               !<cell size
         dwall,&               !<wall thickness
         fs,&                  !<strut content
@@ -65,9 +78,12 @@ module constants
         wsdev,&               !<wall thickness standard deviation
         tm(10)                !<for time measurements
     real(dp), dimension(:), allocatable :: &
-        lambdan,nwl,&       !<wavelength and real part of refractive index
-        lambdak,kwl,&       !<wavelength and imaginary part of refractive index
-        lambdagas,acgas,&   !<wavelength and absorption coefficient of gas
+        lambdan,&           !<wavelength of real part of refractive index
+        nwl,&               !<real part of refractive index
+        lambdak,&           !<wavelength of imaginary part of refractive index
+        kwl,&               !<imaginary part of refractive index
+        lambdagas,&         !<wavelength of absorption coefficient of gas
+        acgas,&             !<absorption coefficient of gas
         lambdabox,&         !<boundaries of gray boxes
         trextcoeffbox,&     !<transport extinction coefficients of gray boxes
         albedobox,&         !<scattering albedos of gray boxes

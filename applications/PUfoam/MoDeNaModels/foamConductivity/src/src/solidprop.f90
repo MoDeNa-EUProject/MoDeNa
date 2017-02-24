@@ -1,7 +1,9 @@
-!> @file
-!! subroutines for evaluation of radiative properties of solid
+!> @file      foamConductivity/src/src/solidprop.f90
+!! @ingroup   src_mod_foamConductivity
 !! @author    Pavel Ferkl
-!! @ingroup   foam_cond
+!! @brief     Effective properties of solid.
+!! @details
+!! Radiative properties of solid phase.
 module solidprop
     use constants
     implicit none
@@ -9,12 +11,13 @@ module solidprop
     public optconst
 contains
 !********************************BEGINNING*************************************
-!> determine optical constants n,k for one wavelength
+!> Determine optical constants n,k for one wavelength.
 subroutine optconst(lambda,n,k)
     use quadpack
     use interpolation
-    real(dp), intent(in) :: lambda  !wavelength
-    real(dp), intent(out) :: n,k  !complex refractive index
+    real(dp), intent(in) :: lambda  !< wavelength
+    real(dp), intent(out) :: n  !< real part of refractive index
+    real(dp), intent(out) :: k  !< imaginary part of refractive index
     !qags variables
     real(dp) :: a !start point of integration
     real(dp) :: abserr
@@ -72,11 +75,11 @@ end subroutine optconst
 
 
 !********************************BEGINNING*************************************
-!> evaluates real part of index of refraction times emissive power
+!> Evaluates real part of index of refraction times emissive power.
 real(dp) function nwew ( lambda )
 !***************************DECLARATION******************************
     use interpolation
-    real(dp) :: lambda
+    real(dp) :: lambda !< wavelength
     integer :: ni=1   !number of points, where we want to interpolate
     real(dp) :: xi(1)   !x-values of points, where we want to interpolate
     real(dp) :: yi(1)   !interpolated y-values
@@ -89,11 +92,11 @@ end function nwew
 
 
 !********************************BEGINNING*************************************
-!> evaluates real part of index of refraction times emissive power
+!> Evaluates real part of index of refraction times emissive power.
 real(dp) function kwew ( lambda )
 !***************************DECLARATION******************************
     use interpolation
-    real(dp) :: lambda
+    real(dp) :: lambda !< wavelength
     integer :: ni=1   !number of points, where we want to interpolate
     real(dp) :: xi(1)   !x-values of points, where we want to interpolate
     real(dp) :: yi(1)   !interpolated y-values
@@ -106,11 +109,11 @@ end function kwew
 
 
 !********************************BEGINNING*************************************
-!> determines emissive power
+!> Determines emissive power.
 real(dp) function Planck(temp,lambda)
 !***************************DECLARATION******************************
-    real(dp), intent(in) :: temp    !temperature
-    real(dp), intent(in) :: lambda  !wavelength
+    real(dp), intent(in) :: temp    !< temperature
+    real(dp), intent(in) :: lambda  !< wavelength
     real(dp) :: n
 !******************************BODY**********************************
     n=1.57_dp !just guess, equation for emissive power is correct only
@@ -121,10 +124,10 @@ end function Planck
 
 
 !********************************BEGINNING*************************************
-!> determines emissive power
+!> Determines emissive power.
 real(dp) function Planck2(lambda)
 !***************************DECLARATION******************************
-    real(dp), intent(in) :: lambda  !wavelength
+    real(dp), intent(in) :: lambda  !< wavelength
 !******************************BODY**********************************
     Planck2=Planck(tmean,lambda)
 end function Planck2

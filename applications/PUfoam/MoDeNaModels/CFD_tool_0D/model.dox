@@ -1,0 +1,27 @@
+/*! @page deps Dependencies
+ *  @section dep_0Dcfd Dependencies of the 0-D CFD model
+ *
+ *
+ *   | Dependency | Type                            | Version |
+ *   | ---------- | ------------------------------- | ------- |
+ *   | [BOOST]    | Libraries                       |  ?      |
+ *   | MongoDBc   | MongoDB C++ driver              |  ?      |
+ *
+ *   [BOOST]: http://www.boost.org/
+*/
+
+/**
+ * @defgroup mod_0Dcfd 0-D CFD Model
+ * @ingroup models
+ * @brief   This is a 0D example of the CFD code with the calls to the database using the MoDeNa interface.
+ * @details
+ *
+ * @note
+ * @warning
+ * @author Mohsen Karimi
+ * @author Daniele Marchisio
+ * @author Pavel Ferkl
+ * @copyright  2014-2016, MoDeNa Project. GNU Public License.
+*/
+
+

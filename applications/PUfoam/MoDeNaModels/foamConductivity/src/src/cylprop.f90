@@ -1,8 +1,9 @@
-!> @file
-!! subroutines for evaluation of strut radiative properties
-!! struts are modeled as cylinders
+!> @file      foamConductivity/src/src/cylprop.f90
+!! @ingroup   src_mod_foamConductivity
 !! @author    Pavel Ferkl
-!! @ingroup   foam_cond
+!! @brief     Estimation of effect of struts on radiative properties.
+!! @details
+!! Determines probability of absorption, scattering and transmittion.
 module cylprop
     use constants
     use solidprop
@@ -12,19 +13,18 @@ module cylprop
     public trextcoeffintstrut,extcoeffintstrut,scattcoeffintstrut,cylconst
 contains
 !********************************BEGINNING*************************************
-!> determine efficiency factors of scattering, extinction and asymmetry factor
-!!of infinitely long cylinder
-!!according to Dombrovsky: Thermal Radiation in Disperse Systems: An Engineering
-!!Approach (2010)
+!> Determines efficiency factors of scattering, extinction and asymmetry factor.
+!!
+!! Assumes struts are infinitely long cylinders.
+!! according to Dombrovsky: Thermal Radiation in Disperse Systems: An
+!! Engineering Approach (2010)
 subroutine cylconst(lambda,theta,radius,Qs,Qt,gcyl)
-    real(dp), intent(in) :: &
-        lambda,&  !wavelength
-        theta,&  !incident angle
-        radius  !radius of cylinder
-    real(dp), intent(out) :: &
-        Qs,&    !efficiency factor of scattering
-        Qt,&    !efficiency factor of extinction
-        gcyl    !anisotropy factor
+    real(dp), intent(in) :: lambda !< wavelength
+    real(dp), intent(in) :: theta  !< incident angle
+    real(dp), intent(in) :: radius !< radius of cylinder
+    real(dp), intent(out) :: Qs    !< efficiency factor of scattering
+    real(dp), intent(out) :: Qt    !< efficiency factor of extinction
+    real(dp), intent(out) :: gcyl   !< anisotropy factor
     integer :: &
         i,k,kmax,nwaw=1001
     real(dp) :: &
@@ -162,9 +162,9 @@ end subroutine cylconst
 
 
 !********************************BEGINNING*************************************
-!> evaluates transport extinction coefficient of strut integrand
+!> Evaluates transport extinction coefficient of strut integrand.
 real(dp) function trextcoeffintstrut ( theta )
-    real(dp), intent(in) :: theta
+    real(dp), intent(in) :: theta !< angle of incidence
     real(dp) :: Qs,Qt,gcyl
     call cylconst(lambda,theta,dstrut/2,Qs,Qt,gcyl)
     trextcoeffintstrut=(Qt-Qs*sin(theta)**2-gcyl*Qs*cos(theta)**2)*cos(theta)
@@ -173,9 +173,9 @@ end function trextcoeffintstrut
 
 
 !********************************BEGINNING*************************************
-!> evaluates extinction coefficient of strut integrand
+!> Evaluates extinction coefficient of strut integrand.
 real(dp) function extcoeffintstrut ( theta )
-    real(dp), intent(in) :: theta
+    real(dp), intent(in) :: theta !< angle of incidence
     real(dp) :: Qs,Qt,gcyl
     call cylconst(lambda,theta,dstrut/2,Qs,Qt,gcyl)
     extcoeffintstrut=Qt*cos(theta)
@@ -184,9 +184,9 @@ end function extcoeffintstrut
 
 
 !********************************BEGINNING*************************************
-!> evaluates scattering coefficient of strut integrand
+!> Evaluates scattering coefficient of strut integrand.
 real(dp) function scattcoeffintstrut ( theta )
-    real(dp), intent(in) :: theta
+    real(dp), intent(in) :: theta !< angle of incidence
     real(dp) :: Qs,Qt,gcyl
     call cylconst(lambda,theta,dstrut/2,Qs,Qt,gcyl)
     scattcoeffintstrut=Qs*cos(theta)

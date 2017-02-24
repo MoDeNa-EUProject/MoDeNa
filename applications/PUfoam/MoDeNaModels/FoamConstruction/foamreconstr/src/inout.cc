@@ -1,7 +1,7 @@
 /*! \file
-	\brief Functions for input and output operations.
-	\author Pavel Ferkl
-	\ingroup foam_constr
+	\ingroup src_mod_foamConstruction
+    \author  Pavel Ferkl
+    \brief   Functions for input and output operations.
 */
 #include "globals.hh"
 #include <fstream>
@@ -197,8 +197,8 @@ void saveToVTK(\
     fprintf (strmo, "ASCII\n");
     fprintf (strmo, "DATASET STRUCTURED_POINTS\n");
     fprintf (strmo, "DIMENSIONS %d %d %d\n",nx,ny,nz);
-    fprintf (strmo, "ORIGIN 0 0 0\n");
-    fprintf (strmo, "SPACING 1 1 1\n");
+    fprintf (strmo, "ORIGIN 1 1 1\n");
+    fprintf (strmo, "SPACING %g %g %g\n",1.0/nx,1.0/ny,1.0/nz);
     fprintf (strmo, "POINT_DATA %d\n",nx*ny*nz);
     fprintf (strmo, "SCALARS values int\n");
     fprintf (strmo, "LOOKUP_TABLE default\n");

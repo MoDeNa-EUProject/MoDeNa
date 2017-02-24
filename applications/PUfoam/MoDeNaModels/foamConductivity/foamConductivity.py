@@ -9,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014-2016 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -21,92 +21,132 @@ License
 
     Modena is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
+    FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+    details.
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
 @endcond'''
 
 """
-@file
-Surrogate function, model definition and backward mapping FireTask for
-Foam conductivity model.
+@file       foamConductivity.py
+@namespace  foamConductivity.foamConductivity
+@ingroup    mod_foamConductivity
+@brief      Surrogate model and Firetasks for Foam conductivity model.
+@author     Pavel Ferkl
+@copyright  2014-2016, MoDeNa Project. GNU Public License.
+@details
 
-@author    Pavel Ferkl
-@copyright 2014-2015, MoDeNa Project. GNU Public License.
-@ingroup   app_aging
+# Foam conductivity python module
+
+Contains a FireTask, which runs the detailed model and copies the results into
+the results folder. The relative path and name of the detailed model executable
+are hard coded. The FireTask is BackwardMapping, which means that if one of the
+lower scale backward mapping models will get out of validity range that model
+will be re-fitted to larger range and the detailed model will be re-run. This is
+repeated until the detailed model succesfully finishes (or possibly crashes for
+other reason, in which case an error is printed out).
+
+Also contains a definition of surrogate function and surrogate model. The
+surrogate model is Backward mapping. Thus, it can be automatically re-fitted
+using the prepared ExactTask, which executes the detailed model, reads the
+results and stores them in the database.
+
 """
 
 import os
-from modena import *
-import modena.Strategy as Strategy
+import json
 from fireworks.utilities.fw_utilities import explicit_serialize
-from jinja2 import Template
+from modena import CFunction, BackwardMappingModel, ModenaFireTask, Strategy
 import polymerConductivity
 import gasConductivity
 import gasMixtureConductivity
-
+## adjust precision of floats when saving json files
+json.encoder.FLOAT_REPR = lambda o: format(o, '.12g')
 
 @explicit_serialize
 class FoamConductivityExactTask(ModenaFireTask):
     """
-    A FireTask that starts a microscopic code and updates the database.
+    @brief    Recipe for Foam conductivity application.
+    @details
+    This FireTask controls the execution of the detailed model of the
+    Foam conductivity model. The detailed model is based on homogeneous phase
+    approach. It predicts the conductivite and radiative properties of
+    an effective homogenous medium and then simulates coupled
+    conductive-radiative heat transfer in this medium.
+
+    In order to start the detailed model, the input values for the model are
+    first written to the file "foamConductivity.json". The detailed model code
+    picks them up from this file and performs the according calculation. Once it
+    is done, the output value is written to the file "foamConductivity.out".
+    This FireTask then reads in the calculated foam conductivity from the output
+    file and inserts this value into the database.
     """
     def task(self, fw_spec):
-
-        # print self['point']
+        """
+        @brief    This task is executed when fitting the surrogate model.
+        """
         eps = self['point']['eps']
         dcell = self['point']['dcell']
         fstrut = self['point']['fstrut']
         temp = self['point']['T']
         xCO2 = self['point']['x[CO2]']
-        xAir = self['point']['x[Air]']
         xCyP = self['point']['x[CyP]']
-        # print xCO2,xAir,xCyP
-
-        # xCO2=0.3
-        # xAir=0.3
-        # xCyP=0.4
+        xO2 = self['point']['x[O2]']
+        xN2 = self['point']['x[N2]']
         # Write input
-        f = open('inputs.in', 'w')
-        f.write('{0:.6e}\n'.format(temp+1))
-        f.write('{0:.6e}\n'.format(temp-1))
-        f.write('{0:.6e}\t{1:.6e}\t{2:.6e}\n'.format(xCO2,xAir,xCyP))
-        f.write('0.9\n')
-        f.write('0.9\n')
-        f.write('1.2\n')
-        f.write('1.1e3\n')
-        f.write('{0:.6e}\n'.format(eps))
-        f.write('{0:.6e}\n'.format(dcell))
-        f.write('2\n')
-        f.write('0.5e-6\n')
-        f.write('{0:.6e}\n'.format(fstrut))
-        f.write('1e-6\n')
-        f.write('3e-2\n')
-        f.write('200\n')
-        f.write('10000\n')
-        f.write('t\n')
-        f.write('0.2\n')
-        f.write('10\n')
-        f.close()
-
+        inputs={"upperBoundary": {"temperature": temp+1,"emittance": 0.9}}
+        inputs["lowerBoundary"]={"temperature": temp-1,"emittance": 0.9}
+        inputs["gasComposition"]={
+            "O2": xO2,
+            "N2": xN2,
+            "CO2": xCO2,
+            "Cyclopentane": xCyP
+        }
+        inputs["gasDensity"]=1.2
+        inputs["solidDensity"]=1.1e3
+        inputs["sourceOfProperty"]={
+            "porosity": "DirectInput",
+            "cellSize": "DirectInput",
+            "gasComposition": "DirectInput",
+            "strutContent": "DirectInput",
+            "wallThickness": "DirectInput"
+        }
+        inputs["porosity"]=eps
+        inputs["cellSize"]=dcell
+        inputs["morphologyInput"]="strutContent"
+        inputs["wallThickness"]=0.5e-6
+        inputs["strutContent"]=fstrut
+        inputs["strutSize"]=1e-6
+        inputs["foamThickness"]=3e-2
+        inputs["spatialDiscretization"]=200
+        inputs["useWallThicknessDistribution"]=True
+        inputs["wallThicknessStandardDeviation"]=0.2
+        inputs["numberOfGrayBoxes"]=10
+        inputs["numericalEffectiveConductivity"]=False
+        # inputs["structureName"]=
+        inputs["testMode"]=False
+        with open('foamConductivity.json','w') as f:
+            json.dump(inputs, f, indent=4)
+        os.mkdir('inputs')
+        os.rename('foamConductivity.json','inputs/foamConductivity.json')
         # Execute the detailed model
         # path to **this** file + /src/...
         # will break if distributed computing
-        os.system(os.path.dirname(os.path.abspath(__file__))+'/src/kfoam')
-
+        ret = os.system(os.path.dirname(os.path.abspath(__file__))+'/src/kfoam')
+        # This call enables backward mapping capabilities
+        self.handleReturnCode(ret)
         # Analyse output
         # os.getcwd() returns the path to the "launcher" directory
         try:
-            FILE = open(os.getcwd()+'/outputs.out','r')
+            FILE = open(os.getcwd()+'/foamConductivity.out','r')
         except IOError:
             raise IOError("File not found")
 
         self['point']['kfoam'] = float(FILE.readline())
 
-        os.remove('inputs.in')
-        os.remove('outputs.out')
+        # os.remove('foamConductivity.json')
+        # os.remove('foamConductivity.out')
 
 ## Surrogate function for thermal conductivity of the foam.
 #
@@ -134,26 +174,27 @@ void tcfoam_SM
     double fs,Xs,Xw,X,kappa,kr;
     double kfoam;
     double kgas=gasMixtureConductivity;
+    double kpol=polymer_thermal_conductivity;
 
     fs=alpha*fstrut;
-    Xs=(1+4*kgas/(kgas+polymer_thermal_conductivity))/3.0;
-    Xw=2*(1+kgas/(2*polymer_thermal_conductivity))/3.0;
+    Xs=(1+4*kgas/(kgas+kpol))/3.0;
+    Xw=2*(1+kgas/(2*kpol))/3.0;
     X=(1-fs)*Xw+fs*Xs;
     kappa=4.09*sqrt(1-eps)/dcell;
     kr=16*sigma*pow(T,3)/(3*kappa);
-    kfoam = (kgas*eps+polymer_thermal_conductivity*X*(1-eps))/(eps+(1-eps)*X)+beta*kr;
+    kfoam = (kgas*eps+kpol*X*(1-eps))/(eps+(1-eps)*X)+beta*kr;
 
     outputs[0] = kfoam;
 }
 ''',
     # These are global bounds for the function
     inputs={
-        'eps': {'min': 0, 'max': 1},
+        'eps': {'min': 0, 'max': 0.995},
         'dcell': {'min': 0, 'max': 1e-1},
         'fstrut': {'min': 0, 'max': 1},
         'gasMixtureConductivity': {'min': 0, 'max': 1e-1},
         'polymer_thermal_conductivity': {'min': 0, 'max': 1e0},
-        'T': {'min': 273, 'max': 450},
+        'T': {'min': 273, 'max': 550},
         'x': {'index': gasConductivity.species, 'min': 0, 'max': 1},
     },
     outputs={
@@ -165,64 +206,17 @@ void tcfoam_SM
     },
 )
 
-# use input file to Foam aging application to initialize with reasonable data.
-fname='input.in'
-try:
-    f = open(fname,'r')
-except IOError:
-    f = open(os.getcwd()+'/../'+fname,'r')
+try: #initialization by initModels
+    with open("./inputs/init_foamConductivity.json") as fl:
+        foaming_ini=json.load(fl)
+except IOError: #automatic initialization
+    with open("../inputs/init_foamConductivity.json") as fl:
+        foaming_ini=json.load(fl)
 
-a=f.readline()
-a=f.readline()
-a=f.readline()
-a=f.readline()
-a=f.readline()
-T0=float(a.split()[0])
-a=f.readline()
-rhop=float(a.split()[0])
-a=f.readline()
-a=f.readline()
-a=f.readline()
-xAir0=float(a.split()[0])
-xCO20=float(a.split()[1])
-xCyP0=float(a.split()[2])
-a=f.readline()
-a=f.readline()
-a=f.readline()
-dcell0=float(a.split()[0])
-a=f.readline()
-fstrut0=float(a.split()[0])
-a=f.readline()
-rho0=float(a.split()[0])
-f.close()
-eps0=1-rho0/rhop
-
-def setIP(a0):
-    a=[]
-    for i in xrange(4):
-        a.append(a0)
-    upar=1-1e-4
-    opar=1+1e-4
-    a[0]=a[0]*upar
-    if a0==0:
-        a[1]=1e-4
-    else:
-        a[1]=a[1]*opar
-    return a
-
-initialPoints_foamConductivity_auto = {
-    'eps': setIP(eps0),
-    'dcell': setIP(dcell0),
-    'fstrut': setIP(fstrut0),
-    'T': setIP(T0),
-    'x[CO2]': setIP(xCO20),
-    'x[Air]': setIP(xAir0),
-    'x[CyP]': setIP(xCyP0),
-}
-
-## Surrogate model for foam conductivity
+## Surrogate model for foam conductivity.
 #
-# Backward mapping model is used.
+# Backward mapping model is used. Gas and polymer conductivity are taken
+# from substitute models.
 m_foamConductivity = BackwardMappingModel(
     _id='foamConductivity',
     surrogateFunction=f_foamConductivity,
@@ -232,7 +226,7 @@ m_foamConductivity = BackwardMappingModel(
         polymerConductivity.m_polymer_thermal_conductivity\
     ],
     initialisationStrategy=Strategy.InitialPoints(
-        initialPoints=initialPoints_foamConductivity_auto,
+        initialPoints=foaming_ini,
     ),
     outOfBoundsStrategy=Strategy.ExtendSpaceStochasticSampling(
         nNewPoints=4
@@ -247,9 +241,13 @@ m_foamConductivity = BackwardMappingModel(
     ),
 )
 
-## Foam conductivity simulation
+## Foam conductivity simulation.
 #
+# Runs the detailed model and saves the results.
 # For the case, when only foam conductivity and no aging is needed.
 m_simulation = Strategy.BackwardMappingScriptTask(
     script=os.path.dirname(os.path.abspath(__file__))+'/src/kfoam'
+        + ' && cp foamConductivity.out ../results/foamConductivity'
+        + ' && cp hahtf.out ../results/foamConductivity'
+        + ' && cp *.csv ../results/foamConductivity/'
 )

@@ -1,0 +1,26 @@
+/*! \page deps Dependencies
+  \section dep_Solubility Dependencies of Solubility model
+    - a current gfortran compiler
+*/
+
+/**
+ * @defgroup mod_solubility Solubility
+ * @ingroup models
+ * @brief   Integrates Solubility model into the MoDeNa software framework
+ * @details
+ *
+ * @pre
+ * @note
+ * @warning
+*/
+
+/**
+ * @defgroup ex_mod_solubility Example Workflow
+ * @ingroup mod_solubility
+ * @brief   Example simulation with Solubility model
+ * @details
+ *
+ * @pre
+ * @note
+ * @warning
+*/

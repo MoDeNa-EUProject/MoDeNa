@@ -1,0 +1,25 @@
+/*! @page deps Dependencies
+ *  @section dep_wallDrainage Dependencies of Wall drainage model
+ *
+ *
+ *   | Dependency      | Type                            | Tested Version |
+ *   | --------------- | ------------------------------- | -------------- |
+ *   | gfortran        | compiler                        | 5.4            |
+ *   | bspline-fortran | Library - Interpolation         | 9aeadb4*       |
+ *   | fson            | Library - JSON reader           | 750341b*       |
+ *   * Library releases are not versioned. Commit ID is provided.
+*/
+
+/**
+ * @defgroup mod_wallDrainage Wall drainage MoDeNa Module
+ * @ingroup  models
+ * @brief    Integrates Wall drainage model into the MoDeNa software framework.
+ * * @ref wallDrainage.wallDrainage.m_simulation Backward mapping FireTask
+*/
+
+/**
+ * @defgroup src_mod_wallDrainage Fortran Source Code
+ * @ingroup  mod_wallDrainage
+ * @brief    Source Code Documentation
+ * @details
+*/

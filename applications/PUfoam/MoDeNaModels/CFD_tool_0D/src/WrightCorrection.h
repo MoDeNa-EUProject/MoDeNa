@@ -1,3 +1,12 @@
+/**
+@ingroup mod_0Dcfd
+@file WrightCorrection.h
+@brief Wright corrections for moments realizability
+@fn void WrightCorrection(double *m, int nNodes)
+@param m input moments
+@param nNodes number of nodes
+@return void
+*/
 void WrightCorrection(double *m, int nNodes);
 
 void WrightCorrection(double *m, int nNodes)
@@ -6,17 +15,17 @@ void WrightCorrection(double *m, int nNodes)
 	// dynamic allocation of new moments
 	double *m1, *m2;
 	m1 = new double[n];
-	m2 = new double[n]; 
+	m2 = new double[n];
 
 	// selecting two moments, 2nd and 3rd moments
-	int i = 2; 
-	int j = 3; 
-	
+	int i = 2;
+	int j = 3;
+
 	// corresponding mean and variance
 	double mu =  (j/(i*j-pow(i,2)))*log(m[i]/m[0]) + (i/(i*j-pow(j,2)))*log(m[j]/m[0]);
 	double sigma_var = ((2.0/(pow(j,2)))*log(m[j]/m[0])-(2.0/(i*j))*log(m[i]/m[0]))/(1.0-i/j);
-	if (sigma_var < 0) 
-	{	
+	if (sigma_var < 0)
+	{
 		sigma_var = 0.0;
 	}
 
@@ -33,7 +42,7 @@ void WrightCorrection(double *m, int nNodes)
 	// corresponding mean and variance
 	mu =  (j/(i*j-pow(i,2)))*log(m[i]/m[0]) + (i/(i*j-pow(j,2)))*log(m[j]/m[0]);
 	sigma_var = ((2.0/(pow(j,2)))*log(m[j]/m[0])-(2.0/(i*j))*log(m[i]/m[0]))/(1.0-i/j);
-	if (sigma_var<0) 
+	if (sigma_var<0)
 	{
     	sigma_var = 0.0;
 	}

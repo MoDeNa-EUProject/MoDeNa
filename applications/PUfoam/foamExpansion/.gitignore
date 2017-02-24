@@ -1,0 +1,18 @@
+# Backups
+*~
+*bak
+
+# Various intermediate files and directories generated CMAKE
+CMakeFiles/
+build/
+inputs/
+Makefile
+CMakeCache.txt
+cmake_install.cmake
+install_manifest.txt
+
+# locate results (executables and libraries)
+*.so*
+*.l[ao]
+*.mod
+*.json

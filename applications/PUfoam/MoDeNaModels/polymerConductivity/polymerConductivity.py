@@ -9,7 +9,7 @@
    o8o        o888o `Y8bod8P' o888bood8P'   `Y8bod8P' o8o        `8  `Y888""8o
 
 Copyright
-    2014-2015 MoDeNa Consortium, All rights reserved.
+    2014-2016 MoDeNa Consortium, All rights reserved.
 
 License
     This file is part of Modena.
@@ -21,35 +21,26 @@ License
 
     Modena is distributed in the hope that it will be useful, but WITHOUT ANY
     WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-    FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
+    FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+    details.
 
     You should have received a copy of the GNU General Public License along
     with Modena.  If not, see <http://www.gnu.org/licenses/>.
 @endcond'''
 
 """
-@file
-Surrogate function and model definitions for thermal conductivity of polyurethane
+@ingroup mod_polymerConductivity
+@namespace polymerConductivity.polymerConductivity
+@brief Surrogate function and model definitions for thermal conductivity of
+      polyurethane
 
 @author    Erik Laurini
 @author    Pavel Ferkl
-@copyright 2014-2015, MoDeNa Project. GNU Public License.
+@copyright 2014-2016, MoDeNa Project. GNU Public License.
 @ingroup   app_aging
 """
 
-import os
-import modena
-from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, CFunction
-import modena.Strategy as Strategy
-from fireworks.user_objects.firetasks.script_task import FireTaskBase, ScriptTask
-from fireworks import Firework, Workflow, FWAction
-from fireworks.utilities.fw_utilities import explicit_serialize
-from blessings import Terminal
-from jinja2 import Template
-
-## Create terminal for colour output
-term = Terminal()
+from modena import CFunction, ForwardMappingModel
 
 ## Surrogate function for thermal conductivity of polyurethane.
 #
@@ -76,7 +67,7 @@ void thermal_conductivity
 ''',
     # These are global bounds for the function
     inputs={
-        'T': {'min': 273, 'max': 450},
+        'T': {'min': 273, 'max': 550},
     },
     outputs={
         'polymer_thermal_conductivity': {

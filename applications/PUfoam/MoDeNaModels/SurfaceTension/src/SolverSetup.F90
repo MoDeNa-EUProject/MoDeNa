@@ -1,4 +1,7 @@
-!>This file contains the subroutine which sets the method used to
+
+
+!> \file SolverSetup.f90 
+!!This file contains the subroutine which sets the method used to
 !!solve the nonlinear system of equations depending on the specifications
 !!made in the makefile.
 
@@ -134,9 +137,18 @@ external MonitorTimer
                If(user%rank == 0) write(*,*)'Using matrix-free AD Jacobian.'
                !determine local size of shell matrix
                JacLocal = INT(ngrid / user%num_procs) 
-               If(mod(ngrid,user%num_procs) /= 0 ) Stop 'Dimensions and number of cores dont match! mod(ngrid,nc) must equal 0'         
+               If(mod(ngrid,user%num_procs) /= 0 ) Then
+                   write(*,*)'Surface Tension Code: Dimensions and number of cores dont match! mod(ngrid,n_cores) must equal 0'
+                   Stop 5                        
+               End if
+               
                !Make sure that local parts of JacShell have the same size as the local DMDA-Arrays (local size JacShell != user%xm!!)
-               If(JacLocal /= user%xm) Stop 'Shell-Jacobi-Matrix and DMDA have to be parallelized accordingly!!(JacLocal = user%xm)'
+               If(JacLocal /= user%xm) Then
+                   write(*,*)'Surface Tension Code: Shell-Jacobi-Matrix and DMDA have to be parallelized accordingly.'
+!               write(*,*) 'Surface Tension Code: Shell-Jacobi-Matrix and DMDA have to be parallelized accordingly!!(JacLocal = user%xm)'
+                   Stop 6 
+               End If
+               
                call MatCreateShell(PETSC_COMM_WORLD,ncomp*JacLocal,ncomp*JacLocal,ncomp*ngrid,ncomp*ngrid,PETSC_NULL_OBJECT,J,ierr)
                call MatShellSetOperation( J, MATOP_MULT, Jac_Shell_AD, ierr )
                call SNESSetJacobian( snes, J, J, Jac_Matrix_Empty, PETSC_NULL_OBJECT, ierr)
@@ -152,9 +164,9 @@ external MonitorTimer
 
                
            Case (3) !build the complete Jacobi matrix via AD
-               If(user%rank == 0) write(*,*)'Using AD-generated Jacobian.'
-               write(*,*)'Funktioniert noch nicht!' 
-               stop              
+               If(user%rank == 0) write(*,*)'Surface Tension Code: Using AD-generated Jacobian.'
+               write(*,*)'Not working yet!' 
+               stop 6              
                !create Matrix that has the appropriate sparsity pattern for the da
                !But that also means that when values are inserted in positions that
                !dont fit this structure, an error occurs!
@@ -178,8 +190,8 @@ external MonitorTimer
 
 !Evaluate Initial Guess
       call FormInitialGuess(snes,x,ierr)
-      write(filename,*)'0_initial_profile_global.xlo'
-      call PrintGlobalVec(x,filename)
+      !write(filename,*)'0_initial_profile_global.xlo'
+      !call PrintGlobalVec(x,filename)
 
       !start timer
       total_time = 0.0
@@ -187,10 +199,10 @@ external MonitorTimer
 
 !Solve system
       call SNESSolve(snes,PETSC_NULL_OBJECT,x,ierr)
-      write(filename,*)'1_final_profile_global.xlo'
-      call PrintGlobalVec(x,filename)
-      write(filename,'(a,I3.3,a)') '2_final_profile_local_proc_',user%rank,'.xlo' 
-      call PrintLocalVec(x,da,filename)  
+      !write(filename,*)'1_final_profile_global.xlo'
+      !call PrintGlobalVec(x,filename)
+      !write(filename,'(a,I3.3,a)') '2_final_profile_local_proc_',user%rank,'.xlo' 
+      !call PrintLocalVec(x,da,filename)  
 
       !plot residual vs time graph
       !call system('gnuplot gnuplot_script.srp')  
@@ -209,7 +221,7 @@ subroutine MonitorTimer(snes,its,norm,dummy,ierr)
   Use Global_x, Only: timer,timer_old,total_time,r
   Use mod_DFT,  Only: free    
   Use PARAMETERS, Only: KBOL,PI
-  Use BASIC_VARIABLES, Only: t,parame, ncomp
+  Use BASIC_VARIABLES, Only: t,parame, ncomp, surfactant, wif_surfactant
   Use VLE_VAR, Only: rhob,tc 
 
 ! ! !PETSc modules
@@ -239,6 +251,7 @@ subroutine MonitorTimer(snes,its,norm,dummy,ierr)
       REAL      :: m_average,surftens,st_macro
       character(80) :: filename=''
 
+      Real :: scale_factor !to scale surface tension in case surfactant is present
 
 
         !calculate interfacial tension 
@@ -255,19 +268,27 @@ subroutine MonitorTimer(snes,its,norm,dummy,ierr)
 
              st_macro = surftens / ( 1.0 + 3.0/8.0/PI *t/tc  &
                                    * (1.0/2.55)**2  / (0.0674*m_average+0.0045) )
-             write(*,*)'ST',st_macro
 
+            write(*,*)'ST',st_macro
+            
+            !calculate scaling factor to implicitly account for surfactant
+            If(surfactant) Then
+               scale_factor = 0.8 - 2.4828*wif_surfactant  !adjusted to experimental results
+            Else
+               scale_factor = 1.
+            End If
+             
+            If(surfactant) write(*,*)'ST including surfactant', st_macro*scale_factor
+
+             
             !write result to outputfile
             filename='./out.txt'
             CALL file_open(filename,99)
-            WRITE (99,*) st_macro
+            WRITE (99,*) st_macro*scale_factor
             close(99)
              
           End If
         
-
-
-
 
         !calculate elapsed time
         timer = MPI_WTIME()  
