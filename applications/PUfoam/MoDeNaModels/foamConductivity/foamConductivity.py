@@ -249,5 +249,5 @@ m_simulation = Strategy.BackwardMappingScriptTask(
     script=os.path.dirname(os.path.abspath(__file__))+'/src/kfoam'
         + ' && cp foamConductivity.out ../results/foamConductivity'
         + ' && cp hahtf.out ../results/foamConductivity'
-        + ' && cp *.csv ../results/foamConductivity/'
+        + ' && rsync --ignore-missing-args *.csv ../results/foamConductivity/'
 )
