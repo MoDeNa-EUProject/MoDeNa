@@ -2,3 +2,9 @@
 *.in
 *.vtk
 *.json
+*.csv
+*.txt
+*.dat
+
+!examples/*.json
+!spectra/*.in
