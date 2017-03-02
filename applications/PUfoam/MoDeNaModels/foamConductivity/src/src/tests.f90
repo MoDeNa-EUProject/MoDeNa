@@ -89,8 +89,8 @@ subroutine eqcond_por
     integer :: fi,npoints,i
     real(dp) :: pormin,pormax,dpor
     pormin=0.90_dp
-    pormax=0.995_dp
-    npoints=20
+    pormax=0.99_dp
+    npoints=19
     dpor=(pormax-pormin)/(npoints-1)
     open(newunit(fi),file='eqcond_por.csv')
     write(fi,*) 'porosity,foam_density,eq_cond,Ross_eq_cond,&
