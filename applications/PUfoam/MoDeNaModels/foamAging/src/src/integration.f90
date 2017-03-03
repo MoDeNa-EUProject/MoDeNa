@@ -58,7 +58,7 @@ subroutine integrate
 ! -----------------------------------
 ! find out physical properties
 ! -----------------------------------
-    Dgas= gasDiffusivity(temp)
+    Dgas= gasDiffusivity(temp) ! diffusivity in gas phase
     call createModels(ngas)
     eps=1-rhof/rhop
     do i=1,ngas
@@ -79,7 +79,6 @@ subroutine integrate
         ncell=nint((dfoam-dsheet)/(dcell+dwall))
     else
         ncell = nint(dfoam/(dcell+dwall))
-        print*, ncell
         divsheet=0
     endif
     nFV = divsheet+ncell*(divwall+divcell)
