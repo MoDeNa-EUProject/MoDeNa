@@ -21,7 +21,7 @@ subroutine integrate
     use physicalProperties
     use conductivity, only: equcond
     use ioutils, only: newunit
-    use model, only: modelPU,ngas,nfv,dz,dif,sol,bc,mor
+    use model, only: model_heterogeneous
     use inout, only: input,output,print_header
     integer :: i, j, k, l, counter, fi
 	integer :: multiplicator
@@ -34,27 +34,36 @@ subroutine integrate
 
     real(dp), allocatable :: ystate(:), yprime(:) ! vector of state
     real(dp), allocatable :: RWORK(:)
-    real(dp), allocatable :: yinit(:)
     real(dp), allocatable :: pp(:) ! partial pressure
 
     ! model should be general, but physical properties and conductivity are
     ! hardcoded for ngas=4
     ngas=4
-    gasname(1)="O2"
-    gasname(2)="N2"
-    gasname(3)="CO2"
-    gasname(4)="CyP"
+    allocate(gasname(ngas))
     allocate(solModel(ngas),diffModel(ngas))
-    allocate(pp(ngas),Sg(ngas),Dg(ngas),xg(ngas),sheetSg(ngas),sheetDg(ngas))
-    allocate(pBg(ngas),kfoamXg(ngas),kgasXg(ngas))
+    allocate(Sg(ngas),Dg(ngas),Pg(ngas),Deff(ngas),sheetSg(ngas),sheetDg(ngas))
+    allocate(pp(ngas),pBg(ngas),xg(ngas),kfoamXg(ngas),kgasXg(ngas))
     allocate(sgModena(ngas),sgInputs(ngas),sgOutputs(ngas))
     allocate(sgTemppos(ngas),sgxl1pos(ngas),sgxl2pos(ngas))
     allocate(dgModena(ngas),dgInputs(ngas),dgOutputs(ngas),dgTemppos(ngas))
     allocate(kgModena(ngas),kgInputs(ngas),kgOutputs(ngas),kgTemppos(ngas))
+    ! gas names must correspond to physical properties in constants module
+    gasname(1)="O2"
+    gasname(2)="N2"
+    gasname(3)="CO2"
+    gasname(4)="CyP"
 ! -----------------------------------
 ! load inputs
 ! -----------------------------------
 	call input
+    if (sheet) then
+        ncell=nint((dfoam-dsheet)/(dcell+dwall))
+    else
+        ncell = nint(dfoam/(dcell+dwall))
+        divsheet=0
+    endif
+    nFV = divsheet+ncell*(divwall+divcell)
+    nEQ = ngas*nFV
 ! -----------------------------------
 ! find out physical properties
 ! -----------------------------------
@@ -69,20 +78,14 @@ subroutine integrate
             Dg(i)=Diffusivity(temp,i)
         endif
     enddo
+    Pg = Dg*Sg*rhop/Mg/1e5_dp
+    Deff = effectiveDiffusivity(temp,dcell,dwall,Pg)
     call print_header
-    Sg=Sg*Rg*temp*1100._dp/(1e5*Mg)
-    sheetSg=sheetSg*Rg*temp*1100._dp/(1e5*Mg)
+    Sg=Sg*Rg*temp*rhop/(1e5*Mg)
+    sheetSg=sheetSg*Rg*temp*rhop/(1e5*Mg)
 ! -----------------------------------
 ! Allocate memory for working arrays
 ! -----------------------------------
-    if (sheet) then
-        ncell=nint((dfoam-dsheet)/(dcell+dwall))
-    else
-        ncell = nint(dfoam/(dcell+dwall))
-        divsheet=0
-    endif
-    nFV = divsheet+ncell*(divwall+divcell)
-    nEQ = ngas*nFV
     allocate(ystate(1:nEQ))
     allocate(yprime(1:nEQ))
     allocate(dz(nfv))
@@ -90,7 +93,6 @@ subroutine integrate
     allocate(dif(neq))
     allocate(sol(neq))
     allocate(bc(ngas))
-    allocate(yinit(ngas))
 ! ----------------------------------
 ! mesh and initial conditions
 ! ----------------------------------
@@ -166,8 +168,8 @@ subroutine integrate
         tin  = dble(i-1)*(tend-tbeg)/dble(nroutputs*multiplicator)+tbeg
         tout = dble(i  )*(tend-tbeg)/dble(nroutputs*multiplicator)+tbeg
 100     continue    ! try to make another run for the initial step simulation
-        call dlsodes(modelPU, neq, ystate, tin, tout, itol, rtol, atol, itask,&
-            istate, iopt, rwork, lrw, iwork, liw, jdem, mf)
+        call dlsodes(model_heterogeneous, neq, ystate, tin, tout, itol, rtol, &
+            atol, itask, istate, iopt, rwork, lrw, iwork, liw, jdem, mf)
         ! evaluating the integration
         if (istate.lt.0) then
             write(*,*) 'Something is wrong, look for ISTATE =', istate

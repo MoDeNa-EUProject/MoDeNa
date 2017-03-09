@@ -7,7 +7,7 @@
 !! Also defines all Modena variables and models.
 module physicalProperties
     use constants
-    use globals, only: solModel,diffModel
+    use globals, only: solModel,diffModel,ngas,gasname
     use fmodena
     implicit none
     !modena variables
@@ -404,5 +404,21 @@ subroutine strutContent(strut_content,foam_density)
     call modena_outputs_destroy (fsOutputs)
     call modena_model_destroy (fsModena)
 end subroutine strutContent
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> Calculates effective diffusivity of the foam.
+!!
+!! [link](http://www.sciencedirect.com/science/article/pii/0017931086901481?via%3Dihub)
+pure function effectiveDiffusivity(temp,dcell,dwall,Pg) result(Deff)
+    real(dp), intent(in) :: temp !< temperature
+    real(dp), intent(in) :: dcell !< cell size
+    real(dp), intent(in) :: dwall !< wall thickness
+    real(dp), dimension(:), intent(in) :: Pg !< wall permeability
+    real(dp), dimension(:), allocatable :: Deff !< effective diffusivity
+    allocate(Deff(size(Pg)))
+    Deff = 1.0_dp*dcell/dwall*Pg/4.46e-4/1e2*1e5*temp/298.0_dp*1e-4_dp
+end function effectiveDiffusivity
 !***********************************END****************************************
 end module physicalProperties

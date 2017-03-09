@@ -304,7 +304,6 @@ end subroutine input
 subroutine output(iprof, time, ystate, neq, pp)
 	use constants
 	use globals
-	use model, only: ngas,dz,mor,nfv,sol
 	integer, intent(in) :: iprof !< number time step
 	integer, intent(in) :: neq !< number of equations
 	real(dp), intent(in) :: time !< time
@@ -375,7 +374,7 @@ end subroutine output
 !! Outputs useful information, which identifies, which foam is simulated.
 subroutine print_header
 	use globals
-	use model, only: nfv
+	integer :: i
     print*, 'Foam:'
     write(*,'(A30,EN12.3,1x,A)') 'foam density:',rhof,'kg/m3'
     write(*,'(A30,EN12.3)') 'porosity:',eps
@@ -392,19 +391,22 @@ subroutine print_header
     print*, 'Physical properties:'
     write(*,'(A30,EN12.3,1x,A)') 'polymer density:',rhop,'kg/m3'
     write(*,'(A30,EN12.3,1x,A)') 'diffusivity in gas:',Dgas,'m2/s'
-    write(*,'(A30,EN12.3,1x,A)') 'O2 diffusivity:',Dg(1),'m2/s'
-	write(*,'(A30,EN12.3,1x,A)') 'N2 diffusivity:',Dg(2),'m2/s'
-    write(*,'(A30,EN12.3,1x,A)') 'CO2 diffusivity:',Dg(3),'m2/s'
-    write(*,'(A30,EN12.3,1x,A)') 'pentane diffusivity:',Dg(4),'m2/s'
-	write(*,'(A30,EN12.3,1x,A)') 'O2 solubility:',Sg(1),'g/g/bar'
-	write(*,'(A30,EN12.3,1x,A)') 'N2 solubility:',Sg(2),'g/g/bar'
-    write(*,'(A30,EN12.3,1x,A)') 'CO2 solubility:',Sg(3),'g/g/bar'
-	write(*,'(A30,EN12.3,1x,A)') 'pentane solubility:',Sg(4),'g/g/bar'
-	write(*,'(A30,EN12.3,1x,A)') 'O2 permeability:',Sg(1)*Dg(1),'m2/s*g/g/bar'
-	write(*,'(A30,EN12.3,1x,A)') 'N2 permeability:',Sg(2)*Dg(2),'m2/s*g/g/bar'
-    write(*,'(A30,EN12.3,1x,A)') 'CO2 permeability:',Sg(3)*Dg(3),'m2/s*g/g/bar'
-	write(*,'(A30,EN12.3,1x,A)') 'pentane permeability:',Sg(4)*Dg(4),&
-        'm2/s*g/g/bar'
+	do i=1,ngas
+		write(*,'(A30,EN12.3,1x,A)') &
+			TRIM(ADJUSTL(gasname(i)))//' diffusivity:',Dg(i),'m2/s'
+	enddo
+	do i=1,ngas
+		write(*,'(A30,EN12.3,1x,A)') &
+			TRIM(ADJUSTL(gasname(i)))//' solubility:',Sg(i),'g/g/bar'
+	enddo
+	do i=1,ngas
+		write(*,'(A30,EN12.3,1x,A)') &
+			TRIM(ADJUSTL(gasname(i)))//' permeability:',Pg(i),'mol/m/s/Pa'
+	enddo
+	do i=1,ngas
+		write(*,'(A30,EN12.3,1x,A)') &
+			TRIM(ADJUSTL(gasname(i)))//' effective diffusivity:',Deff(i),'m2/s'
+	enddo
     print*, 'Numerics:'
     write(*,'(A30,I12)') 'finite volumes in wall:',divwall
     write(*,'(A30,I12)') 'finite volumes in cell:',divcell
