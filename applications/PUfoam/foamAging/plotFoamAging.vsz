@@ -2,7 +2,7 @@
 # Saved at 2017-03-09T11:19:31.396713
 
 AddImportPath(u'/home/pavel/github/MoDeNa/applications/PUfoam/foamAging')
-ImportFile(u'../../../../../bitbucket/escape27_2017/aging/figures/aging/foamAging/keq_time.out', u'time        eq_conductivity         total_pressure                   p_O2                   p_N2                  p_CO2                   p_CP', ignoretext=True, linked=True)
+ImportFile(u'results/foamAging/keq_time.out', u'time        eq_conductivity         total_pressure                   p_O2                   p_N2                  p_CO2                   p_CP', ignoretext=True, linked=True)
 Add('page', name=u'foam_conductivity', autoadd=False)
 To(u'foam_conductivity')
 Set('width', u'12cm')

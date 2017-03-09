@@ -21,7 +21,7 @@ subroutine integrate
     use physicalProperties
     use conductivity, only: equcond
     use ioutils, only: newunit
-    use models, only: model_heterogeneous
+    use models, only: model
     use inout, only: input,output,print_header
     integer :: i, j, k, l, counter, fi
 	integer :: multiplicator
@@ -61,8 +61,12 @@ subroutine integrate
         ncell = nint(dfoam/(dcell+dwall))
         divsheet=0
     endif
-    nFV = divsheet+ncell*(divwall+divcell)
-    nEQ = ngas*nFV
+    if (modelType == "heterogeneous") then
+        nfv = divsheet+ncell*(divwall+divcell)
+    elseif (modelType == "homogeneous") then
+        nfv = divsheet + nfv
+    endif
+    neq = ngas*nfv
 ! -----------------------------------
 ! find out physical properties
 ! -----------------------------------
@@ -78,15 +82,18 @@ subroutine integrate
         endif
     enddo
     Pg = Dg*Sg*rhop/Mg/1e5_dp
-    Deff = effectiveDiffusivity(temp,dcell,dwall,Pg)
+    ksi = 1.0_dp
+    Deff = effectiveDiffusivity(&
+        temp,dcell,dwall,Pg,Sg*rhop/Mg/1e5_dp,rhof,rhop,ksi&
+    )
     call print_header
     Sg=Sg*Rg*temp*rhop/(1e5*Mg)
     sheetSg=sheetSg*Rg*temp*rhop/(1e5*Mg)
 ! -----------------------------------
 ! Allocate memory for working arrays
 ! -----------------------------------
-    allocate(ystate(1:nEQ))
-    allocate(yprime(1:nEQ))
+    allocate(ystate(1:neq))
+    allocate(yprime(1:neq))
     allocate(dz(nfv))
     allocate(mor(nfv))
     allocate(dif(neq))
@@ -106,28 +113,41 @@ subroutine integrate
         enddo
         k=k+1
     enddo
-    do i = 1, ncell
-        do j=1,divcell
-            dz(k)=dcell/divcell
+    if (modelType == "heterogeneous") then
+        do i = 1, ncell
+            do j=1,divcell
+                dz(k)=dcell/divcell
+                mor(k)=1
+                do l=1,ngas
+                    dif(ngas*(k-1)+l)=Dgas
+                    sol(ngas*(k-1)+l)=1
+                    ystate(ngas*(k-1)+l)=xg(l)*pressure/Rg/temp
+                enddo
+                k=k+1
+            enddo
+            do j=1,divwall
+                dz(k)=dwall/divwall
+                mor(k)=2
+                do l=1,ngas
+                    dif(ngas*(k-1)+l)=Dg(l)
+                    sol(ngas*(k-1)+l)=Sg(l)
+                    ystate(ngas*(k-1)+l)=xg(l)*pressure/Rg/temp
+                enddo
+                k=k+1
+            enddo
+        end do
+    elseif (modelType == "homogeneous") then
+        do i = 1, nfv - divsheet
+            dz(k)=dfoam/(nfv - divsheet)
             mor(k)=1
             do l=1,ngas
-                dif(ngas*(k-1)+l)=Dgas
+                dif(ngas*(k-1)+l)=Deff(l)
                 sol(ngas*(k-1)+l)=1
                 ystate(ngas*(k-1)+l)=xg(l)*pressure/Rg/temp
             enddo
             k=k+1
         enddo
-        do j=1,divwall
-            dz(k)=dwall/divwall
-            mor(k)=2
-            do l=1,ngas
-                dif(ngas*(k-1)+l)=Dg(l)
-                sol(ngas*(k-1)+l)=Sg(l)
-                ystate(ngas*(k-1)+l)=xg(l)*pressure/Rg/temp
-            enddo
-            k=k+1
-        enddo
-    end do
+    endif
 ! ----------------------------------
 ! boundary conditions
 ! ----------------------------------
@@ -166,7 +186,7 @@ subroutine integrate
         tin  = dble(i-1)*(tend-tbeg)/dble(nroutputs*multiplicator)+tbeg
         tout = dble(i  )*(tend-tbeg)/dble(nroutputs*multiplicator)+tbeg
 100     continue    ! try to make another run for the initial step simulation
-        call dlsodes(model_heterogeneous, neq, ystate, tin, tout, itol, rtol, &
+        call dlsodes(model, neq, ystate, tin, tout, itol, rtol, &
             atol, itask, istate, iopt, rwork, lrw, iwork, liw, jdem, mf)
         ! evaluating the integration
         if (istate.lt.0) then

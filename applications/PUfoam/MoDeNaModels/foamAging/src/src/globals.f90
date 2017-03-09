@@ -9,8 +9,8 @@ module globals
 	implicit none
 	logical :: sheet !< determines if sheet is used on the outside of the foam
 	character(len=80) :: modelType !< heterogeneous or homogeneous
-    character(len=80), dimension(:), allocatable :: &
-        gasname(:) !<names of the gases from the index set
+	!> names of the gases from the index set
+    character(len=80), dimension(:), allocatable :: gasname(:)
 	integer :: nroutputs !< number of outer endme steps
 	integer :: divwall !< number of grid points in wall
 	integer :: divcell !< number of grid points in cell
@@ -35,6 +35,7 @@ module globals
 	real(dp) :: rhop !< polymer density
 	real(dp) :: eps !< foam porosity
 	real(dp) :: Dgas !< gas diffusivity in gasphase
+	real(dp) :: ksi !< wall shape parameter
 	real(dp), dimension(:), allocatable :: dz !< size of finite volume
 	real(dp), dimension(:), allocatable :: dif !< diffusivity
 	real(dp), dimension(:), allocatable :: sol !< solubility

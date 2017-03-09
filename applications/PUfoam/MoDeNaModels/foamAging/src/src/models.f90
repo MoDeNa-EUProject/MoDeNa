@@ -9,7 +9,7 @@ module models
     use globals
     implicit none
     private
-    public model_heterogeneous
+    public model
 contains
 !********************************BEGINNING*************************************
 !> Model supplied to the integrator.
@@ -19,7 +19,7 @@ contains
 !! the pressure on the wall, solubility given by Henry's law cpol = H*cgas.
 !! Model call is defined for ODEPACK.
 !! @param [in] time time
-subroutine model_heterogeneous(neq, time, ystate, yprime)
+subroutine model(neq, time, ystate, yprime)
     integer, intent(in) :: neq !< number of equations
     real(dp), intent(in) :: time !< time
     real(dp), intent(in) :: ystate(neq) !< integrated variables
@@ -57,6 +57,6 @@ subroutine model_heterogeneous(neq, time, ystate, yprime)
         yprime(k)=(fluxw-fluxe)/dz(j)
         k=k+1
     enddo
-end subroutine model_heterogeneous
+end subroutine model
 !***********************************END****************************************
 end module models

@@ -32,12 +32,19 @@ subroutine input()
 	! Read input parameters
 	json_data => fson_parse("../inputs/foamAging.json")
 	call fson_get(json_data, "modelType", modelType)
+	if (modelType /= "heterogeneous" .and. modelType /= "homogeneous") then
+		write(*,*) 'modelType must be heterogeneous or homogeneous'
+		stop
+	endif
 	call fson_get(json_data, "foamCondition.inProtectiveSheet", sheet)
 	call fson_get(json_data, "numerics.timeStart", tbeg)
 	call fson_get(json_data, "numerics.timeEnd", tend)
 	call fson_get(json_data, "numerics.numberOfOutputs", nroutputs)
 	call fson_get(json_data, "numerics.wallDiscretization", divwall)
 	call fson_get(json_data, "numerics.cellDiscretization", divcell)
+	if (modelType == "homogeneous") then
+		call fson_get(json_data, "numerics.foamDiscretization", nfv)
+	endif
 	if (sheet) then
 		call fson_get(json_data, "numerics.sheetDiscretization", divsheet)
 	endif
@@ -333,17 +340,19 @@ subroutine output(iprof, time, ystate, neq, keq, fi)
     else
         write(name_f,'(I4)') iprof
     endif
-	open(unit=11,file='H2perm_'//trim(name_f)//'.dat')
-	open(unit=12,file='ppar_'//trim(name_f)//'.dat')
 
-	! profiles
-	do i = 1, neq/ngas
-		write (11,100) time/(3600*24),pos,&
-			ystate(ngas*(i-1)+1)*sol(ngas*(i-1)+1),&
-			ystate(ngas*(i-1)+2)*sol(ngas*(i-1)+2),&
-			ystate(ngas*(i-1)+3)*sol(ngas*(i-1)+3),&
-			ystate(ngas*(i-1)+4)*sol(ngas*(i-1)+4)
-	enddo
+	if (modelType == "heterogeneous") then
+		open(unit=11,file='H2perm_'//trim(name_f)//'.dat')
+		do i = 1, neq/ngas
+			write (11,100) time/(3600*24),pos,&
+				ystate(ngas*(i-1)+1)*sol(ngas*(i-1)+1),&
+				ystate(ngas*(i-1)+2)*sol(ngas*(i-1)+2),&
+				ystate(ngas*(i-1)+3)*sol(ngas*(i-1)+3),&
+				ystate(ngas*(i-1)+4)*sol(ngas*(i-1)+4)
+		enddo
+	endif
+
+	open(unit=12,file='ppar_'//trim(name_f)//'.dat')
 	allocate(pp(ngas))
 	pp=0
 	spp=0
@@ -364,7 +373,7 @@ subroutine output(iprof, time, ystate, neq, keq, fi)
 		endif
 	enddo
 	pp=pp/spp
-    write(fi,'(10es23.15)') tbeg/(3600*24),keq*1.0e3_dp,sum(pp),pp
+    write(fi,'(10es23.15)') time/(3600*24),keq*1.0e3_dp,sum(pp),pp
     close(11)
 	close(12)
 100   format (f8.2,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3)

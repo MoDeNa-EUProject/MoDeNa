@@ -411,14 +411,25 @@ end subroutine strutContent
 !> Calculates effective diffusivity of the foam.
 !!
 !! [link](http://www.sciencedirect.com/science/article/pii/0017931086901481?via%3Dihub)
-pure function effectiveDiffusivity(temp,dcell,dwall,Pg) result(Deff)
+!! [link](http://cel.sagepub.com/cgi/doi/10.1177/0021955X02038002248)
+pure function effectiveDiffusivity(&
+        temp,dcell,dwall,Pg,Sg,rhof,rhop,ksi) result(Deff)
     real(dp), intent(in) :: temp !< temperature
     real(dp), intent(in) :: dcell !< cell size
     real(dp), intent(in) :: dwall !< wall thickness
+    real(dp), intent(in) :: rhof !< foam density
+    real(dp), intent(in) :: rhop !< polymer density
+    real(dp), intent(in) :: ksi !< wall shape parameter
     real(dp), dimension(:), intent(in) :: Pg !< wall permeability
+    real(dp), dimension(:), intent(in) :: Sg !< solubility
     real(dp), dimension(:), allocatable :: Deff !< effective diffusivity
     allocate(Deff(size(Pg)))
-    Deff = 1.0_dp*dcell/dwall*Pg/4.46e-4/1e2*1e5*temp/298.0_dp*1e-4_dp
+    ! according to Ostrogorsky
+    ! neglects dissolved gas in polymer
+    ! Deff = ksi*dcell/dwall*Pg/4.46e-4/1e2*1e5*temp/298.0_dp*1e-4_dp
+    ! according to Olsson
+    ! including the effect of dissolved gas
+    Deff = ksi*dcell/dwall*Pg*((1-rhof/rhop)/Rg/temp+rhof/rhop*Sg)**(-1)
 end function effectiveDiffusivity
 !***********************************END****************************************
 end module physicalProperties
