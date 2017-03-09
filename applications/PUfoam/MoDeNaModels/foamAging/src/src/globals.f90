@@ -8,6 +8,7 @@ module globals
 	use constants, only: dp
 	implicit none
 	logical :: sheet !< determines if sheet is used on the outside of the foam
+	character(len=80) :: modelType !< heterogeneous or homogeneous
     character(len=80), dimension(:), allocatable :: &
         gasname(:) !<names of the gases from the index set
 	integer :: nroutputs !< number of outer endme steps

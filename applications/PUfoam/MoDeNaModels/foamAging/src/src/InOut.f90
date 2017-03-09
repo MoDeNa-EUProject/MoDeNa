@@ -31,6 +31,7 @@ subroutine input()
 	integer :: fi
 	! Read input parameters
 	json_data => fson_parse("../inputs/foamAging.json")
+	call fson_get(json_data, "modelType", modelType)
 	call fson_get(json_data, "foamCondition.inProtectiveSheet", sheet)
 	call fson_get(json_data, "numerics.timeStart", tbeg)
 	call fson_get(json_data, "numerics.timeEnd", tend)
@@ -301,17 +302,19 @@ end subroutine input
 !!
 !! Saves partial pressure profiles in whole foam and in gas phase only.
 !! @param [in] time time
-subroutine output(iprof, time, ystate, neq, pp)
+subroutine output(iprof, time, ystate, neq, keq, fi)
 	use constants
 	use globals
 	integer, intent(in) :: iprof !< number time step
 	integer, intent(in) :: neq !< number of equations
+	integer, intent(in) :: fi !< file index for keq_time.out
 	real(dp), intent(in) :: time !< time
 	real(dp), intent(in) :: ystate(:) !< integrated variables
-	real(dp), intent(out) :: pp(:) !< partial pressure
+	real(dp), intent(in) :: keq !< equivalent conductivity
 	integer :: i, j
 	integer :: spp
 	real(dp) :: pos
+	real(dp), dimension(:), allocatable :: pp
 
 	character(len=1) :: name_1	! one character
 	character(len=2) :: name_2	! two characters
@@ -341,6 +344,7 @@ subroutine output(iprof, time, ystate, neq, pp)
 			ystate(ngas*(i-1)+3)*sol(ngas*(i-1)+3),&
 			ystate(ngas*(i-1)+4)*sol(ngas*(i-1)+4)
 	enddo
+	allocate(pp(ngas))
 	pp=0
 	spp=0
 	do i = 1,nfv
@@ -360,6 +364,7 @@ subroutine output(iprof, time, ystate, neq, pp)
 		endif
 	enddo
 	pp=pp/spp
+    write(fi,'(10es23.15)') tbeg/(3600*24),keq*1.0e3_dp,sum(pp),pp
     close(11)
 	close(12)
 100   format (f8.2,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3)
@@ -375,6 +380,7 @@ end subroutine output
 subroutine print_header
 	use globals
 	integer :: i
+	print*, 'Model type: ',TRIM(ADJUSTL(modelType))
     print*, 'Foam:'
     write(*,'(A30,EN12.3,1x,A)') 'foam density:',rhof,'kg/m3'
     write(*,'(A30,EN12.3)') 'porosity:',eps
@@ -403,10 +409,13 @@ subroutine print_header
 		write(*,'(A30,EN12.3,1x,A)') &
 			TRIM(ADJUSTL(gasname(i)))//' permeability:',Pg(i),'mol/m/s/Pa'
 	enddo
-	do i=1,ngas
-		write(*,'(A30,EN12.3,1x,A)') &
-			TRIM(ADJUSTL(gasname(i)))//' effective diffusivity:',Deff(i),'m2/s'
-	enddo
+	if (modelType == 'homogeneous') then
+		do i=1,ngas
+			write(*,'(A30,EN12.3,1x,A)') &
+				TRIM(ADJUSTL(gasname(i)))//' effective diffusivity:',&
+				Deff(i),'m2/s'
+		enddo
+	endif
     print*, 'Numerics:'
     write(*,'(A30,I12)') 'finite volumes in wall:',divwall
     write(*,'(A30,I12)') 'finite volumes in cell:',divcell

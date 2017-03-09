@@ -21,7 +21,7 @@ subroutine integrate
     use physicalProperties
     use conductivity, only: equcond
     use ioutils, only: newunit
-    use model, only: model_heterogeneous
+    use models, only: model_heterogeneous
     use inout, only: input,output,print_header
     integer :: i, j, k, l, counter, fi
 	integer :: multiplicator
@@ -34,7 +34,6 @@ subroutine integrate
 
     real(dp), allocatable :: ystate(:), yprime(:) ! vector of state
     real(dp), allocatable :: RWORK(:)
-    real(dp), allocatable :: pp(:) ! partial pressure
 
     ! model should be general, but physical properties and conductivity are
     ! hardcoded for ngas=4
@@ -42,7 +41,7 @@ subroutine integrate
     allocate(gasname(ngas))
     allocate(solModel(ngas),diffModel(ngas))
     allocate(Sg(ngas),Dg(ngas),Pg(ngas),Deff(ngas),sheetSg(ngas),sheetDg(ngas))
-    allocate(pp(ngas),pBg(ngas),xg(ngas),kfoamXg(ngas),kgasXg(ngas))
+    allocate(pBg(ngas),xg(ngas),kfoamXg(ngas),kgasXg(ngas))
     allocate(sgModena(ngas),sgInputs(ngas),sgOutputs(ngas))
     allocate(sgTemppos(ngas),sgxl1pos(ngas),sgxl2pos(ngas))
     allocate(dgModena(ngas),dgInputs(ngas),dgOutputs(ngas),dgTemppos(ngas))
@@ -161,9 +160,8 @@ subroutine integrate
     open (newunit(fi),file='keq_time.out')
     write(fi,'(10A23)') '#time', 'eq_conductivity', 'total_pressure', 'p_O2', &
         'p_N2', 'p_CO2', 'p_CP'
-    call output(0, 0.0_dp, ystate, neq, pp)
     call equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp_cond)
-    write(fi,'(10es23.15)') tbeg/(3600*24),keq*1.0e3_dp,sum(pp),pp
+    call output(0, 0.0_dp, ystate, neq, keq, fi)
     do i = 1, nroutputs*multiplicator       ! stabilizing multiplicator
         tin  = dble(i-1)*(tend-tbeg)/dble(nroutputs*multiplicator)+tbeg
         tout = dble(i  )*(tend-tbeg)/dble(nroutputs*multiplicator)+tbeg
@@ -196,9 +194,8 @@ subroutine integrate
         if (mod(i,multiplicator).eq.0) then
             write(*,'(2x,A,1x,f6.1,1x,A)') 'time:', tout/(3600*24),'days'
             write(10,'(2x,A,1x,es9.3,1x,A)') 'time:', tout/(3600*24),'days'
-            call output(i/multiplicator, tout, ystate, neq, pp)
             call equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp_cond)
-            write(fi,'(10es23.15)') tout/(3600*24),keq*1e3,sum(pp),pp
+            call output(i/multiplicator, tout, ystate, neq, keq, fi)
         endif
     enddo
     close(10)

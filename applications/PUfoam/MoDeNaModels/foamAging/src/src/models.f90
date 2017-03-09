@@ -5,7 +5,7 @@
 !! @brief     Model subroutines.
 !! @details
 !! Implementation of the physical equations.
-module model
+module models
     use globals
     implicit none
     private
@@ -59,4 +59,4 @@ subroutine model_heterogeneous(neq, time, ystate, yprime)
     enddo
 end subroutine model_heterogeneous
 !***********************************END****************************************
-end module model
+end module models
