@@ -40,9 +40,10 @@ subroutine input()
 	call fson_get(json_data, "numerics.timeStart", tbeg)
 	call fson_get(json_data, "numerics.timeEnd", tend)
 	call fson_get(json_data, "numerics.numberOfOutputs", nroutputs)
-	call fson_get(json_data, "numerics.wallDiscretization", divwall)
-	call fson_get(json_data, "numerics.cellDiscretization", divcell)
-	if (modelType == "homogeneous") then
+	if (modelType == "heterogeneous") then
+		call fson_get(json_data, "numerics.wallDiscretization", divwall)
+		call fson_get(json_data, "numerics.cellDiscretization", divcell)
+	elseif (modelType == "homogeneous") then
 		call fson_get(json_data, "numerics.foamDiscretization", nfv)
 	endif
 	if (sheet) then
