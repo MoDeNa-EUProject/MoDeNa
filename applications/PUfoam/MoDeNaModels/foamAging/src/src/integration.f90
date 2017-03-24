@@ -40,7 +40,8 @@ subroutine integrate
     ngas=4
     allocate(gasname(ngas))
     allocate(solModel(ngas),diffModel(ngas))
-    allocate(Sg(ngas),Dg(ngas),Pg(ngas),Deff(ngas),sheetSg(ngas),sheetDg(ngas))
+    allocate(Sg(ngas),Dg(ngas),Pg(ngas),Deff(ngas),Seff(ngas))
+    allocate(sheetSg(ngas),sheetDg(ngas))
     allocate(pBg(ngas),xg(ngas),kfoamXg(ngas),kgasXg(ngas))
     allocate(sgModena(ngas),sgInputs(ngas),sgOutputs(ngas))
     allocate(sgTemppos(ngas),sgxl1pos(ngas),sgxl2pos(ngas))
@@ -83,9 +84,8 @@ subroutine integrate
     enddo
     Pg = Dg*Sg*rhop/Mg/1e5_dp
     ksi = 1.0_dp
-    Deff = effectiveDiffusivity(&
-        temp,dcell,dwall,Pg,Sg*rhop/Mg/1e5_dp,rhof,rhop,ksi&
-    )
+    Seff = effectiveSolubility(temp,Sg*rhop/Mg/1e5_dp,eps)
+    Deff = effectiveDiffusivity(dcell,dwall,Pg,Seff,ksi)
     call print_header
     Sg=Sg*Rg*temp*rhop/(1e5*Mg)
     sheetSg=sheetSg*Rg*temp*rhop/(1e5*Mg)
@@ -143,7 +143,7 @@ subroutine integrate
             do l=1,ngas
                 dif(ngas*(k-1)+l)=Deff(l)
                 sol(ngas*(k-1)+l)=1
-                ystate(ngas*(k-1)+l)=xg(l)*pressure/Rg/temp
+                ystate(ngas*(k-1)+l)=xg(l)*pressure*Seff(l)
             enddo
             k=k+1
         enddo
@@ -151,7 +151,12 @@ subroutine integrate
 ! ----------------------------------
 ! boundary conditions
 ! ----------------------------------
-    bc=pBg/Rg/temp
+    if (modelType == "heterogeneous") then
+        bc = pBg/Rg/temp
+    elseif (modelType == "homogeneous") then
+        bc = pBg*Seff
+        ! bc = pBg/Rg/temp
+    endif
 ! ----------------------------------
 ! initialize integration
 ! ----------------------------------

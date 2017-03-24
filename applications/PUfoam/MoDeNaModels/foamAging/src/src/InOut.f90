@@ -365,12 +365,26 @@ subroutine output(iprof, time, ystate, neq, keq, fi)
 		endif
 		if (mor(i)==1) then
 			do j=1,ngas
-				pp(j)=pp(j)+ystate(ngas*(i-1)+j)*Rg*temp
+				if (modelType == "heterogeneous") then
+					pp(j)=pp(j)+ystate(ngas*(i-1)+j)*Rg*temp
+				elseif ( modelType == "homogeneous" ) then
+					pp(j)=pp(j)+ystate(ngas*(i-1)+j)/Seff(j)
+				endif
 			enddo
 			spp=spp+1
-			write (12,101) time/(3600*24),pos,ystate(ngas*(i-1)+1)*Rg*temp,&
-				ystate(ngas*(i-1)+2)*Rg*temp,ystate(ngas*(i-1)+3)*Rg*temp,&
-				ystate(ngas*(i-1)+4)*Rg*temp
+			if (modelType == "heterogeneous") then
+				write (12,101) time/(3600*24),pos,&
+					ystate(ngas*(i-1)+1)*Rg*temp,&
+					ystate(ngas*(i-1)+2)*Rg*temp,&
+					ystate(ngas*(i-1)+3)*Rg*temp,&
+					ystate(ngas*(i-1)+4)*Rg*temp
+			elseif ( modelType == "homogeneous" ) then
+				write (12,101) time/(3600*24),pos,&
+					ystate(ngas*(i-1)+1)/Seff(1),&
+					ystate(ngas*(i-1)+2)/Seff(2),&
+					ystate(ngas*(i-1)+3)/Seff(3),&
+					ystate(ngas*(i-1)+4)/Seff(4)
+			endif
 		endif
 	enddo
 	pp=pp/spp

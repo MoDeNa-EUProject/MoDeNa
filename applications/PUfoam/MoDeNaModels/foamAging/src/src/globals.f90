@@ -44,6 +44,7 @@ module globals
 	real(dp), dimension(:), allocatable :: Dg !< gas diffusivity in polymer
 	real(dp), dimension(:), allocatable :: Pg !< gas permeability in polymer
 	real(dp), dimension(:), allocatable :: Deff !< gas diffusivity in foam
+	real(dp), dimension(:), allocatable :: Seff !< gas solubility in foam
 	real(dp), dimension(:), allocatable :: sheetSg !< gas solubility in sheet
 	real(dp), dimension(:), allocatable :: sheetDg !< gas diffusivity in sheet
 	real(dp), dimension(:), allocatable :: xg !< molar fractions of gases
