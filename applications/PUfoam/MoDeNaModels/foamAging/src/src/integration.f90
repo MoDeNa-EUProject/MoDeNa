@@ -23,8 +23,7 @@ subroutine integrate
     use ioutils, only: newunit
     use models, only: model
     use inout, only: input,output,print_header
-    integer :: i, j, k, l, counter, fi
-	integer :: multiplicator
+    integer :: i, j, k, l, fi
     integer :: itol, itask, istate, iopt
     integer :: MF, ML, MU, LRW, LIW, LENRAT, NNZ, LWM, NEQ
     integer, allocatable :: IWORK(:)
@@ -65,15 +64,15 @@ subroutine integrate
     if (modelType == "heterogeneous") then
         nfv = divsheet+ncell*(divwall+divcell)
     elseif (modelType == "homogeneous") then
-        nfv = divsheet + nfv
+        nfv = divsheet + divfoam
     endif
     neq = ngas*nfv
 ! -----------------------------------
 ! find out physical properties
 ! -----------------------------------
-    Dgas= gasDiffusivity(temp) ! diffusivity in gas phase
+    Dgas = gasDiffusivity(temp) ! diffusivity in gas phase
     call createModels(ngas)
-    eps=1-rhof/rhop
+    eps = 1 - rhof/rhop ! porosity
     do i=1,ngas
         if (solModel(i)==1) then
             Sg(i)=Solubility(temp,i)
@@ -155,7 +154,6 @@ subroutine integrate
         bc = pBg/Rg/temp
     elseif (modelType == "homogeneous") then
         bc = pBg*Seff
-        ! bc = pBg/Rg/temp
     endif
 ! ----------------------------------
 ! initialize integration
@@ -170,60 +168,35 @@ subroutine integrate
                 ! 210 structure obtained NEQ+1 calls, implicit Adams,
     allocate(rwork (1:LRW))
     allocate(iwork (1:LIW))
-    open(10,file='dcmp_progress.out', status='unknown')
-    counter = 1
     itol = 1
     rtol = 1.0e-10_dp
     atol = 1.0e-6_dp
     itask = 1
     istate = 1
-    iopt = 0
-    multiplicator = 100
+    iopt = 0 ! change these in case of convergence problems
 ! ----------------------------------
 ! Integration loop
 ! ----------------------------------
-    open (newunit(fi),file='keq_time.out')
-    write(fi,'(10A23)') '#time', 'eq_conductivity', 'total_pressure', 'p_O2', &
+    open (newunit(fi),file='degas_scalar.csv')
+    write(fi, '(1x, A23, 6(",", A23))') &
+        'time', 'eq_conductivity', 'total_pressure', 'p_O2', &
         'p_N2', 'p_CO2', 'p_CP'
     call equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp_cond)
     call output(0, 0.0_dp, ystate, neq, keq, fi)
-    do i = 1, nroutputs*multiplicator       ! stabilizing multiplicator
-        tin  = dble(i-1)*(tend-tbeg)/dble(nroutputs*multiplicator)+tbeg
-        tout = dble(i  )*(tend-tbeg)/dble(nroutputs*multiplicator)+tbeg
-100     continue    ! try to make another run for the initial step simulation
+    do i=1,nroutputs
+        tin  = dble(i-1)*(tend-tbeg)/dble(nroutputs)+tbeg
+        tout = dble(i  )*(tend-tbeg)/dble(nroutputs)+tbeg
         call dlsodes(model, neq, ystate, tin, tout, itol, rtol, &
             atol, itask, istate, iopt, rwork, lrw, iwork, liw, jdem, mf)
         ! evaluating the integration
         if (istate.lt.0) then
             write(*,*) 'Something is wrong, look for ISTATE =', istate
-            if (istate.eq.-1) then  ! not enough steps to reach tout
-                istate = 3
-                iopt = 1   ! start to change something
-                RWORK(5:8)=0.0e0_dp
-                IWORK(5) = 0
-                IWORK(6) = counter*1000
-                IWORK(7) = 0
-                counter = counter + 2
-                write(*,*) 'MAXSTEP', IWORK(6)
-                write(10,*) 'MAXSTEP', IWORK(6)
-                goto 100
-            endif
-            ! stop
-        elseif (counter>3) then
-            counter=counter-1
-            IWORK(6) = counter*1000
-            write(*,*) 'MAXSTEP', IWORK(6)
-            write(10,*) 'MAXSTEP', IWORK(6)
+            stop
         endif
-        ! some output
-        if (mod(i,multiplicator).eq.0) then
-            write(*,'(2x,A,1x,f6.1,1x,A)') 'time:', tout/(3600*24),'days'
-            write(10,'(2x,A,1x,es9.3,1x,A)') 'time:', tout/(3600*24),'days'
-            call equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp_cond)
-            call output(i/multiplicator, tout, ystate, neq, keq, fi)
-        endif
+        write(*,'(2x,A,1x,f6.1,1x,A)') 'time:', tout/(3600*24),'days'
+        call equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp_cond)
+        call output(i, tout, ystate, neq, keq, fi)
     enddo
-    close(10)
     close(fi)
     call destroyModels(ngas)
 end subroutine integrate

@@ -14,6 +14,7 @@ module globals
 	integer :: nroutputs !< number of outer endme steps
 	integer :: divwall !< number of grid points in wall
 	integer :: divcell !< number of grid points in cell
+	integer :: divfoam !< number of grid points in foam
 	integer :: divsheet !< number of grid points in sheet
 	integer :: ncell !< number of cells
 	integer :: ngas !< number of gases

@@ -56,7 +56,8 @@ from modena.Strategy import BackwardMappingScriptTask
 # @details
 # Runs the detailed model and saves the results.
 m = BackwardMappingScriptTask(
-    script = os.path.dirname(os.path.abspath(__file__))+'/src/degas' +
-        ' && cp *.dat ../results/foamAging/' +
-        ' && cp *.out ../results/foamAging/'
+    script = os.path.dirname(os.path.abspath(__file__))
+        + '/src/degas | tee degas.txt'
+        + ' && cp *.csv ../results/foamAging/'
+        + ' && cp *.txt ../results/foamAging/'
 )

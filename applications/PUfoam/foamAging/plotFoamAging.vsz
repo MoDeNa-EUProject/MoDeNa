@@ -1,8 +1,8 @@
 # Veusz saved document (version 1.25.1)
-# Saved at 2017-03-09T11:19:31.396713
+# Saved at 2017-03-27T14:59:47.425746
 
 AddImportPath(u'/home/pavel/github/MoDeNa/applications/PUfoam/foamAging')
-ImportFile(u'results/foamAging/keq_time.out', u'time        eq_conductivity         total_pressure                   p_O2                   p_N2                  p_CO2                   p_CP', ignoretext=True, linked=True)
+ImportFileCSV(u'results/foamAging/degas_scalar.csv', linked=True, numericlocale=u'C', skipwhitespace=True)
 Add('page', name=u'foam_conductivity', autoadd=False)
 To(u'foam_conductivity')
 Set('width', u'12cm')

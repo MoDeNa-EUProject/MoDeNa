@@ -10,6 +10,7 @@ from numpy import loadtxt,arange
 import matplotlib.pyplot as plt
 import json
 import os
+import pandas as pd
 def main():
     nplots=4
     titles=['Oxygen','Nitrogen','Carbon dioxide','Cyclopentane']
@@ -25,8 +26,14 @@ def main():
     lw=2
     for i in arange(0,l+1,int((l-1)/6)):
         j='{0:04d}'.format(i)
-        with open(os.path.join(directory_out,'ppar_'+j+'.dat'),'r') as infile:
-            time,x,co2,cn2,ccd,ccyp=loadtxt(infile,skiprows=0,unpack=True)
+        with open(os.path.join(directory_out,'pres_'+j+'.csv'),'r') as infile:
+            df = pd.read_csv(infile)
+            time = df['time']
+            x = df['position']
+            co2 = df['O2']
+            cn2 = df['N2']
+            ccd = df['CO2']
+            ccyp = df['CP']
         conc=[co2,cn2,ccd,ccyp]
         for j in range(nplots):
             plt.figure(j)

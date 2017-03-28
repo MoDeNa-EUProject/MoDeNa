@@ -18,7 +18,7 @@ subroutine input()
 	use constants
 	use globals
 	use physicalProperties
-	use ioutils
+	use ioutils, only: newunit
 	use fson
     use fson_value_m, only: fson_value_get
 	type(fson_value), pointer :: json_data
@@ -44,7 +44,7 @@ subroutine input()
 		call fson_get(json_data, "numerics.wallDiscretization", divwall)
 		call fson_get(json_data, "numerics.cellDiscretization", divcell)
 	elseif (modelType == "homogeneous") then
-		call fson_get(json_data, "numerics.foamDiscretization", nfv)
+		call fson_get(json_data, "numerics.foamDiscretization", divfoam)
 	endif
 	if (sheet) then
 		call fson_get(json_data, "numerics.sheetDiscretization", divsheet)
@@ -313,13 +313,14 @@ end subroutine input
 subroutine output(iprof, time, ystate, neq, keq, fi)
 	use constants
 	use globals
+	use ioutils, only: newunit
 	integer, intent(in) :: iprof !< number time step
 	integer, intent(in) :: neq !< number of equations
-	integer, intent(in) :: fi !< file index for keq_time.out
+	integer, intent(in) :: fi !< file index for degas_scalar.csv
 	real(dp), intent(in) :: time !< time
 	real(dp), intent(in) :: ystate(:) !< integrated variables
 	real(dp), intent(in) :: keq !< equivalent conductivity
-	integer :: i, j
+	integer :: i, j, fi2, fi3
 	integer :: spp
 	real(dp) :: pos
 	real(dp), dimension(:), allocatable :: pp
@@ -343,9 +344,11 @@ subroutine output(iprof, time, ystate, neq, keq, fi)
     endif
 
 	if (modelType == "heterogeneous") then
-		open(unit=11,file='H2perm_'//trim(name_f)//'.dat')
+		open(newunit(fi2),file='conc_'//trim(name_f)//'.csv')
+		write (fi2,'(A, 5(",", A))') &
+			'time', 'position', 'O2', 'N2', 'CO2', 'CP'
 		do i = 1, neq/ngas
-			write (11,100) time/(3600*24),pos,&
+			write (fi2,'(1x, ES23.15, 5(",", ES23.15))') time/(3600*24),pos,&
 				ystate(ngas*(i-1)+1)*sol(ngas*(i-1)+1),&
 				ystate(ngas*(i-1)+2)*sol(ngas*(i-1)+2),&
 				ystate(ngas*(i-1)+3)*sol(ngas*(i-1)+3),&
@@ -353,7 +356,9 @@ subroutine output(iprof, time, ystate, neq, keq, fi)
 		enddo
 	endif
 
-	open(unit=12,file='ppar_'//trim(name_f)//'.dat')
+	open(newunit(fi3),file='pres_'//trim(name_f)//'.csv')
+	write (fi3,'(A, 5(",", A))') &
+		'time', 'position', 'O2', 'N2', 'CO2', 'CP'
 	allocate(pp(ngas))
 	pp=0
 	spp=0
@@ -373,13 +378,15 @@ subroutine output(iprof, time, ystate, neq, keq, fi)
 			enddo
 			spp=spp+1
 			if (modelType == "heterogeneous") then
-				write (12,101) time/(3600*24),pos,&
+				write (fi3,'(1x, ES23.15, 5(",", ES23.15))') &
+					time/(3600*24),pos,&
 					ystate(ngas*(i-1)+1)*Rg*temp,&
 					ystate(ngas*(i-1)+2)*Rg*temp,&
 					ystate(ngas*(i-1)+3)*Rg*temp,&
 					ystate(ngas*(i-1)+4)*Rg*temp
 			elseif ( modelType == "homogeneous" ) then
-				write (12,101) time/(3600*24),pos,&
+				write (fi3,'(1x, ES23.15, 5(",", ES23.15))') &
+					time/(3600*24),pos,&
 					ystate(ngas*(i-1)+1)/Seff(1),&
 					ystate(ngas*(i-1)+2)/Seff(2),&
 					ystate(ngas*(i-1)+3)/Seff(3),&
@@ -388,11 +395,10 @@ subroutine output(iprof, time, ystate, neq, keq, fi)
 		endif
 	enddo
 	pp=pp/spp
-    write(fi,'(10es23.15)') time/(3600*24),keq*1.0e3_dp,sum(pp),pp
-    close(11)
-	close(12)
-100   format (f8.2,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3)
-101   format (f8.2,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3)
+    write(fi,'(1x, ES23.15, 6(",", ES23.15))') &
+		time/(3600*24),keq*1.0e3_dp,sum(pp),pp
+    close(fi2)
+	close(fi3)
 end subroutine output
 !***********************************END****************************************
 
@@ -436,13 +442,22 @@ subroutine print_header
 	if (modelType == 'homogeneous') then
 		do i=1,ngas
 			write(*,'(A30,EN12.3,1x,A)') &
+				TRIM(ADJUSTL(gasname(i)))//' effective solubility:',&
+				Seff(i),'mol/m3/Pa'
+		enddo
+		do i=1,ngas
+			write(*,'(A30,EN12.3,1x,A)') &
 				TRIM(ADJUSTL(gasname(i)))//' effective diffusivity:',&
 				Deff(i),'m2/s'
 		enddo
 	endif
     print*, 'Numerics:'
-    write(*,'(A30,I12)') 'finite volumes in wall:',divwall
-    write(*,'(A30,I12)') 'finite volumes in cell:',divcell
+	if (modelType == "heterogeneous") then
+	    write(*,'(A30,I12)') 'finite volumes in wall:',divwall
+	    write(*,'(A30,I12)') 'finite volumes in cell:',divcell
+	elseif ( modelType == "homogeneous" ) then
+		write(*,'(A30,I12)') 'finite volumes in foam:',divfoam
+	endif
     if (sheet) then
         write(*,'(A30,I12)') 'finite volumes in sheet:',divsheet
     endif
