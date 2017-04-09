@@ -39,7 +39,17 @@ subroutine input()
 	call fson_get(json_data, "foamCondition.inProtectiveSheet", sheet)
 	call fson_get(json_data, "numerics.timeStart", tbeg)
 	call fson_get(json_data, "numerics.timeEnd", tend)
-	call fson_get(json_data, "numerics.numberOfOutputs", nroutputs)
+	call fson_get(json_data, "numerics.progressTime", progressTime)
+	if (progressTime == "linear") then
+		call fson_get(json_data, "numerics.numberOfOutputs", nroutputs)
+    elseif (progressTime == "logarithmic") then
+		call fson_get(json_data, "numerics.outputsPerOrder", outputsPerOrder)
+		call fson_get(json_data, "numerics.numberOfOrders", numberOfOrders)
+        nroutputs = numberOfOrders*outputsPerOrder + 1
+	else
+		write(*,*) 'modelType must be linear or logarithmic'
+		stop
+    endif
 	if (modelType == "heterogeneous") then
 		call fson_get(json_data, "numerics.wallDiscretization", divwall)
 		call fson_get(json_data, "numerics.cellDiscretization", divcell)

@@ -50,7 +50,7 @@ subroutine equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp)
     yg=cc/sum(cc)
     do i=1,ngas
         kg(i)=gasConductivity(temp,i)
-        if (abs(yg(i))<1e-6_dp) then
+        if (yg(i)<1e-6_dp) then
             yg(i)=0
         endif
     enddo

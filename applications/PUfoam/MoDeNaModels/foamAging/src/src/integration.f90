@@ -188,8 +188,15 @@ subroutine integrate
     call equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp_cond)
     call output(0, 0.0_dp, ystate, neq, keq, fi)
     do i=1,nroutputs
-        tin  = dble(i-1)*(tend-tbeg)/dble(nroutputs)+tbeg
-        tout = dble(i  )*(tend-tbeg)/dble(nroutputs)+tbeg
+        if (progressTime == "linear") then
+            tin  = dble(i-1)*(tend-tbeg)/dble(nroutputs)+tbeg
+            tout = dble(i  )*(tend-tbeg)/dble(nroutputs)+tbeg
+        elseif (progressTime == "logarithmic") then
+            tin  = tbeg + 10**((i - 1 - nroutputs + &
+                outputsPerOrder*log10(tend - tbeg))/outputsPerOrder)
+            tout = tbeg + 10**((i     - nroutputs + &
+                outputsPerOrder*log10(tend - tbeg))/outputsPerOrder)
+        end if
         call dlsodes(model, neq, ystate, tin, tout, itol, rtol, &
             atol, itask, istate, iopt, rwork, lrw, iwork, liw, jdem, mf)
         ! evaluating the integration
@@ -197,7 +204,7 @@ subroutine integrate
             write(*,*) 'Something is wrong, look for ISTATE =', istate
             stop
         endif
-        write(*,'(2x,A,1x,f6.1,1x,A)') 'time:', tout/(3600*24),'days'
+        write(*,'(2x,A,1x,e9.3,1x,A)') 'time:', tout/(3600*24),'days'
         call equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp_cond)
         call output(i, tout, ystate, neq, keq, fi)
     enddo

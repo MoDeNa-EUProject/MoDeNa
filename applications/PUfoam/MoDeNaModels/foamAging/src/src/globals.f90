@@ -9,9 +9,12 @@ module globals
 	implicit none
 	logical :: sheet !< determines if sheet is used on the outside of the foam
 	character(len=80) :: modelType !< heterogeneous or homogeneous
+	character(len=80) :: progressTime !< linear or logarithmic
 	!> names of the gases from the index set
     character(len=80), dimension(:), allocatable :: gasname(:)
 	integer :: nroutputs !< number of outer endme steps
+	integer :: outputsPerOrder !< outputs per decadic order in logarithmic scale
+	integer :: numberOfOrders !< number of decadic orders in logarithmic output
 	integer :: divwall !< number of grid points in wall
 	integer :: divcell !< number of grid points in cell
 	integer :: divfoam !< number of grid points in foam
