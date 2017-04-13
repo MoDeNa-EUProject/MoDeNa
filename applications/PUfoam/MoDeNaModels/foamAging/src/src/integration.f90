@@ -55,6 +55,12 @@ subroutine integrate
 ! load inputs
 ! -----------------------------------
 	call input
+    do i = 1, ngas
+        if ( diffModel(i) == 2  .and. modelType == "heterogeneous" ) then
+            print*, "You cannot use foam diffusivity with heterogeneous model."    
+            stop
+        end if
+    enddo
     if (sheet) then
         ncell=nint((dfoam-dsheet)/(dcell+dwall))
     else
@@ -84,11 +90,11 @@ subroutine integrate
     Pg = Dg*Sg*rhop/Mg/1e5_dp
     ksi = 2.0_dp
     Seff = effectiveSolubility(temp,Sg*rhop/Mg/1e5_dp,eps)
-    Deff = effectiveDiffusivity(dcell,dwall,Pg,Seff,ksi)
-    ! Deff(1) = 1.7996336072e-10_dp
-    ! Deff(2) = 5.09229881418e-11_dp
-    ! Deff(3) = 5.85539723664e-10_dp
-    ! Deff(4) = 1.34453792484e-12_dp
+    do i = 1, ngas
+        if (diffModel(i) /= 2) then
+            Deff(i) = effectiveDiffusivity(dcell,dwall,Pg(i),Seff(i),ksi)
+        endif
+    enddo
     call print_header
     Sg=Sg*Rg*temp*rhop/(1e5*Mg)
     sheetSg=sheetSg*Rg*temp*rhop/(1e5*Mg)

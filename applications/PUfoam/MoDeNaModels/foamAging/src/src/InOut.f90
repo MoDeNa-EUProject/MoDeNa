@@ -246,8 +246,14 @@ subroutine input()
 	    diffModel(1)=0
 	elseif ( strval=="modena" ) then
 		diffModel(1)=1
+		call fson_get(json_data, &
+			"physicalProperties.foam.diffusivity.O2", Dg(1))
+	elseif (strval == "foam") then
+		diffModel(1) = 2
+		call fson_get(json_data, &
+			"physicalProperties.foam.diffusivity.O2", Deff(1))
 	else
-		print*, "Diffusivity model must be constant or modena"
+		print*, "Diffusivity model must be constant, foam or modena"
 	endif
 	call fson_get(json_data, &
 		"physicalProperties.foam.diffusivityModel.N2", strval)
@@ -255,8 +261,14 @@ subroutine input()
 	    diffModel(2)=0
 	elseif ( strval=="modena" ) then
 		diffModel(2)=1
+		call fson_get(json_data, &
+			"physicalProperties.foam.diffusivity.N2", Dg(2))
+	elseif (strval == "foam") then
+		diffModel(2) = 2
+		call fson_get(json_data, &
+			"physicalProperties.foam.diffusivity.N2", Deff(2))
 	else
-		print*, "Diffusivity model must be constant or modena"
+		print*, "Diffusivity model must be constant, foam or modena"
 	endif
 	call fson_get(json_data, &
 		"physicalProperties.foam.diffusivityModel.CO2",strval)
@@ -264,8 +276,14 @@ subroutine input()
 		diffModel(3)=0
 	elseif ( strval=="modena" ) then
 		diffModel(3)=1
+		call fson_get(json_data, &
+			"physicalProperties.foam.diffusivity.CO2", Dg(3))
+	elseif (strval == "foam") then
+		diffModel(3) = 2
+		call fson_get(json_data, &
+			"physicalProperties.foam.diffusivity.CO2", Deff(3))
 	else
-		print*, "Diffusivity model must be constant or modena"
+		print*, "Diffusivity model must be constant, foam or modena"
 	endif
 	call fson_get(json_data, &
 		"physicalProperties.foam.diffusivityModel.Cyclopentane", strval)
@@ -273,24 +291,14 @@ subroutine input()
 		diffModel(4)=0
 	elseif ( strval=="modena" ) then
 		diffModel(4)=1
-	else
-		print*, "Diffusivity model must be constant or modena"
-	endif
-	if (diffModel(1)==0) then
-		call fson_get(json_data, &
-			"physicalProperties.foam.diffusivity.O2", Dg(1))
-	endif
-	if (diffModel(2)==0) then
-		call fson_get(json_data, &
-			"physicalProperties.foam.diffusivity.N2", Dg(2))
-	endif
-	if (diffModel(3)==0) then
-		call fson_get(json_data, &
-			"physicalProperties.foam.diffusivity.CO2", Dg(3))
-	endif
-	if (diffModel(4)==0) then
 		call fson_get(json_data, &
 			"physicalProperties.foam.diffusivity.Cyclopentane", Dg(4))
+	elseif (strval == "foam") then
+		diffModel(4) = 2
+		call fson_get(json_data, &
+			"physicalProperties.foam.diffusivity.Cyclopentane", Deff(4))
+	else
+		print*, "Diffusivity model must be constant, foam or modena"
 	endif
 	if (sheet) then
 		call fson_get(json_data, &
