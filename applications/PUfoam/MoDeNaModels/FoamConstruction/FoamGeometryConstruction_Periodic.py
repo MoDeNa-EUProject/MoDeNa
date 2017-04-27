@@ -127,12 +127,40 @@ def main(MU,SIGMA,NumOfCells,filenameOut,packing,alternativePackingAlgorithm,
             for j in range(0,NumOfCells):
                 fff.write('{0:f}\n'.format(Rads[j]))
         fff.close()
-        commandTessellation="neper -T -n {0:d} -domain \
-            'cube({1:d},{2:d},{3:d})' -morpho @Centers.txt -weight @Rads.txt \
-            -regularization 1 -mloop 15 \
+        commandTessellation="neper -T \
+            -n {0:d} \
+            -domain 'cube({1:d},{2:d},{3:d})' \
+            -morpho voronoi \
+            -morphooptiini 'coo:file(Centers.txt),weight:file(Rads.txt)' \
             -o RVE27 -format tess,geo \
             -statcell vol -statedge length -statface area \
             -statver x".format((27*NumSpheres),EdgeRVESize,EdgeRVESize,
+            EdgeRVESize)
+        os.system(commandTessellation)
+        # Foam
+        EdgeRVESize=int(max(EdgeCubeSize))
+        myfile3=os.path.join(mypath,'Centers.txt')
+        ff=open(myfile3,'w')
+        for i in range(0,1):
+            for j in range(0,NumOfCells):
+                ff.write('{0:f}\t{1:f}\t{2:f}\n'.format(Centers[j][i],
+                    Centers[j][i+1],Centers[j][i+2]))
+        ff.close()
+        myfile4=os.path.join(mypath,'Rads.txt')
+        fff=open(myfile4,'w')
+        for i in range(0,1):
+            for j in range(0,NumOfCells):
+                fff.write('{0:f}\n'.format(Rads[j]))
+        fff.close()
+        commandTessellation="neper -T \
+            -n {0:d} \
+            -domain 'cube({1:d},{2:d},{3:d})' \
+            -periodicity x,y \
+            -morpho voronoi \
+            -morphooptiini 'coo:file(Centers.txt),weight:file(Rads.txt)' \
+            -o Foam -format tess,geo \
+            -statcell vol -statedge length -statface area \
+            -statver x".format((NumSpheres),EdgeRVESize,EdgeRVESize,
             EdgeRVESize)
         os.system(commandTessellation)
         if visualizeTesselation: # needs POV-Ray
@@ -201,6 +229,7 @@ def main(MU,SIGMA,NumOfCells,filenameOut,packing,alternativePackingAlgorithm,
         o=len(a)
         a[o-3:]=''
         lines[NumOfNodes+NumOfEdges+(2*NumOfSurfaces)]="".join(a)
+        print(lines)
         currentline=lines[NumOfNodes+NumOfEdges+(2*NumOfSurfaces)].split(",")
         c=np.array(currentline)
         Volumes[0]=np.absolute(c.astype(np.float))
@@ -208,6 +237,7 @@ def main(MU,SIGMA,NumOfCells,filenameOut,packing,alternativePackingAlgorithm,
         for i in range(1,NumOfVolumes):
             j=NumOfNodes+NumOfEdges+(2*NumOfSurfaces)+i
             currentline = lines[j].split(" = {")
+            print(currentline)
             a=currentline[2].split("}")
             b=a[0].split(",")
             c=np.array(b)
