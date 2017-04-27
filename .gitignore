@@ -134,4 +134,10 @@ platforms/
 tsconfig.json
 jsconfig.json
 
+# geometry and mesh
+*.brep
+*.step
+*.msh
+*.pos
+
 # end-of-file
