@@ -5,6 +5,7 @@
 """
 from __future__ import print_function
 import re
+import numpy as np
 def my_find_all(regex, text):
     """My definition of findall. Returns top level group in list."""
     matches = re.finditer(regex, text)
@@ -57,10 +58,18 @@ def fix_strings(strings):
     for i, line in enumerate(strings):
         strings[i] = re.sub('[-]', '', line)
 
-def save_geo(geo_file, point_s, line_s, line_loop_s, surface_s,\
-        physical_surface_s, surface_loop_s, volume_s):
+def save_geo(
+        geo_file, point_s, line_s, line_loop_s, surface_s, physical_surface_s,
+        surface_loop_s, volume_s, opencascade=True, prepend_plane=False
+    ):
     """saves geometry input file for gmsh"""
     with open(geo_file, "w") as text_file:
+        if prepend_plane:
+            prepend = "Plane "
+        else:
+            prepend = ""
+        if opencascade:
+            text_file.write('SetFactory("OpenCASCADE");\n')
         for line in point_s:
             text_file.write("{}\n".format(line))
         for line in line_s:
@@ -68,13 +77,24 @@ def save_geo(geo_file, point_s, line_s, line_loop_s, surface_s,\
         for line in line_loop_s:
             text_file.write("{}\n".format(line))
         for line in surface_s:
-            text_file.write("{}\n".format(line))
+            text_file.write(prepend + "{}\n".format(line))
         for line in physical_surface_s:
             text_file.write("{}\n".format(line))
         for line in surface_loop_s:
             text_file.write("{}\n".format(line))
         for line in volume_s:
             text_file.write("{}\n".format(line))
+
+def extract_index(text_array):
+    """returns list of indexes of e.g., line, line loop, or surface loop"""
+    index = []
+    for line in text_array:
+        currentline = line.split("{")
+        fraction = currentline[1].split("}")
+        fraction = fraction[0].split(",")
+        fraction = np.array(fraction)
+        index.append(np.absolute(fraction.astype(np.float)))
+    return index
 
 def main():
     """main subroutine"""
