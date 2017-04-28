@@ -134,10 +134,13 @@ platforms/
 tsconfig.json
 jsconfig.json
 
-# geometry and mesh
+# geometry, mesh and 3D results
 *.brep
 *.step
 *.msh
 *.pos
+*.xml
+*.pvd
+*.vtu
 
 # end-of-file
