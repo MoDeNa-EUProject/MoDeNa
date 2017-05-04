@@ -21,10 +21,10 @@ add_custom_target(release
   )
 
 find_package(MODENA REQUIRED)
-find_library(FSON fson PATHS $ENV{HOME}/lib)
+find_library(FSON fson PATHS $ENV{HOME}/lib/fson)
 
 include_directories(${MODENA_INCLUDE_DIRS})
-include_directories($ENV{HOME}/include)
+include_directories($ENV{HOME}/include/fson)
 link_directories(${MODENA_LIBRARY_DIRS})
 
 set (CMAKE_Fortran_FLAGS "-ffree-line-length-none -O3")

@@ -16,7 +16,8 @@ link_directories(${MODENA_LIBRARY_DIRS})
 
 find_package(LAPACK REQUIRED)
 find_package(BLAS REQUIRED)
-find_library(FSON fson PATHS $ENV{HOME}/lib)
+find_library(FSON fson PATHS $ENV{HOME}/lib/fson)
+include_directories($ENV{HOME}/include/fson)
 
 set(CMAKE_BUILD_TYPE Debug)
 
