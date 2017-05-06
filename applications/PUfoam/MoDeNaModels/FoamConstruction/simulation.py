@@ -8,14 +8,14 @@ import subprocess as sp
 import fenics as fe
 from blessings import Terminal
 XMIN = 0.0
-XMAX = 1.0
+XMAX = 2.0
 YMIN = 0.0
-YMAX = 1.0
+YMAX = 2.0
 ZMIN = 0.0
-ZMAX = 1.0
+ZMAX = 2.0
 def main():
     """Main function."""
-    fname = "test"
+    fname = "test2"
     term = Terminal()
     print(
         term.yellow
@@ -81,6 +81,7 @@ def preprocess(fname):
     fe.File(fname+"_mesh.pvd") << mesh
     boundaries = fe.MeshFunction('size_t', mesh, fname+'_facet_region.xml')
     subdomains = fe.MeshFunction('size_t', mesh, fname+'_physical_region.xml')
+    fe.File(fname+"_subdomains.pvd") << subdomains
     fe.plot(mesh)
     fe.plot(boundaries)
     fe.plot(subdomains)
@@ -97,12 +98,17 @@ def preprocess(fname):
     ]
     u = fe.Function(V)
     v = fe.TestFunction(V)
-    D = fe.Constant(1)
+    dx = fe.Measure('dx', domain=mesh, subdomain_data=subdomains)
+    D0 = fe.Constant(1)
+    D1 = fe.Constant(100)
     f = fe.Expression(
         '1/(pow(x[0]-0.1,2)+pow(x[1]-0.1,2)+pow(x[2]-0.1,2)+1e-8)',
         degree=2
     )
-    F = -D*fe.inner(fe.grad(u), fe.grad(v))*fe.dx + f*v*fe.dx
+    F = (
+        -D0*fe.inner(fe.grad(u), fe.grad(v))*dx(1)# + f*v*fe.dx
+        -D1*fe.inner(fe.grad(u), fe.grad(v))*dx(2)# + f*v*fe.dx
+    )
     return F, u, bc
 
 def integrate(F, u, bc):
