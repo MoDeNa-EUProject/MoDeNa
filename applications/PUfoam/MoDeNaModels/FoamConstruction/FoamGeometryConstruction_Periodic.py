@@ -18,10 +18,12 @@ import random
 import math
 import geo_tools
 ## current directory
-mypath=os.getcwd()
-def main(MU,SIGMA,NumOfCells,filenameOut,packing,alternativePackingAlgorithm,
-    tesselation,visualizeTesselation,geometry,statistics,hypermesh,deleteFiles,
-    dx,dy,dz):
+mypath = os.getcwd()
+def main(
+        MU, SIGMA, NumOfCells, filenameOut, packing,
+        alternativePackingAlgorithm, tesselation, visualizeTesselation,
+        geometry, statistics, hypermesh, deleteFiles, dx, dy, dz
+    ):
     """Main function.
 
     Packing algorithm for creation of seeds for tessellation.
@@ -186,22 +188,22 @@ def main(MU,SIGMA,NumOfCells,filenameOut,packing,alternativePackingAlgorithm,
         NumOfEdges=len(line_s)
         NumOfSurfaces=len(surface_s)
         NumOfVolumes=len(volume_s)
-        Edges=geo_tools.extract_index(line_s)
-        Faces=geo_tools.extract_index(line_loop_s)
-        Volumes=geo_tools.extract_index(surface_loop_s)
+        Edges=geo_tools.extract(line_s, 'int')
+        Faces=geo_tools.extract(line_loop_s, 'int')
+        Volumes=geo_tools.extract(surface_loop_s, 'int')
         #####################################################
         MAX0=list(range(0,NumOfCells))
         for i in range(NumOfCells):
             MAX0[i]=max(Volumes[i])
-        MaxIndexOfFaces=int(max(MAX0))
-        MAX1=list(range(0,int(MaxIndexOfFaces)))
-        for i in range(int(MaxIndexOfFaces)):
+        MaxIndexOfFaces=max(MAX0)
+        MAX1=list(range(0,MaxIndexOfFaces))
+        for i in range(MaxIndexOfFaces):
             MAX1[i]=max(Faces[i])
-        MaxIndexOfEdges=int(max(MAX1))
-        MAX2=list(range(0,int(MaxIndexOfEdges)))
-        for i in range(int(MaxIndexOfEdges)):
+        MaxIndexOfEdges=max(MAX1)
+        MAX2=list(range(0,MaxIndexOfEdges))
+        for i in range(MaxIndexOfEdges):
             MAX2[i]=max(Edges[i])
-        MaxIndexOfNodes=int(max(MAX2))
+        MaxIndexOfNodes=max(MAX2)
         ####################################################
         # Making GEO file containing Periodic RVE
         geo_tools.save_geo(
