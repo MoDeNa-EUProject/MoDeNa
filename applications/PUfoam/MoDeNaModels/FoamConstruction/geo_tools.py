@@ -150,14 +150,49 @@ def other_surfaces(surface_loops, surf0, surf1):
     ]
     return surf
 
-def periodic_surafces(points, lines, line_loops, surfaces, vec):
-    """Returns list of periodic surface doubles."""
-    surface_points = []
+def periodic_surfaces(points, lines, line_loops, surfaces, vec):
+    """Returns list of periodic surface pairs."""
+    surface_points = [[]]*len(line_loops)
+    boundary_points_ind = []
     for surface in surfaces:
         for line in line_loops[surface - 1]:
             for point in lines[line - 1]:
-                print(points[point - 1])
-                exit()
+                if point not in surface_points[surface - 1]:
+                    surface_points[surface - 1] = surface_points[surface - 1] \
+                        + [point]
+                if point not in boundary_points_ind:
+                    boundary_points_ind.append(point)
+    boundary_points = []
+    for point in boundary_points_ind:
+        boundary_points.append(points[point - 1])
+    for i, point in enumerate(surface_points):
+        point.sort()
+        surface_points[i] = point
+    # print(surface_points)
+    # print(boundary_points_ind)
+    # print(boundary_points)
+    eps = 1e-8
+    periodic_points = [None]*len(points)
+    for i, firstpoint in enumerate(boundary_points):
+        for j, secondpoint in enumerate(boundary_points):
+            if np.sum(np.abs(firstpoint + vec - secondpoint)) < eps:
+                periodic_points[boundary_points_ind[i] - 1] = \
+                    boundary_points_ind[j]
+    # print(periodic_points)
+    psurfs = []
+    for i, surf in enumerate(surface_points):
+        if surf:
+            per_surf = []
+            for point in surf:
+                per_surf.append(periodic_points[point - 1])
+            if None not in per_surf:
+                per_surf.sort()
+                if per_surf in surface_points:
+                    psurfs.append(
+                        [i + 1, surface_points.index(per_surf) + 1]
+                    )
+    # print(psurfs)
+    return psurfs
 
 def main():
     """Main subroutine. Just for testing of functionality."""
@@ -181,7 +216,14 @@ def main():
     print(surf1)
     surf = other_surfaces(surface_loops, surf0, surf1)
     print(surf)
-    periodic_surafces(points, lines, line_loops, surf, [1, 0, 0])
+    psurfX = periodic_surfaces(
+        points, lines, line_loops, surf, np.array([1, 0, 0])
+    )
+    print(psurfX)
+    psurfY = periodic_surfaces(
+        points, lines, line_loops, surf, np.array([0, 1, 0])
+    )
+    print(psurfY)
 
 if __name__ == "__main__":
     main()
