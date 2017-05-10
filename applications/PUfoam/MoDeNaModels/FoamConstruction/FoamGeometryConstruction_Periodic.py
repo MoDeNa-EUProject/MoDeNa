@@ -181,16 +181,15 @@ def main(
     ######Extraction of middle Representative volume element########
     ################################################################
     if geometry:
-        point_s, line_s, line_loop_s, surface_s,\
-            physical_surface_s, surface_loop_s, volume_s \
-            = geo_tools.read_geo("RVE27.geo")
-        NumOfNodes=len(point_s)
-        NumOfEdges=len(line_s)
-        NumOfSurfaces=len(surface_s)
-        NumOfVolumes=len(volume_s)
-        Edges=geo_tools.extract(line_s, 'int')
-        Faces=geo_tools.extract(line_loop_s, 'int')
-        Volumes=geo_tools.extract(surface_loop_s, 'int')
+        sdat = geo_tools.read_geo("RVE27.geo")
+        NumOfNodes=len(sdat['point'])
+        NumOfEdges=len(sdat['line'])
+        NumOfSurfaces=len(sdat['surface'])
+        NumOfVolumes=len(sdat['volume'])
+        edat = geo_tools.extract_data(sdat)
+        Edges=edat['line']
+        Faces=edat['line_loop']
+        Volumes=edat['surface_loop']
         #####################################################
         MAX0=list(range(0,NumOfCells))
         for i in range(NumOfCells):
@@ -206,17 +205,17 @@ def main(
         MaxIndexOfNodes=max(MAX2)
         ####################################################
         # Making GEO file containing Periodic RVE
+        sdat['point'] = sdat['point'][:MaxIndexOfNodes]
+        sdat['line'] = sdat['line'][:MaxIndexOfEdges]
+        sdat['line_loop'] = sdat['line_loop'][:MaxIndexOfFaces]
+        sdat['surface'] = sdat['surface'][:MaxIndexOfFaces]
+        sdat['physical_surface'] = sdat['physical_surface'][:MaxIndexOfFaces]
+        sdat['surface_loop'] = sdat['surface_loop'][:NumOfCells]
+        sdat['volume'] = sdat['volume'][:NumOfCells]
         geo_tools.save_geo(
             os.path.join(mypath,filenameOut+".geo"),
-            point_s[:MaxIndexOfNodes],
-            line_s[:MaxIndexOfEdges],
-            line_loop_s[:MaxIndexOfFaces],
-            surface_s[:MaxIndexOfFaces],
-            physical_surface_s[:MaxIndexOfFaces],
-            surface_loop_s[:NumOfCells],
-            volume_s[:NumOfCells],
-            opencascade=False,
-            prepend_plane=True
+            sdat,
+            opencascade=False
         )
         ####################################################
         # Making gnuplot file containing Periodic RVE
