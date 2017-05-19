@@ -164,7 +164,7 @@ def main(
         commandTessellation="neper -T \
             -n {0:d} \
             -domain 'cube({1:d},{2:d},{3:d})' \
-            -periodicity x,y \
+            -periodicity x,y,z \
             -morpho voronoi \
             -morphooptiini 'coo:file(Centers.txt),weight:file(Rads.txt)' \
             -o Foam -format tess,geo \

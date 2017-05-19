@@ -2528,6 +2528,7 @@ SUBROUTINE pcsaft_par
 
         ELSE IF(compna(i) == 'pu'.AND.compna(j) == 'co2')THEN
            kij(i,j) =  0.12710446807888531
+           kij(i,j) =  0
 
         ELSE IF(compna(i) == '14-butandiol'.AND.compna(j) == 'co2')THEN
            kij(i,j) =  0.40955941645989324
