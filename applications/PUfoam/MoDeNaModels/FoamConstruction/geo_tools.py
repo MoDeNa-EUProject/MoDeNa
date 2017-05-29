@@ -5,12 +5,14 @@
 """
 from __future__ import print_function
 import re
+import shutil
+import subprocess as sp
 import numpy as np
 NAMES = {
     'point': 'Point',
     'line': 'Line',
     'line_loop': 'Line Loop',
-    'surface': 'Surface',
+    'surface': 'Plane Surface',
     'surface_loop': 'Surface Loop',
     'volume': 'Volume',
     'periodic_surface_X': 'Periodic Surface',
@@ -44,34 +46,38 @@ def read_geo(geo_file):
         text = text_file.read()
         sdat = {}
         sdat['point'] = my_find_all(
-            r'Point\s[(][0-9]+[)]\s[=]\s[{]'
-            + r'[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)[,]'
-            + r'[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)[,]'
-            + r'[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)[}][;]',
+            # r'Point\s[(][0-9]+[)]\s[=]\s[{]'
+            # + r'[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)[,]'
+            # + r'[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)[,]'
+            # + r'[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)[}][;]',
+            # text
+            r'Point\s?[(][0-9]+[)]\s[=]\s[{](.*?)[}][;]',
             text
         )
         sdat['line'] = my_find_all(
-            r'Line\s[(][0-9]+[)]\s[=]\s[{][0-9]+[,][0-9]+[}][;]', text
+            r'Line\s?[(][0-9]+[)]\s[=]\s[{][0-9]+[,]\s?[0-9]+[}][;]', text
         )
         sdat['line_loop'] = my_find_all(
-            r'Line\sLoop\s[(][0-9]+[)]\s[=]\s[{]([+-]?[0-9]+[,]?)+[}][;]',
+            r'Line\sLoop\s?[(][0-9]+[)]\s[=]\s[{]([+-]?[0-9]+[,]?\s?)+[}][;]',
             text
         )
         sdat['surface'] = my_find_all(
-            r'(Surface\s[(][0-9]+[)]\s[=]\s[{]([0-9]+[,]?)+[}][;])'
-            + r'(?!.*Physical.*)',
+            r'Plane\sSurface\s?[(][0-9]+[)]\s[=]\s[{]([0-9]+[,]?\s?)+[}][;]',
             text
+            # r'(Surface\s[(][0-9]+[)]\s[=]\s[{]([0-9]+[,]?)+[}][;])'
+            # + r'(?!.*Physical.*)',
+            # text
         )
         sdat['physical_surface'] = my_find_all(
-            r'Physical\sSurface\s[(][0-9]+[)]\s[=]\s[{]([0-9]+[,]?)+[}][;]',
+            r'Physical\sSurface\s?[(][0-9]+[)]\s[=]\s[{]([0-9]+[,]?\s?)+[}][;]',
             text
         )
         sdat['surface_loop'] = my_find_all(
-            r'Surface\sLoop\s[(][0-9]+[)]\s[=]\s[{]([+-]?[0-9]+[,]?)+[}][;]',
+            r'Surface\sLoop\s?[(][0-9]+[)]\s[=]\s[{]([+-]?[0-9]+[,]?\s?)+[}][;]',
             text
         )
         sdat['volume'] = my_find_all(
-            r'Volume\s[(][0-9]+[)]\s[=]\s[{]([0-9]+[,]?)+[}][;]',
+            r'Volume\s?[(][0-9]+[)]\s[=]\s[{]([0-9]+[,]?\s?)+[}][;]',
             text
         )
         return sdat
@@ -98,20 +104,24 @@ def extract_data(sdat):
     """Extracts geo data to lists from list of geo strings."""
     edat = {}
     for key in sdat:
+        lines = [None]*len(sdat[key])
         index = [None]*len(sdat[key])
-        for line in sdat[key]:
+        for i, line in enumerate(sdat[key]):
             part = line.split("(")
-            i = int(part[1].split(")")[0])
+            ind = int(part[1].split(")")[0])
             fraction = line.split("{")
             fraction = fraction[1].split("}")
             fraction = fraction[0].split(",")
-            fraction = np.array(fraction)
             if key == "point":
+                fraction = np.array(fraction[0:2])
                 fraction = fraction.astype(np.float)
             else:
+                fraction = np.array(fraction)
                 fraction = np.absolute(fraction.astype(np.int)).tolist()
-            index[i-1] = fraction
-        edat[key] = index
+            lines[i] = fraction
+            index[i] = ind
+        edat[key] = lines
+        edat[key+'_index'] = index
     return edat
 
 def collect_strings(edat):
@@ -225,12 +235,93 @@ def periodic_surfaces(edat, surfaces, vec):
     # print(psurfs)
     return psurfs
 
+def move_to_box(infile, wfile, outfile, volumes):
+    """Moves periodic closed foam to periodic box."""
+    with open(wfile, 'w') as wfl:
+        mvol = max(volumes)
+        wfl.write('SetFactory("OpenCASCADE");\n\n')
+        wfl.write('Include "{0}";\n\n'.format(infile))
+        wfl.write('Block({0}) = {{-1,-1,-1,3,3,1}};\n'.format(mvol + 1))
+        wfl.write('Block({0}) = {{-1,-1, 1,3,3,1}};\n'.format(mvol + 2))
+        wfl.write('Block({0}) = {{-1,-1, 0,3,3,1}};\n'.format(mvol + 3))
+        wfl.write('Block({0}) = {{-1,-1,-1,3,1,3}};\n'.format(mvol + 4))
+        wfl.write('Block({0}) = {{-1, 1,-1,3,1,3}};\n'.format(mvol + 5))
+        wfl.write('Block({0}) = {{-1, 0,-1,3,1,3}};\n'.format(mvol + 6))
+        wfl.write('Block({0}) = {{-1,-1,-1,1,3,3}};\n'.format(mvol + 7))
+        wfl.write('Block({0}) = {{ 1,-1,-1,1,3,3}};\n'.format(mvol + 8))
+        wfl.write('Block({0}) = {{ 0,-1,-1,1,3,3}};\n'.format(mvol + 9))
+        wfl.write('\n')
+        wfl.write(
+            'zol() = BooleanIntersection'
+            + '{{Volume{{1:{0}}};}}'.format(mvol)
+            + '{{Volume{{{0}}}; Delete;}};\n'.format(mvol + 1)
+        )
+        wfl.write(
+            'zoh() = BooleanIntersection'
+            + '{{Volume{{1:{0}}};}}'.format(mvol)
+            + '{{Volume{{{0}}}; Delete;}};\n'.format(mvol + 2)
+        )
+        wfl.write(
+            'zin() = BooleanIntersection'
+            + '{{Volume{{1:{0}}}; Delete;}}'.format(mvol)
+            + '{{Volume{{{0}}}; Delete;}};\n'.format(mvol + 3)
+        )
+        wfl.write('Translate{0,0, 1}{Volume{zol()};}\n')
+        wfl.write('Translate{0,0,-1}{Volume{zoh()};}\n\n')
+        wfl.write(
+            'yol() = BooleanIntersection'
+            + '{Volume{zol(),zoh(),zin()};}'
+            + '{{Volume{{{0}}}; Delete;}};\n'.format(mvol + 4)
+        )
+        wfl.write(
+            'yoh() = BooleanIntersection'
+            + '{Volume{zol(),zoh(),zin()};}'
+            + '{{Volume{{{0}}}; Delete;}};\n'.format(mvol + 5)
+        )
+        wfl.write(
+            'yin() = BooleanIntersection'
+            + '{Volume{zol(),zoh(),zin()}; Delete;}'
+            + '{{Volume{{{0}}}; Delete;}};\n'.format(mvol + 6)
+        )
+        wfl.write('Translate{0, 1,0}{Volume{yol()};}\n')
+        wfl.write('Translate{0,-1,0}{Volume{yoh()};}\n\n')
+        wfl.write(
+            'xol() = BooleanIntersection'
+            + '{Volume{yol(),yoh(),yin()};}'
+            + '{{Volume{{{0}}}; Delete;}};\n'.format(mvol + 7)
+        )
+        wfl.write(
+            'xoh() = BooleanIntersection'
+            + '{Volume{yol(),yoh(),yin()};}'
+            + '{{Volume{{{0}}}; Delete;}};\n'.format(mvol + 8)
+        )
+        wfl.write(
+            'xin() = BooleanIntersection'
+            + '{Volume{yol(),yoh(),yin()}; Delete;}'
+            + '{{Volume{{{0}}}; Delete;}};\n'.format(mvol + 9)
+        )
+        wfl.write('Translate{ 1,0,0}{Volume{xol()};}\n')
+        wfl.write('Translate{-1,0,0}{Volume{xoh()};}\n\n')
+    call = sp.Popen(['gmsh', wfile, '-0'])
+    call.wait()
+    shutil.move(wfile+'_unrolled', outfile)
+
 def main():
     """Main subroutine. Just for testing of functionality."""
-    sdat = read_geo("Foam.geo") # string data
-    fix_strings(sdat['line_loop'])
-    fix_strings(sdat['surface_loop'])
+    # sdat = read_geo("FoamClosed.geo") # string data
+    # fix_strings(sdat['line_loop'])
+    # fix_strings(sdat['surface_loop'])
+    # sdat.pop('physical_surface')
+    # save_geo("FoamClosedFixed.geo", sdat)
+    # move_to_box(
+    #     "FoamClosedFixed.geo", "move_to_box.geo", "FoamBox.geo",
+    #     range(1, len(sdat['volume']) + 1)
+    # )
+    sdat = read_geo("FoamBox.geo") # string data
     edat = extract_data(sdat) # extracted data
+    print(edat['volume'])
+    print(edat['volume_index'])
+    exit(0)
     surf0 = surfaces_in_z_plane(edat, 0.0)
     print(surf0)
     surf1 = surfaces_in_z_plane(edat, 1.0)

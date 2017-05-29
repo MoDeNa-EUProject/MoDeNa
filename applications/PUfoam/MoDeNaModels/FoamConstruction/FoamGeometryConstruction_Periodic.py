@@ -167,7 +167,7 @@ def main(
             -periodicity x,y,z \
             -morpho voronoi \
             -morphooptiini 'coo:file(Centers.txt),weight:file(Rads.txt)' \
-            -o Foam -format tess,geo \
+            -o FoamClosed -format tess,geo \
             -statcell vol -statedge length -statface area \
             -statver x".format((NumSpheres),EdgeRVESize,EdgeRVESize,
             EdgeRVESize)
