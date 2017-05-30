@@ -41,7 +41,12 @@ def my_find_all(regex, text):
     return my_list
 
 def read_geo(geo_file, ignore_point_format=True, plane_surface=True):
-    """Reads geometry input file for gmsh."""
+    """
+    Reads geometry input file for gmsh into dictionary. Based on regular
+    expressions. Points can contain optional fourth argument, thus it is better
+    to include everything in curly braces. Some geo files use Surface, some
+    Plane Surface. You should specify what you want to read.
+    """
     with open(geo_file, "r") as text_file:
         text = text_file.read()
         sdat = {}
@@ -55,36 +60,30 @@ def read_geo(geo_file, ignore_point_format=True, plane_surface=True):
                 + r'[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)[,]'
                 + r'[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)[}][;]'
             )
-        sdat['point'] = my_find_all(
-            rexp['point'],
-            text
+        rexp['line'] = r'Line\s?[(][0-9]+[)]\s[=]\s[{][0-9]+[,]\s?[0-9]+[}][;]'
+        rexp['line_loop'] = (
+            r'Line\sLoop\s?[(][0-9]+[)]\s[=]\s[{]([+-]?[0-9]+[,]?\s?)+[}][;]'
         )
-        sdat['line'] = my_find_all(
-            r'Line\s?[(][0-9]+[)]\s[=]\s[{][0-9]+[,]\s?[0-9]+[}][;]', text
+        if plane_surface:
+            rexp['surface'] = (
+                r'Plane\sSurface\s?[(][0-9]+[)]\s[=]\s[{]([0-9]+[,]?\s?)+[}][;]'
+            )
+        else:
+            rexp['surface'] = (
+                r'(Surface\s[(][0-9]+[)]\s[=]\s[{]([0-9]+[,]?)+[}][;])'
+                + r'(?!.*Physical.*)',
+            )
+        rexp['physical_surface'] = (
+            r'Physical\sSurface\s?[(][0-9]+[)]\s[=]\s[{]([0-9]+[,]?\s?)+[}][;]'
         )
-        sdat['line_loop'] = my_find_all(
-            r'Line\sLoop\s?[(][0-9]+[)]\s[=]\s[{]([+-]?[0-9]+[,]?\s?)+[}][;]',
-            text
+        rexp['surface_loop'] = (
+            r'Surface\sLoop\s?[(][0-9]+[)]\s[=]\s[{]([+-]?[0-9]+[,]?\s?)+[}][;]'
         )
-        sdat['surface'] = my_find_all(
-            r'Plane\sSurface\s?[(][0-9]+[)]\s[=]\s[{]([0-9]+[,]?\s?)+[}][;]',
-            text
-            # r'(Surface\s[(][0-9]+[)]\s[=]\s[{]([0-9]+[,]?)+[}][;])'
-            # + r'(?!.*Physical.*)',
-            # text
+        rexp['volume'] = (
+            r'Volume\s?[(][0-9]+[)]\s[=]\s[{]([0-9]+[,]?\s?)+[}][;]'
         )
-        sdat['physical_surface'] = my_find_all(
-            r'Physical\sSurface\s?[(][0-9]+[)]\s[=]\s[{]([0-9]+[,]?\s?)+[}][;]',
-            text
-        )
-        sdat['surface_loop'] = my_find_all(
-            r'Surface\sLoop\s?[(][0-9]+[)]\s[=]\s[{]([+-]?[0-9]+[,]?\s?)+[}][;]',
-            text
-        )
-        sdat['volume'] = my_find_all(
-            r'Volume\s?[(][0-9]+[)]\s[=]\s[{]([0-9]+[,]?\s?)+[}][;]',
-            text
-        )
+        for key in rexp:
+            sdat[key] = my_find_all(rexp[key], text)
         return sdat
 
 def fix_strings(strings):
