@@ -1,13 +1,23 @@
 #!/usr/bin/env python
-"""
-@brief      Manipulates .geo input files for gmsh.
-@author     Pavel Ferkl
+"""Manipulates .geo input files for gmsh.
+
+Usage:
+    geo_tools.py
+    geo_tools.py -v | --verbose
+    geo_tools.py -h | --help
+
+Options:
+    -h --help     Show this screen.
+    -v --verbose  Verbose mode.
+
+@author Pavel Ferkl
 """
 from __future__ import print_function
 import re
 import shutil
 import subprocess as sp
 import numpy as np
+from docopt import docopt
 NAMES = {
     'point': 'Point',
     'line': 'Line',
@@ -251,61 +261,70 @@ def periodic_surfaces(edat, surfaces, vec, eps=1e-8):
             )
     return psurfs
 
-def remove_duplicity(edat):
-    """Removes duplicit points, lines, etc."""
-    eps = 1e-8
+def identify_duplicity(edat, key, number, eps=1e-8):
+    """
+    Core algorithm for removing duplicities. User should call remove_duplicity()
+    instead. Parameter eps is used to compare coordinates (floating point
+    numbers).
+    """
     dupl = dict()
-    for i, item1 in edat['point'].iteritems():
-        for j, item2 in edat['point'].iteritems():
-            if i != j and i > j and np.sum(np.abs(item1 - item2)) < eps:
-                if i not in dupl:
-                    dupl[i] = []
-                dupl[i].append(j)
+    if number == 'float':
+        for i, item1 in edat[key].iteritems():
+            for j, item2 in edat[key].iteritems():
+                if i != j and i > j and np.sum(np.abs(item1 - item2)) < eps:
+                    if i not in dupl:
+                        dupl[i] = []
+                    dupl[i].append(j)
+    elif number == 'integer':
+        for i, item1 in edat[key].iteritems():
+            for j, item2 in edat[key].iteritems():
+                if i != j and i > j and sorted(item1) == sorted(item2):
+                    if i not in dupl:
+                        dupl[i] = []
+                    dupl[i].append(j)
+    else:
+        raise Exception('number argument must be float or integer')
+    return dupl
+
+def remove_duplicit_ids_from_keys(edat, dupl, key):
+    """Removes duplicit IDs from IDs of entities."""
     for i in dupl:
-        del edat['point'][i]
-    for values in edat['line'].itervalues():
+        del edat[key][i]
+
+def remove_duplicit_ids_from_values(edat, dupl, key):
+    """Removes duplicit IDs from values of entities."""
+    for values in edat[key].itervalues():
         for j, value in enumerate(values):
             if value in dupl:
                 values[j] = min(dupl[value])
-    dupl = dict()
-    for i, item1 in edat['line'].iteritems():
-        for j, item2 in edat['line'].iteritems():
-            if i != j and i > j and sorted(item1) == sorted(item2):
-                if i not in dupl:
-                    dupl[i] = []
-                dupl[i].append(j)
-    for i in dupl:
-        del edat['line'][i]
-    for values in edat['line_loop'].itervalues():
-        for j, value in enumerate(values):
-            if value in dupl:
-                values[j] = min(dupl[value])
-    dupl = dict()
-    for i, item1 in edat['line_loop'].iteritems():
-        for j, item2 in edat['line_loop'].iteritems():
-            if i != j and i > j and sorted(item1) == sorted(item2):
-                if i not in dupl:
-                    dupl[i] = []
-                dupl[i].append(j)
-    for i in dupl:
-        del edat['line_loop'][i]
-        del edat['surface'][i]
-    for values in edat['surface_loop'].itervalues():
-        for j, value in enumerate(values):
-            if value in dupl:
-                values[j] = min(dupl[value])
-    # dupl = dict() # no duplicit volumes
-    # for i, item1 in edat['surface_loop'].iteritems():
-    #     for j, item2 in edat['surface_loop'].iteritems():
-    #         if i != j and i > j and sorted(item1) == sorted(item2):
-    #             if i not in dupl:
-    #                 dupl[i] = []
-    #             dupl[i].append(j)
-    # print(dupl)
-    # exit()
+
+def remove_duplicity(edat, eps=1e-8):
+    """
+    Removes duplicit points, lines, etc. Parameter eps is used to compare
+    coordinates (floating point numbers).
+    """
+    # points
+    dupl = identify_duplicity(edat, 'point', 'float', eps)
+    remove_duplicit_ids_from_keys(edat, dupl, 'point')
+    remove_duplicit_ids_from_values(edat, dupl, 'line')
+    # lines
+    dupl = identify_duplicity(edat, 'line', 'integer', eps)
+    remove_duplicit_ids_from_keys(edat, dupl, 'line')
+    remove_duplicit_ids_from_values(edat, dupl, 'line_loop')
+    # line loops
+    dupl = identify_duplicity(edat, 'line_loop', 'integer', eps)
+    remove_duplicit_ids_from_keys(edat, dupl, 'line_loop')
+    remove_duplicit_ids_from_keys(edat, dupl, 'surface')
+    remove_duplicit_ids_from_values(edat, dupl, 'surface_loop')
+    # there are no duplicit volumes
 
 def move_to_box(infile, wfile, outfile, volumes):
-    """Moves periodic closed foam to periodic box."""
+    """
+    Moves periodic closed foam to periodic box. Uses gmsh, specifically boolean
+    operations and transformations from OpenCASCADE. The result is unrolled to
+    another geo file so that it can be quickly read and worked with in the
+    follow-up work.
+    """
     with open(wfile, 'w') as wfl:
         mvol = max(volumes)
         wfl.write('SetFactory("OpenCASCADE");\n\n')
@@ -377,42 +396,53 @@ def move_to_box(infile, wfile, outfile, volumes):
 
 def main():
     """Main subroutine. Just for testing of functionality."""
-    # sdat = read_geo("FoamClosed.geo") # string data
-    # fix_strings(sdat['line_loop'])
-    # fix_strings(sdat['surface_loop'])
-    # sdat.pop('physical_surface')
-    # save_geo("FoamClosedFixed.geo", sdat)
-    # move_to_box(
-    #     "FoamClosedFixed.geo", "move_to_box.geo", "FoamBox.geo",
-    #     range(1, len(sdat['volume']) + 1)
-    # )
+    # read Neper foam
+    sdat = read_geo("FoamClosed.geo") # string data
+    # Neper creates physical surfaces, which we don't want
+    sdat.pop('physical_surface')
+    # remove orientation, OpenCASCADE compatibility
+    fix_strings(sdat['line_loop'])
+    fix_strings(sdat['surface_loop'])
+    # save the foam to geo file
+    save_geo("FoamClosedFixed.geo", sdat)
+    # move foam to a periodic box and save it to a file
+    move_to_box(
+        "FoamClosedFixed.geo", "move_to_box.geo", "FoamBox.geo",
+        range(1, len(sdat['volume']) + 1)
+    )
+    # read boxed foam
     sdat = read_geo("FoamBox.geo") # string data
     edat = extract_data(sdat) # extracted data
+    # duplicity of points, lines, etc. was created during moving to a box
     remove_duplicity(edat)
+    # identification of physical surfaces for boundary conditions
     surf0 = surfaces_in_plane(edat, 0.0, 2)
-    print(surf0)
+    if ARGS['--verbose']:
+        print('Z=0 surface IDs: {}'.format(surf0))
     surf1 = surfaces_in_plane(edat, 1.0, 2)
-    print(surf1)
+    if ARGS['--verbose']:
+        print('Z=1 surface IDs: {}'.format(surf1))
     surf = other_surfaces(edat['surface_loop'].itervalues(), surf0, surf1)
-    # surf = surfaces_in_plane(edat, 0.0, 1) + surfaces_in_plane(edat, 1.0, 1) \
-    #     + surfaces_in_plane(edat, 0.0, 0) + surfaces_in_plane(edat, 1.0, 0)
-    print(surf)
-    edat.pop('physical_surface')
+    if ARGS['--verbose']:
+        print('other boundary surface IDs: {}'.format(surf))
     edat['physical_surface'] = {1:surf0, 2:surf1, 3:surf}
+    # identification of periodic surfaces for periodic mesh creation
     edat['periodic_surface_X'] = periodic_surfaces(
         edat, surf, np.array([1, 0, 0])
     )
-    print(edat['periodic_surface_X'])
+    if ARGS['--verbose']:
+        print('surface IDs periodic in X: {}'.format(edat['periodic_surface_X']))
     edat['periodic_surface_Y'] = periodic_surfaces(
         edat, surf, np.array([0, 1, 0])
     )
-    print(edat['periodic_surface_Y'])
+    if ARGS['--verbose']:
+        print('surface IDs periodic in Y: {}'.format(edat['periodic_surface_Y']))
+    # define physical volumes
     edat['physical_volume'] = {1:edat['volume'].keys()}
-    # edat['physical_volume'] = edat['volume']
-    print(edat.keys())
-    sdat2 = collect_strings(edat)
-    print(sdat2.keys())
-    save_geo("FoamBoxFixed.geo", sdat2)
+    # save the final foam
+    sdat = collect_strings(edat)
+    save_geo("FoamBoxFixed.geo", sdat)
 
 if __name__ == "__main__":
+    ARGS = docopt(__doc__)
     main()
