@@ -88,17 +88,20 @@ def read_geo(geo_file, ignore_point_format=True, plane_surface=True):
 
 def fix_strings(strings):
     """
-    Removes negative sign (orientation); opencascade has problems otherwise.
+    Removes negative sign (orientation) from loops. OpenCASCADE has problems
+    otherwise.
     """
     for i, line in enumerate(strings):
         strings[i] = re.sub('[-]', '', line)
 
-def save_geo(geo_file, sdat, opencascade=True):
+def save_geo(geo_file, sdat, opencascade=True, char_length=0.1):
     """Saves geometry input file for gmsh."""
     with open(geo_file, "w") as text_file:
         if opencascade:
             text_file.write('SetFactory("OpenCASCADE");\n')
-            text_file.write('Mesh.CharacteristicLengthMax = 0.1;\n')
+            text_file.write(
+                'Mesh.CharacteristicLengthMax = {0};\n'.format(char_length)
+            )
         for key in NAME_LIST:
             if key in sdat:
                 for line in sdat[key]:
