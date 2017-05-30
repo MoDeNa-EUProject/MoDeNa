@@ -40,18 +40,23 @@ def my_find_all(regex, text):
         my_list.append(match.group(0))
     return my_list
 
-def read_geo(geo_file):
+def read_geo(geo_file, ignore_point_format=True, plane_surface=True):
     """Reads geometry input file for gmsh."""
     with open(geo_file, "r") as text_file:
         text = text_file.read()
         sdat = {}
+        rexp = {}
+        if ignore_point_format:
+            rexp['point'] = r'Point\s?[(][0-9]+[)]\s[=]\s[{](.*?)[}][;]'
+        else:
+            rexp['point'] = (
+                r'Point\s[(][0-9]+[)]\s[=]\s[{]'
+                + r'[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)[,]'
+                + r'[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)[,]'
+                + r'[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)[}][;]'
+            )
         sdat['point'] = my_find_all(
-            # r'Point\s[(][0-9]+[)]\s[=]\s[{]'
-            # + r'[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)[,]'
-            # + r'[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)[,]'
-            # + r'[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)[}][;]',
-            # text
-            r'Point\s?[(][0-9]+[)]\s[=]\s[{](.*?)[}][;]',
+            rexp['point'],
             text
         )
         sdat['line'] = my_find_all(
@@ -144,10 +149,10 @@ def collect_strings(edat):
                     )
                 )
         else:
-            for i, j in enumerate(edat[key]):
+            for i, j in edat[key].iteritems():
                 j = ','.join(str(e) for e in j)
                 sdat[key].append('{0} ({1}) = {{{2}}};'.format(
-                    NAMES[key], i + 1, j
+                    NAMES[key], i, j
                 ))
     return sdat
 
@@ -209,7 +214,7 @@ def periodic_surfaces(edat, surfaces, vec):
     for i, point in surface_points.iteritems():
         point.sort()
         surface_points[i] = point
-    print(surface_points)
+    # print(surface_points)
     # print(boundary_points_ind)
     # print(boundary_points)
     # exit()
@@ -219,7 +224,7 @@ def periodic_surfaces(edat, surfaces, vec):
         for j, secondpoint in boundary_points.iteritems():
             if np.sum(np.abs(firstpoint + vec - secondpoint)) < eps:
                 periodic_points[i] = j
-    print(periodic_points)
+    # print(periodic_points)
     # exit()
     psurfs = []
     for i, surf in surface_points.iteritems():
@@ -231,7 +236,7 @@ def periodic_surfaces(edat, surfaces, vec):
                 per_surf.append(None)
         if None not in per_surf:
             per_surf.sort()
-            print(surf, per_surf)
+            # print(surf, per_surf)
             if per_surf in surface_points.values():
                 psurfs.append(
                     [i, list(surface_points.keys())[list(surface_points.values()).index(per_surf)]]
@@ -282,6 +287,15 @@ def remove_duplicity(edat):
         for j, value in enumerate(values):
             if value in dupl:
                 values[j] = min(dupl[value])
+    # dupl = dict() # no duplicit volumes
+    # for i, item1 in edat['surface_loop'].iteritems():
+    #     for j, item2 in edat['surface_loop'].iteritems():
+    #         if i != j and i > j and sorted(item1) == sorted(item2):
+    #             if i not in dupl:
+    #                 dupl[i] = []
+    #             dupl[i].append(j)
+    # print(dupl)
+    # exit()
 
 def move_to_box(infile, wfile, outfile, volumes):
     """Moves periodic closed foam to periodic box."""
@@ -376,25 +390,22 @@ def main():
     surf = surfaces_in_plane(edat, 0.0, 1) + surfaces_in_plane(edat, 1.0, 1) \
         + surfaces_in_plane(edat, 0.0, 0) + surfaces_in_plane(edat, 1.0, 0)
     print(surf)
-    edat['physical_surface'] = [surf0, surf1, surf]
+    edat.pop('physical_surface')
+    edat['physical_surface'] = {1:surf0, 2:surf1, 3:surf}
     edat['periodic_surface_X'] = periodic_surfaces(
         edat, surf, np.array([1, 0, 0])
     )
     print(edat['periodic_surface_X'])
-    exit(0)
     edat['periodic_surface_Y'] = periodic_surfaces(
         edat, surf, np.array([0, 1, 0])
     )
     print(edat['periodic_surface_Y'])
-    edat['physical_volume'] = [[]]
-    for i in edat['volume']:
-        edat['physical_volume'][0] += i
-    print(edat['physical_volume'])
+    edat['physical_volume'] = {1:edat['volume'].keys()}
+    # edat['physical_volume'] = edat['volume']
     print(edat.keys())
     sdat2 = collect_strings(edat)
     print(sdat2.keys())
-    print(sdat2['physical_volume'])
-    save_geo("Foam2.geo", sdat2)
+    save_geo("FoamBoxFixed.geo", sdat2)
 
 if __name__ == "__main__":
     main()
