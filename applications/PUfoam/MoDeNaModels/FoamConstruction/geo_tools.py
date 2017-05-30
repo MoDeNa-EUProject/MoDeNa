@@ -104,24 +104,24 @@ def extract_data(sdat):
     """Extracts geo data to lists from list of geo strings."""
     edat = {}
     for key in sdat:
-        lines = [None]*len(sdat[key])
-        index = [None]*len(sdat[key])
-        for i, line in enumerate(sdat[key]):
+        lines = dict()
+        for line in sdat[key]:
             part = line.split("(")
             ind = int(part[1].split(")")[0])
             fraction = line.split("{")
             fraction = fraction[1].split("}")
             fraction = fraction[0].split(",")
             if key == "point":
-                fraction = np.array(fraction[0:2])
+                fraction = np.array(fraction[0:3])
                 fraction = fraction.astype(np.float)
+                for j, number in enumerate(fraction):
+                    if abs(number) < 1e-8:
+                        fraction[j] = 0
             else:
                 fraction = np.array(fraction)
                 fraction = np.absolute(fraction.astype(np.int)).tolist()
-            lines[i] = fraction
-            index[i] = ind
+            lines[ind] = fraction
         edat[key] = lines
-        edat[key+'_index'] = index
     return edat
 
 def collect_strings(edat):
@@ -151,30 +151,30 @@ def collect_strings(edat):
                 ))
     return sdat
 
-def surfaces_in_z_plane(edat, z_coord):
-    """Finds surafces that lie completely lie in z plane"""
+def surfaces_in_plane(edat, coord, direction):
+    """Finds surfaces that lie completely lie in a plane"""
     points_in_plane = []
-    for i, point in enumerate(edat['point']):
-        if point[2] == z_coord:
-            points_in_plane.append(i+1)
+    for i, point in edat['point'].iteritems():
+        if point[direction] == coord:
+            points_in_plane.append(i)
     lines_in_plane = []
-    for i, line in enumerate(edat['line']):
+    for i, line in edat['line'].iteritems():
         if line[0] in points_in_plane and line[1] in points_in_plane:
-            lines_in_plane.append(i+1)
+            lines_in_plane.append(i)
     line_loops_in_plane = []
-    for i, line_loop in enumerate(edat['line_loop']):
+    for i, line_loop in edat['line_loop'].iteritems():
         log = True
         for line in line_loop:
             if line not in lines_in_plane:
                 log = False
         if log:
-            line_loops_in_plane.append(i+1)
-    surfaces_in_plane = line_loops_in_plane
-    return surfaces_in_plane
+            line_loops_in_plane.append(i)
+    return line_loops_in_plane
 
 def other_surfaces(surface_loops, surf0, surf1):
     """
     Returns list of boundary surfaces, which are not in surf0 or surf1.
+    Assumes that inner surfaces are shared by two volumes.
     """
     all_surfaces = []
     for surface_loop in surface_loops:
@@ -193,47 +193,95 @@ def other_surfaces(surface_loops, surf0, surf1):
 
 def periodic_surfaces(edat, surfaces, vec):
     """Returns list of periodic surface pairs."""
-    surface_points = [[]]*len(edat['line_loop'])
-    boundary_points_ind = []
+    surface_points = dict()
+    boundary_points = dict()
     for surface in surfaces:
-        for line in edat['line_loop'][surface - 1]:
-            for point in edat['line'][line - 1]:
-                if point not in surface_points[surface - 1]:
-                    surface_points[surface - 1] = surface_points[surface - 1] \
-                        + [point]
-                if point not in boundary_points_ind:
-                    boundary_points_ind.append(point)
-    boundary_points = []
-    for point in boundary_points_ind:
-        boundary_points.append(edat['point'][point - 1])
-    for i, point in enumerate(surface_points):
+        surface_points[surface] = []
+        for line in edat['line_loop'][surface]:
+            for point in edat['line'][line]:
+                if point not in surface_points[surface]:
+                    surface_points[surface] = surface_points[surface] + [point]
+                if point not in boundary_points:
+                    boundary_points[point] = edat['point'][point]
+    # boundary_points = []
+    # for point in boundary_points_ind:
+    #     boundary_points.append(edat['point'][point])
+    for i, point in surface_points.iteritems():
         point.sort()
         surface_points[i] = point
-    # print(surface_points)
+    print(surface_points)
     # print(boundary_points_ind)
     # print(boundary_points)
+    # exit()
     eps = 1e-8
-    periodic_points = [None]*len(edat['point'])
-    for i, firstpoint in enumerate(boundary_points):
-        for j, secondpoint in enumerate(boundary_points):
+    periodic_points = dict()
+    for i, firstpoint in boundary_points.iteritems():
+        for j, secondpoint in boundary_points.iteritems():
             if np.sum(np.abs(firstpoint + vec - secondpoint)) < eps:
-                periodic_points[boundary_points_ind[i] - 1] = \
-                    boundary_points_ind[j]
-    # print(periodic_points)
+                periodic_points[i] = j
+    print(periodic_points)
+    # exit()
     psurfs = []
-    for i, surf in enumerate(surface_points):
-        if surf:
-            per_surf = []
-            for point in surf:
-                per_surf.append(periodic_points[point - 1])
-            if None not in per_surf:
-                per_surf.sort()
-                if per_surf in surface_points:
-                    psurfs.append(
-                        [i + 1, surface_points.index(per_surf) + 1]
-                    )
+    for i, surf in surface_points.iteritems():
+        per_surf = []
+        for point in surf:
+            if point in periodic_points:
+                per_surf.append(periodic_points[point])
+            else:
+                per_surf.append(None)
+        if None not in per_surf:
+            per_surf.sort()
+            print(surf, per_surf)
+            if per_surf in surface_points.values():
+                psurfs.append(
+                    [i, list(surface_points.keys())[list(surface_points.values()).index(per_surf)]]
+                )
     # print(psurfs)
     return psurfs
+
+def remove_duplicity(edat):
+    """Removes duplicit points, lines, etc."""
+    eps = 1e-8
+    dupl = dict()
+    for i, item1 in edat['point'].iteritems():
+        for j, item2 in edat['point'].iteritems():
+            if i != j and i > j and np.sum(np.abs(item1 - item2)) < eps:
+                if i not in dupl:
+                    dupl[i] = []
+                dupl[i].append(j)
+    for i in dupl:
+        del edat['point'][i]
+    for values in edat['line'].itervalues():
+        for j, value in enumerate(values):
+            if value in dupl:
+                values[j] = min(dupl[value])
+    dupl = dict()
+    for i, item1 in edat['line'].iteritems():
+        for j, item2 in edat['line'].iteritems():
+            if i != j and i > j and sorted(item1) == sorted(item2):
+                if i not in dupl:
+                    dupl[i] = []
+                dupl[i].append(j)
+    for i in dupl:
+        del edat['line'][i]
+    for values in edat['line_loop'].itervalues():
+        for j, value in enumerate(values):
+            if value in dupl:
+                values[j] = min(dupl[value])
+    dupl = dict()
+    for i, item1 in edat['line_loop'].iteritems():
+        for j, item2 in edat['line_loop'].iteritems():
+            if i != j and i > j and sorted(item1) == sorted(item2):
+                if i not in dupl:
+                    dupl[i] = []
+                dupl[i].append(j)
+    for i in dupl:
+        del edat['line_loop'][i]
+        del edat['surface'][i]
+    for values in edat['surface_loop'].itervalues():
+        for j, value in enumerate(values):
+            if value in dupl:
+                values[j] = min(dupl[value])
 
 def move_to_box(infile, wfile, outfile, volumes):
     """Moves periodic closed foam to periodic box."""
@@ -319,20 +367,21 @@ def main():
     # )
     sdat = read_geo("FoamBox.geo") # string data
     edat = extract_data(sdat) # extracted data
-    print(edat['volume'])
-    print(edat['volume_index'])
-    exit(0)
-    surf0 = surfaces_in_z_plane(edat, 0.0)
+    remove_duplicity(edat)
+    surf0 = surfaces_in_plane(edat, 0.0, 2)
     print(surf0)
-    surf1 = surfaces_in_z_plane(edat, 1.0)
+    surf1 = surfaces_in_plane(edat, 1.0, 2)
     print(surf1)
-    surf = other_surfaces(edat['surface_loop'], surf0, surf1)
+    # surf = other_surfaces(edat['surface_loop'].itervalues(), surf0, surf1)
+    surf = surfaces_in_plane(edat, 0.0, 1) + surfaces_in_plane(edat, 1.0, 1) \
+        + surfaces_in_plane(edat, 0.0, 0) + surfaces_in_plane(edat, 1.0, 0)
     print(surf)
     edat['physical_surface'] = [surf0, surf1, surf]
     edat['periodic_surface_X'] = periodic_surfaces(
         edat, surf, np.array([1, 0, 0])
     )
     print(edat['periodic_surface_X'])
+    exit(0)
     edat['periodic_surface_Y'] = periodic_surfaces(
         edat, surf, np.array([0, 1, 0])
     )
