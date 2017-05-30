@@ -8,14 +8,14 @@ import subprocess as sp
 import fenics as fe
 from blessings import Terminal
 XMIN = 0.0
-XMAX = 2.0
+XMAX = 1.0
 YMIN = 0.0
-YMAX = 2.0
+YMAX = 1.0
 ZMIN = 0.0
-ZMAX = 2.0
+ZMAX = 1.0
 def main():
     """Main function."""
-    fname = "test2"
+    fname = "FoamBoxFixed"
     term = Terminal()
     print(
         term.yellow
@@ -85,7 +85,7 @@ def preprocess(fname):
     fe.plot(mesh)
     fe.plot(boundaries)
     fe.plot(subdomains)
-    # interactive()
+    # fe.interactive()
     # V = FunctionSpace(mesh, "CG", 1)
     V = fe.FunctionSpace(mesh, "CG", 1, constrained_domain=PeriodicDomain())
     dofmap = V.dofmap()
@@ -101,10 +101,10 @@ def preprocess(fname):
     dx = fe.Measure('dx', domain=mesh, subdomain_data=subdomains)
     D0 = fe.Constant(1)
     D1 = fe.Constant(100)
-    f = fe.Expression(
-        '1/(pow(x[0]-0.1,2)+pow(x[1]-0.1,2)+pow(x[2]-0.1,2)+1e-8)',
-        degree=2
-    )
+    # f = fe.Expression(
+    #     '1/(pow(x[0]-0.1,2)+pow(x[1]-0.1,2)+pow(x[2]-0.1,2)+1e-8)',
+    #     degree=2
+    # )
     F = (
         -D0*fe.inner(fe.grad(u), fe.grad(v))*dx(1)# + f*v*fe.dx
         -D1*fe.inner(fe.grad(u), fe.grad(v))*dx(2)# + f*v*fe.dx
@@ -117,12 +117,12 @@ def integrate(F, u, bc):
     # solve(a == L, u, bc)
     fe.solve(F == 0, u, bc)
     # check periodicity
-    # print(u(0.0, 0.1, 0.1))
-    # print(u(1.0, 0.1, 0.1))
-    # print(u(0.1, 0.0, 0.1))
-    # print(u(0.1, 1.0, 0.1))
-    # print(u(0.1, 0.1, 0.0))
-    # print(u(0.1, 0.1, 1.0))
+    print(u(0.0, 0.1, 0.1))
+    print(u(1.0, 0.1, 0.1))
+    print(u(0.1, 0.0, 0.1))
+    print(u(0.1, 1.0, 0.1))
+    print(u(0.1, 0.1, 0.0))
+    print(u(0.1, 0.1, 1.0))
     return u
 
 def postprocess(fname, u):
