@@ -95,7 +95,10 @@ def fix_strings(strings):
         strings[i] = re.sub('[-]', '', line)
 
 def save_geo(geo_file, sdat, opencascade=True, char_length=0.1):
-    """Saves geometry input file for gmsh."""
+    """
+    Creates geometry input file for gmsh. Input is a dictionary with prepared
+    string lines.
+    """
     with open(geo_file, "w") as text_file:
         if opencascade:
             text_file.write('SetFactory("OpenCASCADE");\n')
@@ -108,23 +111,24 @@ def save_geo(geo_file, sdat, opencascade=True, char_length=0.1):
                     text_file.write("{}\n".format(line))
 
 def extract_data(sdat):
-    """Extracts geo data to lists from list of geo strings."""
+    """Extracts geo data to dictionaries from list of geo strings."""
     edat = {}
     for key in sdat:
         lines = dict()
         for line in sdat[key]:
             part = line.split("(")
-            ind = int(part[1].split(")")[0])
+            ind = int(part[1].split(")")[0]) # ID of the element
             fraction = line.split("{")
             fraction = fraction[1].split("}")
             fraction = fraction[0].split(",")
-            if key == "point":
+            if key == "point": # point data are floats
+                # ignore the optional fourth argument (defines mesh coarseness)
                 fraction = np.array(fraction[0:3])
                 fraction = fraction.astype(np.float)
                 for j, number in enumerate(fraction):
                     if abs(number) < 1e-8:
                         fraction[j] = 0
-            else:
+            else: # other data are integers
                 fraction = np.array(fraction)
                 fraction = np.absolute(fraction.astype(np.int)).tolist()
             lines[ind] = fraction
@@ -180,8 +184,9 @@ def surfaces_in_plane(edat, coord, direction):
 
 def other_surfaces(surface_loops, surf0, surf1):
     """
-    Returns list of boundary surfaces, which are not in surf0 or surf1.
-    Assumes that inner surfaces are shared by two volumes.
+    Returns list of boundary surfaces, which are not in surf0 or surf1. Assumes
+    that inner surfaces are shared by two volumes. Remove duplicates before
+    calling this function.
     """
     all_surfaces = []
     for surface_loop in surface_loops:
@@ -198,10 +203,13 @@ def other_surfaces(surface_loops, surf0, surf1):
     ]
     return surf
 
-def periodic_surfaces(edat, surfaces, vec):
-    """Returns list of periodic surface pairs."""
-    surface_points = dict()
-    boundary_points = dict()
+def periodic_surfaces(edat, surfaces, vec, eps=1e-8):
+    """
+    Returns list of periodic surface pairs in specified direction. Parameter eps
+    is used to compare coordinates (floating point numbers).
+    """
+    surface_points = dict() # point IDs for each boundary surface
+    boundary_points = dict() # dictionary with only boundary points
     for surface in surfaces:
         surface_points[surface] = []
         for line in edat['line_loop'][surface]:
@@ -210,26 +218,20 @@ def periodic_surfaces(edat, surfaces, vec):
                     surface_points[surface] = surface_points[surface] + [point]
                 if point not in boundary_points:
                     boundary_points[point] = edat['point'][point]
-    # boundary_points = []
-    # for point in boundary_points_ind:
-    #     boundary_points.append(edat['point'][point])
+    # sort point IDs so that you can compare later
     for i, point in surface_points.iteritems():
         point.sort()
         surface_points[i] = point
-    # print(surface_points)
-    # print(boundary_points_ind)
-    # print(boundary_points)
-    # exit()
-    eps = 1e-8
+    # dictionary with ID of periodic point for each point that has one
     periodic_points = dict()
     for i, firstpoint in boundary_points.iteritems():
         for j, secondpoint in boundary_points.iteritems():
             if np.sum(np.abs(firstpoint + vec - secondpoint)) < eps:
                 periodic_points[i] = j
-    # print(periodic_points)
-    # exit()
-    psurfs = []
+    psurfs = [] # list of periodic surface pairs (IDs)
     for i, surf in surface_points.iteritems():
+        # Try to create surface using IDs of periodic points. Use None if there
+        # is no periodic point in specified direction.
         per_surf = []
         for point in surf:
             if point in periodic_points:
@@ -237,13 +239,16 @@ def periodic_surfaces(edat, surfaces, vec):
             else:
                 per_surf.append(None)
         if None not in per_surf:
-            per_surf.sort()
-            # print(surf, per_surf)
-            if per_surf in surface_points.values():
-                psurfs.append(
-                    [i, list(surface_points.keys())[list(surface_points.values()).index(per_surf)]]
-                )
-    # print(psurfs)
+            per_surf.sort() # sort so you can find it
+            # use ID of current surface and find ID of periodic surface
+            psurfs.append(
+                [
+                    i,
+                    surface_points.keys()[
+                        surface_points.values().index(per_surf)
+                    ]
+                ]
+            )
     return psurfs
 
 def remove_duplicity(edat):
@@ -388,9 +393,9 @@ def main():
     print(surf0)
     surf1 = surfaces_in_plane(edat, 1.0, 2)
     print(surf1)
-    # surf = other_surfaces(edat['surface_loop'].itervalues(), surf0, surf1)
-    surf = surfaces_in_plane(edat, 0.0, 1) + surfaces_in_plane(edat, 1.0, 1) \
-        + surfaces_in_plane(edat, 0.0, 0) + surfaces_in_plane(edat, 1.0, 0)
+    surf = other_surfaces(edat['surface_loop'].itervalues(), surf0, surf1)
+    # surf = surfaces_in_plane(edat, 0.0, 1) + surfaces_in_plane(edat, 1.0, 1) \
+    #     + surfaces_in_plane(edat, 0.0, 0) + surfaces_in_plane(edat, 1.0, 0)
     print(surf)
     edat.pop('physical_surface')
     edat['physical_surface'] = {1:surf0, 2:surf1, 3:surf}
