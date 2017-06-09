@@ -1,0 +1,25 @@
+{
+    "filename": "FoamBoxFixed",
+    "mesh_domain": false,
+    "convert_mesh": false,
+    "boundary_conditions": {
+        "top": 1,
+        "bottom": 2
+    },
+    "conductivity": {
+        "gas": 1,
+        "solid": 100
+    },
+    "element_degree": 1,
+    "saving": {
+        "mesh": true,
+        "boundaries": true,
+        "subdomains": true
+    },
+    "plotting": {
+        "mesh": true,
+        "boundaries": true,
+        "subdomains": true,
+        "solution": true
+    }
+}

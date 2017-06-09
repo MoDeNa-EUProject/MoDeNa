@@ -24,7 +24,7 @@ YMAX = 1.0
 ZMIN = 0.0
 ZMAX = 1.0
 def main():
-    """Main function. Reads input file and organizes workflow."""
+    """Main function. Organizes workflow."""
     fname = str(INPUTS['filename'])
     term = Terminal()
     print(
@@ -100,15 +100,15 @@ def preprocess(fname):
     if INPUTS['saving']['subdomains']:
         fe.File(fname+"_subdomains.pvd") << subdomains
     if INPUTS['plotting']['mesh']:
-        fe.plot(mesh)
+        fe.plot(mesh, title='Mesh')
     if INPUTS['plotting']['boundaries']:
-        fe.plot(boundaries)
+        fe.plot(boundaries, title='Boundaries')
     if INPUTS['plotting']['subdomains']:
-        fe.plot(subdomains)
+        fe.plot(subdomains, title='Subdomains')
     fun_space = fe.FunctionSpace(
         mesh,
         "CG",
-        1,
+        INPUTS['element_degree'],
         constrained_domain=PeriodicDomain()
     )
     if ARGS['--verbose']:
@@ -150,7 +150,8 @@ def postprocess(fname, field):
     """Postprocessing of the simulation."""
     if INPUTS['plotting']['solution']:
         fe.plot(field, title="Solution")
-    fe.interactive()
+    if True in INPUTS['plotting'].values():
+        fe.interactive()
     fe.File(fname+".pvd") << field
 
 if __name__ == "__main__":
