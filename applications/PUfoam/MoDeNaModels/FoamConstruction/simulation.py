@@ -138,13 +138,13 @@ def preprocess(fname):
         print('Number of DOFs:', len(dofmap.dofs()))
     field = fe.TrialFunction(fun_space)
     test_func = fe.TestFunction(fun_space)
-    kappa = Conductivity(
+    cond = Conductivity(
         subdomains,
         fe.Constant(INPUTS['conductivity']['gas']),
         fe.Constant(INPUTS['conductivity']['solid']),
         degree=0
     )
-    system_matrix = -kappa*fe.inner(fe.grad(field), fe.grad(test_func))*fe.dx
+    system_matrix = -cond*fe.inner(fe.grad(field), fe.grad(test_func))*fe.dx
     bctop = fe.Constant(INPUTS['boundary_conditions']['top'])
     bcbot = fe.Constant(INPUTS['boundary_conditions']['bottom'])
     bcs = [
@@ -170,6 +170,38 @@ def integrate(system_matrix, field, bcs):
 
 def postprocess(fname, field):
     """Postprocessing of the simulation."""
+    func_space = field.function_space()
+    mesh = func_space.mesh()
+    degree = func_space.ufl_element().degree()
+    vec_func_space = fe.VectorFunctionSpace(mesh, 'CG', degree)
+    subdomains = fe.MeshFunction('size_t', mesh, fname+'_physical_region.xml')
+    cond = Conductivity(
+        subdomains,
+        fe.Constant(INPUTS['conductivity']['gas']),
+        fe.Constant(INPUTS['conductivity']['solid']),
+        degree=0
+    )
+    flux = fe.project(-cond*fe.grad(field), vec_func_space)
+    divergence = fe.project(-fe.div(cond*fe.grad(field)), func_space)
+    fe.plot(flux, title="Flux")
+    fe.plot(divergence, title="Divergence")
+    flux_x, flux_y, flux_z = flux.split(deepcopy=True)  # extract components
+    fe.plot(flux_x, title='x-component of flux (-kappa*grad(u))')
+    fe.plot(flux_y, title='y-component of flux (-kappa*grad(u))')
+    fe.plot(flux_z, title='z-component of flux (-kappa*grad(u))')
+    normal = fe.FacetNormal(mesh)
+    boundaries = fe.MeshFunction('size_t', mesh, fname+'_facet_region.xml')
+    ds = fe.Measure('ds', domain=mesh, subdomain_data=boundaries)
+    total_flux = fe.assemble(-cond*fe.dot(fe.grad(field), normal)*ds(2))
+    print(total_flux)
+    total_flux = fe.assemble(flux_z*fe.dx)
+    surf = (XMAX - XMIN)*(YMAX - YMIN)
+    print(total_flux)
+    keff = total_flux/surf*(ZMAX - ZMIN)/(
+        INPUTS['boundary_conditions']['top']
+        - INPUTS['boundary_conditions']['bottom']
+    )
+    print('Effective conductivity: {0}'.format(keff))
     if INPUTS['plotting']['solution']:
         fe.plot(field, title="Solution")
     if True in INPUTS['plotting'].values():
