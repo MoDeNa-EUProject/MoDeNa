@@ -88,6 +88,28 @@ class PeriodicDomain(fe.SubDomain):
             pos_b[1] = -1000
             pos_b[2] = -1000
 
+
+class Conductivity(fe.Expression):
+    """
+    Defines conductivity on computational domain. Maybe it should be rewritten
+    as C++ code (see
+    https://fenicsproject.org/pub/tutorial/sphinx1/._ftut1005.html)
+    """
+    def __init__(self, subdomains, k_0, k_1, **kwargs):
+        """Constructor."""
+        self.subdomains = subdomains
+        self.k_0 = k_0
+        self.k_1 = k_1
+
+    def eval_cell(self, values, x, cell):
+        """
+        Assigns value to the cell. Note that Gmsh indexes subdomains from 1.
+        """
+        if self.subdomains[cell.index] == 1:
+            values[0] = self.k_0
+        else:
+            values[0] = self.k_1
+
 def preprocess(fname):
     """Loads mesh, defines system of equations and prepares system matrix."""
     mesh = fe.Mesh(fname+".xml")
@@ -116,13 +138,13 @@ def preprocess(fname):
         print('Number of DOFs:', len(dofmap.dofs()))
     field = fe.TrialFunction(fun_space)
     test_func = fe.TestFunction(fun_space)
-    dx = fe.Measure('dx', domain=mesh, subdomain_data=subdomains)
-    cond1 = fe.Constant(INPUTS['conductivity']['gas'])
-    cond2 = fe.Constant(INPUTS['conductivity']['solid'])
-    system_matrix = (
-        -cond1*fe.inner(fe.grad(field), fe.grad(test_func))*dx(1)
-        -cond2*fe.inner(fe.grad(field), fe.grad(test_func))*dx(2)
+    kappa = Conductivity(
+        subdomains,
+        fe.Constant(INPUTS['conductivity']['gas']),
+        fe.Constant(INPUTS['conductivity']['solid']),
+        degree=0
     )
+    system_matrix = -kappa*fe.inner(fe.grad(field), fe.grad(test_func))*fe.dx
     bctop = fe.Constant(INPUTS['boundary_conditions']['top'])
     bcbot = fe.Constant(INPUTS['boundary_conditions']['bottom'])
     bcs = [
