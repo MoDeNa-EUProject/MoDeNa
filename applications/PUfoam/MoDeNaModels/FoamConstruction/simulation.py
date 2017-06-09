@@ -6,7 +6,7 @@ Usage:
 
 Options:
     -h --help       Show this screen.
-    -i input_file   Json file with inputs.
+    -i input_file   Json file with inputs. Uses default file otherwise.
     --verbose       Print more information.
 
 @author: Pavel Ferkl
@@ -36,9 +36,9 @@ def main():
         mesh_domain(fname+".geo")
     if INPUTS['convert_mesh']:
         convert_mesh(fname+".msh", fname+".xml")
-    system_matrix, field, bcs = preprocess(fname)
+    system_matrix, field, bcs, cond = preprocess(fname)
     field = integrate(system_matrix, field, bcs)
-    postprocess(fname, field)
+    postprocess(fname, field, cond)
     print(
         term.yellow
         + "End."
@@ -129,7 +129,7 @@ def preprocess(fname):
         fe.plot(subdomains, title='Subdomains')
     fun_space = fe.FunctionSpace(
         mesh,
-        "CG",
+        INPUTS['element_type'],
         INPUTS['element_degree'],
         constrained_domain=PeriodicDomain()
     )
@@ -152,7 +152,7 @@ def preprocess(fname):
         fe.DirichletBC(fun_space, bcbot, boundaries, 2)
     ]
     field = fe.Function(fun_space)
-    return system_matrix, field, bcs
+    return system_matrix, field, bcs, cond
 
 def integrate(system_matrix, field, bcs):
     """Integrates the equation"""
@@ -168,45 +168,49 @@ def integrate(system_matrix, field, bcs):
         print('Value at ZMAX:', field((XMIN + XMAX)/3, (YMIN + YMAX)/3, ZMAX))
     return field
 
-def postprocess(fname, field):
+def postprocess(fname, field, cond):
     """Postprocessing of the simulation."""
     func_space = field.function_space()
     mesh = func_space.mesh()
     degree = func_space.ufl_element().degree()
-    vec_func_space = fe.VectorFunctionSpace(mesh, 'CG', degree)
-    subdomains = fe.MeshFunction('size_t', mesh, fname+'_physical_region.xml')
-    cond = Conductivity(
-        subdomains,
-        fe.Constant(INPUTS['conductivity']['gas']),
-        fe.Constant(INPUTS['conductivity']['solid']),
-        degree=0
+    vec_func_space = fe.VectorFunctionSpace(
+        mesh,
+        INPUTS['element_type'],
+        degree
     )
     flux = fe.project(-cond*fe.grad(field), vec_func_space)
     divergence = fe.project(-fe.div(cond*fe.grad(field)), func_space)
-    fe.plot(flux, title="Flux")
-    fe.plot(divergence, title="Divergence")
-    flux_x, flux_y, flux_z = flux.split(deepcopy=True)  # extract components
-    fe.plot(flux_x, title='x-component of flux (-kappa*grad(u))')
-    fe.plot(flux_y, title='y-component of flux (-kappa*grad(u))')
-    fe.plot(flux_z, title='z-component of flux (-kappa*grad(u))')
-    normal = fe.FacetNormal(mesh)
-    boundaries = fe.MeshFunction('size_t', mesh, fname+'_facet_region.xml')
-    ds = fe.Measure('ds', domain=mesh, subdomain_data=boundaries)
-    total_flux = fe.assemble(-cond*fe.dot(fe.grad(field), normal)*ds(2))
-    print(total_flux)
-    total_flux = fe.assemble(flux_z*fe.dx)
-    surf = (XMAX - XMIN)*(YMAX - YMIN)
-    print(total_flux)
-    keff = total_flux/surf*(ZMAX - ZMIN)/(
+    flux_x, flux_y, flux_z = flux.split()
+    av_flux = fe.assemble(flux_z*fe.dx)/((XMAX - XMIN)*(YMAX - YMIN))
+    keff = av_flux*(ZMAX - ZMIN)/(
         INPUTS['boundary_conditions']['top']
         - INPUTS['boundary_conditions']['bottom']
     )
     print('Effective conductivity: {0}'.format(keff))
+    with open(fname+"_keff.csv", 'w') as textfile:
+        textfile.write('keff\n')
+        textfile.write('{0}\n'.format(keff))
+    fe.File(fname+"_solution.pvd") << field
+    if INPUTS['saving']['flux']:
+        fe.File(fname+"_flux.pvd") << flux
+    if INPUTS['saving']['flux_divergence']:
+        fe.File(fname+"_flux_divergence.pvd") << divergence
+    if INPUTS['saving']['flux_components']:
+        fe.File(fname+"_flux_x.pvd") << flux_x
+        fe.File(fname+"_flux_y.pvd") << flux_y
+        fe.File(fname+"_flux_z.pvd") << flux_z
     if INPUTS['plotting']['solution']:
         fe.plot(field, title="Solution")
+    if INPUTS['plotting']['flux']:
+        fe.plot(flux, title="Flux")
+    if INPUTS['plotting']['flux_divergence']:
+        fe.plot(divergence, title="Divergence")
+    if INPUTS['plotting']['flux_components']:
+        fe.plot(flux_x, title='x-component of flux (-kappa*grad(u))')
+        fe.plot(flux_y, title='y-component of flux (-kappa*grad(u))')
+        fe.plot(flux_z, title='z-component of flux (-kappa*grad(u))')
     if True in INPUTS['plotting'].values():
         fe.interactive()
-    fe.File(fname+".pvd") << field
 
 if __name__ == "__main__":
     ARGS = docopt(__doc__)

@@ -3,23 +3,30 @@
     "mesh_domain": false,
     "convert_mesh": false,
     "boundary_conditions": {
-        "top": 1,
-        "bottom": 2
+        "top": 2,
+        "bottom": 1
     },
     "conductivity": {
         "gas": 1,
-        "solid": 100
+        "solid": 10
     },
+    "element_type": "CG",
     "element_degree": 1,
     "saving": {
-        "mesh": true,
-        "boundaries": true,
-        "subdomains": true
+        "mesh": false,
+        "boundaries": false,
+        "subdomains": false,
+        "flux": false,
+        "flux_divergence": false,
+        "flux_components": false
     },
     "plotting": {
-        "mesh": true,
-        "boundaries": true,
-        "subdomains": true,
-        "solution": true
+        "mesh": false,
+        "boundaries": false,
+        "subdomains": false,
+        "solution": true,
+        "flux": false,
+        "flux_divergence": false,
+        "flux_components": false
     }
 }

@@ -19,4 +19,5 @@
 *.in
 *.png
 *.tess
+*.csv
 spherepack
