@@ -187,9 +187,9 @@ def main(
         NumOfSurfaces=len(sdat['surface'])
         NumOfVolumes=len(sdat['volume'])
         edat = geo_tools.extract_data(sdat)
-        Edges=edat['line']
-        Faces=edat['line_loop']
-        Volumes=edat['surface_loop']
+        Edges=edat['line'].values()
+        Faces=edat['line_loop'].values()
+        Volumes=edat['surface_loop'].values()
         #####################################################
         MAX0=list(range(0,NumOfCells))
         for i in range(NumOfCells):

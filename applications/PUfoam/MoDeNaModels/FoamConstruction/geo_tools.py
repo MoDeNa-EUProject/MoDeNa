@@ -2,9 +2,7 @@
 """Manipulates .geo input files for gmsh.
 
 Usage:
-    geo_tools.py
-    geo_tools.py -v | --verbose
-    geo_tools.py -h | --help
+    geo_tools.py [-h | --help] [-v | --verbose]
 
 Options:
     -h --help     Show this screen.
@@ -17,6 +15,7 @@ import re
 import shutil
 import subprocess as sp
 import numpy as np
+from blessings import Terminal
 from docopt import docopt
 NAMES = {
     'point': 'Point',
@@ -151,14 +150,14 @@ def collect_strings(edat):
     for key in edat:
         sdat[key] = []
         if key == 'periodic_surface_X':
-            for i, j in enumerate(edat[key]):
+            for j in edat[key]:
                 sdat[key].append(
                     '{0} {{{1}}} = {{{2}}} Translate{{-1,0,0}};'.format(
                         NAMES[key], j[0], j[1]
                     )
                 )
         elif key == 'periodic_surface_Y':
-            for i, j in enumerate(edat[key]):
+            for j in edat[key]:
                 sdat[key].append(
                     '{0} {{{1}}} = {{{2}}} Translate{{0,-1,0}};'.format(
                         NAMES[key], j[0], j[1]
@@ -225,29 +224,26 @@ def periodic_surfaces(edat, surfaces, vec, eps=1e-8):
         for line in edat['line_loop'][surface]:
             for point in edat['line'][line]:
                 if point not in surface_points[surface]:
-                    surface_points[surface] = surface_points[surface] + [point]
+                    surface_points[surface] += [point]
                 if point not in boundary_points:
                     boundary_points[point] = edat['point'][point]
     # sort point IDs so that you can compare later
-    for i, point in surface_points.iteritems():
+    for point in surface_points.itervalues():
         point.sort()
-        surface_points[i] = point
     # dictionary with ID of periodic point for each point that has one
     periodic_points = dict()
-    for i, firstpoint in boundary_points.iteritems():
+    for i, point in boundary_points.iteritems():
         for j, secondpoint in boundary_points.iteritems():
-            if np.sum(np.abs(firstpoint + vec - secondpoint)) < eps:
+            if np.sum(np.abs(point + vec - secondpoint)) < eps:
                 periodic_points[i] = j
     psurfs = [] # list of periodic surface pairs (IDs)
-    for i, surf in surface_points.iteritems():
+    for i, surface in surface_points.iteritems():
         # Try to create surface using IDs of periodic points. Use None if there
         # is no periodic point in specified direction.
-        per_surf = []
-        for point in surf:
-            if point in periodic_points:
-                per_surf.append(periodic_points[point])
-            else:
-                per_surf.append(None)
+        per_surf = [
+            periodic_points[point] if point in periodic_points else None
+            for point in surface
+        ]
         if None not in per_surf:
             per_surf.sort() # sort so you can find it
             # use ID of current surface and find ID of periodic surface
@@ -395,9 +391,16 @@ def move_to_box(infile, wfile, outfile, volumes):
     shutil.move(wfile+'_unrolled', outfile)
 
 def main():
-    """Main subroutine. Just for testing of functionality."""
+    """Main subroutine. Organizes workflow."""
+    term = Terminal()
+    fname = 'FoamClosed'
+    print(
+        term.yellow
+        + "Working on file {}.geo.".format(fname)
+        + term.normal
+    )
     # read Neper foam
-    sdat = read_geo("FoamClosed.geo") # string data
+    sdat = read_geo(fname + ".geo") # string data
     # Neper creates physical surfaces, which we don't want
     sdat.pop('physical_surface')
     # remove orientation, OpenCASCADE compatibility
@@ -407,11 +410,11 @@ def main():
     save_geo("FoamClosedFixed.geo", sdat)
     # move foam to a periodic box and save it to a file
     move_to_box(
-        "FoamClosedFixed.geo", "move_to_box.geo", "FoamBox.geo",
+        fname + "Fixed.geo", "move_to_box.geo", fname + "Box.geo",
         range(1, len(sdat['volume']) + 1)
     )
     # read boxed foam
-    sdat = read_geo("FoamBox.geo") # string data
+    sdat = read_geo(fname + "Box.geo") # string data
     edat = extract_data(sdat) # extracted data
     # duplicity of points, lines, etc. was created during moving to a box
     remove_duplicity(edat)
@@ -431,17 +434,26 @@ def main():
         edat, surf, np.array([1, 0, 0])
     )
     if ARGS['--verbose']:
-        print('surface IDs periodic in X: {}'.format(edat['periodic_surface_X']))
+        print(
+            'surface IDs periodic in X: {}'.format(edat['periodic_surface_X'])
+        )
     edat['periodic_surface_Y'] = periodic_surfaces(
         edat, surf, np.array([0, 1, 0])
     )
     if ARGS['--verbose']:
-        print('surface IDs periodic in Y: {}'.format(edat['periodic_surface_Y']))
+        print(
+            'surface IDs periodic in Y: {}'.format(edat['periodic_surface_Y'])
+        )
     # define physical volumes
     edat['physical_volume'] = {1:edat['volume'].keys()}
     # save the final foam
     sdat = collect_strings(edat)
-    save_geo("FoamBoxFixed.geo", sdat)
+    save_geo(fname + "BoxFixed.geo", sdat)
+    print(
+        term.yellow
+        + "Prepared file {}BoxFixed.geo.".format(fname)
+        + term.normal
+    )
 
 if __name__ == "__main__":
     ARGS = docopt(__doc__)
