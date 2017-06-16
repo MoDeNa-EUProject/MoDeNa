@@ -19,9 +19,6 @@ module tests
     character(len=99) :: fileplacein_ref='../spectra/'  !modena
     character(len=99) :: fileplaceout='./'  !modena
     character(len=99) :: inputs='foamConductivity.json',spectra='spectra.out'
-    character(len=99) :: nspec='spec_n.in'
-    character(len=99) :: kspec='spec_k.in'
-    character(len=99) :: gasspec='gasspec.in'
     character(len=99) :: after_foaming,after_foaming0='after_foaming.txt'
     character(len=99) :: bg_res='../../foamExpansion/results/bubbleGrowth/'
     character(len=99) :: qmom0D_res='../../foamExpansion/results/CFD0D/'
@@ -190,6 +187,9 @@ subroutine loadParameters
     logical :: file_exists
     real(dp) :: xO2,xN2,xCO2,xCyP,matr(7)
     character(len=80) :: strval !name of the file with morphology
+    character(len=99) :: nspec
+    character(len=99) :: kspec
+    character(len=99) :: gasspec
     inputs=TRIM(ADJUSTL(fileplacein_par))//TRIM(ADJUSTL(inputs))
     inquire(file=inputs,exist=file_exists) !first try current folder
     if (.not. file_exists) then
@@ -342,6 +342,9 @@ subroutine loadParameters
     endif
     call fson_get(json_data, "strutSize", dstrut)
     call fson_get(json_data, "foamThickness", dfoam)
+    call fson_get(json_data, "spectra.polymer_n", nspec)
+    call fson_get(json_data, "spectra.polymer_k", kspec)
+    call fson_get(json_data, "spectra.gas_k", gasspec)
     call fson_get(json_data, "spatialDiscretization", nz)
     call fson_get(json_data, "useWallThicknessDistribution", wdist)
     if (wdist) then

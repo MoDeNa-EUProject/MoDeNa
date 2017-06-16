@@ -7,4 +7,4 @@
 *.dat
 
 !examples/*.json
-!spectra/*.in
+!spectra/*.csv
