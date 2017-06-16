@@ -364,6 +364,7 @@ subroutine loadParameters
     tmean=(temp1+temp2)/2
     call gasConductivity(cond1,tmean,xO2,xN2,xCO2,xCyP)
     call polymerConductivity(cond2,tmean)
+    cond2 = 0.1455_dp+1e-6_dp*(tmean - 273.2_dp)**2
     n1=1
     k1=0
     write(*,*) 'System information:'

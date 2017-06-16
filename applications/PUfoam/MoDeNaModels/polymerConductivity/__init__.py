@@ -41,5 +41,4 @@ Contributors
 @namespace polymerConductivity
 """
 
-from polymerConductivity import m_polymer_thermal_conductivity,\
-                                f_polymer_thermal_conductivity
+from polymerConductivity import *
