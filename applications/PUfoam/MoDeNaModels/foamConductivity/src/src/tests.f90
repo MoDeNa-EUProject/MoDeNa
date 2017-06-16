@@ -13,7 +13,8 @@ module tests
     use condrad, only: equcond,cond,alpha,sigma
     implicit none
     private
-    public loadParameters,eqcond,eqcond_por,eqcond_dcell,eqcond_strut
+    public loadParameters,eqcond,eqcond_por,eqcond_dcell,eqcond_strut,&
+        eqcond_dfoam
     character(len=99) :: fileplacein_par='./inputs/'   !modena
     character(len=99) :: fileplacein_ref='../spectra/'  !modena
     character(len=99) :: fileplaceout='./'  !modena
@@ -152,6 +153,29 @@ subroutine eqcond_strut
     enddo
     close(fi)
 end subroutine eqcond_strut
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> Calculate dependance of equivalent conductivity on cell size.
+subroutine eqcond_dfoam
+    integer :: fi,npoints,i
+    real(dp) :: dfoammin,dfoammax,ddfoam
+    dfoammin=1e-3_dp
+    dfoammax=1000e-3_dp
+    npoints=7
+    ddfoam=log10(dfoammax/dfoammin)/(npoints-1)
+    open(newunit(fi),file='eqcond_dfoam.csv')
+    write(fi,*) 'porosity,foam_density,eq_cond,Ross_eq_cond,&
+        kgas,ksol,krad,dcell,fstrut,dfoam'
+    do i=1,npoints
+        dfoam=dfoammin*10**((i-1)*ddfoam)
+        call eqcond(1)
+        write(fi,'(1x,es23.15,9(",",es23.15))') &
+            por,rhof,eqc,eqc_ross,kgas,ksol,krad,dcell,fs,dfoam
+    enddo
+    close(fi)
+end subroutine eqcond_dfoam
 !***********************************END****************************************
 
 
