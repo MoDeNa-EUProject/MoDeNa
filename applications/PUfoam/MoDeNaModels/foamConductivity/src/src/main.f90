@@ -20,11 +20,11 @@ program hahtf
     open (newunit(mfi),file='hahtf.out')
     write(mfi,*) 'Welcome in hahtf'
     call loadParameters
-    ! call eqcond(1)
+    call eqcond(1)
     ! call eqcond_por
     ! call eqcond_dcell
     ! call eqcond_strut
-    call eqcond_dfoam
+    ! call eqcond_dfoam
     write(*,*) 'Program exited normally'
     write(mfi,*) 'Program exited normally'
     close(mfi)

@@ -222,8 +222,9 @@ subroutine fcn_fs2(n,x,fvec,iflag)
     dcelldd=dcell*(pi/6/0.348_dp)**(1/3._dp)
     Vcell=0.348_dp*dcelldd**3
     Vstruts=2.8_dp*dstrut**2*dcelldd
-    Vwalls=(1.317_dp*dcelldd**2-13.4284_dp*dstrut*dcelldd+34.2375_dp*dstrut**2)*&
-        dwall+(4.639_dp*dcell-17.976_dp*dstrut)*dwall**2
+    Vwalls=(1.317_dp*dcelldd**2 - 13.4284_dp*dstrut*dcelldd + &
+        34.2375_dp*dstrut**2)*dwall + (4.639_dp*dcell - &
+        17.976_dp*dstrut)*dwall**2
     fvec(1)=fs-Vstruts/(Vstruts+Vwalls)
     fvec(2)=1-por-(Vstruts+Vwalls)/Vcell
 end subroutine fcn_fs2
