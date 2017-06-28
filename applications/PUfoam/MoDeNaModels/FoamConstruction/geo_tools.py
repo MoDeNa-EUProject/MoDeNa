@@ -390,6 +390,56 @@ def move_to_box(infile, wfile, outfile, volumes):
     call.wait()
     shutil.move(wfile+'_unrolled', outfile)
 
+def create_walls(edat, alpha=0.1):
+    """Creates walls."""
+    volume_points = dict() # point IDs for each volume
+    for volume in edat['surface_loop']:
+        volume_points[volume] = []
+        for surface in edat['surface_loop'][volume]:
+            for line in edat['line_loop'][surface]:
+                for point in edat['line'][line]:
+                    if point not in volume_points[volume]:
+                        volume_points[volume] += [point]
+        volume_points[volume].sort()
+    centroids = dict() # centroid for each volume
+    for volume in edat['surface_loop']:
+        total = 0
+        for point in volume_points[volume]:
+            total += edat['point'][point]
+        total /= len(volume_points[volume])
+        centroids[volume] = total
+    npoints = len(edat['point'])
+    nlines = len(edat['line'])
+    nsurfaces = len(edat['line_loop'])
+    nvolumes = len(edat['surface_loop'])
+    print(len(edat['point']))
+    for volume in edat['surface_loop'].keys():
+        point_map = dict() # mapping of old points to new points
+        nvolumes += 1
+        edat['surface_loop'][nvolumes] = []
+        for point in volume_points[volume]:
+            npoints += 1
+            edat['point'][npoints] = edat['point'][point] + alpha*(
+                centroids[volume] - edat['point'][point])
+            point_map[point] = npoints
+        for surface in edat['surface_loop'][volume]:
+            nsurfaces += 1
+            edat['line_loop'][nsurfaces] = []
+            for line in edat['line_loop'][surface]:
+                nlines += 1
+                edat['line'][nlines] = [
+                    point_map[edat['line'][line][0]],
+                    point_map[edat['line'][line][1]],
+                ]
+                edat['line_loop'][nsurfaces] += [nlines]
+            edat['surface'][nsurfaces] = [nsurfaces]
+            edat['surface_loop'][nvolumes] += [nsurfaces]
+        edat['volume'][nvolumes] = [nvolumes]
+        edat['volume'][volume] += [nvolumes]
+    print(len(edat['point']))
+    remove_duplicity(edat)
+    print(len(edat['point']))
+
 def main():
     """Main subroutine. Organizes workflow."""
     term = Terminal()
@@ -408,6 +458,15 @@ def main():
     fix_strings(sdat['surface_loop'])
     # save the foam to geo file
     save_geo("FoamClosedFixed.geo", sdat)
+
+    # test walls
+    edat = extract_data(sdat)
+    create_walls(edat)
+    sdat = collect_strings(edat)
+    save_geo("test.geo", sdat)
+    exit()
+    # end test walls
+
     # move foam to a periodic box and save it to a file
     move_to_box(
         fname + "Fixed.geo", "move_to_box.geo", fname + "Box.geo",
