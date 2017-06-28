@@ -412,7 +412,6 @@ def create_walls(edat, alpha=0.1):
     nlines = len(edat['line'])
     nsurfaces = len(edat['line_loop'])
     nvolumes = len(edat['surface_loop'])
-    print(len(edat['point']))
     for volume in edat['surface_loop'].keys():
         point_map = dict() # mapping of old points to new points
         nvolumes += 1
@@ -436,12 +435,21 @@ def create_walls(edat, alpha=0.1):
             edat['surface_loop'][nvolumes] += [nsurfaces]
         edat['volume'][nvolumes] = [nvolumes]
         edat['volume'][volume] += [nvolumes]
-    print(len(edat['point']))
     remove_duplicity(edat)
-    print(len(edat['point']))
 
 def main():
     """Main subroutine. Organizes workflow."""
+    """
+    TODO: Fix final structure. GMSH merges two line loops into one when the
+    surface has a hole. OpenCASCADE doesn't like it. There are several options:
+
+    1. Don't work with OpenCASCADE. But you must use oriented line loops and
+    surface loops. You have to change several functions (e.g., removal of
+    duplicity). Implementation is not trivial.
+
+    2. Split line loops and surface loops. Redefine surfaces and volumes with
+    holes. How to detect holes?
+    """
     term = Terminal()
     fname = 'FoamClosed'
     print(
@@ -457,14 +465,14 @@ def main():
     fix_strings(sdat['line_loop'])
     fix_strings(sdat['surface_loop'])
     # save the foam to geo file
-    save_geo("FoamClosedFixed.geo", sdat)
+    save_geo(fname + "Fixed.geo", sdat)
 
     # test walls
     edat = extract_data(sdat)
     create_walls(edat)
     sdat = collect_strings(edat)
-    save_geo("test.geo", sdat)
-    exit()
+    save_geo(fname + "Fixed.geo", sdat)
+    # exit()
     # end test walls
 
     # move foam to a periodic box and save it to a file
