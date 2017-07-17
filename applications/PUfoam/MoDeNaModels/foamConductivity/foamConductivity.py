@@ -119,6 +119,11 @@ class FoamConductivityExactTask(ModenaFireTask):
         inputs["strutContent"]=fstrut
         inputs["strutSize"]=1e-6
         inputs["foamThickness"]=3e-2
+        inputs["spectra"]={
+            "polymer_n": "spec_n_ps_kaemmerlen2010.csv",
+            "polymer_k": "spec_k_ps_kaemmerlen2010.csv",
+            "gas_k": "spec_k_gas.csv"
+        }
         inputs["spatialDiscretization"]=200
         inputs["useWallThicknessDistribution"]=True
         inputs["wallThicknessStandardDeviation"]=0.2
