@@ -57,7 +57,7 @@ if (modena_error_occurred())
 }
 ///@endcond
 /// instantiate the Arrhenius rheology model
-rheologymodel = modena_model_new("Rheology_Arrhenius");
+// rheologymodel = modena_model_new("Rheology_Arrhenius");
 ///@cond
 if (modena_error_occurred())
 {
@@ -93,8 +93,8 @@ outputs_kinetics = modena_outputs_new(kinetics); ///< set the outputs for the ki
 inputs_den = modena_inputs_new (density_reaction_mixturemodel); ///< set the inputs for the surrogate model for density of reacting mixture
 outputs_den = modena_outputs_new (density_reaction_mixturemodel); ///< set the output for the surrogate model for the density of reacting mixture
 
-inputs_rheo = modena_inputs_new (rheologymodel); ///< set the inputs for the rheology surrogate model
-outputs_rheo = modena_outputs_new (rheologymodel); ///< set the output for the rheology surrogate model
+// inputs_rheo = modena_inputs_new (rheologymodel); ///< set the inputs for the rheology surrogate model
+// outputs_rheo = modena_outputs_new (rheologymodel); ///< set the output for the rheology surrogate model
 
 inputs_strutContent = modena_inputs_new (strutContentmodel); ///< set the inputs for strut content surrogate model
 outputs_strutContent = modena_outputs_new (strutContentmodel); ///< set the output for the strut content surrogate model
@@ -162,11 +162,11 @@ X_N2_Pos = modena_model_inputs_argPos(thermalConductivitymodel, "x[N2]");
 X_Cyp_Pos = modena_model_inputs_argPos(thermalConductivitymodel, "x[CyP]");
 modena_model_argPos_check(thermalConductivitymodel);
 
-temp_rheopos = modena_model_inputs_argPos(rheologymodel, "T");
-shear_rheopos = modena_model_inputs_argPos(rheologymodel, "shear");
-conv_rheopos = modena_model_inputs_argPos(rheologymodel, "X");
-m0_rheopos = modena_model_inputs_argPos(rheologymodel, "m0");
-m1_rheopos = modena_model_inputs_argPos(rheologymodel, "m1");
-// modena_model_argPos_check(rheologymodel);
+// temp_rheopos = modena_model_inputs_argPos(rheologymodel, "T");
+// shear_rheopos = modena_model_inputs_argPos(rheologymodel, "shear");
+// conv_rheopos = modena_model_inputs_argPos(rheologymodel, "X");
+// m0_rheopos = modena_model_inputs_argPos(rheologymodel, "m0");
+// m1_rheopos = modena_model_inputs_argPos(rheologymodel, "m1");
+// // modena_model_argPos_check(rheologymodel);
 #endif
 ///@endcond

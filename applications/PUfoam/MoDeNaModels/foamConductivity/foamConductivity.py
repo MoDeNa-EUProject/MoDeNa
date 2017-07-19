@@ -238,7 +238,7 @@ m_foamConductivity = BackwardMappingModel(
     ),
     parameterFittingStrategy=Strategy.NonLinFitWithErrorContol(
         testDataPercentage=0.2,
-        maxError=0.01,
+        maxError=0.02,
         improveErrorStrategy=Strategy.StochasticSampling(
             nNewPoints=2
         ),
