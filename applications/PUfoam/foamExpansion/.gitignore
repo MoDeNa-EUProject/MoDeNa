@@ -8,4 +8,4 @@ inputs/
 
 !examples/*.json
 !examples/**/inputs/
-!spectra/*.in
+!spectra/*.csv
