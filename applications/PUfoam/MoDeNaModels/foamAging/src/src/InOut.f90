@@ -244,10 +244,10 @@ subroutine input()
 		"physicalProperties.foam.diffusivityModel.O2", strval)
 	if (strval=="constant") then
 	    diffModel(1)=0
-	elseif ( strval=="modena" ) then
-		diffModel(1)=1
 		call fson_get(json_data, &
 			"physicalProperties.foam.diffusivity.O2", Dg(1))
+	elseif ( strval=="modena" ) then
+		diffModel(1)=1
 	elseif (strval == "foam") then
 		diffModel(1) = 2
 		call fson_get(json_data, &
@@ -259,10 +259,10 @@ subroutine input()
 		"physicalProperties.foam.diffusivityModel.N2", strval)
 	if (strval=="constant") then
 	    diffModel(2)=0
-	elseif ( strval=="modena" ) then
-		diffModel(2)=1
 		call fson_get(json_data, &
 			"physicalProperties.foam.diffusivity.N2", Dg(2))
+	elseif ( strval=="modena" ) then
+		diffModel(2)=1
 	elseif (strval == "foam") then
 		diffModel(2) = 2
 		call fson_get(json_data, &
@@ -274,10 +274,10 @@ subroutine input()
 		"physicalProperties.foam.diffusivityModel.CO2",strval)
 	if (strval=="constant") then
 		diffModel(3)=0
-	elseif ( strval=="modena" ) then
-		diffModel(3)=1
 		call fson_get(json_data, &
 			"physicalProperties.foam.diffusivity.CO2", Dg(3))
+	elseif ( strval=="modena" ) then
+		diffModel(3)=1
 	elseif (strval == "foam") then
 		diffModel(3) = 2
 		call fson_get(json_data, &
@@ -289,10 +289,10 @@ subroutine input()
 		"physicalProperties.foam.diffusivityModel.Cyclopentane", strval)
 	if (strval=="constant") then
 		diffModel(4)=0
-	elseif ( strval=="modena" ) then
-		diffModel(4)=1
 		call fson_get(json_data, &
 			"physicalProperties.foam.diffusivity.Cyclopentane", Dg(4))
+	elseif ( strval=="modena" ) then
+		diffModel(4)=1
 	elseif (strval == "foam") then
 		diffModel(4) = 2
 		call fson_get(json_data, &
