@@ -84,9 +84,10 @@ The library is installed to `{HOME}/lib` and `{HOME}/include`
 cd where-you-want-source-files
 git clone https://github.com/japaf/fson.git
 cd fson
-cmake .
-make
-make install
+mkdir build; cd build
+cmake ..
+cmake --build .
+cmake --build . --target install
 ```
 ### 7. Install bspline library
 The library is installed to `{HOME}/lib` and `{HOME}/include`
@@ -94,9 +95,10 @@ The library is installed to `{HOME}/lib` and `{HOME}/include`
 cd where-you-want-source-files
 git clone https://github.com/japaf/bspline-fortran.git
 cd bspline-fortran
-cmake .
-make
-make install
+mkdir build; cd build
+cmake ..
+cmake --build .
+cmake --build . --target install
 ```
 ### 8. Install sundials library
 ```

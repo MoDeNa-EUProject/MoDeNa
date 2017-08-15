@@ -17,9 +17,10 @@ The library is installed to `{HOME}/lib` and `{HOME}/include`
 cd where-you-want-source-files
 git clone https://github.com/japaf/fson.git
 cd fson
-cmake .
-make
-make install
+mkdir build; cd build
+cmake ..
+cmake --build .
+cmake --build . --target install
 ```
 ### Compile the detailed models
 ```
@@ -33,7 +34,7 @@ make install
 ```
 ./initModels
 ```
-Note that foamConductivity takes initial points from `init_foamConductivity.json`. This file can be prepared using `prep_init_foamConductivity.py`.
+Note that foamConductivity takes initial points from `init_foamConductivity.json`. This file can be prepared using `prep_init_foamConductivity.py`. Try `./prep_init_foamConductivity.py 2` first.
 - The heat insulation properties can be predicted by running
 ```
 ./workflow_foamConductivity
