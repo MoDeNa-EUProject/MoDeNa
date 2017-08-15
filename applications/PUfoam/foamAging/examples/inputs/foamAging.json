@@ -52,14 +52,17 @@
                 "CO2": "modena",
                 "Cyclopentane": "modena"
             },
-            "solubility": {
-                "Cyclopentane": 1e-8
-            },
             "diffusivityModel": {
-                "O2": "modena",
-                "N2": "modena",
-                "CO2": "modena",
-                "Cyclopentane": "modena"
+                "O2": "foam",
+                "N2": "foam",
+                "CO2": "foam",
+                "Cyclopentane": "foam"
+            },
+            "diffusivity": {
+                "O2": 1.7996336072e-10,
+                "N2": 5.09229881418e-11,
+                "CO2": 5.85539723664e-10,
+                "Cyclopentane": 1.34453792484e-12
             }
         }
     }

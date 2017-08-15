@@ -29,6 +29,11 @@
     "morphologyInput": "strutContent",
     "strutSize": 1e-6,
     "foamThickness": 3e-2,
+    "spectra": {
+        "polymer_n": "spec_n_ps_kaemmerlen2010.csv",
+        "polymer_k": "spec_k_ps_kaemmerlen2010.csv",
+        "gas_k": "spec_k_gas.csv"
+    },
     "spatialDiscretization": 200,
     "useWallThicknessDistribution": true,
     "wallThicknessStandardDeviation": 0.2,
