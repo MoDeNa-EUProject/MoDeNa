@@ -18,7 +18,7 @@ subroutine input()
 	use constants
 	use globals
 	use physicalProperties
-	use ioutils
+	use ioutils, only: newunit
 	use fson
     use fson_value_m, only: fson_value_get
 	type(fson_value), pointer :: json_data
@@ -31,12 +31,31 @@ subroutine input()
 	integer :: fi
 	! Read input parameters
 	json_data => fson_parse("../inputs/foamAging.json")
+	call fson_get(json_data, "modelType", modelType)
+	if (modelType /= "heterogeneous" .and. modelType /= "homogeneous") then
+		write(*,*) 'modelType must be heterogeneous or homogeneous'
+		stop
+	endif
 	call fson_get(json_data, "foamCondition.inProtectiveSheet", sheet)
 	call fson_get(json_data, "numerics.timeStart", tbeg)
 	call fson_get(json_data, "numerics.timeEnd", tend)
-	call fson_get(json_data, "numerics.numberOfOutputs", nroutputs)
-	call fson_get(json_data, "numerics.wallDiscretization", divwall)
-	call fson_get(json_data, "numerics.cellDiscretization", divcell)
+	call fson_get(json_data, "numerics.progressTime", progressTime)
+	if (progressTime == "linear") then
+		call fson_get(json_data, "numerics.numberOfOutputs", nroutputs)
+    elseif (progressTime == "logarithmic") then
+		call fson_get(json_data, "numerics.outputsPerOrder", outputsPerOrder)
+		call fson_get(json_data, "numerics.numberOfOrders", numberOfOrders)
+        nroutputs = numberOfOrders*outputsPerOrder + 1
+	else
+		write(*,*) 'modelType must be linear or logarithmic'
+		stop
+    endif
+	if (modelType == "heterogeneous") then
+		call fson_get(json_data, "numerics.wallDiscretization", divwall)
+		call fson_get(json_data, "numerics.cellDiscretization", divcell)
+	elseif (modelType == "homogeneous") then
+		call fson_get(json_data, "numerics.foamDiscretization", divfoam)
+	endif
 	if (sheet) then
 		call fson_get(json_data, "numerics.sheetDiscretization", divsheet)
 	endif
@@ -225,53 +244,61 @@ subroutine input()
 		"physicalProperties.foam.diffusivityModel.O2", strval)
 	if (strval=="constant") then
 	    diffModel(1)=0
+		call fson_get(json_data, &
+			"physicalProperties.foam.diffusivity.O2", Dg(1))
 	elseif ( strval=="modena" ) then
 		diffModel(1)=1
+	elseif (strval == "foam") then
+		diffModel(1) = 2
+		call fson_get(json_data, &
+			"physicalProperties.foam.diffusivity.O2", Deff(1))
 	else
-		print*, "Diffusivity model must be constant or modena"
+		print*, "Diffusivity model must be constant, foam or modena"
 	endif
 	call fson_get(json_data, &
 		"physicalProperties.foam.diffusivityModel.N2", strval)
 	if (strval=="constant") then
 	    diffModel(2)=0
+		call fson_get(json_data, &
+			"physicalProperties.foam.diffusivity.N2", Dg(2))
 	elseif ( strval=="modena" ) then
 		diffModel(2)=1
+	elseif (strval == "foam") then
+		diffModel(2) = 2
+		call fson_get(json_data, &
+			"physicalProperties.foam.diffusivity.N2", Deff(2))
 	else
-		print*, "Diffusivity model must be constant or modena"
+		print*, "Diffusivity model must be constant, foam or modena"
 	endif
 	call fson_get(json_data, &
 		"physicalProperties.foam.diffusivityModel.CO2",strval)
 	if (strval=="constant") then
 		diffModel(3)=0
+		call fson_get(json_data, &
+			"physicalProperties.foam.diffusivity.CO2", Dg(3))
 	elseif ( strval=="modena" ) then
 		diffModel(3)=1
+	elseif (strval == "foam") then
+		diffModel(3) = 2
+		call fson_get(json_data, &
+			"physicalProperties.foam.diffusivity.CO2", Deff(3))
 	else
-		print*, "Diffusivity model must be constant or modena"
+		print*, "Diffusivity model must be constant, foam or modena"
 	endif
 	call fson_get(json_data, &
 		"physicalProperties.foam.diffusivityModel.Cyclopentane", strval)
 	if (strval=="constant") then
 		diffModel(4)=0
-	elseif ( strval=="modena" ) then
-		diffModel(4)=1
-	else
-		print*, "Diffusivity model must be constant or modena"
-	endif
-	if (diffModel(1)==0) then
-		call fson_get(json_data, &
-			"physicalProperties.foam.diffusivity.O2", Dg(1))
-	endif
-	if (diffModel(2)==0) then
-		call fson_get(json_data, &
-			"physicalProperties.foam.diffusivity.N2", Dg(2))
-	endif
-	if (diffModel(3)==0) then
-		call fson_get(json_data, &
-			"physicalProperties.foam.diffusivity.CO2", Dg(3))
-	endif
-	if (diffModel(4)==0) then
 		call fson_get(json_data, &
 			"physicalProperties.foam.diffusivity.Cyclopentane", Dg(4))
+	elseif ( strval=="modena" ) then
+		diffModel(4)=1
+	elseif (strval == "foam") then
+		diffModel(4) = 2
+		call fson_get(json_data, &
+			"physicalProperties.foam.diffusivity.Cyclopentane", Deff(4))
+	else
+		print*, "Diffusivity model must be constant, foam or modena"
 	endif
 	if (sheet) then
 		call fson_get(json_data, &
@@ -301,18 +328,20 @@ end subroutine input
 !!
 !! Saves partial pressure profiles in whole foam and in gas phase only.
 !! @param [in] time time
-subroutine output(iprof, time, ystate, neq, pp)
+subroutine output(iprof, time, ystate, neq, keq, fi)
 	use constants
 	use globals
-	use model, only: ngas,dz,mor,nfv,sol
+	use ioutils, only: newunit
 	integer, intent(in) :: iprof !< number time step
 	integer, intent(in) :: neq !< number of equations
+	integer, intent(in) :: fi !< file index for degas_scalar.csv
 	real(dp), intent(in) :: time !< time
 	real(dp), intent(in) :: ystate(:) !< integrated variables
-	real(dp), intent(out) :: pp(:) !< partial pressure
-	integer :: i, j
+	real(dp), intent(in) :: keq !< equivalent conductivity
+	integer :: i, j, fi2, fi3
 	integer :: spp
 	real(dp) :: pos
+	real(dp), dimension(:), allocatable :: pp
 
 	character(len=1) :: name_1	! one character
 	character(len=2) :: name_2	! two characters
@@ -331,17 +360,24 @@ subroutine output(iprof, time, ystate, neq, pp)
     else
         write(name_f,'(I4)') iprof
     endif
-	open(unit=11,file='H2perm_'//trim(name_f)//'.dat')
-	open(unit=12,file='ppar_'//trim(name_f)//'.dat')
 
-	! profiles
-	do i = 1, neq/ngas
-		write (11,100) time/(3600*24),pos,&
-			ystate(ngas*(i-1)+1)*sol(ngas*(i-1)+1),&
-			ystate(ngas*(i-1)+2)*sol(ngas*(i-1)+2),&
-			ystate(ngas*(i-1)+3)*sol(ngas*(i-1)+3),&
-			ystate(ngas*(i-1)+4)*sol(ngas*(i-1)+4)
-	enddo
+	if (modelType == "heterogeneous") then
+		open(newunit(fi2),file='conc_'//trim(name_f)//'.csv')
+		write (fi2,'(A, 5(",", A))') &
+			'time', 'position', 'O2', 'N2', 'CO2', 'CP'
+		do i = 1, neq/ngas
+			write (fi2,'(1x, ES23.15, 5(",", ES23.15))') time/(3600*24),pos,&
+				ystate(ngas*(i-1)+1)*sol(ngas*(i-1)+1),&
+				ystate(ngas*(i-1)+2)*sol(ngas*(i-1)+2),&
+				ystate(ngas*(i-1)+3)*sol(ngas*(i-1)+3),&
+				ystate(ngas*(i-1)+4)*sol(ngas*(i-1)+4)
+		enddo
+	endif
+
+	open(newunit(fi3),file='pres_'//trim(name_f)//'.csv')
+	write (fi3,'(A, 5(",", A))') &
+		'time', 'position', 'O2', 'N2', 'CO2', 'CP'
+	allocate(pp(ngas))
 	pp=0
 	spp=0
 	do i = 1,nfv
@@ -352,19 +388,35 @@ subroutine output(iprof, time, ystate, neq, pp)
 		endif
 		if (mor(i)==1) then
 			do j=1,ngas
-				pp(j)=pp(j)+ystate(ngas*(i-1)+j)*Rg*temp
+				if (modelType == "heterogeneous") then
+					pp(j)=pp(j)+ystate(ngas*(i-1)+j)*Rg*temp
+				elseif ( modelType == "homogeneous" ) then
+					pp(j)=pp(j)+ystate(ngas*(i-1)+j)/Seff(j)
+				endif
 			enddo
 			spp=spp+1
-			write (12,101) time/(3600*24),pos,ystate(ngas*(i-1)+1)*Rg*temp,&
-				ystate(ngas*(i-1)+2)*Rg*temp,ystate(ngas*(i-1)+3)*Rg*temp,&
-				ystate(ngas*(i-1)+4)*Rg*temp
+			if (modelType == "heterogeneous") then
+				write (fi3,'(1x, ES23.15, 5(",", ES23.15))') &
+					time/(3600*24),pos,&
+					ystate(ngas*(i-1)+1)*Rg*temp,&
+					ystate(ngas*(i-1)+2)*Rg*temp,&
+					ystate(ngas*(i-1)+3)*Rg*temp,&
+					ystate(ngas*(i-1)+4)*Rg*temp
+			elseif ( modelType == "homogeneous" ) then
+				write (fi3,'(1x, ES23.15, 5(",", ES23.15))') &
+					time/(3600*24),pos,&
+					ystate(ngas*(i-1)+1)/Seff(1),&
+					ystate(ngas*(i-1)+2)/Seff(2),&
+					ystate(ngas*(i-1)+3)/Seff(3),&
+					ystate(ngas*(i-1)+4)/Seff(4)
+			endif
 		endif
 	enddo
 	pp=pp/spp
-    close(11)
-	close(12)
-100   format (f8.2,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3)
-101   format (f8.2,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3,2x,ES23.8E3)
+    write(fi,'(1x, ES23.15, 6(",", ES23.15))') &
+		time/(3600*24),keq*1.0e3_dp,sum(pp),pp
+    close(fi2)
+	close(fi3)
 end subroutine output
 !***********************************END****************************************
 
@@ -375,7 +427,8 @@ end subroutine output
 !! Outputs useful information, which identifies, which foam is simulated.
 subroutine print_header
 	use globals
-	use model, only: nfv
+	integer :: i
+	print*, 'Model type: ',TRIM(ADJUSTL(modelType))
     print*, 'Foam:'
     write(*,'(A30,EN12.3,1x,A)') 'foam density:',rhof,'kg/m3'
     write(*,'(A30,EN12.3)') 'porosity:',eps
@@ -392,22 +445,37 @@ subroutine print_header
     print*, 'Physical properties:'
     write(*,'(A30,EN12.3,1x,A)') 'polymer density:',rhop,'kg/m3'
     write(*,'(A30,EN12.3,1x,A)') 'diffusivity in gas:',Dgas,'m2/s'
-    write(*,'(A30,EN12.3,1x,A)') 'O2 diffusivity:',Dg(1),'m2/s'
-	write(*,'(A30,EN12.3,1x,A)') 'N2 diffusivity:',Dg(2),'m2/s'
-    write(*,'(A30,EN12.3,1x,A)') 'CO2 diffusivity:',Dg(3),'m2/s'
-    write(*,'(A30,EN12.3,1x,A)') 'pentane diffusivity:',Dg(4),'m2/s'
-	write(*,'(A30,EN12.3,1x,A)') 'O2 solubility:',Sg(1),'g/g/bar'
-	write(*,'(A30,EN12.3,1x,A)') 'N2 solubility:',Sg(2),'g/g/bar'
-    write(*,'(A30,EN12.3,1x,A)') 'CO2 solubility:',Sg(3),'g/g/bar'
-	write(*,'(A30,EN12.3,1x,A)') 'pentane solubility:',Sg(4),'g/g/bar'
-	write(*,'(A30,EN12.3,1x,A)') 'O2 permeability:',Sg(1)*Dg(1),'m2/s*g/g/bar'
-	write(*,'(A30,EN12.3,1x,A)') 'N2 permeability:',Sg(2)*Dg(2),'m2/s*g/g/bar'
-    write(*,'(A30,EN12.3,1x,A)') 'CO2 permeability:',Sg(3)*Dg(3),'m2/s*g/g/bar'
-	write(*,'(A30,EN12.3,1x,A)') 'pentane permeability:',Sg(4)*Dg(4),&
-        'm2/s*g/g/bar'
+	do i=1,ngas
+		write(*,'(A30,EN12.3,1x,A)') &
+			TRIM(ADJUSTL(gasname(i)))//' diffusivity:',Dg(i),'m2/s'
+	enddo
+	do i=1,ngas
+		write(*,'(A30,EN12.3,1x,A)') &
+			TRIM(ADJUSTL(gasname(i)))//' solubility:',Sg(i),'g/g/bar'
+	enddo
+	do i=1,ngas
+		write(*,'(A30,EN12.3,1x,A)') &
+			TRIM(ADJUSTL(gasname(i)))//' permeability:',Pg(i),'mol/m/s/Pa'
+	enddo
+	if (modelType == 'homogeneous') then
+		do i=1,ngas
+			write(*,'(A30,EN12.3,1x,A)') &
+				TRIM(ADJUSTL(gasname(i)))//' effective solubility:',&
+				Seff(i),'mol/m3/Pa'
+		enddo
+		do i=1,ngas
+			write(*,'(A30,EN12.3,1x,A)') &
+				TRIM(ADJUSTL(gasname(i)))//' effective diffusivity:',&
+				Deff(i),'m2/s'
+		enddo
+	endif
     print*, 'Numerics:'
-    write(*,'(A30,I12)') 'finite volumes in wall:',divwall
-    write(*,'(A30,I12)') 'finite volumes in cell:',divcell
+	if (modelType == "heterogeneous") then
+	    write(*,'(A30,I12)') 'finite volumes in wall:',divwall
+	    write(*,'(A30,I12)') 'finite volumes in cell:',divcell
+	elseif ( modelType == "homogeneous" ) then
+		write(*,'(A30,I12)') 'finite volumes in foam:',divfoam
+	endif
     if (sheet) then
         write(*,'(A30,I12)') 'finite volumes in sheet:',divsheet
     endif

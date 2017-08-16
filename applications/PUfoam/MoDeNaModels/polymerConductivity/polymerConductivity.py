@@ -87,7 +87,7 @@ m_polymer_thermal_conductivity = ForwardMappingModel(
     _id='polymer_thermal_conductivity',
     surrogateFunction=f_polymer_thermal_conductivity,
     substituteModels=[],
-    parameters=[0.198e-3, 151.08e-3],
+    parameters=[0.198e-3, 131.08e-3],
     inputs={
         'T': {'min': 273, 'max': 450},
     },

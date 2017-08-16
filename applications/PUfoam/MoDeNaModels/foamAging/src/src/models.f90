@@ -5,21 +5,11 @@
 !! @brief     Model subroutines.
 !! @details
 !! Implementation of the physical equations.
-module model
-    use globals, only:dp
+module models
+    use globals
     implicit none
-    integer :: &
-        ngas,&    !< number of gases
-        nfv     !< number of finite volumes
-    integer, dimension(:), allocatable :: &
-        mor   !< morphology: 1=cell,2=wall,3=sheet
-    real(dp), dimension(:), allocatable :: &
-        dz,&    !< size of finite volume
-        dif,&   !< diffusivity
-        sol,&   !< solubility
-        bc      !< boundary condition
     private
-    public modelPU,ngas,nfv,dz,dif,sol,bc,mor
+    public model
 contains
 !********************************BEGINNING*************************************
 !> Model supplied to the integrator.
@@ -29,8 +19,7 @@ contains
 !! the pressure on the wall, solubility given by Henry's law cpol = H*cgas.
 !! Model call is defined for ODEPACK.
 !! @param [in] time time
-subroutine modelPU(neq, time, ystate, yprime)
-    use constants
+subroutine model(neq, time, ystate, yprime)
     integer, intent(in) :: neq !< number of equations
     real(dp), intent(in) :: time !< time
     real(dp), intent(in) :: ystate(neq) !< integrated variables
@@ -68,6 +57,6 @@ subroutine modelPU(neq, time, ystate, yprime)
         yprime(k)=(fluxw-fluxe)/dz(j)
         k=k+1
     enddo
-end subroutine modelPU
+end subroutine model
 !***********************************END****************************************
-end module model
+end module models

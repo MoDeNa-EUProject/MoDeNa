@@ -2,8 +2,8 @@ cmake_minimum_required (VERSION 2.8)
 project (bubbleGrowth C CXX Fortran)
 
 if( CMAKE_VERSION VERSION_GREATER "3.0" )
-    cmake_policy(SET CMP0042 OLD)
-    cmake_policy(SET CMP0026 OLD)
+  cmake_policy(SET CMP0042 OLD)
+  cmake_policy(SET CMP0026 OLD)
 endif()
 
 find_package(MODENA QUIET)
@@ -55,22 +55,35 @@ IF(LAPACK_FOUND)
   LIST(APPEND SUNDIALS_LIBS ${LAPACK_LIBRARIES})
 ENDIF(LAPACK_FOUND)
 
-include_directories($ENV{HOME}/include)
-find_library(FSON fson PATHS $ENV{HOME}/lib)
-find_library(BSPLINE bspline PATHS $ENV{HOME}/lib)
+find_package(FSON REQUIRED)
+include_directories(${FSON_INCLUDE_DIRS})
+
+find_package(BSPLINE REQUIRED)
+include_directories(${BSPLINE_INCLUDE_DIRS})
+
 if(MODENA_FOUND)
-    message("MoDeNa found")
-    include_directories(${MODENA_INCLUDE_DIRS})
-    link_directories(${MODENA_LIBRARY_DIRS})
-    target_link_libraries(
-        bblgrExact MODENA::modena ${FSON} ${BSPLINE} ${SUNDIALS_LIBS})
+  message("MoDeNa found")
+  include_directories(${MODENA_INCLUDE_DIRS})
+  link_directories(${MODENA_LIBRARY_DIRS})
+  target_link_libraries(
+    bblgrExact
+    MODENA::modena
+    ${FSON_LIBRARIES}
+    ${BSPLINE_LIBRARIES}
+    ${SUNDIALS_LIBS}
+  )
 else()
-    message("MoDeNa not found")
-    file (GLOB _fms RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/fake_modena.c)
-    message(${_sources})
-    message(${CMAKE_CURRENT_SOURCE_DIR})
-    message(${_fms})
-    add_library(fake_modena STATIC ${_fms})
-    target_link_libraries(
-        bblgrExact fake_modena ${FSON} ${BSPLINE} ${SUNDIALS_LIBS})
+  message("MoDeNa not found")
+  file (GLOB _fms RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/fake_modena.c)
+  message(${_sources})
+  message(${CMAKE_CURRENT_SOURCE_DIR})
+  message(${_fms})
+  add_library(fake_modena STATIC ${_fms})
+  target_link_libraries(
+    bblgrExact
+    fake_modena
+    ${FSON_LIBRARIES}
+    ${BSPLINE_LIBRARIES}
+    ${SUNDIALS_LIBS}
+  )
 endif()

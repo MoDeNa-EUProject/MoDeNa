@@ -191,7 +191,7 @@ void gasMixtureConductivity
 #
 # Thermal conductivity of blowing agents is a function of temperature.
 f_gasMixtureConductivity = CFunction(
-    Ccode=dohrnCode,
+    Ccode=weightedAverageCode,
     # These are global bounds for the function
     inputs={
         'T': {'min': 273, 'max': 550},

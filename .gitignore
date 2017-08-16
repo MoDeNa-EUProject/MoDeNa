@@ -127,4 +127,20 @@ solaris*Gcc*/
 SunOS*Gcc*/
 platforms/
 
+### Code ###
+# Visual Studio Code - https://code.visualstudio.com/
+.settings/
+.vscode/
+tsconfig.json
+jsconfig.json
+
+# geometry, mesh and 3D results
+*.brep
+*.step
+*.msh
+*.pos
+*.xml
+*.pvd
+*.vtu
+
 # end-of-file

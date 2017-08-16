@@ -47,7 +47,7 @@ SUBROUTINE para_input
      CALL pcsaft_par
   ELSE
      write (*,*) 'Solubility Code: no pure component parameters defined for EOS=',eos
-     stop 5
+     stop 5 
   END IF
 
   DO i = 1, ncomp
@@ -111,22 +111,14 @@ SUBROUTINE pcsaft_par
      SELECT CASE ( compna(i) )
 
      !MoDeNa components
-
+     
     CASE ('14-butandiol')
       mm(i)       = 90.12
       parame(i,1) = 4.35923557
       parame(i,2) = 3.02947364
       parame(i,3) = 197.11998863
-      
-   CASE ('surfactant') 
-     mm(i) =  2655.24078
-     parame(i,1) = 78.5859962
-     parame(i,2) = 4.17006833
-     parame(i,3) = 230.284526
-     parame(i,6) = 17.9645
-      
 
-    CASE('mdi')
+    CASE('mdi') 
       mm(i) =  2.50252E+02
       parame(i,1) = mm(i)*0.030769
       parame(i,2) = 2.886003
@@ -137,7 +129,7 @@ SUBROUTINE pcsaft_par
       parame(i,1) = 1.18938	!n2 and o2 according to mole fractions (weighted artihm. avg)
       parame(i,2) = 3.28694	!n2 and o2 according to mole fractions (weighted artihm. avg)
       parame(i,3) = 95.672	!n2 and o2 according to mole fractions (weighted artihm. avg)
-
+   
     CASE ('pu') !parameters obtained from MD simulations
 !      mm(i) =  2042.22 !pu n = 5
 !      parame(i,1) = mm(i)*0.008845
@@ -156,7 +148,7 @@ SUBROUTINE pcsaft_par
       parame(i,2) = 4.537837
       parame(i,3) = 400.036950
 
-   CASE ('tpg')
+   CASE ('tpg') 
      mm(i) =  192.25
      parame(i,1) = mm(i)*0.01239
      parame(i,2) =  4.549
@@ -286,10 +278,10 @@ SUBROUTINE pcsaft_par
         parame(i,2) = 1.0
         parame(i,3) = 140.0
      CASE ('adamantane')
-        mm(i)       =   136.235000000000
-        parame(i,1) =   4.81897145432221
-        parame(i,2) =   3.47128575274660
-        parame(i,3) =   266.936967922521
+        mm(i)       =   136.235000000000     
+        parame(i,1) =   4.81897145432221     
+        parame(i,2) =   3.47128575274660     
+        parame(i,3) =   266.936967922521     
      CASE ('methane')
         mm(i)       = 16.043
         parame(i,1)  = 1.0
@@ -592,12 +584,12 @@ SUBROUTINE pcsaft_par
         parame(i,2) =           3.76000631
         parame(i,3) =           291.049123
      CASE ('thf')
-        mm(i)       =   72.1057000000000
+        mm(i)       =   72.1057000000000     
         ! parame(i,1) = mm(i)*  0.34311391E-01
-        parame(i,1) =   2.47404685540709
-        parame(i,2) =   3.51369375633677
-        parame(i,3) =   274.181927093696
-        parame(i,6) =   1.63100000000000
+        parame(i,1) =   2.47404685540709     
+        parame(i,2) =   3.51369375633677     
+        parame(i,3) =   274.181927093696     
+        parame(i,6) =   1.63100000000000     
      CASE ('co2')
         mm(i)       = 44.01
         parame(i,1) = mm(i)*  .0470968503
@@ -615,9 +607,9 @@ SUBROUTINE pcsaft_par
         IF (pol /= 1) write (*,*) 'parameters for co missing'
         IF (pol /= 1) stop 5
         IF (pol >= 1) mm(i)       = 28.01
-        IF (pol >= 1) parame(i,1) = mm(i)*  5.126059746332587E-002  ! 1.43580933494776
-        IF (pol >= 1) parame(i,2) = 3.13556624711756
-        IF (pol >= 1) parame(i,3) = 87.7191028693595
+        IF (pol >= 1) parame(i,1) = mm(i)*  5.126059746332587E-002  ! 1.43580933494776     
+        IF (pol >= 1) parame(i,2) = 3.13556624711756     
+        IF (pol >= 1) parame(i,3) = 87.7191028693595     
         IF (pol >= 1) parame(i,6) = 0.1098
      CASE ('n2')
         mm(i)       = 28.01
@@ -746,10 +738,10 @@ SUBROUTINE pcsaft_par
         IF (pol >= 2) parame(i,6) = 2.88000000000000
         IF (pol == 2) parame(i,11)= 6.40000000000000
         ! IF (pol >= 1) mm(i)       =   58.0800000000000     ! PCP-SAFT (with more emphasis on crit. pt.)
-        ! IF (pol >= 1) parame(i,1) =   2.79925169706703
-        ! IF (pol >= 1) parame(i,2) =   3.26496723061544
-        ! IF (pol >= 1) parame(i,3) =   221.426206364920
-        ! IF (pol >= 1) parame(i,6) =   3.22546611481946
+        ! IF (pol >= 1) parame(i,1) =   2.79925169706703     
+        ! IF (pol >= 1) parame(i,2) =   3.26496723061544     
+        ! IF (pol >= 1) parame(i,3) =   221.426206364920     
+        ! IF (pol >= 1) parame(i,6) =   3.22546611481946     
      CASE ('butanone')
         mm(i)       = 72.1066               !  PC-SAFT
         parame(i,1) = mm(i)*  4.264192830122321E-002  !  =3.07476446724498
@@ -799,10 +791,10 @@ SUBROUTINE pcsaft_par
         IF (pol == 2) parame(i,6) = 2.82000000000000
         IF (pol == 2) parame(i,11)= 9.93000000000000
      CASE ('2-octanone')
-        mm(i)       =   128.212040000000
-        parame(i,1) =   4.32004934535641
-        parame(i,2) =   3.68827454027963
-        parame(i,3) =   257.552579277391
+        mm(i)       =   128.212040000000     
+        parame(i,1) =   4.32004934535641     
+        parame(i,2) =   3.68827454027963     
+        parame(i,3) =   257.552579277391     
      CASE ('cyclohexanone')          ! from DIPPR
         ! IF (pol.GE.1) mm(i)       = 98.1430                !  PCP-SAFT
         ! IF (pol.GE.1) parame(i,1) = 3.084202
@@ -1181,11 +1173,11 @@ SUBROUTINE pcsaft_par
      CASE ('fluoromethane')    ! R41
         IF (pol /= 1) write (*,*) 'non-polar parameters missing for fluoromethane'
         IF (pol /= 1) stop 5
-        IF (pol >= 1) mm(i)       =   34.0329000000000
-        IF (pol >= 1) parame(i,1) =   1.94494757526896
-        IF (pol >= 1) parame(i,2) =   2.96858005012635
-        IF (pol >= 1) parame(i,3) =   168.938697391009
-        IF (pol >= 1) parame(i,6) =         1.57823038894029
+        IF (pol >= 1) mm(i)       =   34.0329000000000     
+        IF (pol >= 1) parame(i,1) =   1.94494757526896     
+        IF (pol >= 1) parame(i,2) =   2.96858005012635     
+        IF (pol >= 1) parame(i,3) =   168.938697391009     
+        IF (pol >= 1) parame(i,6) =         1.57823038894029     
      CASE ('dichloromethane')   ! R30
         mm(i)       = 84.932        ! PC-SAFT
         parame(i,1) = 2.3117
@@ -1213,10 +1205,10 @@ SUBROUTINE pcsaft_par
      CASE ('trifluoromethane')   ! R23
         IF (pol /= 1) write (*,*) 'non-polar parameters missing for trifluoromethane'
         IF (pol /= 1) stop 5
-        IF (pol >= 1) mm(i)       =   70.0138000000000
-        IF (pol >= 1) parame(i,1) =   2.66039274225485
-        IF (pol >= 1) parame(i,2) =   2.82905884530501
-        IF (pol >= 1) parame(i,3) =   149.527709542333
+        IF (pol >= 1) mm(i)       =   70.0138000000000     
+        IF (pol >= 1) parame(i,1) =   2.66039274225485     
+        IF (pol >= 1) parame(i,2) =   2.82905884530501     
+        IF (pol >= 1) parame(i,3) =   149.527709542333     
         IF (pol >= 1) parame(i,6) =   1.339963415253999E-002
      CASE ('tetrachloromethane')   ! R10
         mm(i)       = 153.822
@@ -1226,19 +1218,19 @@ SUBROUTINE pcsaft_par
      CASE ('trichlorofluoromethane')   ! R11
         IF (pol /= 1) write (*,*) 'non-polar parameters missing for trichlorofluoromethane'
         IF (pol /= 1) stop 5
-        IF (pol >= 1) mm(i)       =   137.368000000000
-        IF (pol >= 1) parame(i,1) =   2.28793359008803
-        IF (pol >= 1) parame(i,2) =   3.69013104930876
-        IF (pol >= 1) parame(i,3) =   248.603173885090
+        IF (pol >= 1) mm(i)       =   137.368000000000     
+        IF (pol >= 1) parame(i,1) =   2.28793359008803     
+        IF (pol >= 1) parame(i,2) =   3.69013104930876     
+        IF (pol >= 1) parame(i,3) =   248.603173885090     
         IF (pol >= 1) parame(i,6) =   0.23225538492979
      CASE ('chlorodifluoromethane')   ! R22   ( CHClF2 or CHF2Cl)
         IF (pol /= 1) write (*,*) 'non-polar parameters missing for chlorodifluoromethane'
         IF (pol /= 1) stop 5
-        IF (pol >= 1) mm(i)       =   86.4684000000000
-        IF (pol >= 1) parame(i,1) =   2.47218586047893
-        IF (pol >= 1) parame(i,2) =   3.13845692489930
-        IF (pol >= 1) parame(i,3) =   187.666355083434
-        IF (pol >= 1) parame(i,6) =         1.04954264812860
+        IF (pol >= 1) mm(i)       =   86.4684000000000     
+        IF (pol >= 1) parame(i,1) =   2.47218586047893     
+        IF (pol >= 1) parame(i,2) =   3.13845692489930     
+        IF (pol >= 1) parame(i,3) =   187.666355083434     
+        IF (pol >= 1) parame(i,6) =         1.04954264812860     
      CASE ('chloroethane')
         mm(i)       = 64.514
         parame(i,1) = mm(i)*  .0350926868
@@ -1850,7 +1842,7 @@ SUBROUTINE pcsaft_par
         eps_hb(i,i,2,2)= 0.0
         kap_hb(i,i)    = .00186263367
      CASE ('ethanediol')
-        mm(i)       = 62.07
+        mm(i)       = 62.07     
         parame(i,1) = 3.64151628
         parame(i,2) = 2.78381944
         parame(i,3) = 262.53650804
@@ -1875,7 +1867,7 @@ SUBROUTINE pcsaft_par
         IF (pol >= 1) kap_hb(i,i)    = 0.1294968485
         IF (pol >= 1) parame(i,6) = 2.4103116    ! dipole moment
      CASE ('glycerol')
-        mm(i)       = 92.09
+        mm(i)       = 92.09       
         parame(i,1) = 2.09257199
         parame(i,2) = 3.79298757
         parame(i,3) = 492.74380031
@@ -1914,7 +1906,7 @@ SUBROUTINE pcsaft_par
         IF (pol >= 1) kap_hb(i,i)    = 0.030
         IF (pol >= 1) parame(i,6) = 0.776
      CASE ('formamide')
-        mm(i)       = 45.04
+        mm(i)       = 45.04    
         parame(i,1) = 2.30026276
         parame(i,2) = 2.92582027
         parame(i,3) = 313.56210527
@@ -2045,13 +2037,13 @@ SUBROUTINE pcsaft_par
 
      CASE ('methylisocyanate')
         mm(i)       =   57.0540
-        parame(i,1) =   2.14783454354850
-        parame(i,2) =   3.30276435689525
-        parame(i,3) =   284.359877866415
-        IF (pol >= 1) parame(i,1) =   2.54196677366949
-        IF (pol >= 1) parame(i,2) =   3.11423929858242
-        IF (pol >= 1) parame(i,3) =   215.712884707899
-        IF (pol >= 1) parame(i,6) =   2.99864229366191
+        parame(i,1) =   2.14783454354850     
+        parame(i,2) =   3.30276435689525     
+        parame(i,3) =   284.359877866415     
+        IF (pol >= 1) parame(i,1) =   2.54196677366949     
+        IF (pol >= 1) parame(i,2) =   3.11423929858242     
+        IF (pol >= 1) parame(i,3) =   215.712884707899     
+        IF (pol >= 1) parame(i,6) =   2.99864229366191     
      CASE ('HF')
         ! mm(i)       = 20.006       !  PC-SAFT
         ! parame(i,1) = 0.87731
@@ -2184,48 +2176,48 @@ SUBROUTINE pcsaft_par
 
         IF (pol >= 1) mm(i) = 18.015           !PCP-SAFT with m=1 enforced and Q adjusted
         IF (pol >= 1) parame(i,1) = 1.0
-        IF (pol >= 1) parame(i,2) = 3.10292190714748
-        IF (pol >= 1) parame(i,3) = 308.033050211038
+        IF (pol >= 1) parame(i,2) = 3.10292190714748     
+        IF (pol >= 1) parame(i,3) = 308.033050211038     
         IF (pol >= 1) nhb_typ(i)     = 2
         IF (pol >= 1) nhb_no(i,1)    = 1
         IF (pol >= 1) nhb_no(i,2)    = 1
-        IF (pol >= 1) eps_hb(i,i,1,2)= 2166.02739727598
-        IF (pol >= 1) eps_hb(i,i,2,1)= 2166.02739727598
+        IF (pol >= 1) eps_hb(i,i,1,2)= 2166.02739727598     
+        IF (pol >= 1) eps_hb(i,i,2,1)= 2166.02739727598     
         IF (pol >= 1) eps_hb(i,i,1,1)= 0.0
         IF (pol >= 1) eps_hb(i,i,2,2)= 0.0
         IF (pol >= 1) kap_hb(i,i) = 3.469980265130953E-004
-        IF (pol >= 1) parame(i,6) = 1.85500000000000
-        IF (pol >= 1) parame(i,7) = 3.50269655874463
+        IF (pol >= 1) parame(i,6) = 1.85500000000000     
+        IF (pol >= 1) parame(i,7) = 3.50269655874463     
 
         IF (pol >= 1) mm(i) = 18.015           !PCP-SAFT Q adjusted (excellent fit to exp. data)
-        IF (pol >= 1) parame(i,1) = 1.19897029844512
-        IF (pol >= 1) parame(i,2) = 2.87559712360227
-        IF (pol >= 1) parame(i,3) = 283.758844011803
+        IF (pol >= 1) parame(i,1) = 1.19897029844512     
+        IF (pol >= 1) parame(i,2) = 2.87559712360227     
+        IF (pol >= 1) parame(i,3) = 283.758844011803     
         IF (pol >= 1) nhb_typ(i)     = 2
         IF (pol >= 1) nhb_no(i,1)    = 1
         IF (pol >= 1) nhb_no(i,2)    = 1
-        IF (pol >= 1) eps_hb(i,i,1,2)= 1326.09825616021
-        IF (pol >= 1) eps_hb(i,i,2,1)= 1326.09825616021
+        IF (pol >= 1) eps_hb(i,i,1,2)= 1326.09825616021     
+        IF (pol >= 1) eps_hb(i,i,2,1)= 1326.09825616021     
         IF (pol >= 1) eps_hb(i,i,1,1)= 0.0
         IF (pol >= 1) eps_hb(i,i,2,2)= 0.0
         IF (pol >= 1) kap_hb(i,i) = 5.680937058899043E-003
-        IF (pol >= 1) parame(i,6) = 1.85500000000000
-        IF (pol >= 1) parame(i,7) = 3.48575663070838
+        IF (pol >= 1) parame(i,6) = 1.85500000000000     
+        IF (pol >= 1) parame(i,7) = 3.48575663070838     
 
         IF (pol >= 1) mm(i) = 18.015           !PCP-SAFT Q adjusted, 4 sites (excellent fit to exp. data)
         IF (pol >= 1) parame(i,1) = 1.27084414211470
-        IF (pol >= 1) parame(i,2) = 2.81979213575847
-        IF (pol >= 1) parame(i,3) = 281.943549171383
+        IF (pol >= 1) parame(i,2) = 2.81979213575847     
+        IF (pol >= 1) parame(i,3) = 281.943549171383     
         IF (pol >= 1) nhb_typ(i)     = 2
         IF (pol >= 1) nhb_no(i,1)    = 2
         IF (pol >= 1) nhb_no(i,2)    = 2
-        IF (pol >= 1) eps_hb(i,i,1,2)= 952.657528272410
-        IF (pol >= 1) eps_hb(i,i,2,1)= 952.657528272410
+        IF (pol >= 1) eps_hb(i,i,1,2)= 952.657528272410     
+        IF (pol >= 1) eps_hb(i,i,2,1)= 952.657528272410     
         IF (pol >= 1) eps_hb(i,i,1,1)= 0.0
         IF (pol >= 1) eps_hb(i,i,2,2)= 0.0
         IF (pol >= 1) kap_hb(i,i)    = 4.353859441452534E-003
-        IF (pol >= 1) parame(i,6) = 1.85500000000000
-        IF (pol >= 1) parame(i,7) = 3.43534786736533
+        IF (pol >= 1) parame(i,6) = 1.85500000000000     
+        IF (pol >= 1) parame(i,7) = 3.43534786736533     
 
         ! IF (pol.EQ.2) mm(i)       = 18.015       !  PCIP-SAFT - DQ with my=my_RPT
         ! IF (pol.EQ.2) parame(i,1) = 1.0
@@ -2519,8 +2511,36 @@ SUBROUTINE pcsaft_par
 
      DO  j = 1,ncomp
 
-        IF (compna(i) == 'ps'.AND.compna(j) == 'cyclohexane')THEN
-           kij(i,j) = 0.0075
+
+!MoDeNa systems
+
+        IF (compna(i) == 'pu'.AND.compna(j) == 'o2')THEN
+           kij(i,j) = -0.24572145912911289
+
+        ELSE IF(compna(i) == 'pu'.AND.compna(j) == 'n2')THEN
+           kij(i,j) = -0.31375263403786025
+
+        ELSE IF(compna(i) == 'pu'.AND.compna(j) == 'n2')THEN
+           kij(i,j) = -0.31375263403786025
+
+        ELSE IF(compna(i) == 'pu'.AND.compna(j) == 'cyclopentane')THEN
+           kij(i,j) = 6.5157610561499532E-002
+
+        ELSE IF(compna(i) == 'pu'.AND.compna(j) == 'co2')THEN
+           kij(i,j) =  0.12710446807888531
+           kij(i,j) =  0
+
+        ELSE IF(compna(i) == '14-butandiol'.AND.compna(j) == 'co2')THEN
+           kij(i,j) =  0.40955941645989324
+
+        ELSE IF(compna(i) == 'cyclopentane'.AND.compna(j) == 'co2')THEN
+           kij(i,j) =  4.7512196491560799E-002
+
+!End MoDeNa systems
+
+
+
+
         ELSE IF(compna(i) == 'peva'.AND.compna(j) == 'ethylene')THEN
            ! --   0 Gew.% VA-------------
            ! kij(i,j) = 0.039
@@ -2597,8 +2617,8 @@ SUBROUTINE pcsaft_par
            kij(i,j) = 0.051875  ! PC-SAFT
            IF (pol == 1) kij(i,j) = -0.0353125  ! PCP-SAFT
         ELSE IF(compna(i) == 'methane'.AND.compna(j) == 'co') THEN
-           ! IF (pol == 1) kij(i,j) = -0.003  ! PCP-SAFT
-           IF (pol == 1) kij(i,j) = 0.018  ! PCP-SAFT
+           ! IF (pol == 1) kij(i,j) = -0.003  ! PCP-SAFT 
+           IF (pol == 1) kij(i,j) = 0.018  ! PCP-SAFT 
         ELSE IF(compna(i) == 'ethane'.AND.compna(j) == 'co2') THEN
            kij(i,j) = 0.095
            kij(i,j) = 0.021
@@ -2996,8 +3016,6 @@ SUBROUTINE pcsaft_par
            ! kij(i,j) =  -0.047
            kij(i,j) =  +0.055
            ! kij(i,j) =  +0.036
-       ELSE IF (compna(i) == 'pu' .AND. compna(j) == 'cyclopentane') THEN
-           kij(i,j) = 8.7268282271172337E-002 !adjusted to solubility
         ELSE
         END IF
 
@@ -3009,3 +3027,4 @@ SUBROUTINE pcsaft_par
   END DO
 
 END SUBROUTINE pcsaft_par
+

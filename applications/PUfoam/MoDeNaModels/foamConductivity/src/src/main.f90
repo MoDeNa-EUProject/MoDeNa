@@ -11,7 +11,8 @@
 !!
 !! Changes to this program are for testing purposes only.
 program hahtf
-    use tests, only: loadParameters,eqcond,eqcond_por,eqcond_dcell,eqcond_strut
+    use tests, only: loadParameters,eqcond,eqcond_por,eqcond_dcell,&
+        eqcond_strut,eqcond_dfoam
     use ioutils, only: newunit
     use constants, only: mfi
     implicit none
@@ -23,6 +24,7 @@ program hahtf
     ! call eqcond_por
     ! call eqcond_dcell
     ! call eqcond_strut
+    ! call eqcond_dfoam
     write(*,*) 'Program exited normally'
     write(mfi,*) 'Program exited normally'
     close(mfi)

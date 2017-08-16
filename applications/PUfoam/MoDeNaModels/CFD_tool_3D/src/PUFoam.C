@@ -84,7 +84,9 @@ extern "C"{void dsteqr_(char &, int *, double *, double *, double *, int *, doub
 
 int main(int argc, char *argv[])
 {
+    // Info<< "\nHere.\n" << endl;
     #include "modenaCalls.H"
+    // return 0;
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"

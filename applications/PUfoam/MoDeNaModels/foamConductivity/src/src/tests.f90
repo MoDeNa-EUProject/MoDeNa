@@ -13,14 +13,12 @@ module tests
     use condrad, only: equcond,cond,alpha,sigma
     implicit none
     private
-    public loadParameters,eqcond,eqcond_por,eqcond_dcell,eqcond_strut
+    public loadParameters,eqcond,eqcond_por,eqcond_dcell,eqcond_strut,&
+        eqcond_dfoam
     character(len=99) :: fileplacein_par='./inputs/'   !modena
     character(len=99) :: fileplacein_ref='../spectra/'  !modena
     character(len=99) :: fileplaceout='./'  !modena
     character(len=99) :: inputs='foamConductivity.json',spectra='spectra.out'
-    character(len=99) :: nspec='spec_n.in'
-    character(len=99) :: kspec='spec_k.in'
-    character(len=99) :: gasspec='gasspec.in'
     character(len=99) :: after_foaming,after_foaming0='after_foaming.txt'
     character(len=99) :: bg_res='../../foamExpansion/results/bubbleGrowth/'
     character(len=99) :: qmom0D_res='../../foamExpansion/results/CFD0D/'
@@ -89,8 +87,8 @@ subroutine eqcond_por
     integer :: fi,npoints,i
     real(dp) :: pormin,pormax,dpor
     pormin=0.90_dp
-    pormax=0.995_dp
-    npoints=20
+    pormax=0.99_dp
+    npoints=19
     dpor=(pormax-pormin)/(npoints-1)
     open(newunit(fi),file='eqcond_por.csv')
     write(fi,*) 'porosity,foam_density,eq_cond,Ross_eq_cond,&
@@ -156,6 +154,29 @@ end subroutine eqcond_strut
 
 
 !********************************BEGINNING*************************************
+!> Calculate dependance of equivalent conductivity on cell size.
+subroutine eqcond_dfoam
+    integer :: fi,npoints,i
+    real(dp) :: dfoammin,dfoammax,ddfoam
+    dfoammin=1e-3_dp
+    dfoammax=1000e-3_dp
+    npoints=7
+    ddfoam=log10(dfoammax/dfoammin)/(npoints-1)
+    open(newunit(fi),file='eqcond_dfoam.csv')
+    write(fi,*) 'porosity,foam_density,eq_cond,Ross_eq_cond,&
+        kgas,ksol,krad,dcell,fstrut,dfoam'
+    do i=1,npoints
+        dfoam=dfoammin*10**((i-1)*ddfoam)
+        call eqcond(1)
+        write(fi,'(1x,es23.15,9(",",es23.15))') &
+            por,rhof,eqc,eqc_ross,kgas,ksol,krad,dcell,fs,dfoam
+    enddo
+    close(fi)
+end subroutine eqcond_dfoam
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
 !> Loads parameters, usually from text file.
 subroutine loadParameters
     use physicalProperties
@@ -166,6 +187,9 @@ subroutine loadParameters
     logical :: file_exists
     real(dp) :: xO2,xN2,xCO2,xCyP,matr(7)
     character(len=80) :: strval !name of the file with morphology
+    character(len=99) :: nspec
+    character(len=99) :: kspec
+    character(len=99) :: gasspec
     inputs=TRIM(ADJUSTL(fileplacein_par))//TRIM(ADJUSTL(inputs))
     inquire(file=inputs,exist=file_exists) !first try current folder
     if (.not. file_exists) then
@@ -318,6 +342,9 @@ subroutine loadParameters
     endif
     call fson_get(json_data, "strutSize", dstrut)
     call fson_get(json_data, "foamThickness", dfoam)
+    call fson_get(json_data, "spectra.polymer_n", nspec)
+    call fson_get(json_data, "spectra.polymer_k", kspec)
+    call fson_get(json_data, "spectra.gas_k", gasspec)
     call fson_get(json_data, "spatialDiscretization", nz)
     call fson_get(json_data, "useWallThicknessDistribution", wdist)
     if (wdist) then
@@ -337,6 +364,7 @@ subroutine loadParameters
     tmean=(temp1+temp2)/2
     call gasConductivity(cond1,tmean,xO2,xN2,xCO2,xCyP)
     call polymerConductivity(cond2,tmean)
+    cond2 = 0.1455_dp+1e-6_dp*(tmean - 273.2_dp)**2
     n1=1
     k1=0
     write(*,*) 'System information:'

@@ -16,11 +16,14 @@ import re
 import time
 import random
 import math
+import geo_tools
 ## current directory
-mypath=os.getcwd()
-def main(MU,SIGMA,NumOfCells,filenameOut,packing,alternativePackingAlgorithm,
-    tesselation,visualizeTesselation,geometry,statistics,hypermesh,deleteFiles,
-    dx,dy,dz):
+mypath = os.getcwd()
+def main(
+        MU, SIGMA, NumOfCells, filenameOut, packing,
+        alternativePackingAlgorithm, tesselation, visualizeTesselation,
+        geometry, statistics, hypermesh, deleteFiles, dx, dy, dz
+    ):
     """Main function.
 
     Packing algorithm for creation of seeds for tessellation.
@@ -91,7 +94,8 @@ def main(MU,SIGMA,NumOfCells,filenameOut,packing,alternativePackingAlgorithm,
         EdgeCubeSize=[math.ceil(MAXcenters[0]-Mincenters[0]),
             math.ceil(MAXcenters[1]-Mincenters[1]),
             math.ceil(MAXcenters[2]-Mincenters[2])]
-        EdgeRVESize=int(3.0*max(EdgeCubeSize)) #For NEPER: Size of edge of RVE
+        EdgeRVESize=int(max(EdgeCubeSize)) #For NEPER: Size of edge of RVE
+        EdgeRVESize27=3*EdgeRVESize
         if alternativePackingAlgorithm:
             os.system('./spherepack')
     if tesselation:
@@ -102,37 +106,70 @@ def main(MU,SIGMA,NumOfCells,filenameOut,packing,alternativePackingAlgorithm,
         Rads=Rads/2
         MaxCenters=np.amax(Centers, axis=0)
         L2=int(0.5+MaxCenters[0])
-        print (L2)
         X=L2+Centers[:,0]
         Y=L2+Centers[:,1]
         Z=L2+Centers[:,2]
+        # translate seeds in 26 directions to simulate periodicity
         Centers27=np.array([
-            X,X+L2,X-L2,X+L2,X,X+L2,X,X-L2,X-L2,X-L2,X+L2,X,X,X-L2,X+L2,
-            X+L2,X,X,X-L2,X,X,X-L2,X+L2,X+L2,X-L2,X-L2,X+L2,Y,Y+L2,Y-L2,
-            Y+L2,Y+L2,Y,Y-L2,Y,Y-L2,Y+L2,Y-L2,Y-L2,Y+L2,Y,Y,Y,Y+L2,Y,Y,
-            Y-L2,Y,Y+L2,Y-L2,Y+L2,Y-L2,Y+L2,Y-L2,Z,Z+L2,Z-L2,Z,Z+L2,Z+L2,
-            Z-L2,Z-L2,Z,Z,Z,Z+L2,Z-L2,Z+L2,Z-L2,Z,Z,Z+L2,Z,Z,Z-L2,Z+L2,
-            Z+L2,Z-L2,Z+L2,Z-L2,Z-L2])
+            X,X+L2,X-L2,X+L2,X,X+L2,X,X-L2,X-L2,
+            X-L2,X+L2,X,X,X-L2,X+L2,X+L2,X,X,
+            X-L2,X,X,X-L2,X+L2,X+L2,X-L2,X-L2,X+L2,
+            Y,Y+L2,Y-L2,Y+L2,Y+L2,Y,Y-L2,Y,Y-L2,
+            Y+L2,Y-L2,Y-L2,Y+L2,Y,Y,Y,Y+L2,Y,
+            Y,Y-L2,Y,Y+L2,Y-L2,Y+L2,Y-L2,Y+L2,Y-L2,
+            Z,Z+L2,Z-L2,Z,Z+L2,Z+L2,Z-L2,Z-L2,Z,
+            Z,Z,Z+L2,Z-L2,Z+L2,Z-L2,Z,Z,Z+L2,
+            Z,Z,Z-L2,Z+L2,Z+L2,Z-L2,Z+L2,Z-L2,Z-L2
+        ])
         # Creation of input .txt files for neper
-        myfile3=os.path.join(mypath,'Centers.txt')
+        myfile3=os.path.join(mypath,'Centers27.txt')
         ff=open(myfile3,'w')
         for i in range(0,27):
             for j in range(0,NumOfCells):
                 ff.write('{0:f}\t{1:f}\t{2:f}\n'.format(Centers27[i,j],
                     Centers27[i+27,j],Centers27[i+54,j]))
         ff.close()
-        myfile4=os.path.join(mypath,'Rads.txt')
+        myfile4=os.path.join(mypath,'Rads27.txt')
         fff=open(myfile4,'w')
         for i in range(0,27):
             for j in range(0,NumOfCells):
                 fff.write('{0:f}\n'.format(Rads[j]))
         fff.close()
-        commandTessellation="neper -T -n {0:d} -domain \
-            'cube({1:d},{2:d},{3:d})' -morpho @Centers.txt -weight @Rads.txt \
-            -regularization 1 -mloop 15 \
+        commandTessellation="neper -T \
+            -n {0:d} \
+            -domain 'cube({1:d},{2:d},{3:d})' \
+            -morpho voronoi \
+            -morphooptiini 'coo:file(Centers27.txt),weight:file(Rads27.txt)' \
             -o RVE27 -format tess,geo \
             -statcell vol -statedge length -statface area \
-            -statver x".format((27*NumSpheres),EdgeRVESize,EdgeRVESize,
+            -statver x".format((27*NumSpheres),EdgeRVESize27,EdgeRVESize27,
+            EdgeRVESize27
+        )
+        os.system(commandTessellation)
+        # create periodic RVE named Foam.geo directly using Neper's new 
+        # periodicity option
+        myfile3=os.path.join(mypath,'Centers.txt')
+        ff=open(myfile3,'w')
+        for i in range(0,1):
+            for j in range(0,NumOfCells):
+                ff.write('{0:f}\t{1:f}\t{2:f}\n'.format(Centers[j][i],
+                    Centers[j][i+1],Centers[j][i+2]))
+        ff.close()
+        myfile4=os.path.join(mypath,'Rads.txt')
+        fff=open(myfile4,'w')
+        for i in range(0,1):
+            for j in range(0,NumOfCells):
+                fff.write('{0:f}\n'.format(Rads[j]))
+        fff.close()
+        commandTessellation="neper -T \
+            -n {0:d} \
+            -domain 'cube({1:d},{2:d},{3:d})' \
+            -periodicity x,y,z \
+            -morpho voronoi \
+            -morphooptiini 'coo:file(Centers.txt),weight:file(Rads.txt)' \
+            -o FoamClosed -format tess,geo \
+            -statcell vol -statedge length -statface area \
+            -statver x".format((NumSpheres),EdgeRVESize,EdgeRVESize,
             EdgeRVESize)
         os.system(commandTessellation)
         if visualizeTesselation: # needs POV-Ray
@@ -144,125 +181,56 @@ def main(MU,SIGMA,NumOfCells,filenameOut,packing,alternativePackingAlgorithm,
     ######Extraction of middle Representative volume element########
     ################################################################
     if geometry:
-        myfile12=os.path.join(mypath,'RVE27.stver')
-        verX=np.loadtxt(myfile12)
-        NumOfNodes=len(verX)
-        myfile12=os.path.join(mypath,'RVE27.stedge')
-        EdgesLength=np.loadtxt(myfile12)
-        NumOfEdges=len(EdgesLength)
-        myfile12=os.path.join(mypath,'RVE27.stface')
-        SurfacesArea=np.loadtxt(myfile12)
-        NumOfSurfaces=len(SurfacesArea)
-        myfile12=os.path.join(mypath,'RVE27.stcell')
-        CellVolumes=np.loadtxt(myfile12)
-        NumOfVolumes=len(CellVolumes)
-        ####   Reading the GEO file
-        myfile12=os.path.join(mypath,'RVE27.geo')
-        text_file = open(myfile12, "r")
-        lines = text_file.readlines()
-        ####   Extraction of Nodes
-        t=0
-        Nodes=list(range(NumOfNodes))
-        for i in range(0,NumOfNodes):
-            currentline = lines[i].split("{")
-            a=currentline[1].split("}")
-            b=a[0].split(",")
-            c=np.array(b)
-            Nodes[t]=np.absolute(c.astype(np.float))
-            t=t+1
-        #####   Extraction of Edges
-        Edges=list(range(NumOfEdges))
-        r=0
-        t=0
-        for i in range(NumOfNodes,NumOfNodes+NumOfEdges):
-            currentline = lines[i].split("{")
-            a=currentline[1].split("}")
-            b=a[0].split(",")
-            c=np.array(b)
-            Edges[t]=np.absolute(c.astype(np.float))
-            t=t+1
-        ####   Extraction of Faces
-        Faces=list(range(NumOfSurfaces))
-        r=0
-        t=0
-        for i in range(0,NumOfSurfaces):
-            j=NumOfNodes+NumOfEdges+(2*i)
-            currentline = lines[j].split("{")
-            a=currentline[1].split("}")
-            b=a[0].split(",")
-            c=np.array(b)
-            Faces[t]=np.absolute(c.astype(np.float))
-            t=t+1
-        ####   Extraction of volumes
-        Volumes=list(range(NumOfVolumes))
-        #print NumOfNodes+NumOfEdges+(2*NumOfSurfaces)
-        a=list(lines[NumOfNodes+NumOfEdges+(2*NumOfSurfaces)])
-        a[0:21]=''
-        o=len(a)
-        a[o-3:]=''
-        lines[NumOfNodes+NumOfEdges+(2*NumOfSurfaces)]="".join(a)
-        currentline=lines[NumOfNodes+NumOfEdges+(2*NumOfSurfaces)].split(",")
-        c=np.array(currentline)
-        Volumes[0]=np.absolute(c.astype(np.float))
-        t=1
-        for i in range(1,NumOfVolumes):
-            j=NumOfNodes+NumOfEdges+(2*NumOfSurfaces)+i
-            currentline = lines[j].split(" = {")
-            a=currentline[2].split("}")
-            b=a[0].split(",")
-            c=np.array(b)
-            Volumes[t]=np.absolute(c.astype(np.float))
-            t=t+1
+        sdat = geo_tools.read_geo("RVE27.geo")
+        NumOfNodes=len(sdat['point'])
+        NumOfEdges=len(sdat['line'])
+        NumOfSurfaces=len(sdat['surface'])
+        NumOfVolumes=len(sdat['volume'])
+        edat = geo_tools.extract_data(sdat)
+        Edges=edat['line'].values()
+        Faces=edat['line_loop'].values()
+        Volumes=edat['surface_loop'].values()
         #####################################################
         MAX0=list(range(0,NumOfCells))
         for i in range(NumOfCells):
             MAX0[i]=max(Volumes[i])
         MaxIndexOfFaces=max(MAX0)
-        MAX1=list(range(0,int(MaxIndexOfFaces)))
-        for i in range(int(MaxIndexOfFaces)):
+        MAX1=list(range(0,MaxIndexOfFaces))
+        for i in range(MaxIndexOfFaces):
             MAX1[i]=max(Faces[i])
         MaxIndexOfEdges=max(MAX1)
-        MAX2=list(range(0,int(MaxIndexOfEdges)))
-        for i in range(int(MaxIndexOfEdges)):
+        MAX2=list(range(0,MaxIndexOfEdges))
+        for i in range(MaxIndexOfEdges):
             MAX2[i]=max(Edges[i])
         MaxIndexOfNodes=max(MAX2)
-        text_file.close()
         ####################################################
         # Making GEO file containing Periodic RVE
-        myfile13=os.path.join(mypath,filenameOut+".geo")
-        text_GEO = open(myfile13, "w")
-        for i in range(int(MaxIndexOfNodes)):
-            text_GEO.write('{0}'.format(lines[i]))
-        for i in range(int(NumOfNodes),int(NumOfNodes+MaxIndexOfEdges)):
-            text_GEO.write('{0}'.format(lines[i]))
-        j=int(NumOfNodes+NumOfEdges)
-        for i in range(int(NumOfNodes+NumOfEdges),
-            int(NumOfNodes+NumOfEdges+MaxIndexOfFaces)):
-            text_GEO.write('{0}{1}'.format(lines[j],lines[j+1]))
-            j=2+j
-        text_GEO.write('{0}{1}{2}\n'.format(' Surface Loop (1) = {',
-            lines[int(NumOfNodes+NumOfEdges+(2*NumOfSurfaces))],'};'))
-        NumOfCells=NumOfVolumes/27
-        j=int(NumOfNodes+NumOfEdges+(2*NumOfSurfaces)+1)
-        for i in range(int(NumOfCells-1)):
-            text_GEO.write('{0}'.format(lines[j]))
-            j+=1
-        text_GEO.write('{0}{1}{2}{3}{4}'.format(
-            'Volume (',NumOfCells,') = {',NumOfCells,'};'))
-        text_GEO.close()
+        sdat['point'] = sdat['point'][:MaxIndexOfNodes]
+        sdat['line'] = sdat['line'][:MaxIndexOfEdges]
+        sdat['line_loop'] = sdat['line_loop'][:MaxIndexOfFaces]
+        sdat['surface'] = sdat['surface'][:MaxIndexOfFaces]
+        sdat['physical_surface'] = sdat['physical_surface'][:MaxIndexOfFaces]
+        sdat['surface_loop'] = sdat['surface_loop'][:NumOfCells]
+        sdat['volume'] = sdat['volume'][:NumOfCells]
+        geo_tools.save_geo(
+            os.path.join(mypath,filenameOut+".geo"),
+            sdat,
+            opencascade=False
+        )
         ####################################################
         # Making gnuplot file containing Periodic RVE
-        myfile13=os.path.join(mypath,filenameOut+".gnu")
-        text_gnu = open(myfile13, "w")
-        for i in range(int(NumOfNodes),int(NumOfNodes+MaxIndexOfEdges)):
-            a=re.findall("[-+]?\d+[\.]?\d*", lines[i])
-            b=int(a[1])-1
-            c=int(a[2])-1
-            text_gnu.write('{0}\t{1}\t{2}\n'.format(
-                (Nodes[b][0]-L2)/L2,(Nodes[b][1]-L2)/L2,(Nodes[b][2]-L2)/L2))
-            text_gnu.write('{0}\t{1}\t{2}\n\n\n'.format(
-                (Nodes[c][0]-L2)/L2,(Nodes[c][1]-L2)/L2,(Nodes[c][2]-L2)/L2))
-        text_gnu.close()
+        # not working
+        # myfile13=os.path.join(mypath,filenameOut+".gnu")
+        # text_gnu = open(myfile13, "w")
+        # for i in range(int(NumOfNodes),int(NumOfNodes+MaxIndexOfEdges)):
+        #     a=re.findall("[-+]?\d+[\.]?\d*", lines[i])
+        #     b=int(a[1])-1
+        #     c=int(a[2])-1
+        #     text_gnu.write('{0}\t{1}\t{2}\n'.format(
+        #         (Nodes[b][0]-L2)/L2,(Nodes[b][1]-L2)/L2,(Nodes[b][2]-L2)/L2))
+        #     text_gnu.write('{0}\t{1}\t{2}\n\n\n'.format(
+        #         (Nodes[c][0]-L2)/L2,(Nodes[c][1]-L2)/L2,(Nodes[c][2]-L2)/L2))
+        # text_gnu.close()
     # End of Geometry construction
     ################################################################
     ######Statistical info for Periodic RVE#########################
@@ -333,6 +301,8 @@ def main(MU,SIGMA,NumOfCells,filenameOut,packing,alternativePackingAlgorithm,
         os.remove('Project01.sco')
         os.remove('Rads.txt')
         os.remove('Centers.txt')
+        os.remove('Rads27.txt')
+        os.remove('Centers27.txt')
         os.remove('RVE27.geo')
         os.remove('RVE27.stcell')
         os.remove('RVE27.stedge')

@@ -7,7 +7,7 @@
 !! Also defines all Modena variables and models.
 module physicalProperties
     use constants
-    use globals, only: solModel,diffModel
+    use globals, only: solModel,diffModel,ngas,gasname
     use fmodena
     implicit none
     !modena variables
@@ -404,5 +404,42 @@ subroutine strutContent(strut_content,foam_density)
     call modena_outputs_destroy (fsOutputs)
     call modena_model_destroy (fsModena)
 end subroutine strutContent
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> Calculates effective diffusivity of the foam.
+!!
+!! [link](http://www.sciencedirect.com/science/article/pii/0017931086901481?via%3Dihub)
+!! [link](http://cel.sagepub.com/cgi/doi/10.1177/0021955X02038002248)
+elemental function effectiveDiffusivity(dcell,dwall,Pg,Seff,ksi) result(Deff)
+    real(dp), intent(in) :: dcell !< cell size (m)
+    real(dp), intent(in) :: dwall !< wall thickness (m)
+    real(dp), intent(in) :: Pg !< wall permeability (mol/m/s/Pa)
+    real(dp), intent(in) :: Seff !< effective solubility (mol/m3/Pa)
+    real(dp), intent(in) :: ksi !< wall shape parameter
+    real(dp) :: Deff !< effective diffusivity (m2/s)
+    Deff = ksi*dcell/dwall*Pg/Seff
+end function effectiveDiffusivity
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> Calculates effective solubility of the foam.
+!!
+!! [link](http://www.sciencedirect.com/science/article/pii/0017931086901481?via%3Dihub)
+!! [link](http://cel.sagepub.com/cgi/doi/10.1177/0021955X02038002248)
+elemental function effectiveSolubility(temp,Sg,eps) result(Seff)
+    real(dp), intent(in) :: temp !< temperature (K)
+    real(dp), intent(in) :: Sg !< solubility (mol/m3/Pa)
+    real(dp), intent(in) :: eps !< foam porosity
+    real(dp) :: Seff !< effective solubility (mol/m3/Pa)
+    ! according to Ostrogorsky
+    ! neglects dissolved gas in polymer
+    Seff = 4.46e-5*1e2/1e5/temp*298.0_dp/1e-4
+    ! according to Olsson
+    ! including the effect of dissolved gas
+    Seff = eps/Rg/temp+(1-eps)*Sg
+end function effectiveSolubility
 !***********************************END****************************************
 end module physicalProperties

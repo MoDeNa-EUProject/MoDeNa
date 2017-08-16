@@ -119,6 +119,11 @@ class FoamConductivityExactTask(ModenaFireTask):
         inputs["strutContent"]=fstrut
         inputs["strutSize"]=1e-6
         inputs["foamThickness"]=3e-2
+        inputs["spectra"]={
+            "polymer_n": "spec_n_pu_dombrovsky2010.csv",
+            "polymer_k": "spec_k_pu_basf.csv",
+            "gas_k": "spec_k_gas.csv"
+        }
         inputs["spatialDiscretization"]=200
         inputs["useWallThicknessDistribution"]=True
         inputs["wallThicknessStandardDeviation"]=0.2
@@ -233,7 +238,7 @@ m_foamConductivity = BackwardMappingModel(
     ),
     parameterFittingStrategy=Strategy.NonLinFitWithErrorContol(
         testDataPercentage=0.2,
-        maxError=0.01,
+        maxError=0.02,
         improveErrorStrategy=Strategy.StochasticSampling(
             nNewPoints=2
         ),
@@ -249,5 +254,5 @@ m_simulation = Strategy.BackwardMappingScriptTask(
     script=os.path.dirname(os.path.abspath(__file__))+'/src/kfoam'
         + ' && cp foamConductivity.out ../results/foamConductivity'
         + ' && cp hahtf.out ../results/foamConductivity'
-        + ' && cp *.csv ../results/foamConductivity/'
+        + ' && rsync --ignore-missing-args *.csv ../results/foamConductivity/'
 )

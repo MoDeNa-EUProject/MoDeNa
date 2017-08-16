@@ -20,12 +20,10 @@ module constants
         hPc=6.6260695729e-34_dp,&       !<Planck constant
 	    C2=0.014387752_dp             !<constant in Planck's law [m*K]
     complex(dp), parameter :: iu=(0.0e0_dp,1.0e0_dp)       !<imaginary constant
-    character(len=80) :: &
-        gasname(4) !<names of the gases from the index set
     real(dp), dimension(4) :: & !oxygen, nitrogen, carbon dioxide, cyclopentane
-        Tc=(/154.58_dp,126.19_dp,304.17_dp,511.7_dp/),&   !<critical temperature
-        pc=(/5.043e6_dp,3.396e6_dp,7.386e6_dp,45.1e5_dp/),&    !<critical pressure
-        Mg=(/32e-3_dp,28e-3_dp,44e-3_dp,70e-3_dp/),&   !<molar mass
-        Tb=(/90.19_dp,77.36_dp,194.75_dp,322.4_dp/),&  !<normal boiling point
+        Tc=(/154.58_dp,126.19_dp,304.17_dp,511.7_dp/),& !<critical temperature
+        pc=(/5.043e6_dp,3.396e6_dp,7.386e6_dp,45.1e5_dp/),& !<critical pressure
+        Mg=(/32e-3_dp,28e-3_dp,44e-3_dp,70e-3_dp/),& !<molar mass
+        Tb=(/90.19_dp,77.36_dp,194.75_dp,322.4_dp/),& !<normal boiling point
         cpg=(/0,0,0,0/) !<heat capacity, needs to be filled in conductivity
 end module constants

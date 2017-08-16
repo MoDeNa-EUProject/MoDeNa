@@ -1,0 +1,32 @@
+{
+    "filename": "FoamBoxFixed",
+    "mesh_domain": false,
+    "convert_mesh": false,
+    "boundary_conditions": {
+        "top": 2,
+        "bottom": 1
+    },
+    "conductivity": {
+        "gas": 1,
+        "solid": 10
+    },
+    "element_type": "CG",
+    "element_degree": 1,
+    "saving": {
+        "mesh": false,
+        "boundaries": false,
+        "subdomains": false,
+        "flux": false,
+        "flux_divergence": false,
+        "flux_components": false
+    },
+    "plotting": {
+        "mesh": false,
+        "boundaries": false,
+        "subdomains": false,
+        "solution": true,
+        "flux": false,
+        "flux_divergence": false,
+        "flux_components": false
+    }
+}
