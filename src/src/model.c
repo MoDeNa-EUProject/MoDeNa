@@ -431,17 +431,17 @@ void modena_model_argPos_check(const modena_model_t *self)
     }
 }
 
-char** modena_model_inputs_names(const modena_model_t *self)
+const char** modena_model_inputs_names(const modena_model_t *self)
 {
     return self->inputs_names;
 }
 
-char** modena_model_outputs_names(const modena_model_t *self)
+const char** modena_model_outputs_names(const modena_model_t *self)
 {
     return self->outputs_names;
 }
 
-char** modena_model_parameters_names(const modena_model_t *self)
+const char** modena_model_parameters_names(const modena_model_t *self)
 {
     return self->parameters_names;
 }
@@ -690,19 +690,19 @@ void modena_model_destroy(modena_model_t *self)
 
     for(i = 0; i < self->inputs_size; i++)
     {
-        free(self->inputs_names[i]);
+        free((char*)self->inputs_names[i]);
     }
     free(self->inputs_names);
 
     for(i = 0; i < self->outputs_size; i++)
     {
-        free(self->outputs_names[i]);
+        free((char*)self->outputs_names[i]);
     }
     free(self->outputs_names);
 
     for(i = 0; i < self->parameters_size; i++)
     {
-        free(self->parameters_names[i]);
+        free((char*)self->parameters_names[i]);
     }
     free(self->parameters_names);
 
@@ -859,9 +859,11 @@ static PyObject *modena_model_t_call
  * -------   -----------  ----------------------------------------------------
  * ml_name   char *       name of the method
  * ml_meth   PyCFunction  pointer to the C implementation
- * ml_flags  int          flag bits indicating how the call should be
- *                        constructed
+ * ml_flags  int          flag bits indicating how the call is constructed
  * ml_doc    char *       points to the contents of the docstring
+ *
+ *
+ * [online doc]: https://docs.python.org/2/c-api/structures.html#c.PyMethodDef
  */
 static PyMethodDef modena_model_t_methods[] = {
     {"call", (PyCFunction) modena_model_t_call, METH_KEYWORDS,
@@ -870,7 +872,7 @@ static PyMethodDef modena_model_t_methods[] = {
     {NULL}  /* Sentinel */
 };
 
-/*
+/**
  */
 PyObject*
 modena_model_t_get_parameters(modena_model_t *self, void *closure)
@@ -884,7 +886,7 @@ modena_model_t_get_parameters(modena_model_t *self, void *closure)
     return pParams;
 }
 
-/*
+/**
  */
 static int
 modena_model_t_set_parameters(modena_model_t *self, PyObject *value, void *closure)
@@ -994,7 +996,7 @@ static int modena_model_t_init
         Py_INCREF(pModel);
         self->pModel = pModel;
     }
-    
+
     //PyObject_Print(self->pModel, stdout, 0);
     //printf("\n");
 
@@ -1144,6 +1146,13 @@ static PyObject * modena_model_t_new
     return (PyObject *)self;
 }
 
+/**
+ * @brief  Documentation of modena_model_t class
+*/
+PyDoc_STRVAR(module_doc,
+ "modena_model_t objects\n"
+);
+
 /* C-Python: The C structure used to describe the modena_model type.
  */
 PyTypeObject modena_model_tType = {
@@ -1168,7 +1177,7 @@ PyTypeObject modena_model_tType = {
     0,                                                          /*tp_setattro*/
     0,                                                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,                      /*tp_flags*/
-    "modena_model_t objects",                                      /* tp_doc */
+    module_doc,                                                    /* tp_doc */
     0,                                                        /* tp_traverse */
     0,                                                           /* tp_clear */
     0,                                                     /* tp_richcompare */

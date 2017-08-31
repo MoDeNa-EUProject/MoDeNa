@@ -126,9 +126,9 @@ typedef struct modena_model_t
 
     modena_substitute_model_t *substituteModels; /**< Substitute models `modena_substitute_model_t`*/
 
-    char** inputs_names;                /**< Surrogate model inputs names */
-    char** outputs_names;               /**< Surrogate model outputs names */
-    char** parameters_names;            /**< Surrogate model parameter names */
+    const char** inputs_names;                /**< Surrogate model inputs names */
+    const char** outputs_names;               /**< Surrogate model outputs names */
+    const char** parameters_names;            /**< Surrogate model parameter names */
 
 } modena_model_t;
 
@@ -306,7 +306,7 @@ size_t modena_model_outputs_argPos
  *
  *  @param self pointer to surrogate model created by modena_model_new.
 */
-char** modena_model_inputs_names
+const char** modena_model_inputs_names
 (
     const modena_model_t *self
 );
@@ -318,7 +318,7 @@ char** modena_model_inputs_names
  *
  *  @param self pointer to surrogate model created by modena_model_new.
 */
-char** modena_model_outputs_names
+const char** modena_model_outputs_names
 (
     const modena_model_t *self
 );
@@ -330,7 +330,7 @@ char** modena_model_outputs_names
  *
  *  @param self pointer to surrogate model created by modena_model_new.
 */
-char** modena_model_parameters_names
+const char** modena_model_parameters_names
 (
     const modena_model_t *self
 );
