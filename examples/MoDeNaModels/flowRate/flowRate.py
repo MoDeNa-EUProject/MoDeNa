@@ -35,10 +35,8 @@ License
 @ingroup   twoTank
 """
 
-from . import DETAILED_MODEL_PATH, DETAILED_MODEL_EXEC
-
 from os import system
-from os.path import join
+from os.path import abspath, dirname, join
 
 import modena
 from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, CFunction, ModenaFireTask
@@ -70,7 +68,7 @@ class FlowRateExactSim(ModenaFireTask):
         # In this simple example, this call stands for a complex microscopic
         # code - such as full 3D CFD simulation.
         # Source code in src/flowRateExact.C
-        ret = system(join(DETAILED_MODEL_PATH, DETAILED_MODEL_EXEC))
+        ret = system(join(abspath(dirname(__file__)),'src','flowRateExact'))
 
         # This enables backward mapping capabilities (not needed in this example)
         self.handleReturnCode(ret)
@@ -79,10 +77,6 @@ class FlowRateExactSim(ModenaFireTask):
         f = open('out.txt', 'r')
         self['point']['flowRate'] = float(f.readline())
         f.close()
-
-
-
-
 
 
 f = CFunction(

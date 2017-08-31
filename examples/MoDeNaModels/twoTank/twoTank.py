@@ -36,9 +36,9 @@ License
 """
 
 from modena.Strategy import BackwardMappingScriptTask
-import os
+from os.path import abspath, dirname, join
 
 # Source code in src/twoTanksMacroscopicProblem.C
 m = BackwardMappingScriptTask(
-    script=os.path.dirname(os.path.abspath(__file__))+'/src/twoTanksMacroscopicProblem'
+    script=join(dirname(abspath(__file__)),'src','twoTanksMacroscopicProblem')
 )
