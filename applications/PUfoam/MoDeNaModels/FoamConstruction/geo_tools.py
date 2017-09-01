@@ -438,7 +438,11 @@ def create_walls(edat, alpha=0.1):
     remove_duplicity(edat)
 
 def main():
-    """Main subroutine. Organizes workflow."""
+    """
+    Main subroutine. Organizes workflow.
+
+    File.geo -> FileFixed.geo -> FileBox.geo -> FileBoxFixed.geo
+    """
     """
     TODO: Fix final structure. GMSH merges two line loops into one when the
     surface has a hole. OpenCASCADE doesn't like it. There are several options:
