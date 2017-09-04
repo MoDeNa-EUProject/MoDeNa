@@ -191,15 +191,17 @@ def surfaces_in_plane(edat, coord, direction):
             line_loops_in_plane.append(i)
     return line_loops_in_plane
 
-def other_surfaces(surface_loops, surf0, surf1):
+def other_surfaces(edat, surf0, surf1):
     """
     Returns list of boundary surfaces, which are not in surf0 or surf1. Assumes
     that inner surfaces are shared by two volumes. Remove duplicates before
     calling this function.
     """
     all_surfaces = []
-    for surface_loop in surface_loops:
-        all_surfaces += surface_loop
+    for surface_loops in edat['volume'].itervalues():
+        for surface_loop in surface_loops:
+            for surfaces in edat['surface_loop'][surface_loop]:
+                all_surfaces += edat['surface'][surfaces]
     count = dict()
     for surface in all_surfaces:
         if surface in count:
@@ -313,6 +315,28 @@ def remove_duplicity(edat, eps=1e-8):
     remove_duplicit_ids_from_keys(edat, dupl, 'surface')
     remove_duplicit_ids_from_values(edat, dupl, 'surface_loop')
     # there are no duplicit volumes
+
+def split_loops(edat, key):
+    """
+    Makes sure that line and surface loops contain only one loop. Surfaces and
+    volumes with holes are instead defined in Surface and Volume entries,
+    respectively. Needed because gmsh unrolls geometry in a way, which is
+    unusable with OpenCASCADE kernel.
+    """
+    if key == 'line_loop':
+        key2 = 'surface'
+    elif key == 'surface_loop':
+        key2 = 'volume'
+    else:
+        raise Exception('can be called only for line_loop or surface_loop')
+    for i, item1 in edat[key].iteritems():
+        for j, item2 in edat[key].iteritems():
+            if i != j and set(item2).issubset((set(item1))):
+                for value in item2:
+                    item1.remove(value)
+                edat[key][i] = item1
+                edat[key2][i] = [i, j]
+                break
 
 def move_to_box(infile, wfile, outfile, volumes):
     """
@@ -443,17 +467,6 @@ def main():
 
     File.geo -> FileFixed.geo -> FileBox.geo -> FileBoxFixed.geo
     """
-    """
-    TODO: Fix final structure. GMSH merges two line loops into one when the
-    surface has a hole. OpenCASCADE doesn't like it. There are several options:
-
-    1. Don't work with OpenCASCADE. But you must use oriented line loops and
-    surface loops. You have to change several functions (e.g., removal of
-    duplicity). Implementation is not trivial.
-
-    2. Split line loops and surface loops. Redefine surfaces and volumes with
-    holes. How to detect holes?
-    """
     term = Terminal()
     fname = 'FoamClosed'
     print(
@@ -489,6 +502,9 @@ def main():
     edat = extract_data(sdat) # extracted data
     # duplicity of points, lines, etc. was created during moving to a box
     remove_duplicity(edat)
+    # restore OpenCASCADE compatibility
+    split_loops(edat, 'line_loop')
+    split_loops(edat, 'surface_loop')
     # identification of physical surfaces for boundary conditions
     surf0 = surfaces_in_plane(edat, 0.0, 2)
     if ARGS['--verbose']:
@@ -496,7 +512,7 @@ def main():
     surf1 = surfaces_in_plane(edat, 1.0, 2)
     if ARGS['--verbose']:
         print('Z=1 surface IDs: {}'.format(surf1))
-    surf = other_surfaces(edat['surface_loop'].itervalues(), surf0, surf1)
+    surf = other_surfaces(edat, surf0, surf1)
     if ARGS['--verbose']:
         print('other boundary surface IDs: {}'.format(surf))
     edat['physical_surface'] = {1:surf0, 2:surf1, 3:surf}
