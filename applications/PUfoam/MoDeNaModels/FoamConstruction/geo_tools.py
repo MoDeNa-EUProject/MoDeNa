@@ -91,6 +91,10 @@ def read_geo(geo_file, ignore_point_format=True, plane_surface=True):
         rexp['volume'] = (
             r'Volume\s?[(][0-9]+[)]\s[=]\s[{]([0-9]+[,]?\s?)+[}][;]'
         )
+        rexp['physical_volume'] = (
+            r'Physical\sVolume\s?[(]["][a-z]+["][)]\s[=]\s'
+            + r'[{]([0-9]+[,]?\s?)+[}][;]'
+        )
         for key in rexp:
             sdat[key] = my_find_all(rexp[key], text)
         return sdat
@@ -126,18 +130,25 @@ def extract_data(sdat):
         lines = dict()
         for line in sdat[key]:
             part = line.split("(")
-            ind = int(part[1].split(")")[0]) # ID of the element
+            if key == "physical_volume":
+                ind = part[1].split(")")[0]  # ID of the element
+                if ind == '"walls"':
+                    ind = 1
+                elif ind == '"cells"':
+                    ind = 2
+            else:
+                ind = int(part[1].split(")")[0]) # ID of the element
             fraction = line.split("{")
             fraction = fraction[1].split("}")
             fraction = fraction[0].split(",")
-            if key == "point": # point data are floats
+            if key == "point": # point data consists of floats
                 # ignore the optional fourth argument (defines mesh coarseness)
                 fraction = np.array(fraction[0:3])
                 fraction = fraction.astype(np.float)
                 for j, number in enumerate(fraction):
                     if abs(number) < 1e-8:
                         fraction[j] = 0
-            else: # other data are integers
+            else:  # other data consists of integers
                 fraction = np.array(fraction)
                 fraction = np.absolute(fraction.astype(np.int)).tolist()
             lines[ind] = fraction
@@ -343,7 +354,8 @@ def move_to_box(infile, wfile, outfile, volumes):
     Moves periodic closed foam to periodic box. Uses gmsh, specifically boolean
     operations and transformations from OpenCASCADE. The result is unrolled to
     another geo file so that it can be quickly read and worked with in the
-    follow-up work.
+    follow-up work. Operations are performed two times. First for walls (first
+    half of volumes) and then for cells.
     """
     with open(wfile, 'w') as wfl:
         mvol = max(volumes)
@@ -361,55 +373,108 @@ def move_to_box(infile, wfile, outfile, volumes):
         wfl.write('\n')
         wfl.write(
             'zol() = BooleanIntersection'
-            + '{{Volume{{1:{0}}};}}'.format(mvol)
-            + '{{Volume{{{0}}}; Delete;}};\n'.format(mvol + 1)
+            + '{{Volume{{1:{0}}};}}'.format(mvol/2)
+            + '{{Volume{{{0}}};}};\n'.format(mvol + 1)
         )
         wfl.write(
             'zoh() = BooleanIntersection'
-            + '{{Volume{{1:{0}}};}}'.format(mvol)
-            + '{{Volume{{{0}}}; Delete;}};\n'.format(mvol + 2)
+            + '{{Volume{{1:{0}}};}}'.format(mvol/2)
+            + '{{Volume{{{0}}};}};\n'.format(mvol + 2)
         )
         wfl.write(
             'zin() = BooleanIntersection'
-            + '{{Volume{{1:{0}}}; Delete;}}'.format(mvol)
-            + '{{Volume{{{0}}}; Delete;}};\n'.format(mvol + 3)
+            + '{{Volume{{1:{0}}}; Delete;}}'.format(mvol/2)
+            + '{{Volume{{{0}}};}};\n'.format(mvol + 3)
         )
         wfl.write('Translate{0,0, 1}{Volume{zol()};}\n')
         wfl.write('Translate{0,0,-1}{Volume{zoh()};}\n\n')
         wfl.write(
             'yol() = BooleanIntersection'
             + '{Volume{zol(),zoh(),zin()};}'
-            + '{{Volume{{{0}}}; Delete;}};\n'.format(mvol + 4)
+            + '{{Volume{{{0}}};}};\n'.format(mvol + 4)
         )
         wfl.write(
             'yoh() = BooleanIntersection'
             + '{Volume{zol(),zoh(),zin()};}'
-            + '{{Volume{{{0}}}; Delete;}};\n'.format(mvol + 5)
+            + '{{Volume{{{0}}};}};\n'.format(mvol + 5)
         )
         wfl.write(
             'yin() = BooleanIntersection'
             + '{Volume{zol(),zoh(),zin()}; Delete;}'
-            + '{{Volume{{{0}}}; Delete;}};\n'.format(mvol + 6)
+            + '{{Volume{{{0}}};}};\n'.format(mvol + 6)
         )
         wfl.write('Translate{0, 1,0}{Volume{yol()};}\n')
         wfl.write('Translate{0,-1,0}{Volume{yoh()};}\n\n')
         wfl.write(
             'xol() = BooleanIntersection'
             + '{Volume{yol(),yoh(),yin()};}'
-            + '{{Volume{{{0}}}; Delete;}};\n'.format(mvol + 7)
+            + '{{Volume{{{0}}};}};\n'.format(mvol + 7)
         )
         wfl.write(
             'xoh() = BooleanIntersection'
             + '{Volume{yol(),yoh(),yin()};}'
-            + '{{Volume{{{0}}}; Delete;}};\n'.format(mvol + 8)
+            + '{{Volume{{{0}}};}};\n'.format(mvol + 8)
         )
         wfl.write(
             'xin() = BooleanIntersection'
             + '{Volume{yol(),yoh(),yin()}; Delete;}'
-            + '{{Volume{{{0}}}; Delete;}};\n'.format(mvol + 9)
+            + '{{Volume{{{0}}};}};\n'.format(mvol + 9)
         )
         wfl.write('Translate{ 1,0,0}{Volume{xol()};}\n')
         wfl.write('Translate{-1,0,0}{Volume{xoh()};}\n\n')
+        wfl.write(
+            'zol2() = BooleanIntersection'
+            + '{{Volume{{{0}:{1}}};}}'.format(mvol/2 + 1, mvol)
+            + '{{Volume{{{0}}}; Delete;}};\n'.format(mvol + 1)
+        )
+        wfl.write(
+            'zoh2() = BooleanIntersection'
+            + '{{Volume{{{0}:{1}}};}}'.format(mvol/2 + 1, mvol)
+            + '{{Volume{{{0}}}; Delete;}};\n'.format(mvol + 2)
+        )
+        wfl.write(
+            'zin2() = BooleanIntersection'
+            + '{{Volume{{{0}:{1}}}; Delete;}}'.format(mvol/2 + 1, mvol)
+            + '{{Volume{{{0}}}; Delete;}};\n'.format(mvol + 3)
+        )
+        wfl.write('Translate{0,0, 1}{Volume{zol2()};}\n')
+        wfl.write('Translate{0,0,-1}{Volume{zoh2()};}\n\n')
+        wfl.write(
+            'yol2() = BooleanIntersection'
+            + '{Volume{zol2(),zoh2(),zin2()};}'
+            + '{{Volume{{{0}}}; Delete;}};\n'.format(mvol + 4)
+        )
+        wfl.write(
+            'yoh2() = BooleanIntersection'
+            + '{Volume{zol2(),zoh2(),zin2()};}'
+            + '{{Volume{{{0}}}; Delete;}};\n'.format(mvol + 5)
+        )
+        wfl.write(
+            'yin2() = BooleanIntersection'
+            + '{Volume{zol2(),zoh2(),zin2()}; Delete;}'
+            + '{{Volume{{{0}}}; Delete;}};\n'.format(mvol + 6)
+        )
+        wfl.write('Translate{0, 1,0}{Volume{yol2()};}\n')
+        wfl.write('Translate{0,-1,0}{Volume{yoh2()};}\n\n')
+        wfl.write(
+            'xol2() = BooleanIntersection'
+            + '{Volume{yol2(),yoh2(),yin2()};}'
+            + '{{Volume{{{0}}}; Delete;}};\n'.format(mvol + 7)
+        )
+        wfl.write(
+            'xoh2() = BooleanIntersection'
+            + '{Volume{yol2(),yoh2(),yin2()};}'
+            + '{{Volume{{{0}}}; Delete;}};\n'.format(mvol + 8)
+        )
+        wfl.write(
+            'xin2() = BooleanIntersection'
+            + '{Volume{yol2(),yoh2(),yin2()}; Delete;}'
+            + '{{Volume{{{0}}}; Delete;}};\n'.format(mvol + 9)
+        )
+        wfl.write('Translate{ 1,0,0}{Volume{xol2()};}\n')
+        wfl.write('Translate{-1,0,0}{Volume{xoh2()};}\n\n')
+        wfl.write('Physical Volume ("walls") = {xol(),xoh(),xin()};\n')
+        wfl.write('Physical Volume ("cells") = {xol2(),xoh2(),xin2()};\n\n')
     call = sp.Popen(['gmsh', wfile, '-0'])
     call.wait()
     shutil.move(wfile+'_unrolled', outfile)
@@ -536,8 +601,6 @@ def main():
         print(
             'surface IDs periodic in Y: {}'.format(edat['periodic_surface_Y'])
         )
-    # define physical volumes
-    edat['physical_volume'] = {1:edat['volume'].keys()}
     # save the final foam
     sdat = collect_strings(edat)
     save_geo(fname + "BoxFixed.geo", sdat)
