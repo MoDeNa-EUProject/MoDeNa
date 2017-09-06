@@ -515,7 +515,12 @@ def main():
     surf = other_surfaces(edat, surf0, surf1)
     if ARGS['--verbose']:
         print('other boundary surface IDs: {}'.format(surf))
-    edat['physical_surface'] = {1:surf0, 2:surf1, 3:surf}
+    """
+    Physical surfaces create problems in mesh conversion step. Bug in gmsh?
+    Boundaries will be defined in fenics/dolfin directly.
+    TODO: fix this
+    """
+    # edat['physical_surface'] = {1:surf0, 2:surf1, 3:surf}
     # identification of periodic surfaces for periodic mesh creation
     edat['periodic_surface_X'] = periodic_surfaces(
         edat, surf, np.array([1, 0, 0])

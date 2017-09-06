@@ -47,13 +47,21 @@ def main():
 
 def mesh_domain(domain):
     """Mesh computational domain using Gmsh."""
-    call = sp.Popen(['gmsh', '-3', domain])
+    call = sp.Popen(['gmsh', '-3', '-v', '3', domain])
     call.wait()
 
 def convert_mesh(input_mesh, output_mesh):
     """Convert mesh to xml using dolfin-convert."""
     call = sp.Popen(['dolfin-convert', input_mesh, output_mesh])
     call.wait()
+
+def bottomBC(x):
+    """Bottom boundary condition."""
+    return abs(x[2] - ZMAX) < fe.DOLFIN_EPS
+
+def topBC(x):
+    """Top boundary condition."""
+    return abs(x[2] - ZMIN) < fe.DOLFIN_EPS
 
 class PeriodicDomain(fe.SubDomain):
     """Class for periodic boundary conditions."""
@@ -114,10 +122,10 @@ def preprocess(fname):
     """Loads mesh, defines system of equations and prepares system matrix."""
     mesh = fe.Mesh(fname+".xml")
     if INPUTS['saving']['mesh']:
-        fe.File(fname+"_mesh.pvd") << mesh
-    boundaries = fe.MeshFunction('size_t', mesh, fname+'_facet_region.xml')
-    if INPUTS['saving']['boundaries']:
-        fe.File(fname+"_subdomains.pvd") << boundaries
+        fe.File(fname + "_mesh.pvd") << mesh
+    # boundaries = fe.MeshFunction('size_t', mesh, fname+'_facet_region.xml')
+    # if INPUTS['saving']['boundaries']:
+    #     fe.File(fname+"_subdomains.pvd") << boundaries
     subdomains = fe.MeshFunction('size_t', mesh, fname+'_physical_region.xml')
     if INPUTS['saving']['subdomains']:
         fe.File(fname+"_subdomains.pvd") << subdomains
@@ -147,9 +155,13 @@ def preprocess(fname):
     system_matrix = -cond*fe.inner(fe.grad(field), fe.grad(test_func))*fe.dx
     bctop = fe.Constant(INPUTS['boundary_conditions']['top'])
     bcbot = fe.Constant(INPUTS['boundary_conditions']['bottom'])
+    # bcs = [
+    #     fe.DirichletBC(fun_space, bctop, boundaries, 1),
+    #     fe.DirichletBC(fun_space, bcbot, boundaries, 2)
+    # ]
     bcs = [
-        fe.DirichletBC(fun_space, bctop, boundaries, 1),
-        fe.DirichletBC(fun_space, bcbot, boundaries, 2)
+        fe.DirichletBC(fun_space, bctop, topBC),
+        fe.DirichletBC(fun_space, bcbot, bottomBC)
     ]
     field = fe.Function(fun_space)
     return system_matrix, field, bcs, cond
