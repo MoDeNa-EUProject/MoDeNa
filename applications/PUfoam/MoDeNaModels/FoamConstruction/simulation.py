@@ -23,6 +23,8 @@ YMIN = 0.0
 YMAX = 1.0
 ZMIN = 0.0
 ZMAX = 1.0
+
+
 def main():
     """Main function. Organizes workflow."""
     fname = str(INPUTS['filename'])
@@ -33,9 +35,9 @@ def main():
         + term.normal
     )
     if INPUTS['mesh_domain']:
-        mesh_domain(fname+".geo")
+        mesh_domain(fname + ".geo")
     if INPUTS['convert_mesh']:
-        convert_mesh(fname+".msh", fname+".xml")
+        convert_mesh(fname + ".msh", fname + ".xml")
     system_matrix, field, bcs, cond = preprocess(fname)
     field = integrate(system_matrix, field, bcs)
     postprocess(fname, field, cond)
@@ -45,26 +47,32 @@ def main():
         + term.normal
     )
 
+
 def mesh_domain(domain):
     """Mesh computational domain using Gmsh."""
     call = sp.Popen(['gmsh', '-3', '-v', '3', domain])
     call.wait()
+
 
 def convert_mesh(input_mesh, output_mesh):
     """Convert mesh to xml using dolfin-convert."""
     call = sp.Popen(['dolfin-convert', input_mesh, output_mesh])
     call.wait()
 
+
 def bottomBC(x):
     """Bottom boundary condition."""
     return abs(x[2] - ZMAX) < fe.DOLFIN_EPS
+
 
 def topBC(x):
     """Top boundary condition."""
     return abs(x[2] - ZMIN) < fe.DOLFIN_EPS
 
+
 class PeriodicDomain(fe.SubDomain):
     """Class for periodic boundary conditions."""
+
     def inside(self, pos, on_boundary):
         """
         return True if on left (XMIN) or front (YMIN) boundary AND NOT on one of
@@ -97,12 +105,13 @@ class PeriodicDomain(fe.SubDomain):
             pos_b[2] = -1000
 
 
-class Conductivity(fe.Expression):
+class SubdomainConstant(fe.Expression):
     """
-    Defines conductivity on computational domain. Maybe it should be rewritten
-    as C++ code (see
+    Defines constant on computational domain respecting the subdomains. Maybe it
+    should be rewritten as C++ code (see
     https://fenicsproject.org/pub/tutorial/sphinx1/._ftut1005.html)
     """
+
     def __init__(self, subdomains, k_0, k_1, **kwargs):
         """Constructor."""
         self.subdomains = subdomains
@@ -118,17 +127,26 @@ class Conductivity(fe.Expression):
         else:
             values[0] = self.k_1
 
+
+def analytical_conductivity(k_gas, k_sol, por, f_strut):
+    """Effective conductivity according to Ahern et al. (2005)."""
+    fun = 2 * (1 - f_strut) / 3 * (1 + k_gas / (2 * k_sol)) + \
+        f_strut / 3 * (1 + 4 * k_gas / (k_gas + k_sol))
+    return (k_gas * por + k_sol * fun * (1 - por)) / (por + (1 - por) * fun)
+
+
 def preprocess(fname):
     """Loads mesh, defines system of equations and prepares system matrix."""
-    mesh = fe.Mesh(fname+".xml")
+    mesh = fe.Mesh(fname + ".xml")
     if INPUTS['saving']['mesh']:
         fe.File(fname + "_mesh.pvd") << mesh
     # boundaries = fe.MeshFunction('size_t', mesh, fname+'_facet_region.xml')
     # if INPUTS['saving']['boundaries']:
     #     fe.File(fname+"_subdomains.pvd") << boundaries
-    subdomains = fe.MeshFunction('size_t', mesh, fname+'_physical_region.xml')
+    subdomains = fe.MeshFunction(
+        'size_t', mesh, fname + '_physical_region.xml')
     if INPUTS['saving']['subdomains']:
-        fe.File(fname+"_subdomains.pvd") << subdomains
+        fe.File(fname + "_subdomains.pvd") << subdomains
     if INPUTS['plotting']['mesh']:
         fe.plot(mesh, title='Mesh')
     if INPUTS['plotting']['boundaries']:
@@ -146,13 +164,29 @@ def preprocess(fname):
         print('Number of DOFs:', len(dofmap.dofs()))
     field = fe.TrialFunction(fun_space)
     test_func = fe.TestFunction(fun_space)
-    cond = Conductivity(
+    cond = SubdomainConstant(
         subdomains,
         fe.Constant(INPUTS['conductivity']['gas']),
         fe.Constant(INPUTS['conductivity']['solid']),
         degree=0
     )
-    system_matrix = -cond*fe.inner(fe.grad(field), fe.grad(test_func))*fe.dx
+    unit_function = fe.Function(fun_space)
+    unit_function.assign(fe.Constant(1.0))
+    gas_content = SubdomainConstant(
+        subdomains,
+        fe.Constant(1.0),
+        fe.Constant(0.0),
+        degree=0
+    )
+    porosity = fe.assemble(gas_content * unit_function *
+                           fe.dx) / (XMAX * YMAX * ZMAX)
+    print('Porosity: {0}'.format(porosity))
+    keff = analytical_conductivity(
+        INPUTS['conductivity']['gas'], INPUTS['conductivity']['solid'],
+        porosity, 0.0)
+    print('Analytical conductivity: {0} mWm^-1K^-1'.format(keff * 1e3))
+    system_matrix = -cond * \
+        fe.inner(fe.grad(field), fe.grad(test_func)) * fe.dx
     bctop = fe.Constant(INPUTS['boundary_conditions']['top'])
     bcbot = fe.Constant(INPUTS['boundary_conditions']['bottom'])
     # bcs = [
@@ -166,19 +200,21 @@ def preprocess(fname):
     field = fe.Function(fun_space)
     return system_matrix, field, bcs, cond
 
+
 def integrate(system_matrix, field, bcs):
     """Integrates the equation"""
     left_side, right_side = fe.lhs(system_matrix), fe.rhs(system_matrix)
     fe.solve(left_side == right_side, field, bcs)
     if ARGS['--verbose']:
         print('Checking periodicity:')
-        print('Value at XMIN:', field(XMIN, (YMIN + YMAX)/3, (ZMIN + ZMAX)/3))
-        print('Value at XMAX:', field(XMAX, (YMIN + YMAX)/3, (ZMIN + ZMAX)/3))
-        print('Value at YMIN:', field((XMIN + XMAX)/3, YMIN, (ZMIN + ZMAX)/3))
-        print('Value at YMAX:', field((XMIN + XMAX)/3, YMAX, (ZMIN + ZMAX)/3))
-        print('Value at ZMIN:', field((XMIN + XMAX)/3, (YMIN + YMAX)/3, ZMIN))
-        print('Value at ZMAX:', field((XMIN + XMAX)/3, (YMIN + YMAX)/3, ZMAX))
+        print('Value at XMIN:', field(XMIN, (YMIN + YMAX) / 3, (ZMIN + ZMAX) / 3))
+        print('Value at XMAX:', field(XMAX, (YMIN + YMAX) / 3, (ZMIN + ZMAX) / 3))
+        print('Value at YMIN:', field((XMIN + XMAX) / 3, YMIN, (ZMIN + ZMAX) / 3))
+        print('Value at YMAX:', field((XMIN + XMAX) / 3, YMAX, (ZMIN + ZMAX) / 3))
+        print('Value at ZMIN:', field((XMIN + XMAX) / 3, (YMIN + YMAX) / 3, ZMIN))
+        print('Value at ZMAX:', field((XMIN + XMAX) / 3, (YMIN + YMAX) / 3, ZMAX))
     return field
+
 
 def postprocess(fname, field, cond):
     """Postprocessing of the simulation."""
@@ -190,27 +226,27 @@ def postprocess(fname, field, cond):
         INPUTS['element_type'],
         degree
     )
-    flux = fe.project(-cond*fe.grad(field), vec_func_space)
-    divergence = fe.project(-fe.div(cond*fe.grad(field)), func_space)
+    flux = fe.project(-cond * fe.grad(field), vec_func_space)
+    divergence = fe.project(-fe.div(cond * fe.grad(field)), func_space)
     flux_x, flux_y, flux_z = flux.split()
-    av_flux = fe.assemble(flux_z*fe.dx)/((XMAX - XMIN)*(YMAX - YMIN))
-    keff = av_flux*(ZMAX - ZMIN)/(
+    av_flux = fe.assemble(flux_z * fe.dx) / ((XMAX - XMIN) * (YMAX - YMIN))
+    keff = av_flux * (ZMAX - ZMIN) / (
         INPUTS['boundary_conditions']['top']
         - INPUTS['boundary_conditions']['bottom']
     )
-    print('Effective conductivity: {0}'.format(keff))
-    with open(fname+"_keff.csv", 'w') as textfile:
+    print('Effective conductivity: {0} mWm^-1K^-1'.format(keff*1e3))
+    with open(fname + "_keff.csv", 'w') as textfile:
         textfile.write('keff\n')
         textfile.write('{0}\n'.format(keff))
-    fe.File(fname+"_solution.pvd") << field
+    fe.File(fname + "_solution.pvd") << field
     if INPUTS['saving']['flux']:
-        fe.File(fname+"_flux.pvd") << flux
+        fe.File(fname + "_flux.pvd") << flux
     if INPUTS['saving']['flux_divergence']:
-        fe.File(fname+"_flux_divergence.pvd") << divergence
+        fe.File(fname + "_flux_divergence.pvd") << divergence
     if INPUTS['saving']['flux_components']:
-        fe.File(fname+"_flux_x.pvd") << flux_x
-        fe.File(fname+"_flux_y.pvd") << flux_y
-        fe.File(fname+"_flux_z.pvd") << flux_z
+        fe.File(fname + "_flux_x.pvd") << flux_x
+        fe.File(fname + "_flux_y.pvd") << flux_y
+        fe.File(fname + "_flux_z.pvd") << flux_z
     if INPUTS['plotting']['solution']:
         fe.plot(field, title="Solution")
     if INPUTS['plotting']['flux']:
@@ -223,6 +259,7 @@ def postprocess(fname, field, cond):
         fe.plot(flux_z, title='z-component of flux (-kappa*grad(u))')
     if True in INPUTS['plotting'].values():
         fe.interactive()
+
 
 if __name__ == "__main__":
     ARGS = docopt(__doc__)

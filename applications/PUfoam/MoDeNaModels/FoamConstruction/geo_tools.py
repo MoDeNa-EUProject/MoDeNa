@@ -41,6 +41,8 @@ NAME_LIST = [
     'physical_surface',
     'physical_volume'
 ]
+
+
 def my_find_all(regex, text):
     """My definition of findall. Returns top level group in list."""
     matches = re.finditer(regex, text)
@@ -48,6 +50,7 @@ def my_find_all(regex, text):
     for match in matches:
         my_list.append(match.group(0))
     return my_list
+
 
 def read_geo(geo_file, ignore_point_format=True, plane_surface=True):
     """
@@ -99,6 +102,7 @@ def read_geo(geo_file, ignore_point_format=True, plane_surface=True):
             sdat[key] = my_find_all(rexp[key], text)
         return sdat
 
+
 def fix_strings(strings):
     """
     Removes negative sign (orientation) from loops. OpenCASCADE has problems
@@ -106,6 +110,7 @@ def fix_strings(strings):
     """
     for i, line in enumerate(strings):
         strings[i] = re.sub('[-]', '', line)
+
 
 def save_geo(geo_file, sdat, opencascade=True, char_length=0.1):
     """
@@ -123,6 +128,7 @@ def save_geo(geo_file, sdat, opencascade=True, char_length=0.1):
                 for line in sdat[key]:
                     text_file.write("{}\n".format(line))
 
+
 def extract_data(sdat):
     """Extracts geo data to dictionaries from list of geo strings."""
     edat = {}
@@ -132,16 +138,16 @@ def extract_data(sdat):
             part = line.split("(")
             if key == "physical_volume":
                 ind = part[1].split(")")[0]  # ID of the element
-                if ind == '"walls"':
+                if ind == '"cells"':
                     ind = 1
-                elif ind == '"cells"':
+                elif ind == '"walls"':
                     ind = 2
             else:
-                ind = int(part[1].split(")")[0]) # ID of the element
+                ind = int(part[1].split(")")[0])  # ID of the element
             fraction = line.split("{")
             fraction = fraction[1].split("}")
             fraction = fraction[0].split(",")
-            if key == "point": # point data consists of floats
+            if key == "point":  # point data consists of floats
                 # ignore the optional fourth argument (defines mesh coarseness)
                 fraction = np.array(fraction[0:3])
                 fraction = fraction.astype(np.float)
@@ -154,6 +160,7 @@ def extract_data(sdat):
             lines[ind] = fraction
         edat[key] = lines
     return edat
+
 
 def collect_strings(edat):
     """Creates lists of geo strings from geo data."""
@@ -182,6 +189,7 @@ def collect_strings(edat):
                 ))
     return sdat
 
+
 def surfaces_in_plane(edat, coord, direction):
     """Finds surfaces that lie completely lie in a plane"""
     points_in_plane = []
@@ -201,6 +209,7 @@ def surfaces_in_plane(edat, coord, direction):
         if log:
             line_loops_in_plane.append(i)
     return line_loops_in_plane
+
 
 def other_surfaces(edat, surf0, surf1):
     """
@@ -225,13 +234,14 @@ def other_surfaces(edat, surf0, surf1):
     ]
     return surf
 
+
 def periodic_surfaces(edat, surfaces, vec, eps=1e-8):
     """
     Returns list of periodic surface pairs in specified direction. Parameter eps
     is used to compare coordinates (floating point numbers).
     """
-    surface_points = dict() # point IDs for each boundary surface
-    boundary_points = dict() # dictionary with only boundary points
+    surface_points = dict()  # point IDs for each boundary surface
+    boundary_points = dict()  # dictionary with only boundary points
     for surface in surfaces:
         surface_points[surface] = []
         for line in edat['line_loop'][surface]:
@@ -249,7 +259,7 @@ def periodic_surfaces(edat, surfaces, vec, eps=1e-8):
         for j, secondpoint in boundary_points.iteritems():
             if np.sum(np.abs(point + vec - secondpoint)) < eps:
                 periodic_points[i] = j
-    psurfs = [] # list of periodic surface pairs (IDs)
+    psurfs = []  # list of periodic surface pairs (IDs)
     for i, surface in surface_points.iteritems():
         # Try to create surface using IDs of periodic points. Use None if there
         # is no periodic point in specified direction.
@@ -258,7 +268,7 @@ def periodic_surfaces(edat, surfaces, vec, eps=1e-8):
             for point in surface
         ]
         if None not in per_surf:
-            per_surf.sort() # sort so you can find it
+            per_surf.sort()  # sort so you can find it
             # use ID of current surface and find ID of periodic surface
             psurfs.append(
                 [
@@ -270,7 +280,8 @@ def periodic_surfaces(edat, surfaces, vec, eps=1e-8):
             )
     return psurfs
 
-def identify_duplicity(edat, key, number, eps=1e-8):
+
+def identify_duplicity(edat, key, number, eps):
     """
     Core algorithm for removing duplicities. User should call remove_duplicity()
     instead. Parameter eps is used to compare coordinates (floating point
@@ -295,10 +306,12 @@ def identify_duplicity(edat, key, number, eps=1e-8):
         raise Exception('number argument must be float or integer')
     return dupl
 
+
 def remove_duplicit_ids_from_keys(edat, dupl, key):
     """Removes duplicit IDs from IDs of entities."""
     for i in dupl:
         del edat[key][i]
+
 
 def remove_duplicit_ids_from_values(edat, dupl, key):
     """Removes duplicit IDs from values of entities."""
@@ -307,7 +320,8 @@ def remove_duplicit_ids_from_values(edat, dupl, key):
             if value in dupl:
                 values[j] = min(dupl[value])
 
-def remove_duplicity(edat, eps=1e-8):
+
+def remove_duplicity(edat, eps=1e-10):
     """
     Removes duplicit points, lines, etc. Parameter eps is used to compare
     coordinates (floating point numbers).
@@ -326,6 +340,7 @@ def remove_duplicity(edat, eps=1e-8):
     remove_duplicit_ids_from_keys(edat, dupl, 'surface')
     remove_duplicit_ids_from_values(edat, dupl, 'surface_loop')
     # there are no duplicit volumes
+
 
 def split_loops(edat, key):
     """
@@ -348,6 +363,7 @@ def split_loops(edat, key):
                 edat[key][i] = item1
                 edat[key2][i] = [i, j]
                 break
+
 
 def move_to_box(infile, wfile, outfile, volumes):
     """
@@ -373,17 +389,17 @@ def move_to_box(infile, wfile, outfile, volumes):
         wfl.write('\n')
         wfl.write(
             'zol() = BooleanIntersection'
-            + '{{Volume{{1:{0}}};}}'.format(mvol/2)
+            + '{{Volume{{1:{0}}};}}'.format(mvol / 2)
             + '{{Volume{{{0}}};}};\n'.format(mvol + 1)
         )
         wfl.write(
             'zoh() = BooleanIntersection'
-            + '{{Volume{{1:{0}}};}}'.format(mvol/2)
+            + '{{Volume{{1:{0}}};}}'.format(mvol / 2)
             + '{{Volume{{{0}}};}};\n'.format(mvol + 2)
         )
         wfl.write(
             'zin() = BooleanIntersection'
-            + '{{Volume{{1:{0}}}; Delete;}}'.format(mvol/2)
+            + '{{Volume{{1:{0}}}; Delete;}}'.format(mvol / 2)
             + '{{Volume{{{0}}};}};\n'.format(mvol + 3)
         )
         wfl.write('Translate{0,0, 1}{Volume{zol()};}\n')
@@ -424,17 +440,17 @@ def move_to_box(infile, wfile, outfile, volumes):
         wfl.write('Translate{-1,0,0}{Volume{xoh()};}\n\n')
         wfl.write(
             'zol2() = BooleanIntersection'
-            + '{{Volume{{{0}:{1}}};}}'.format(mvol/2 + 1, mvol)
+            + '{{Volume{{{0}:{1}}};}}'.format(mvol / 2 + 1, mvol)
             + '{{Volume{{{0}}}; Delete;}};\n'.format(mvol + 1)
         )
         wfl.write(
             'zoh2() = BooleanIntersection'
-            + '{{Volume{{{0}:{1}}};}}'.format(mvol/2 + 1, mvol)
+            + '{{Volume{{{0}:{1}}};}}'.format(mvol / 2 + 1, mvol)
             + '{{Volume{{{0}}}; Delete;}};\n'.format(mvol + 2)
         )
         wfl.write(
             'zin2() = BooleanIntersection'
-            + '{{Volume{{{0}:{1}}}; Delete;}}'.format(mvol/2 + 1, mvol)
+            + '{{Volume{{{0}:{1}}}; Delete;}}'.format(mvol / 2 + 1, mvol)
             + '{{Volume{{{0}}}; Delete;}};\n'.format(mvol + 3)
         )
         wfl.write('Translate{0,0, 1}{Volume{zol2()};}\n')
@@ -477,11 +493,12 @@ def move_to_box(infile, wfile, outfile, volumes):
         wfl.write('Physical Volume ("cells") = {xol2(),xoh2(),xin2()};\n\n')
     call = sp.Popen(['gmsh', wfile, '-0'])
     call.wait()
-    shutil.move(wfile+'_unrolled', outfile)
+    shutil.move(wfile + '_unrolled', outfile)
 
-def create_walls(edat, alpha=0.1):
+
+def create_walls(edat, wall_thickness=0.01):
     """Creates walls."""
-    volume_points = dict() # point IDs for each volume
+    volume_points = dict()  # point IDs for each volume
     for volume in edat['surface_loop']:
         volume_points[volume] = []
         for surface in edat['surface_loop'][volume]:
@@ -490,7 +507,7 @@ def create_walls(edat, alpha=0.1):
                     if point not in volume_points[volume]:
                         volume_points[volume] += [point]
         volume_points[volume].sort()
-    centroids = dict() # centroid for each volume
+    centroids = dict()  # centroid for each volume
     for volume in edat['surface_loop']:
         total = 0
         for point in volume_points[volume]:
@@ -502,12 +519,12 @@ def create_walls(edat, alpha=0.1):
     nsurfaces = len(edat['line_loop'])
     nvolumes = len(edat['surface_loop'])
     for volume in edat['surface_loop'].keys():
-        point_map = dict() # mapping of old points to new points
+        point_map = dict()  # mapping of old points to new points
         nvolumes += 1
         edat['surface_loop'][nvolumes] = []
         for point in volume_points[volume]:
             npoints += 1
-            edat['point'][npoints] = edat['point'][point] + alpha*(
+            edat['point'][npoints] = edat['point'][point] + wall_thickness * (
                 centroids[volume] - edat['point'][point])
             point_map[point] = npoints
         for surface in edat['surface_loop'][volume]:
@@ -526,6 +543,7 @@ def create_walls(edat, alpha=0.1):
         edat['volume'][volume] += [nvolumes]
     remove_duplicity(edat)
 
+
 def main():
     """
     Main subroutine. Organizes workflow.
@@ -534,13 +552,14 @@ def main():
     """
     term = Terminal()
     fname = 'FoamClosed'
+    wall_thickness = 0.01
     print(
         term.yellow
         + "Working on file {}.geo.".format(fname)
         + term.normal
     )
     # read Neper foam
-    sdat = read_geo(fname + ".geo") # string data
+    sdat = read_geo(fname + ".geo")  # string data
     # Neper creates physical surfaces, which we don't want
     sdat.pop('physical_surface')
     # remove orientation, OpenCASCADE compatibility
@@ -548,23 +567,19 @@ def main():
     fix_strings(sdat['surface_loop'])
     # save the foam to geo file
     save_geo(fname + "Fixed.geo", sdat)
-
-    # test walls
+    # create walls
     edat = extract_data(sdat)
-    create_walls(edat)
+    create_walls(edat, wall_thickness)
     sdat = collect_strings(edat)
     save_geo(fname + "Fixed.geo", sdat)
-    # exit()
-    # end test walls
-
     # move foam to a periodic box and save it to a file
     move_to_box(
         fname + "Fixed.geo", "move_to_box.geo", fname + "Box.geo",
         range(1, len(sdat['volume']) + 1)
     )
     # read boxed foam
-    sdat = read_geo(fname + "Box.geo") # string data
-    edat = extract_data(sdat) # extracted data
+    sdat = read_geo(fname + "Box.geo")  # string data
+    edat = extract_data(sdat)  # extracted data
     # duplicity of points, lines, etc. was created during moving to a box
     remove_duplicity(edat)
     # restore OpenCASCADE compatibility
@@ -609,6 +624,7 @@ def main():
         + "Prepared file {}BoxFixed.geo.".format(fname)
         + term.normal
     )
+
 
 if __name__ == "__main__":
     ARGS = docopt(__doc__)
