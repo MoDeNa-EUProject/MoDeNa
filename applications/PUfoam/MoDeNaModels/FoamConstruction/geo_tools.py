@@ -544,6 +544,40 @@ def create_walls(edat, wall_thickness=0.01):
     remove_duplicity(edat)
 
 
+def extract_center_cells(filename, number_of_cells):
+    """Extracts cells in the center from 27 times larger tessellated doamin."""
+    sdat = read_geo("{0}RVE27.geo".format(filename))
+    edat = extract_data(sdat)
+    edges = edat['line'].values()
+    faces = edat['line_loop'].values()
+    volumes = edat['surface_loop'].values()
+    #####################################################
+    max0 = list(range(0, number_of_cells))
+    for i in range(number_of_cells):
+        max0[i] = max(volumes[i])
+    max_index_of_faces = max(max0)
+    max1 = list(range(0, max_index_of_faces))
+    for i in range(max_index_of_faces):
+        max1[i] = max(faces[i])
+    max_index_of_edges = max(max1)
+    max2 = list(range(0, max_index_of_edges))
+    for i in range(max_index_of_edges):
+        max2[i] = max(edges[i])
+    max_index_of_nodes = max(max2)
+    ####################################################
+    # Making GEO file containing Periodic RVE
+    sdat['point'] = sdat['point'][:max_index_of_nodes]
+    sdat['line'] = sdat['line'][:max_index_of_edges]
+    sdat['line_loop'] = sdat['line_loop'][:max_index_of_faces]
+    sdat['surface'] = sdat['surface'][:max_index_of_faces]
+    sdat['physical_surface'] = sdat['physical_surface'][:max_index_of_faces]
+    sdat['surface_loop'] = sdat['surface_loop'][:number_of_cells]
+    sdat['volume'] = sdat['volume'][:number_of_cells]
+    save_geo(
+        "{0}.geo".format(filename),
+        sdat,
+        opencascade=False
+    )
 def main():
     """
     Main subroutine. Organizes workflow.
