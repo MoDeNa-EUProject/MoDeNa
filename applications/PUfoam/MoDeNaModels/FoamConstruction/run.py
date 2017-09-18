@@ -19,6 +19,8 @@ from __future__ import division, print_function
 import os
 import json
 import datetime
+import shutil
+import subprocess as sp
 from blessings import Terminal
 from docopt import docopt
 from scipy.optimize import minimize_scalar as minimize_scalar
@@ -108,7 +110,7 @@ def porfsOpt(x):
     f.write("0\n")
     f.write("1\n")
     f.write("0\n")
-    f.write(filename + "BoxStruts\n")
+    f.write(filename + "Box_structured\n")
     f.write(filename + "Box-ascii.vtk\n")
     f.write(filename + ".gnu\n")
     f.write("name\n")
@@ -193,7 +195,7 @@ def binarize_box(filename, dx, dy, dz, porosity, strut_content):
         origin = [dx, dy, dz]
         spacing = [dx / vx, dy / vy, dz / vz]
         vtkconv.main(filename + "Box.vtk", filename +
-                     "Box-ascii.vtk", origin, spacing)
+                     "_structured.vtk", origin, spacing)
     else:
         print(
             TERM.yellow +
@@ -246,7 +248,7 @@ def binarize_box(filename, dx, dy, dz, porosity, strut_content):
         f.write("0\n")
         f.write("1\n")
         f.write("0\n")
-        f.write(filename + "BoxStruts\n")
+        f.write(filename + "Box_structured\n")
         f.write(filename + "Box-ascii.vtk\n")
         f.write(filename + ".gnu\n")
         f.write("name\n")
@@ -254,6 +256,18 @@ def binarize_box(filename, dx, dy, dz, porosity, strut_content):
         f.write("parameters.txt" + "\n")
         f.close()
         os.system("./foamreconstr/foamreconstr")
+
+
+def mesh_domain(domain):
+    """Mesh computational domain using Gmsh."""
+    call = sp.Popen(['gmsh', '-3', '-v', '3', domain])
+    call.wait()
+
+
+def convert_mesh(input_mesh, output_mesh):
+    """Convert mesh to xml using dolfin-convert."""
+    call = sp.Popen(['dolfin-convert', input_mesh, output_mesh])
+    call.wait()
 
 
 def structured_grid(filename, dx, dy, dz, porosity, strut_content):
@@ -284,6 +298,18 @@ def structured_grid(filename, dx, dy, dz, porosity, strut_content):
         )
         binarize_box(filename, dx, dy, dz, porosity, strut_content)
 
+
+def unstructured_grid(filename, wall_thickness, verbose):
+    """Creates foam discretized on unstructured grid."""
+    if INPUTS["unstructured_grid_options"]["create_geometry"]:
+        geo_tools.main(filename + "Closed", wall_thickness, verbose)
+    shutil.copy(filename + "ClosedBoxFixed.geo",
+                filename + "_unstructured.geo")
+    if INPUTS["unstructured_grid_options"]["mesh_domain"]:
+        mesh_domain(filename + "_unstructured.geo")
+    if INPUTS["unstructured_grid_options"]["convert_mesh"]:
+        convert_mesh(filename + "_unstructured.msh",
+                     filename + "_unstructured.xml")
 
 def main():
     """Main function.
@@ -328,6 +354,16 @@ def main():
             INPUTS["packing_options"]["domain_size"],
             INPUTS["structured_grid_options"]["porosity"],
             INPUTS["structured_grid_options"]["strut_content"])
+    if INPUTS["unstructured_grid"]:
+        print(
+            TERM.yellow +
+            "Creating unstructured grid." +
+            TERM.normal
+        )
+        unstructured_grid(
+            INPUTS["filename"],
+            INPUTS["unstructured_grid_options"]["wall_thickness"],
+            INPUTS["unstructured_grid_options"]["verbose"],)
     time_end = datetime.datetime.now()
     print("Foam created in: {}".format(time_end - time_start))
 

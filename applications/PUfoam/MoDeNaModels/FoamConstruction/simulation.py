@@ -13,7 +13,6 @@ Options:
 """
 from __future__ import print_function
 import json
-import subprocess as sp
 import fenics as fe
 from blessings import Terminal
 from docopt import docopt
@@ -34,10 +33,6 @@ def main():
         + "Working on file {}.".format(fname)
         + term.normal
     )
-    if INPUTS['mesh_domain']:
-        mesh_domain(fname + ".geo")
-    if INPUTS['convert_mesh']:
-        convert_mesh(fname + ".msh", fname + ".xml")
     system_matrix, field, bcs, cond = preprocess(fname)
     field = integrate(system_matrix, field, bcs)
     postprocess(fname, field, cond)
@@ -46,18 +41,6 @@ def main():
         + "End."
         + term.normal
     )
-
-
-def mesh_domain(domain):
-    """Mesh computational domain using Gmsh."""
-    call = sp.Popen(['gmsh', '-3', '-v', '3', domain])
-    call.wait()
-
-
-def convert_mesh(input_mesh, output_mesh):
-    """Convert mesh to xml using dolfin-convert."""
-    call = sp.Popen(['dolfin-convert', input_mesh, output_mesh])
-    call.wait()
 
 
 def bottomBC(x):

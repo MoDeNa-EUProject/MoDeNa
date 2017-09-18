@@ -1,12 +1,4 @@
-#!/usr/bin/env python
 """Manipulates .geo input files for gmsh.
-
-Usage:
-    geo_tools.py [-h | --help] [-v | --verbose]
-
-Options:
-    -h --help     Show this screen.
-    -v --verbose  Verbose mode.
 
 @author Pavel Ferkl
 """
@@ -578,15 +570,15 @@ def extract_center_cells(filename, number_of_cells):
         sdat,
         opencascade=False
     )
-def main():
+
+
+def main(fname, wall_thickness, verbose):
     """
     Main subroutine. Organizes workflow.
 
     File.geo -> FileFixed.geo -> FileBox.geo -> FileBoxFixed.geo
     """
     term = Terminal()
-    fname = 'FoamClosed'
-    wall_thickness = 0.01
     print(
         term.yellow
         + "Working on file {}.geo.".format(fname)
@@ -621,13 +613,13 @@ def main():
     split_loops(edat, 'surface_loop')
     # identification of physical surfaces for boundary conditions
     surf0 = surfaces_in_plane(edat, 0.0, 2)
-    if ARGS['--verbose']:
+    if verbose:
         print('Z=0 surface IDs: {}'.format(surf0))
     surf1 = surfaces_in_plane(edat, 1.0, 2)
-    if ARGS['--verbose']:
+    if verbose:
         print('Z=1 surface IDs: {}'.format(surf1))
     surf = other_surfaces(edat, surf0, surf1)
-    if ARGS['--verbose']:
+    if verbose:
         print('other boundary surface IDs: {}'.format(surf))
     """
     Physical surfaces create problems in mesh conversion step. Bug in gmsh?
@@ -639,14 +631,14 @@ def main():
     edat['periodic_surface_X'] = periodic_surfaces(
         edat, surf, np.array([1, 0, 0])
     )
-    if ARGS['--verbose']:
+    if verbose:
         print(
             'surface IDs periodic in X: {}'.format(edat['periodic_surface_X'])
         )
     edat['periodic_surface_Y'] = periodic_surfaces(
         edat, surf, np.array([0, 1, 0])
     )
-    if ARGS['--verbose']:
+    if verbose:
         print(
             'surface IDs periodic in Y: {}'.format(edat['periodic_surface_Y'])
         )
@@ -658,8 +650,3 @@ def main():
         + "Prepared file {}BoxFixed.geo.".format(fname)
         + term.normal
     )
-
-
-if __name__ == "__main__":
-    ARGS = docopt(__doc__)
-    main()
