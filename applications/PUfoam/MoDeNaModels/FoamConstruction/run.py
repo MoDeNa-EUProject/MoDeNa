@@ -1,25 +1,19 @@
 #!/usr/bin/env python
 """Python script, which organizes creation of the foam.
 
-@file       run.py
-@namespace  FoamConstruction.run
-@ingroup    mod_foamConstruction
-@author     Pavel Ferkl
-@copyright  2014-2016, MoDeNa Project. GNU Public License.
-@details
+@file       run.py @namespace  FoamConstruction.run @ingroup
+mod_foamConstruction @author     Pavel Ferkl @copyright  2014-2016, MoDeNa
+Project. GNU Public License. @details
 
-First, the geometric tessellation is performed so that the resulting foam has
-the correct bubble size distribution. Then several mesh conversions are made to
-obtain the foam image in desired format. Finally, foam is voxelized to desired
-foam density and struts are optionally added.
+First, the geometric tessellation is performed so that the resulting foam has the
+correct bubble size distribution. Then several mesh conversions are made to obtain
+the foam image in desired format. Finally, foam is voxelized to desired foam
+density and struts are optionally added.
 
-Usage:
-    simulation.py [-h | --help] [-i input_file] [--verbose]
+Usage: simulation.py [-h | --help] [-i input_file] [--verbose]
 
-Options:
-    -h --help       Show this screen.
-    -i input_file   Json file with inputs. Uses default file otherwise.
-    --verbose       Print more information.
+Options: -h --help       Show this screen. -i input_file   Json file with inputs.
+    Uses default file otherwise. --verbose       Print more information.
 """
 from __future__ import division, print_function
 import os
@@ -75,7 +69,7 @@ def porfsOpt(x):
     global DEDGE
     filename = INPUTS["filename"]
     porosity = INPUTS["structured_grid_options"]["porosity"]
-    strutContent = INPUTS["structured_grid_options"]["strutContent"]
+    strut_content = INPUTS["structured_grid_options"]["strut_content"]
     vx = int(x)
     vy = vx
     vz = vx
@@ -101,7 +95,7 @@ def porfsOpt(x):
     f.write("0\n")
     f.write("0\n")
     f.write("{0:f}\n".format(DEDGE))
-    f.write("{0:f}\n".format(1 - strutContent * (1 - porosity)))
+    f.write("{0:f}\n".format(1 - strut_content * (1 - porosity)))
     f.write("0\n")
     f.write("1\n")
     f.write("0\n")
@@ -167,10 +161,10 @@ def periodic_box(filename, render_box):
     os.system("meshconv " + filename + "Box.stl -c ply")
 
 
-def binarize_box():
+def binarize_box(filename, dx, dy, dz, porosity, strut_content):
     """Creates foam with desired porosity and strut content on structured grid."""
     # Binarize and save as .vtk
-    if strutContent == 0:
+    if strut_content == 0:
         # Find the size of box, which would give desired porosity
         # This method is not optimal, since the solver doesn't know that the
         # function takes only integer arguments
@@ -182,11 +176,8 @@ def binarize_box():
         res = minimize_scalar(
             porOpt, bracket=[100, 120], method='Brent', tol=1e-2
         )
-        vx = res.x
-        vx = int(vx)
+        vx = vy = vz = int(res.x)
         print('box size: {0:d}'.format(vx))
-        vy = vx
-        vz = vx
         print(
             TERM.yellow +
             "Creating and saving optimal foam" +
@@ -215,11 +206,8 @@ def binarize_box():
         # res=minimize_scalar(
         #     porfsOpt,bounds=[200,250],method='bounded',tol=2e0
         # )
-        vx = res.x
-        vx = int(vx)
+        vx = vy = vz = int(res.x)
         print('optimal box size: {0:d}'.format(vx))
-        vy = vx
-        vz = vx
         print(
             TERM.yellow +
             "Creating and saving optimal foam" +
@@ -245,7 +233,7 @@ def binarize_box():
         f.write("1\n")
         f.write("0\n")
         f.write("{0:f}\n".format(DEDGE))
-        f.write("{0:f}\n".format(1 - strutContent * (1 - porosity)))
+        f.write("{0:f}\n".format(1 - strut_content * (1 - porosity)))
         f.write("0\n")
         f.write("1\n")
         f.write("0\n")
@@ -268,9 +256,9 @@ def binarize_box():
         os.system("./foamreconstr/foamreconstr")
 
 
-def structured_grid():
+def structured_grid(filename, dx, dy, dz, porosity, strut_content):
     """Creates foam discretized on structured grid."""
-    if INPUTS["extract_center_cells"]:
+    if INPUTS["structured_grid_options"]["extract_center_cells"]:
         print(
             TERM.yellow +
             "Extracting center cells from tessellation." +
@@ -279,15 +267,22 @@ def structured_grid():
         geo_tools.extract_center_cells(
             INPUTS["filename"],
             INPUTS["packing_options"]["number_of_cells"])
-    if INPUTS["move_to_periodic_box"]:
+    if INPUTS["structured_grid_options"]["move_to_periodic_box"]:
         print(
             TERM.yellow +
-            "Extracting center cells from tessellation." +
+            "Creating periodic box." +
             TERM.normal
         )
         periodic_box(
             INPUTS["filename"],
             INPUTS["structured_grid_options"]["render_box"])
+    if INPUTS["structured_grid_options"]["binarize_box"]:
+        print(
+            TERM.yellow +
+            "Meshing." +
+            TERM.normal
+        )
+        binarize_box(filename, dx, dy, dz, porosity, strut_content)
 
 
 def main():
@@ -297,6 +292,8 @@ def main():
     """
     time_start = datetime.datetime.now()
     dx = dy = dz = INPUTS["packing_options"]["domain_size"]
+    porosity = INPUTS["structured_grid_options"]["porosity"]
+    strut_content = INPUTS["structured_grid_options"]["strut_content"]
     if INPUTS["packing"]:
         print(
             TERM.yellow +
@@ -324,7 +321,13 @@ def main():
             "Creating structured grid." +
             TERM.normal
         )
-        structured_grid()
+        structured_grid(
+            INPUTS["filename"],
+            INPUTS["packing_options"]["domain_size"],
+            INPUTS["packing_options"]["domain_size"],
+            INPUTS["packing_options"]["domain_size"],
+            INPUTS["structured_grid_options"]["porosity"],
+            INPUTS["structured_grid_options"]["strut_content"])
     time_end = datetime.datetime.now()
     print("Foam created in: {}".format(time_end - time_start))
 

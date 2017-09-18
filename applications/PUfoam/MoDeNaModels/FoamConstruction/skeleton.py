@@ -173,3 +173,13 @@ def tessellate(filename, number_of_cells, visualize_tessellation):
             -datacelltrs 0.5 -showseed all -dataseedrad @Rads.txt \
             -dataseedtrs 1.0 -print {0}RVE27".format(filename)
         os.system(commandVisualization)
+    sdat = geo_tools.read_geo(filename + ".geo")
+    edat = geo_tools.extract_data(sdat)
+    point = edat["point"]
+    line = edat["line"]
+    with open('{0}.gnu'.format(filename), 'w') as flp:
+        for pidx in line.itervalues():
+            flp.write('{0} {1} {2}\n'.format(
+                point[pidx[0]][0], point[pidx[0]][1], point[pidx[0]][2]))
+            flp.write('{0} {1} {2}\n\n\n'.format(
+                point[pidx[1]][0], point[pidx[1]][1], point[pidx[1]][2]))

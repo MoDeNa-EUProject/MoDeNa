@@ -30,7 +30,7 @@ void makeFoamSkeleton(\
     const int n_x=6,n_y=6,n_z=6; // Set up the number of blocks that
     // the container is divided into (voro++)
     if (report) {
-        cout << "voro++ is creating Voronoi tesselation..." << endl;
+        cout << "voro++ is creating Voronoi tessellation..." << endl;
     }
     // Create a container with the geometry given above, and make it
     // non-periodic in each of the three coordinates. Allocate space for
