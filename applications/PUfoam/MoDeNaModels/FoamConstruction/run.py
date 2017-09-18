@@ -317,7 +317,7 @@ def main():
         FoamGeometryConstruction_Periodic.tessellate(
             INPUTS["filename"],
             INPUTS["packing_options"]["number_of_cells"],
-            INPUTS["tessellation_options"]["visualize_tesselation"])
+            INPUTS["tessellation_options"]["visualize_tessellation"])
     if INPUTS["structured_grid"]:
         print(
             TERM.yellow +

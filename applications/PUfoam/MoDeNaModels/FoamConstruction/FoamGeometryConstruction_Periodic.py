@@ -10,12 +10,10 @@
 Prepares representative volume element (RVE) of foam.
 """
 import os
-import os.path
-import numpy as np
-import re
 import time
 import random
 import math
+import numpy as np
 import geo_tools
 # current directory
 MYPATH = os.getcwd()
@@ -87,7 +85,7 @@ def pack_spheres(average_radius, deviance, number_of_cells, alternative_algorith
         os.system('./spherepack')
 
 
-def tessellate(filename, number_of_cells, visualize_tesselation):
+def tessellate(filename, number_of_cells, visualize_tessellation):
     """Use Laguerre tessellation from Neper to create dry foam. Uses Project01.rco
     as input file."""
     myfile12 = os.path.join(MYPATH, 'Project01.rco')
@@ -95,8 +93,8 @@ def tessellate(filename, number_of_cells, visualize_tesselation):
     Centers = CentersRads[:, :3]  # All centers of spheres
     Rads = CentersRads[:, 3]  # All radii of spheres
     Rads = Rads / 2
-    MAXcenters = max(Centers)
-    Mincenters = min(Centers)
+    MAXcenters = max(Centers.tolist())
+    Mincenters = min(Centers.tolist())
     EdgeCubeSize = [math.ceil(MAXcenters[0] - Mincenters[0]),
                     math.ceil(MAXcenters[1] - Mincenters[1]),
                     math.ceil(MAXcenters[2] - Mincenters[2])]
@@ -170,7 +168,7 @@ def tessellate(filename, number_of_cells, visualize_tesselation):
         -statver x".format(number_of_cells, EdgeRVESize, EdgeRVESize,
                            EdgeRVESize, filename)
     os.system(commandTessellation)
-    if visualize_tesselation:  # needs POV-Ray
+    if visualize_tessellation:  # needs POV-Ray
         commandVisualization = "neper -V {0}RVE27.tess -datacellcol ori \
             -datacelltrs 0.5 -showseed all -dataseedrad @Rads.txt \
             -dataseedtrs 1.0 -print {0}RVE27".format(filename)
