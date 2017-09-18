@@ -1,6 +1,6 @@
 """
-@file       FoamGeometryConstruction_Periodic.py
-@namespace  FoamConstruction.FoamGeometryConstruction_Periodic
+@file       skeleton.py
+@namespace  FoamConstruction.skeleton
 @ingroup    mod_foamConstruction
 @brief      Packing and tesselation.
 @author     Mohammad Marvi-Mashhadi

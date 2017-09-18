@@ -28,7 +28,7 @@ import datetime
 from blessings import Terminal
 from docopt import docopt
 from scipy.optimize import minimize_scalar as minimize_scalar
-import FoamGeometryConstruction_Periodic
+import skeleton
 import periodicBox
 import vtkconv
 import geo_tools
@@ -303,7 +303,7 @@ def main():
             "Packing spheres." +
             TERM.normal
         )
-        FoamGeometryConstruction_Periodic.pack_spheres(
+        skeleton.pack_spheres(
             INPUTS["packing_options"]["average_radius"],
             INPUTS["packing_options"]["deviance"],
             INPUTS["packing_options"]["number_of_cells"],
@@ -314,7 +314,7 @@ def main():
             "Tessellating." +
             TERM.normal
         )
-        FoamGeometryConstruction_Periodic.tessellate(
+        skeleton.tessellate(
             INPUTS["filename"],
             INPUTS["packing_options"]["number_of_cells"],
             INPUTS["tessellation_options"]["visualize_tessellation"])
