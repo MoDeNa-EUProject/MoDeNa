@@ -99,49 +99,6 @@ def tessellate(filename, number_of_cells, visualize_tessellation):
                     math.ceil(MAXcenters[1] - Mincenters[1]),
                     math.ceil(MAXcenters[2] - Mincenters[2])]
     EdgeRVESize = int(max(EdgeCubeSize))  # For NEPER: Size of edge of RVE
-    EdgeRVESize27 = 3 * EdgeRVESize
-    MaxCenters = np.amax(Centers, axis=0)
-    L2 = int(0.5 + MaxCenters[0])
-    X = L2 + Centers[:, 0]
-    Y = L2 + Centers[:, 1]
-    Z = L2 + Centers[:, 2]
-    # translate seeds in 26 directions to simulate periodicity
-    Centers27 = np.array([
-        X, X + L2, X - L2, X + L2, X, X + L2, X, X - L2, X - L2,
-        X - L2, X + L2, X, X, X - L2, X + L2, X + L2, X, X,
-        X - L2, X, X, X - L2, X + L2, X + L2, X - L2, X - L2, X + L2,
-        Y, Y + L2, Y - L2, Y + L2, Y + L2, Y, Y - L2, Y, Y - L2,
-        Y + L2, Y - L2, Y - L2, Y + L2, Y, Y, Y, Y + L2, Y,
-        Y, Y - L2, Y, Y + L2, Y - L2, Y + L2, Y - L2, Y + L2, Y - L2,
-        Z, Z + L2, Z - L2, Z, Z + L2, Z + L2, Z - L2, Z - L2, Z,
-        Z, Z, Z + L2, Z - L2, Z + L2, Z - L2, Z, Z, Z + L2,
-        Z, Z, Z - L2, Z + L2, Z + L2, Z - L2, Z + L2, Z - L2, Z - L2
-    ])
-    # Creation of input .txt files for neper
-    myfile3 = os.path.join(MYPATH, 'Centers27.txt')
-    ff = open(myfile3, 'w')
-    for i in range(0, 27):
-        for j in range(0, number_of_cells):
-            ff.write('{0:f}\t{1:f}\t{2:f}\n'.format(Centers27[i, j],
-                                                    Centers27[i + 27, j],
-                                                    Centers27[i + 54, j]))
-    ff.close()
-    myfile4 = os.path.join(MYPATH, 'Rads27.txt')
-    fff = open(myfile4, 'w')
-    for i in range(0, 27):
-        for j in range(0, number_of_cells):
-            fff.write('{0:f}\n'.format(Rads[j]))
-    fff.close()
-    commandTessellation = "neper -T \
-        -n {0:d} \
-        -domain 'cube({1:d},{2:d},{3:d})' \
-        -morpho voronoi \
-        -morphooptiini 'coo:file(Centers27.txt),weight:file(Rads27.txt)' \
-        -o {4}RVE27 -format tess,geo \
-        -statcell vol -statedge length -statface area \
-        -statver x".format(27 * number_of_cells, EdgeRVESize27, EdgeRVESize27,
-                           EdgeRVESize27, filename)
-    os.system(commandTessellation)
     # create periodic RVE directly using Neper's new periodicity option
     myfile3 = os.path.join(MYPATH, 'Centers.txt')
     ff = open(myfile3, 'w')
@@ -163,7 +120,7 @@ def tessellate(filename, number_of_cells, visualize_tessellation):
         -periodicity x,y,z \
         -morpho voronoi \
         -morphooptiini 'coo:file(Centers.txt),weight:file(Rads.txt)' \
-        -o {4}Closed -format tess,geo \
+        -o {4} -format tess,geo \
         -statcell vol -statedge length -statface area \
         -statver x".format(number_of_cells, EdgeRVESize, EdgeRVESize,
                            EdgeRVESize, filename)

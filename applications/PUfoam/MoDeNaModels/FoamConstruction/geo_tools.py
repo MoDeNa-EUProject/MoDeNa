@@ -591,20 +591,18 @@ def main(fname, wall_thickness, verbose):
     # remove orientation, OpenCASCADE compatibility
     fix_strings(sdat['line_loop'])
     fix_strings(sdat['surface_loop'])
-    # save the foam to geo file
-    save_geo(fname + "Fixed.geo", sdat)
     # create walls
     edat = extract_data(sdat)
     create_walls(edat, wall_thickness)
     sdat = collect_strings(edat)
-    save_geo(fname + "Fixed.geo", sdat)
+    save_geo(fname + "Walls.geo", sdat)
     # move foam to a periodic box and save it to a file
     move_to_box(
-        fname + "Fixed.geo", "move_to_box.geo", fname + "Box.geo",
+        fname + "Walls.geo", "move_to_box.geo", fname + "WallsBox.geo",
         range(1, len(sdat['volume']) + 1)
     )
     # read boxed foam
-    sdat = read_geo(fname + "Box.geo")  # string data
+    sdat = read_geo(fname + "WallsBox.geo")  # string data
     edat = extract_data(sdat)  # extracted data
     # duplicity of points, lines, etc. was created during moving to a box
     remove_duplicity(edat)
@@ -644,9 +642,9 @@ def main(fname, wall_thickness, verbose):
         )
     # save the final foam
     sdat = collect_strings(edat)
-    save_geo(fname + "BoxFixed.geo", sdat)
+    save_geo(fname + "WallsBoxFixed.geo", sdat)
     print(
         term.yellow
-        + "Prepared file {}BoxFixed.geo.".format(fname)
+        + "Prepared file {}WallsBoxFixed.geo.".format(fname)
         + term.normal
     )

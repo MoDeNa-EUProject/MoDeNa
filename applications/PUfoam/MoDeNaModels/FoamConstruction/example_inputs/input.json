@@ -1,6 +1,6 @@
 {
     "filename": "Foam",
-    "packing": true,
+    "packing": false,
     "packing_options": {
         "alternative_algorithm": false,
         "average_radius": 0.15,
@@ -8,7 +8,7 @@
         "number_of_cells": 8,
         "domain_size": 1
     },
-    "tessellation": true,
+    "tessellation": false,
     "tessellation_options": {
         "visualize_tessellation": false
     },
@@ -16,17 +16,15 @@
     "structured_grid_options": {
         "porosity": 0.92,
         "strut_content": 0.6,
-        "extract_center_cells": true,
         "move_to_periodic_box": true,
         "render_box": false,
         "binarize_box": true,
         "strut_size_guess": 6
     },
-    "unstructured_grid": true,
+    "unstructured_grid": false,
     "unstructured_grid_options": {
         "create_geometry": true,
         "wall_thickness": 0.02,
-        "verbose": false,
         "mesh_domain": true,
         "convert_mesh": true
     }

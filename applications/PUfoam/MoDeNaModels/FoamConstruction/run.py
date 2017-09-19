@@ -12,8 +12,10 @@ density and struts are optionally added.
 
 Usage: simulation.py [-h | --help] [-i input_file] [--verbose]
 
-Options: -h --help       Show this screen. -i input_file   Json file with inputs.
-    Uses default file otherwise. --verbose       Print more information.
+Options:
+    -h --help       Show this screen.
+    -i input_file   Json file with inputs. Uses default file otherwise.
+    --verbose       Print more information.
 """
 from __future__ import division, print_function
 import os
@@ -195,7 +197,7 @@ def binarize_box(filename, dx, dy, dz, porosity, strut_content):
         origin = [dx, dy, dz]
         spacing = [dx / vx, dy / vy, dz / vz]
         vtkconv.main(filename + "Box.vtk", filename +
-                     "_structured.vtk", origin, spacing)
+                     "_str.vtk", origin, spacing)
     else:
         print(
             TERM.yellow +
@@ -248,7 +250,7 @@ def binarize_box(filename, dx, dy, dz, porosity, strut_content):
         f.write("0\n")
         f.write("1\n")
         f.write("0\n")
-        f.write(filename + "Box_structured\n")
+        f.write(filename + "_str\n")
         f.write(filename + "Box-ascii.vtk\n")
         f.write(filename + ".gnu\n")
         f.write("name\n")
@@ -272,15 +274,6 @@ def convert_mesh(input_mesh, output_mesh):
 
 def structured_grid(filename, dx, dy, dz, porosity, strut_content):
     """Creates foam discretized on structured grid."""
-    if INPUTS["structured_grid_options"]["extract_center_cells"]:
-        print(
-            TERM.yellow +
-            "Extracting center cells from tessellation." +
-            TERM.normal
-        )
-        geo_tools.extract_center_cells(
-            INPUTS["filename"],
-            INPUTS["packing_options"]["number_of_cells"])
     if INPUTS["structured_grid_options"]["move_to_periodic_box"]:
         print(
             TERM.yellow +
@@ -302,14 +295,15 @@ def structured_grid(filename, dx, dy, dz, porosity, strut_content):
 def unstructured_grid(filename, wall_thickness, verbose):
     """Creates foam discretized on unstructured grid."""
     if INPUTS["unstructured_grid_options"]["create_geometry"]:
-        geo_tools.main(filename + "Closed", wall_thickness, verbose)
-    shutil.copy(filename + "ClosedBoxFixed.geo",
-                filename + "_unstructured.geo")
+        geo_tools.main(filename, wall_thickness, verbose)
+    shutil.copy(filename + "WallsBoxFixed.geo",
+                filename + "_uns.geo")
     if INPUTS["unstructured_grid_options"]["mesh_domain"]:
-        mesh_domain(filename + "_unstructured.geo")
+        mesh_domain(filename + "_uns.geo")
     if INPUTS["unstructured_grid_options"]["convert_mesh"]:
-        convert_mesh(filename + "_unstructured.msh",
-                     filename + "_unstructured.xml")
+        convert_mesh(filename + "_uns.msh",
+                     filename + "_uns.xml")
+
 
 def main():
     """Main function.
@@ -363,7 +357,7 @@ def main():
         unstructured_grid(
             INPUTS["filename"],
             INPUTS["unstructured_grid_options"]["wall_thickness"],
-            INPUTS["unstructured_grid_options"]["verbose"],)
+            ARGS['--verbose'])
     time_end = datetime.datetime.now()
     print("Foam created in: {}".format(time_end - time_start))
 

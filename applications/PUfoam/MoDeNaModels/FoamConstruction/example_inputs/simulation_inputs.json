@@ -1,5 +1,5 @@
 {
-    "filename": "Foam_unstructured",
+    "filename": "Foam_uns",
     "boundary_conditions": {
         "top": 2,
         "bottom": 1
