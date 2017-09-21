@@ -16,6 +16,7 @@ import json
 import fenics as fe
 from blessings import Terminal
 from docopt import docopt
+from scipy.constants import gas_constant
 XMIN = 0.0
 XMAX = 1.0
 YMIN = 0.0
@@ -33,9 +34,9 @@ def main():
         + "Working on file {}.".format(fname)
         + term.normal
     )
-    system_matrix, field, bcs, cond = preprocess(fname)
+    system_matrix, field, bcs, diff, subdomains = preprocess(fname)
     field = integrate(system_matrix, field, bcs)
-    postprocess(fname, field, cond)
+    postprocess(fname, field, diff, subdomains)
     print(
         term.yellow
         + "End."
@@ -43,12 +44,12 @@ def main():
     )
 
 
-def bottomBC(x):
+def bottom_bc(x):
     """Bottom boundary condition."""
     return abs(x[2] - ZMAX) < fe.DOLFIN_EPS
 
 
-def topBC(x):
+def top_bc(x):
     """Top boundary condition."""
     return abs(x[2] - ZMIN) < fe.DOLFIN_EPS
 
@@ -118,24 +119,34 @@ def analytical_conductivity(k_gas, k_sol, por, f_strut):
     return (k_gas * por + k_sol * fun * (1 - por)) / (por + (1 - por) * fun)
 
 
+def analytical_diffusivity(perm, sol, por, dcell, dwall, temp, geom):
+    """Effective diffusivity."""
+    rgas = 8.314
+    return geom * dcell / dwall * perm * (por / (rgas * temp)
+                                          + sol * (1 - por))**(-1)
+    # return geom * dcell / dwall * perm * (por / (rgas * temp))**(-1)
+
+
 def preprocess(fname):
     """Loads mesh, defines system of equations and prepares system matrix."""
     mesh = fe.Mesh(fname + ".xml")
     if INPUTS['saving']['mesh']:
         fe.File(fname + "_mesh.pvd") << mesh
-    # boundaries = fe.MeshFunction('size_t', mesh, fname+'_facet_region.xml')
-    # if INPUTS['saving']['boundaries']:
-    #     fe.File(fname+"_subdomains.pvd") << boundaries
+    if INPUTS['plotting']['mesh']:
+        fe.plot(mesh, title='Mesh')
     subdomains = fe.MeshFunction(
         'size_t', mesh, fname + '_physical_region.xml')
     if INPUTS['saving']['subdomains']:
         fe.File(fname + "_subdomains.pvd") << subdomains
-    if INPUTS['plotting']['mesh']:
-        fe.plot(mesh, title='Mesh')
-    if INPUTS['plotting']['boundaries']:
-        fe.plot(boundaries, title='Boundaries')
     if INPUTS['plotting']['subdomains']:
         fe.plot(subdomains, title='Subdomains')
+    # Boundaries cannot be exported from gmsh for some foams.
+    # Possible bug in gmsh? Boundaries are defined through functions here instead.
+    # boundaries = fe.MeshFunction('size_t', mesh, fname+'_facet_region.xml')
+    # if INPUTS['saving']['boundaries']:
+    #     fe.File(fname+"_subdomains.pvd") << boundaries
+    # if INPUTS['plotting']['boundaries']:
+    #     fe.plot(boundaries, title='Boundaries')
     fun_space = fe.FunctionSpace(
         mesh,
         INPUTS['element_type'],
@@ -147,12 +158,22 @@ def preprocess(fname):
         print('Number of DOFs:', len(dofmap.dofs()))
     field = fe.TrialFunction(fun_space)
     test_func = fe.TestFunction(fun_space)
-    cond = SubdomainConstant(
-        subdomains,
-        fe.Constant(INPUTS['conductivity']['gas']),
-        fe.Constant(INPUTS['conductivity']['solid']),
-        degree=0
-    )
+    if INPUTS['mode'] == 'conductivity':
+        diff = SubdomainConstant(
+            subdomains,
+            fe.Constant(INPUTS['conductivity']['gas']),
+            fe.Constant(INPUTS['conductivity']['solid']),
+            degree=0
+        )
+    elif INPUTS['mode'] == 'diffusivity':
+        diff = SubdomainConstant(
+            subdomains,
+            fe.Constant(INPUTS['diffusivity']['gas']),
+            fe.Constant(INPUTS['diffusivity']['solid']) *
+            fe.Constant(INPUTS['solubility'] *
+                        gas_constant * INPUTS['temperature']),
+            degree=0
+        )
     unit_function = fe.Function(fun_space)
     unit_function.assign(fe.Constant(1.0))
     gas_content = SubdomainConstant(
@@ -164,11 +185,21 @@ def preprocess(fname):
     porosity = fe.assemble(gas_content * unit_function *
                            fe.dx) / (XMAX * YMAX * ZMAX)
     print('Porosity: {0}'.format(porosity))
-    keff = analytical_conductivity(
-        INPUTS['conductivity']['gas'], INPUTS['conductivity']['solid'],
-        porosity, 0.0)
-    print('Analytical conductivity: {0} mWm^-1K^-1'.format(keff * 1e3))
-    system_matrix = -cond * \
+    if INPUTS['analytical_model']:
+        if INPUTS['mode'] == 'conductivity':
+            keff = analytical_conductivity(
+                INPUTS['conductivity']['gas'], INPUTS['conductivity']['solid'],
+                porosity, 0.0)
+            print('Analytical model: {0} W/(mK)'.format(keff))
+        elif INPUTS['mode'] == 'diffusivity':
+            deff = analytical_diffusivity(
+                INPUTS['diffusivity']['solid'] *
+                INPUTS['solubility'], INPUTS['solubility'],
+                porosity, INPUTS['morphology']['cell_size'],
+                INPUTS['morphology']['wall_thickness'],
+                INPUTS['temperature'], 1.0)
+            print('Analytical model: {0} m^2/s'.format(deff))
+    system_matrix = -diff * \
         fe.inner(fe.grad(field), fe.grad(test_func)) * fe.dx
     bctop = fe.Constant(INPUTS['boundary_conditions']['top'])
     bcbot = fe.Constant(INPUTS['boundary_conditions']['bottom'])
@@ -177,11 +208,11 @@ def preprocess(fname):
     #     fe.DirichletBC(fun_space, bcbot, boundaries, 2)
     # ]
     bcs = [
-        fe.DirichletBC(fun_space, bctop, topBC),
-        fe.DirichletBC(fun_space, bcbot, bottomBC)
+        fe.DirichletBC(fun_space, bctop, top_bc),
+        fe.DirichletBC(fun_space, bcbot, bottom_bc)
     ]
     field = fe.Function(fun_space)
-    return system_matrix, field, bcs, cond
+    return system_matrix, field, bcs, diff, subdomains
 
 
 def integrate(system_matrix, field, bcs):
@@ -199,7 +230,7 @@ def integrate(system_matrix, field, bcs):
     return field
 
 
-def postprocess(fname, field, cond):
+def postprocess(fname, field, diff, subdomains):
     """Postprocessing of the simulation."""
     func_space = field.function_space()
     mesh = func_space.mesh()
@@ -209,15 +240,34 @@ def postprocess(fname, field, cond):
         INPUTS['element_type'],
         degree
     )
-    flux = fe.project(-cond * fe.grad(field), vec_func_space)
-    divergence = fe.project(-fe.div(cond * fe.grad(field)), func_space)
+    flux = fe.project(-diff * fe.grad(field), vec_func_space)
+    divergence = fe.project(-fe.div(diff * fe.grad(field)), func_space)
     flux_x, flux_y, flux_z = flux.split()
     av_flux = fe.assemble(flux_z * fe.dx) / ((XMAX - XMIN) * (YMAX - YMIN))
     keff = av_flux * (ZMAX - ZMIN) / (
         INPUTS['boundary_conditions']['top']
         - INPUTS['boundary_conditions']['bottom']
     )
-    print('Effective conductivity: {0} mWm^-1K^-1'.format(keff*1e3))
+    if INPUTS['mode'] == 'conductivity':
+        print('Numerical model: {0} W/(mK)'.format(keff))
+    elif INPUTS['mode'] == 'diffusivity':
+        print('Numerical model: {0} m^2/s'.format(keff))
+    # projection has to be to discontinuous function space
+    if INPUTS['mode'] == 'diffusivity':
+        sol_field = SubdomainConstant(
+            subdomains,
+            fe.Constant(1.0),
+            fe.Constant(INPUTS['solubility'] *
+                        gas_constant * INPUTS['temperature']),
+            degree=0
+        )
+        dis_func_space = fe.FunctionSpace(
+            mesh,
+            'DG',
+            INPUTS['element_degree'],
+            constrained_domain=PeriodicDomain()
+        )
+        field = fe.project(field * sol_field, dis_func_space)
     with open(fname + "_keff.csv", 'w') as textfile:
         textfile.write('keff\n')
         textfile.write('{0}\n'.format(keff))
