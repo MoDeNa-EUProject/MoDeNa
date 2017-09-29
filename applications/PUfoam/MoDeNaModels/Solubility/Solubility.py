@@ -182,6 +182,8 @@ const double term2 = exp(term1);
 outputs[0] = P0*term2;
 
 outputs[0] = P0 + T*P1 + P2*T*T;
+
+outputs[0] = P0*exp(P1*T);
 }
 '''
 Ccode3='''
@@ -302,7 +304,7 @@ m_solubilityCyclopentanePU = BackwardMappingModel(
     substituteModels=[],
     initialisationStrategy=Strategy.InitialPoints(
         initialPoints={
-            'T': [290, 320, 350, 380],
+            'T': [270, 320, 370, 420],
             'xl1': [1.1e-3, 1.0e-3, 1.0e-3, 1.0e-4],
             'xl2': [0.9989, 0.999, 0.999, 0.9999],
         },
