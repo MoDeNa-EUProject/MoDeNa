@@ -296,8 +296,8 @@ def unstructured_grid(filename, wall_thickness, verbose):
     """Creates foam discretized on unstructured grid."""
     if INPUTS["unstructured_grid_options"]["create_geometry"]:
         geo_tools.main(filename, wall_thickness, verbose)
-    shutil.copy(filename + "WallsBoxFixed.geo",
-                filename + "_uns.geo")
+        shutil.copy(filename + "WallsBoxFixed.geo",
+                    filename + "_uns.geo")
     if INPUTS["unstructured_grid_options"]["mesh_domain"]:
         mesh_domain(filename + "_uns.geo")
     if INPUTS["unstructured_grid_options"]["convert_mesh"]:

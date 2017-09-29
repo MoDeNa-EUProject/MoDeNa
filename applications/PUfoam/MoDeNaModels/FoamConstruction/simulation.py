@@ -54,6 +54,13 @@ def main():
         INPUTS['element_degree'],
         constrained_domain=PeriodicDomain()
     )
+    # discontinuous function space for visualization
+    dis_func_space = fe.FunctionSpace(
+        mesh,
+        'DG',
+        INPUTS['element_degree'],
+        constrained_domain=PeriodicDomain()
+    )
     if ARGS['--verbose']:
         print('Number of cells:', mesh.num_cells())
         print('Number of faces:', mesh.num_faces())
@@ -91,8 +98,10 @@ def main():
         fe.Constant(0.0),
         degree=0
     )
+    # define structure of foam over whole domain
+    structure = fe.project(unit_function * gas_content, dis_func_space)
     # calculate porosity and wall thickness
-    porosity = fe.assemble(gas_content * unit_function *
+    porosity = fe.assemble(structure *
                            fe.dx) / ((XMAX - XMIN) * (YMAX - YMIN) * (ZMAX - ZMIN))
     print('Porosity: {0}'.format(porosity))
     dwall = wall_thickness(
@@ -162,18 +171,13 @@ def main():
                         gas_constant * INPUTS['temperature']),
             degree=0
         )
-        dis_func_space = fe.FunctionSpace(
-            mesh,
-            'DG',
-            INPUTS['element_degree'],
-            constrained_domain=PeriodicDomain()
-        )
         field = fe.project(field * sol_field, dis_func_space)
     # save results
     with open(fname + "_eff_prop.csv", 'w') as textfile:
         textfile.write('eff_prop\n')
         textfile.write('{0}\n'.format(eff_prop))
     fe.File(fname + "_solution.pvd") << field
+    fe.File(fname + "_structure.pvd") << structure
     if INPUTS['saving']['flux']:
         fe.File(fname + "_flux.pvd") << flux
     if INPUTS['saving']['flux_divergence']:
