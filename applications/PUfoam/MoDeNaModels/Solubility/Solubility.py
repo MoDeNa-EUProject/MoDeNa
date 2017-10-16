@@ -274,7 +274,7 @@ m_solubilityCO2PU = BackwardMappingModel(
     substituteModels=[],
     initialisationStrategy=Strategy.InitialPoints(
         initialPoints={
-            'T': [290, 320, 350, 380],
+            'T': [270, 320, 370, 420],
             'xl1': [1.1e-3, 1.0e-3, 1.0e-3, 1.0e-4],
             'xl2': [0.9989, 0.999, 0.999, 0.9999],
         },
@@ -289,7 +289,7 @@ m_solubilityAirPU = BackwardMappingModel(
     substituteModels=[],
     initialisationStrategy=Strategy.InitialPoints(
         initialPoints={
-            'T': [290, 320, 350, 380],
+            'T': [270, 320, 370, 420],
             'xl1': [1.1e-3, 1.0e-3, 1.0e-3, 1.0e-4],
             'xl2': [0.9989, 0.999, 0.999, 0.9999],
         },
@@ -319,7 +319,7 @@ m_solubilityO2PU = BackwardMappingModel(
     substituteModels=[],
     initialisationStrategy=Strategy.InitialPoints(
         initialPoints={
-            'T': [290, 320, 350, 380],
+            'T': [270, 320, 370, 420],
             'xl1': [1.1e-3, 1.0e-3, 1.0e-3, 1.0e-4],
             'xl2': [0.9989, 0.999, 0.999, 0.9999],
         },
@@ -334,7 +334,7 @@ m_solubilityN2PU = BackwardMappingModel(
     substituteModels=[],
     initialisationStrategy=Strategy.InitialPoints(
         initialPoints={
-            'T': [290, 320, 350, 380],
+            'T': [270, 320, 370, 420],
             'xl1': [1.1e-3, 1.0e-3, 1.0e-3, 1.0e-4],
             'xl2': [0.9989, 0.999, 0.999, 0.9999],
         },
