@@ -81,36 +81,42 @@ The following key-pairs should be defined:
 
 ### Preparing foamConductivity.json
 - `upperBoundary`:
-    - `emittance`: numer 0-1, 0.9 recommended
+    - `emittance`: surface emittance, number 0-1, 0.9 recommended
     - `temperature`: temperature (K)
 - `lowerBoundary`:
-    - `emittance`: numer 0-1, 0.9 recommended
+    - `emittance`: surface emittance, number 0-1, 0.9 recommended
     - `temperature`: temperature (K)
 - `gasDensity`: gas density (kg/m3)
 - `solidDensity`: polymer density (kg/m3)
-- `sourceOfProperty`: when "DirectInput" is used, the property must be given in this file. Otherwise, it will be loaded from the results of the specified given tool.
+- `sourceOfProperty`: when "DirectInput" is used, the property must be given in the input file. Otherwise, it will be loaded from the results of the specified given tool. You can obtain "BubbleGrowth", "Qmom0D", or "Qmom3D" results by running `./workflow_bubbleGrowth`, `./workflow_0D`, or `./workflow_3D` in foamExpansion application. The final state is always saved in `after_foaming.txt` file. "StrutContent" uses StrutContent surrogate model to estimate strut content based on foam density.
     - `porosity`: ["DirectInput","BubbleGrowth","Qmom0D","Qmom3D"]
     - `cellSize`: ["DirectInput","BubbleGrowth","Qmom0D","Qmom3D"]
-    - `gasComposition`: ["DirectInput","BubbleGrowth","Qmom0D","Qmom3D"]
+    - `gasComposition`: molar fractions are always normalized ["DirectInput","BubbleGrowth","Qmom0D","Qmom3D"]
     - `strutContent`: ["DirectInput","StrutContent"]
     - `wallThickness`: ["DirectInput"]
 - `gasComposition`:
     - `Cyclopentane`: molar fraction of cyclopentane
     - `CO2`: molar fraction of CO2
-    - `Air`: molar fraction of air
-- `useWallThicknessDistribution`: [true,false]
-- `spatialDiscretization`: number of finite volumes for conduction-radiation simulation
-- `wallThicknessStandardDeviation`: if wall thickness distribution is used
-- `morphologyInput`: 2 is recommended (strut content is specified, wall thickness and strut size is calculated)
+    - `O2`: molar fraction of oxygen
+    - `N2`: molar fraction of nitrogen
+- `porosity`: foam porosity, if "DirectInput" is used
+- `cellSize`: cell size, if "DirectInput" is used (m)
+- `morphologyInput`: when we know foam porosity and cell size, foam morphology is fully specified, if we additionally know either wall thickness, strut content, or strut size. Specify, which property you know, the others will be used as initial guesses to calculate them precisely. "strutSize" is recommended. "strutSize2" uses slightly different model to calculate strut size and wall thickness. ["wallThickness","strutContent","strutSize","strutContent2"]
+- `strutContent`: strut content, if "DirectInput" is used
+- `wallThickness`: wall thickness, if "DirectInput" is used (m)
+- `strutSize`: strut size (m)
 - `foamThickness`: foam thickness (m)
-- `porosity`: foam porosity
-- `numericalEffectiveConductivity`: [true,false]
-- `testMode`: [true,false]
-- `numberOfGrayBoxes`: 10 is recommended
-- `strutContent`: strut content
-- `cellSize`: cell size (m)
-- `strutSize`: initial guess of strut size
-- `wallThickness`: initial guess of wall thickness
+- `spectra`:
+    - `polymer_n`: file with spectrum of real part of refractive index of polymer
+    - `polymer_k`: file with spectrum of imaginary part of refractive index of polymer
+    - `gas_k`: file with spectrum of imaginary part of refractive index of gas
+- `spatialDiscretization`: number of finite volumes for conduction-radiation simulation
+- `useWallThicknessDistribution`: assume wall thickness distribution for calculation of radiative properties [true,false]
+- `wallThicknessStandardDeviation`: if wall thickness distribution is used
+- `numberOfGrayBoxes`: number of gray boxes for discretization of foam spectra, 10 is recommended
+- `numericalEffectiveConductivity`: use numerical instead of analytical model to calculate effective conductivity, false is recommended [true,false]
+- `structureName`: filename with foam morphology saved in VTK voxel format, if numerical model for effective conductivity is used
+- `testMode`: disable estimation of radiative properties, significantly decreases computational time, false is recommended [true,false]
 
 ### Preparing init_foamConductivity.json
 - `T`: list of temperatures (K)
