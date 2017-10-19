@@ -4,27 +4,32 @@ The input files should be located in the `inputs` folder. `foamAging.json` contr
 
 ### Preparing foamAging.json
 The following key-pairs should be defined:
+- `modelType`: "homogeneous" model first estimates effective foam diffusivity using analytical model, and then simulates diffusion of blowing agents through foam. "heterogeneous" model represents foam as a series of parallel polymer walls separated by gas cells and simulates diffusion of blowing agents directly in this foam. ["homogeneous","heterogeneous"]
 - `numerics`:
     - `timeStart`: starting time (s)
     - `timeEnd`: end time (s)
-    - `numberOfOutputs`: how many times should the intermediate results be written
-    - `wallDiscretization`: number of finite volumes in each wall
-    - `cellDiscretization`: number of finite volumes in each cell
-    - `sheetDiscretization`: number of finite volumes in sheet, if it is used
-- `sourceOfProperty`: when "DirectInput" is used, the property must be given in this file. Otherwise, it will be loaded from the results of the specified given tool.
+    - `progressTime`: determines spacing between outputs ["logarithmic","linear"]
+    - `numberOfOutputs`: how many times should the intermediate results be written, used for linear progress of time
+    - `outputsPerOrder`: how many times we save per decade if we have logarithmic progress of time
+    - `numberOfOrders`: for how many decades we save in logarithmic progress of time - used to determine total number of outputs, assumes starting time is 0 
+    - `wallDiscretization`: number of finite volumes in each wall, used in heterogeneous model
+    - `cellDiscretization`: number of finite volumes in each cell, used in heterogeneous model
+    - `foamDiscretization`: number of finite volumes in foam, used in homogeneous model
+    - `sheetDiscretization`: number of finite volumes in sheet, if sheet is used
+- `sourceOfProperty`: when "DirectInput" is used, the property must be given in the input file. Otherwise, it will be loaded from the results of the specified given tool. You can obtain "BubbleGrowth", "Qmom0D", or "Qmom3D" results by running `./workflow_bubbleGrowth`, `./workflow_0D`, or `./workflow_3D` in foamExpansion application. The final state is always saved in `after_foaming.txt` file. "StrutContent" uses StrutContent surrogate model to estimate strut content based on foam density.
     - `foamDensity`: ["DirectInput","BubbleGrowth","Qmom0D","Qmom3D"]
     - `cellSize`: ["DirectInput","BubbleGrowth","Qmom0D","Qmom3D"]
-    - `gasComposition`: ["DirectInput","BubbleGrowth","Qmom0D","Qmom3D"]
+    - `gasComposition`: molar fractions are always normalized ["DirectInput","BubbleGrowth","Qmom0D","Qmom3D"]
     - `strutContent`: ["DirectInput","StrutContent"]
     - `wallThickness`: ["DirectInput"]
 - `foamCondition`:
-    - `foamHalfThickness`: half of foam thickness (m)
+    - `foamHalfThickness`: size of computational domain - half of foam thickness (m)
     - `inProtectiveSheet`: is foam enclosed in a sheet [true,false]
     - `sheetThickness`: thickness of the sheet, if it is used (m)
     - `agingTemperature`: temperature of aging (K)
     - `conductivityTemperature`: temperature of conductivity measurements (K)
     - `initialPressure`: initial pressure in foam (Pa)
-    - `initialComposition`:
+    - `initialComposition`: used when "DirectInput" was selected
         - `O2`: molar fraction of oxygen in initial foam
         - `N2`: molar fraction of nitrogen in initial foam
         - `CO2`: molar fraction of CO2 in initial foam
@@ -35,14 +40,14 @@ The following key-pairs should be defined:
         - `CO2`: pressure of CO2 at the outer boundary (Pa)
         - `Cyclopentane`: pressure of cyclopentane at the outer boundary (Pa)
 - `morphology`:
-    - `foamDensity`: foam density (kg/m3)
-    - `cellSize`: cell size (m)
-    - `strutContent`: strut content
-    - `wallThickness`: wall thickness (m)
+    - `foamDensity`: foam density, if "DirectInput" was selected (kg/m3)
+    - `cellSize`: cell size, if "DirectInput" was selected (m)
+    - `strutContent`: strut content, if "DirectInput" was selected
+    - `wallThickness`: wall thickness, if "DirectInput" was selected (m)
 - `physicalProperties`:
     - `polymerDensity`: polymer density (kg/m3)
     - `foam`:
-        - `solubilityModel`:
+        - `solubilityModel`: When "constant" is used, property must be given in the input file. When "modena" is used, surrogate Solubility model is used for given temperature of aging.
             - `O2`: solubility model ["constant","modena"]
             - `N2`: solubility model ["constant","modena"]
             - `CO2`: solubility model ["constant","modena"]
@@ -52,16 +57,16 @@ The following key-pairs should be defined:
             - `N2`: solubility of nitrogen, if "constant" model is used (g/g/bar)
             - `CO2`: solubility of CO2, if "constant" model is used (g/g/bar)
             - `Cyclopentane`: solubility of cyclopentane, if "constant" model is used (g/g/bar)
-        - `diffusivityModel`:
-            - `O2`: diffusivity model ["constant","modena"]
-            - `N2`: diffusivity model ["constant","modena"]
-            - `CO2`: diffusivity model ["constant","modena"]
-            - `Cyclopentane`: diffusivity model ["constant","modena"]
+        - `diffusivityModel`: When "constant" is used, diffusivity in polymer must be given in the input file. When "modena" is used, surrogate Diffusivity model is used for given temperature of aging. When "foam" is used, diffusivity in foam (effective diffusivity) must be given in the input file. 
+            - `O2`: diffusivity model ["constant","modena","foam"]
+            - `N2`: diffusivity model ["constant","modena","foam"]
+            - `CO2`: diffusivity model ["constant","modena","foam"]
+            - `Cyclopentane`: diffusivity model ["constant","modena","foam"]
         - `diffusivity`:
-            - `O2`: diffusivity of oxygen, if "constant" model is used (m2/s)
-            - `N2`: diffusivity of nitrogen, if "constant" model is used (m2/s)
-            - `CO2`: diffusivity of CO2, if "constant" model is used (m2/s)
-            - `Cyclopentane`: diffusivity of cyclopentane, if "constant" model is used (m2/s)
+            - `O2`: diffusivity of oxygen, if "constant" or "foam" model is used (m2/s)
+            - `N2`: diffusivity of nitrogen, if "constant" or "foam" model is used (m2/s)
+            - `CO2`: diffusivity of CO2, if "constant" or "foam" model is used (m2/s)
+            - `Cyclopentane`: diffusivity of cyclopentane, if "constant" or "foam" model is used (m2/s)
     - `sheet`:
         - `solubility`:
             - `O2`: solubility of oxygen, if "constant" model is used (g/g/bar)
