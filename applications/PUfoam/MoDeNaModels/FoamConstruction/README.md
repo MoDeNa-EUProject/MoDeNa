@@ -15,6 +15,18 @@ sudo apt-get install libmatheval-dev gmsh gsl-bin libgsl0-dev python-vtk \
     lib3ds-1-3 libjpeg62 freeglut3 libnlopt-dev libboost-dev \ libboost-date-time-dev libboost-thread-dev zlib1g-dev libpng12-dev \
     libjpeg8-dev libtiff5-dev libopenexr-dev
 ```
+Install python packages using pip
+```
+sudo -H pip install spack vapory
+```
+Install packing-generation from github and copy the executable to PATH
+```
+cd where-you-want-source-files
+git clone https://github.com/VasiliBaranov/packing-generation.git
+cd packing-generation/_Release
+make
+cp PackingGeneration.exe ~/bin/
+```
 Then download and install `neper` from http://neper.sourceforge.net/downloads.html.
 You will need to unpack `neper`, go to its `src` folder and then:
 ```

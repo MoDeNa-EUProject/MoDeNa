@@ -26,7 +26,8 @@ import subprocess as sp
 from blessings import Terminal
 from docopt import docopt
 from scipy.optimize import minimize_scalar as minimize_scalar
-import skeleton
+import packing
+import tessellation
 import periodicBox
 import vtkconv
 import geo_tools
@@ -320,18 +321,18 @@ def main():
             "Packing spheres." +
             TERM.normal
         )
-        skeleton.pack_spheres(
+        packing.pack_spheres(
             INPUTS["packing_options"]["average_radius"],
-            INPUTS["packing_options"]["deviance"],
+            INPUTS["packing_options"]["variance"],
             INPUTS["packing_options"]["number_of_cells"],
-            INPUTS["packing_options"]["alternative_algorithm"])
+            INPUTS["packing_options"]["algorithm"])
     if INPUTS["tessellation"]:
         print(
             TERM.yellow +
             "Tessellating." +
             TERM.normal
         )
-        skeleton.tessellate(
+        tessellation.tessellate(
             INPUTS["filename"],
             INPUTS["packing_options"]["number_of_cells"],
             INPUTS["tessellation_options"]["visualize_tessellation"])

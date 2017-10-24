@@ -20,4 +20,7 @@
 *.png
 *.tess
 *.csv
-spherepack
+*.conf
+*.xyzd
+*.nfo
+*.pdf
