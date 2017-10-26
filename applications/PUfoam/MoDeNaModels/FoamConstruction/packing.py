@@ -138,7 +138,8 @@ def read_results():
 
 
 def render_packing(data, domain=1.0, pixels=1000):
-    """Save picture of packed domain."""
+    """Save picture of packed domain. Uses spack.
+    https://pyspack.readthedocs.io/en/latest/"""
     pack = spack.Packing(data[:, 0:3], data[:, 3], L=domain)
     print(pack.contacts())
     scene = pack.scene(rot=pi / 4, camera_height=0.5,
@@ -160,7 +161,8 @@ def generate_structure(flag):
 
 def pack_spheres(average_radius, variance, number_of_cells, algorithm):
     """Packs spheres into a periodic domain. Creates Project01.rco with sphere
-    centers and radii."""
+    centers and radii. Simple model is implemented directly, other algorithms use
+    Vasili Baranov's code: https://github.com/VasiliBaranov/packing-generation."""
     if algorithm == 'simple':
         data = simple_packing(average_radius, variance, number_of_cells)
     else:

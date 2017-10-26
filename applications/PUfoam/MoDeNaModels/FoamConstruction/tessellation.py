@@ -8,6 +8,7 @@
 @copyright  2014-2016, MoDeNa Project. GNU Public License.
 @details
 Prepares representative volume element (RVE) of foam using Laguerre tessellation.
+Uses Neper 3.
 """
 import os
 import math
@@ -21,48 +22,47 @@ def tessellate(filename, number_of_cells, visualize_tessellation):
     """Use Laguerre tessellation from Neper to create dry foam. Uses Project01.rco
     as input file."""
     myfile12 = os.path.join(MYPATH, 'Project01.rco')
-    CentersRads = np.loadtxt(myfile12, usecols=(0, 1, 2, 3))
-    CentersRads[:, 3] = CentersRads[:, 3] / 2.0
-    Centers = CentersRads[:, :3]  # All centers of spheres
-    Rads = CentersRads[:, 3]  # All radii of spheres
-    Rads = Rads / 2
-    MAXcenters = max(Centers.tolist())
-    Mincenters = min(Centers.tolist())
-    EdgeCubeSize = [math.ceil(MAXcenters[0] - Mincenters[0]),
-                    math.ceil(MAXcenters[1] - Mincenters[1]),
-                    math.ceil(MAXcenters[2] - Mincenters[2])]
-    EdgeRVESize = int(max(EdgeCubeSize))  # For NEPER: Size of edge of RVE
+    centers_rads = np.loadtxt(myfile12, usecols=(0, 1, 2, 3))
+    centers_rads[:, 3] = centers_rads[:, 3] / 2.0
+    centers = centers_rads[:, :3]  # All centers of spheres
+    rads = centers_rads[:, 3]  # All radii of spheres
+    rads = rads / 2
+    max_centers = max(centers.tolist())
+    min_centers = min(centers.tolist())
+    edge_cube_size = [math.ceil(max_centers[0] - min_centers[0]),
+                      math.ceil(max_centers[1] - min_centers[1]),
+                      math.ceil(max_centers[2] - min_centers[2])]
+    edge_rve_size = int(max(edge_cube_size))  # For NEPER: Size of edge of RVE
     # create periodic RVE directly using Neper's new periodicity option
-    myfile3 = os.path.join(MYPATH, 'Centers.txt')
-    ff = open(myfile3, 'w')
-    for i in range(0, 1):
-        for j in range(0, number_of_cells):
-            ff.write('{0:f}\t{1:f}\t{2:f}\n'.format(Centers[j][i],
-                                                    Centers[j][i + 1],
-                                                    Centers[j][i + 2]))
-    ff.close()
+    myfile3 = os.path.join(MYPATH, 'centers.txt')
+    with open(myfile3, 'w') as fout:
+        for i in range(0, 1):
+            for j in range(0, number_of_cells):
+                fout.write('{0:f}\t{1:f}\t{2:f}\n'.format(centers[j][i],
+                                                          centers[j][i + 1],
+                                                          centers[j][i + 2]))
     myfile4 = os.path.join(MYPATH, 'Rads.txt')
-    fff = open(myfile4, 'w')
-    for i in range(0, 1):
-        for j in range(0, number_of_cells):
-            fff.write('{0:f}\n'.format(Rads[j]))
-    fff.close()
-    commandTessellation = "neper -T \
+    with open(myfile4, 'w') as fout:
+        for i in range(0, 1):
+            for j in range(0, number_of_cells):
+                fout.write('{0:f}\n'.format(rads[j]))
+    # Note: Neper regularization is not available for periodic tessellations
+    command_tessellation = "neper -T \
         -n {0:d} \
         -domain 'cube({1:d},{2:d},{3:d})' \
         -periodicity x,y,z \
         -morpho voronoi \
-        -morphooptiini 'coo:file(Centers.txt),weight:file(Rads.txt)' \
+        -morphooptiini 'coo:file(centers.txt),weight:file(Rads.txt)' \
         -o {4} -format tess,geo \
         -statcell vol -statedge length -statface area \
-        -statver x".format(number_of_cells, EdgeRVESize, EdgeRVESize,
-                           EdgeRVESize, filename)
-    os.system(commandTessellation)
+        -statver x".format(number_of_cells, edge_rve_size, edge_rve_size,
+                           edge_rve_size, filename)
+    os.system(command_tessellation)
     if visualize_tessellation:  # needs POV-Ray
-        commandVisualization = "neper -V {0}RVE27.tess -datacellcol ori \
+        command_visualization = "neper -V {0}RVE27.tess -datacellcol ori \
             -datacelltrs 0.5 -showseed all -dataseedrad @Rads.txt \
             -dataseedtrs 1.0 -print {0}RVE27".format(filename)
-        os.system(commandVisualization)
+        os.system(command_visualization)
     sdat = read_geo(filename + ".geo")
     edat = extract_data(sdat)
     point = edat["point"]
