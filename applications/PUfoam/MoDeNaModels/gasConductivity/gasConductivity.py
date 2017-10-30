@@ -45,7 +45,7 @@ from modena import CFunction, ForwardMappingModel, IndexSet
 ## List of components, for which surrogate model is provided
 species = IndexSet(
     name= 'gas_thermal_conductivity_species',
-    names= [ 'CO2', 'CyP', 'O2', 'N2' ]
+    names= [ 'CO2', 'CyP', 'O2', 'N2', 'Opt', 'Sol' ]
 )
 
 ## Surrogate function for thermal conductivity of blowing agents.
@@ -115,6 +115,28 @@ m_CyP_thermal_conductivity = ForwardMappingModel(
     surrogateFunction=f_gas_thermal_conductivity,
     substituteModels=[],
     parameters=[0.0956e-3, -14.89e-3],
+)
+
+## Surrogate model for thermal conductivity of blowing agent
+#
+# Forward mapping model is used. Cyclopentane temeprature dependence used.
+# Fitted to data from product sheet.
+m_Opt_thermal_conductivity = ForwardMappingModel(
+    _id='gas_thermal_conductivity[A=Opt]',
+    surrogateFunction=f_gas_thermal_conductivity,
+    substituteModels=[],
+    parameters=[0.0956e-3, -0.0177888],
+)
+
+## Surrogate model for thermal conductivity of blowing agent
+#
+# Forward mapping model is used.  Cyclopentane temeprature dependence used.
+# Fitted to data from product sheet.
+m_Sol_thermal_conductivity = ForwardMappingModel(
+    _id='gas_thermal_conductivity[A=Sol]',
+    surrogateFunction=f_gas_thermal_conductivity,
+    substituteModels=[],
+    parameters=[0.0956e-3, -0.0178108],
 )
 
 ## Surrogate model for thermal conductivity of blowing agent

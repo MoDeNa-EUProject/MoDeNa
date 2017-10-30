@@ -41,10 +41,4 @@ Contributors
 @namespace gasConductivity
 """
 
-from gasConductivity import species
-from gasConductivity import m_CyP_thermal_conductivity
-from gasConductivity import m_Air_thermal_conductivity
-from gasConductivity import m_CO2_thermal_conductivity
-from gasConductivity import m_O2_thermal_conductivity
-from gasConductivity import m_N2_thermal_conductivity
-from gasConductivity import f_gas_thermal_conductivity
+from gasConductivity import *

@@ -43,7 +43,7 @@ from modena import CFunction, ForwardMappingModel, IndexSet
 ## List of components, for which surrogate model is provided
 species = IndexSet(
     name= 'diffusivity_pol_species',
-    names= [ 'CO2', 'CyP', 'N2', 'O2' ]
+    names= [ 'CO2', 'CyP', 'N2', 'O2', 'Opt', 'Sol' ]
 )
 ## Surrogate function for diffusivity of blowing agents in polymer.
 #
@@ -83,7 +83,7 @@ void diffusivityPol
         'A': species,
     },
 )
-## Surrogate model for diffusivity
+## Surrogate model for diffusivity of CO2
 #
 # Forward mapping model is used.
 m_CO2_diffusivity = ForwardMappingModel(
@@ -92,7 +92,7 @@ m_CO2_diffusivity = ForwardMappingModel(
     substituteModels=[],
     parameters=[0.00123, 6156],
 )
-## Surrogate model for diffusivity
+## Surrogate model for diffusivity of cyclopentane
 #
 # Forward mapping model is used.
 m_CyP_diffusivity = ForwardMappingModel(
@@ -101,7 +101,25 @@ m_CyP_diffusivity = ForwardMappingModel(
     substituteModels=[],
     parameters=[1.7e-7, 4236],
 )
-## Surrogate model for diffusivity
+## Surrogate model for diffusivity of Opteon
+#
+# Forward mapping model is used.
+m_CyP_diffusivity = ForwardMappingModel(
+    _id='diffusivityPol[A=Opt]',
+    surrogateFunction=f_diffusivity,
+    substituteModels=[],
+    parameters=[1.7e-8, 4236],
+)
+## Surrogate model for diffusivity of Solstice
+#
+# Forward mapping model is used.
+m_CyP_diffusivity = ForwardMappingModel(
+    _id='diffusivityPol[A=Sol]',
+    surrogateFunction=f_diffusivity,
+    substituteModels=[],
+    parameters=[1.7e-8, 4236],
+)
+## Surrogate model for diffusivity of nitrogen
 #
 # Forward mapping model is used.
 m_N2_diffusivity = ForwardMappingModel(
@@ -110,7 +128,7 @@ m_N2_diffusivity = ForwardMappingModel(
     substituteModels=[],
     parameters=[0.003235, 6927],
 )
-## Surrogate model for diffusivity
+## Surrogate model for diffusivity of oxygen
 #
 # Forward mapping model is used.
 m_O2_diffusivity = ForwardMappingModel(
