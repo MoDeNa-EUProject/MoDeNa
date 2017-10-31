@@ -10,7 +10,7 @@ module physicalProperties
     use fmodena
     implicit none
     private
-    public polymerConductivity,gasConductivity,strutContent
+    public polymerConductivity,gasConductivity,strutContent,get_names
 contains
 !********************************BEGINNING*************************************
 !> Calculation of thermal conductivity of polymer.
@@ -137,5 +137,48 @@ subroutine strutContent(strut_content,foam_density)
     call modena_outputs_destroy (fsOutputs)
     call modena_model_destroy (fsModena)
 end subroutine strutContent
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> Get names of the species.
+subroutine get_names(gasname)
+    character(len=255), dimension(:), allocatable :: gasname(:)
+    integer(c_size_t) :: i
+    !modena variables
+    type(c_ptr) :: index_set = c_null_ptr
+    type(c_ptr) :: name = c_null_ptr
+    integer(c_size_t) :: itbeg,itend
+    index_set = modena_index_set_new(&
+        c_char_"gas_thermal_conductivity_species"//c_null_char)
+    itbeg = modena_index_set_iterator_start(index_set)
+    itend = modena_index_set_iterator_end(index_set)
+    allocate(gasname(itend))
+    do i = itbeg, itend - 1
+        gasname(i+1) = modena_index_set_get_name(index_set, i)
+    enddo
+    call modena_index_set_destroy(index_set)
+end subroutine get_names
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+function modena_index_set_get_name(indexSet, ind) result(ret)
+    use  iso_c_binding
+    type(c_ptr) :: indexSet
+    integer(c_size_t) :: ind
+    character*255 :: ret
+    type(c_ptr) :: name_ptr = c_null_ptr
+    character, pointer, dimension(:) :: last_message_array
+    character*255 :: last_message
+    integer :: message_length, i
+    name_ptr = modena_index_set_get_name_ptr(indexSet, ind)
+    call C_F_POINTER(name_ptr, last_message_array, [ 255 ])
+    do i=1, 255
+        last_message(i:i+1) = last_message_array(i)
+    enddo
+    message_length = LEN_TRIM(last_message(1:INDEX(last_message, CHAR(0))))
+    ret = last_message(1:message_length-1)
+end function modena_index_set_get_name
 !***********************************END****************************************
 end module physicalProperties

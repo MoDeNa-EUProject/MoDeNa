@@ -190,6 +190,13 @@ subroutine loadParameters
     character(len=99) :: nspec
     character(len=99) :: kspec
     character(len=99) :: gasspec
+    character(len=255), dimension(:), allocatable :: gasname(:)
+    print*, 'hello'
+    call get_names(gasname)
+    do i=1,size(gasname)
+        print*, TRIM(ADJUSTL(gasname(i)))
+    enddo
+    stop
     inputs=TRIM(ADJUSTL(fileplacein_par))//TRIM(ADJUSTL(inputs))
     inquire(file=inputs,exist=file_exists) !first try current folder
     if (.not. file_exists) then
