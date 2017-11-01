@@ -29,6 +29,17 @@ subroutine input()
     character(len=99) :: qmom3D_res='../../foamExpansion/results/CFD3D/'
 	real(dp) :: matr(7)
 	integer :: fi
+	call get_names(gasname)
+	ngas=size(gasname)
+    allocate(gasname(ngas))
+    allocate(solModel(ngas),diffModel(ngas))
+    allocate(Sg(ngas),Dg(ngas),Pg(ngas),Deff(ngas),Seff(ngas))
+    allocate(sheetSg(ngas),sheetDg(ngas))
+    allocate(pBg(ngas),xg(ngas),kfoamXg(ngas),kgasXg(ngas))
+    allocate(sgModena(ngas),sgInputs(ngas),sgOutputs(ngas))
+    allocate(sgTemppos(ngas),sgxl1pos(ngas),sgxl2pos(ngas))
+    allocate(dgModena(ngas),dgInputs(ngas),dgOutputs(ngas),dgTemppos(ngas))
+    allocate(kgModena(ngas),kgInputs(ngas),kgOutputs(ngas),kgTemppos(ngas))
 	! Read input parameters
 	json_data => fson_parse("../inputs/foamAging.json")
 	call fson_get(json_data, "modelType", modelType)

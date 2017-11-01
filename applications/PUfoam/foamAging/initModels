@@ -49,7 +49,7 @@ from fireworks.core.rocket_launcher import rapidfire
 # import diffusivity # automatic initialization fails
 # import gasMixtureConductivity # imported by foamConductivity
 # import gasConductivity # imported by gasMixtureConductivity
-import foamConductivity
+# import foamConductivity
 # import Solubility # automatic initialization fails
 # import StrutContent
 

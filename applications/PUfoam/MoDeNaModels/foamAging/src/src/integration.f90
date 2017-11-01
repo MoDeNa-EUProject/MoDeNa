@@ -33,24 +33,6 @@ subroutine integrate
 
     real(dp), allocatable :: ystate(:), yprime(:) ! vector of state
     real(dp), allocatable :: RWORK(:)
-
-    ! model should be general, but physical properties and conductivity are
-    ! hardcoded for ngas=4
-    ngas=4
-    allocate(gasname(ngas))
-    allocate(solModel(ngas),diffModel(ngas))
-    allocate(Sg(ngas),Dg(ngas),Pg(ngas),Deff(ngas),Seff(ngas))
-    allocate(sheetSg(ngas),sheetDg(ngas))
-    allocate(pBg(ngas),xg(ngas),kfoamXg(ngas),kgasXg(ngas))
-    allocate(sgModena(ngas),sgInputs(ngas),sgOutputs(ngas))
-    allocate(sgTemppos(ngas),sgxl1pos(ngas),sgxl2pos(ngas))
-    allocate(dgModena(ngas),dgInputs(ngas),dgOutputs(ngas),dgTemppos(ngas))
-    allocate(kgModena(ngas),kgInputs(ngas),kgOutputs(ngas),kgTemppos(ngas))
-    ! gas names must correspond to physical properties in constants module
-    gasname(1)="O2"
-    gasname(2)="N2"
-    gasname(3)="CO2"
-    gasname(4)="CyP"
 ! -----------------------------------
 ! load inputs
 ! -----------------------------------

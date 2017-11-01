@@ -276,7 +276,9 @@ subroutine loadParameters
         read(fi,*)
         read(fi,*) matr(1:4)
         xgas = 0
-        xgas(1:2) = matr(3:4)
+        ! this works only for cyclopentane and CO2
+        xgas(1) = matr(4)
+        xgas(2) = matr(3)
         close(fi)
     elseif (strval=="Qmom0D") then
         after_foaming=TRIM(ADJUSTL(qmom0D_res))//TRIM(ADJUSTL(after_foaming0))
@@ -284,7 +286,9 @@ subroutine loadParameters
         read(fi,*)
         read(fi,*) matr(1:4)
         xgas = 0
-        xgas(1:2) = matr(3:4)
+        ! this works only for cyclopentane and CO2
+        xgas(1) = matr(4)
+        xgas(2) = matr(3)
         close(fi)
     elseif (strval=="Qmom3D") then
         after_foaming=TRIM(ADJUSTL(qmom3D_res))//TRIM(ADJUSTL(after_foaming0))
@@ -292,7 +296,9 @@ subroutine loadParameters
         read(fi,*)
         read(fi,*) matr(1:4)
         xgas = 0
-        xgas(1:2) = matr(3:4)
+        ! this works only for cyclopentane and CO2
+        xgas(1) = matr(4)
+        xgas(2) = matr(3)
         close(fi)
     elseif (strval=="DirectInput") then
         do i=1,size(xgas)

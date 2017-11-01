@@ -155,7 +155,6 @@ end subroutine get_names
 
 !********************************BEGINNING*************************************
 function modena_index_set_get_name(indexSet, ind) result(ret)
-    use  iso_c_binding
     type(c_ptr) :: indexSet
     integer(c_size_t) :: ind
     character*255 :: ret

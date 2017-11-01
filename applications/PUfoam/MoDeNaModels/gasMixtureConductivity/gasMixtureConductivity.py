@@ -217,11 +217,6 @@ f_gasMixtureConductivity = CFunction(
 m_gasMixtureConductivity = ForwardMappingModel(
     _id='gasMixtureConductivity',
     surrogateFunction=f_gasMixtureConductivity,
-    substituteModels=[gasConductivity.m_CO2_thermal_conductivity,\
-                      gasConductivity.m_CyP_thermal_conductivity,\
-                      gasConductivity.m_Opt_thermal_conductivity,\
-                      gasConductivity.m_Sol_thermal_conductivity,\
-                      gasConductivity.m_O2_thermal_conductivity,\
-                      gasConductivity.m_N2_thermal_conductivity],
+    substituteModels=gasConductivity.substituteModels,
     parameters=[1, 1, 1],
 )
