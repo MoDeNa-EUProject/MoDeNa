@@ -46,12 +46,12 @@ from modena import SurrogateModel, MODENA_PARSED_URI
 from fireworks import LaunchPad, Workflow
 from fireworks.core.rocket_launcher import rapidfire
 
-# import diffusivity # automatic initialization fails
+import diffusivity # automatic initialization fails
 # import gasMixtureConductivity # imported by foamConductivity
 # import gasConductivity # imported by gasMixtureConductivity
-# import foamConductivity
-# import Solubility # automatic initialization fails
-# import StrutContent
+import foamConductivity
+import Solubility # automatic initialization fails
+import StrutContent
 
 # set up the LaunchPad and reset it
 launchpad = LaunchPad(**MODENA_PARSED_URI)

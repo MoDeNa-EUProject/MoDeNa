@@ -22,7 +22,7 @@ subroutine integrate
     use conductivity, only: equcond
     use ioutils, only: newunit
     use models, only: model
-    use inout, only: input,output,print_header
+    use inout, only: input,output,print_header,write_header
     integer :: i, j, k, l, fi
     integer :: itol, itask, istate, iopt
     integer :: MF, ML, MU, LRW, LIW, LENRAT, NNZ, LWM, NEQ
@@ -169,10 +169,7 @@ subroutine integrate
 ! ----------------------------------
 ! Integration loop
 ! ----------------------------------
-    open (newunit(fi),file='degas_scalar.csv')
-    write(fi, '(1x, A23, 6(",", A23))') &
-        'time', 'eq_conductivity', 'total_pressure', 'p_O2', &
-        'p_N2', 'p_CO2', 'p_CP'
+    call write_header(fi)
     call equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp_cond)
     call output(0, 0.0_dp, ystate, neq, keq, fi)
     do i=1,nroutputs

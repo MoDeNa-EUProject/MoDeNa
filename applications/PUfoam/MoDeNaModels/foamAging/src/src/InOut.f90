@@ -8,7 +8,7 @@
 module inout
 	implicit none
 	private
-	public input,output,print_header
+	public input,output,print_header,write_header
 contains
 !********************************BEGINNING*************************************
 !> Reads input file.
@@ -28,10 +28,9 @@ subroutine input()
     character(len=99) :: qmom0D_res='../../foamExpansion/results/CFD0D/'
     character(len=99) :: qmom3D_res='../../foamExpansion/results/CFD3D/'
 	real(dp) :: matr(7)
-	integer :: fi
+	integer :: fi, i
 	call get_names(gasname)
 	ngas=size(gasname)
-    allocate(gasname(ngas))
     allocate(solModel(ngas),diffModel(ngas))
     allocate(Sg(ngas),Dg(ngas),Pg(ngas),Deff(ngas),Seff(ngas))
     allocate(sheetSg(ngas),sheetDg(ngas))
@@ -40,6 +39,7 @@ subroutine input()
     allocate(sgTemppos(ngas),sgxl1pos(ngas),sgxl2pos(ngas))
     allocate(dgModena(ngas),dgInputs(ngas),dgOutputs(ngas),dgTemppos(ngas))
     allocate(kgModena(ngas),kgInputs(ngas),kgOutputs(ngas),kgTemppos(ngas))
+	allocate(Mg(ngas))
 	! Read input parameters
 	json_data => fson_parse("../inputs/foamAging.json")
 	call fson_get(json_data, "modelType", modelType)
@@ -78,56 +78,53 @@ subroutine input()
 	call fson_get(json_data, "foamCondition.agingTemperature", temp)
 	call fson_get(json_data, "foamCondition.conductivityTemperature", temp_cond)
 	call fson_get(json_data, "foamCondition.initialPressure", pressure)
-	call fson_get(json_data, "foamCondition.boundaryPressure.O2", pBg(1))
-	call fson_get(json_data, "foamCondition.boundaryPressure.N2", pBg(2))
-	call fson_get(json_data, "foamCondition.boundaryPressure.CO2", pBg(3))
-	call fson_get(&
-		json_data, "foamCondition.boundaryPressure.Cyclopentane", pBg(4))
+	do i = 1, ngas
+		call fson_get(json_data, "foamCondition.boundaryPressure."//&
+			trim(adjustl(gasname(i))), pBg(i))
+	enddo
 	call fson_get(json_data, "sourceOfProperty.gasComposition", strval)
     if (strval=="BubbleGrowth") then
         after_foaming=TRIM(ADJUSTL(bg_res))//TRIM(ADJUSTL(after_foaming0))
         open(unit=newunit(fi),file=after_foaming)
         read(fi,*)
         read(fi,*) matr(1:4)
-        xg(1)=0 ! no oxygen
-		xg(2)=0 ! no nitrogen
-        xg(3)=matr(4)
-		xg(4)=matr(3)
-        xg=xg/sum(xg)
+        xg = 0
+        ! this works only for cyclopentane and CO2
+        xg(1) = matr(4)
+        xg(2) = matr(3)
         close(fi)
     elseif (strval=="Qmom0D") then
         after_foaming=TRIM(ADJUSTL(qmom0D_res))//TRIM(ADJUSTL(after_foaming0))
         open(unit=newunit(fi),file=after_foaming)
         read(fi,*)
         read(fi,*) matr(1:4)
-        xg(1)=0 ! no oxygen
-		xg(2)=0 ! no nitrogen
-        xg(3)=matr(4)
-		xg(4)=matr(3)
-        xg=xg/sum(xg)
+        xg = 0
+        ! this works only for cyclopentane and CO2
+        xg(1) = matr(4)
+        xg(2) = matr(3)
         close(fi)
     elseif (strval=="Qmom3D") then
         after_foaming=TRIM(ADJUSTL(qmom3D_res))//TRIM(ADJUSTL(after_foaming0))
         open(unit=newunit(fi),file=after_foaming)
         read(fi,*)
         read(fi,*) matr(1:4)
-        xg(1)=0 ! no oxygen
-		xg(2)=0 ! no nitrogen
-        xg(3)=matr(4)
-		xg(4)=matr(3)
-        xg=xg/sum(xg)
+        xg = 0
+        ! this works only for cyclopentane and CO2
+        xg(1) = matr(4)
+        xg(2) = matr(3)
         close(fi)
     elseif (strval=="DirectInput") then
-		call fson_get(json_data, "foamCondition.initialComposition.O2", xg(1))
-		call fson_get(json_data, "foamCondition.initialComposition.N2", xg(2))
-		call fson_get(json_data, "foamCondition.initialComposition.CO2", xg(3))
-		call fson_get(&
-			json_data, "foamCondition.initialComposition.Cyclopentane", xg(4))
-		xg=xg/sum(xg)
+		do i=1,ngas
+            call fson_get(&
+                json_data,&
+                "foamCondition.initialComposition."//TRIM(ADJUSTL(gasname(i))),&
+                xg(i))
+        enddo
     else
         write(*,*) 'unknown source for gas composition'
         stop
     endif
+	xg = xg / sum(xg)
 	call fson_get(json_data, "sourceOfProperty.foamDensity", strval)
     if (strval=="BubbleGrowth") then
         after_foaming=TRIM(ADJUSTL(bg_res))//TRIM(ADJUSTL(after_foaming0))
@@ -201,134 +198,50 @@ subroutine input()
         stop
     endif
 	call fson_get(json_data, "physicalProperties.polymerDensity", rhop)
-	call fson_get(json_data, &
-		"physicalProperties.foam.solubilityModel.O2", strval)
-	if (strval=="constant") then
-		solModel(1)=0
-	elseif ( strval=="modena" ) then
-		solModel(1)=1
-	else
-		print*, "Solubility model must be constant or modena"
-	endif
-	call fson_get(json_data, &
-		"physicalProperties.foam.solubilityModel.N2", strval)
-	if (strval=="constant") then
-		solModel(2)=0
-	elseif ( strval=="modena" ) then
-		solModel(2)=1
-	else
-		print*, "Solubility model must be constant or modena"
-	endif
-	call fson_get(json_data, &
-		"physicalProperties.foam.solubilityModel.CO2", strval)
-	if (strval=="constant") then
-		solModel(3)=0
-	elseif ( strval=="modena" ) then
-		solModel(3)=1
-	else
-		print*, "Solubility model must be constant or modena"
-	endif
-	call fson_get(json_data, &
-		"physicalProperties.foam.solubilityModel.Cyclopentane", strval)
-	if (strval=="constant") then
-		solModel(4)=0
-	elseif ( strval=="modena" ) then
-		solModel(4)=1
-	else
-		print*, "Solubility model must be constant or modena"
-	endif
-	if (solModel(1)==0) then
-		call fson_get(json_data, "physicalProperties.foam.solubility.O2", Sg(1))
-	endif
-	if (solModel(2)==0) then
-		call fson_get(json_data, "physicalProperties.foam.solubility.N2", Sg(2))
-	endif
-	if (solModel(3)==0) then
-		call fson_get(&
-			json_data, "physicalProperties.foam.solubility.CO2", Sg(3))
-	endif
-	if (solModel(4)==0) then
-		call fson_get(&
-			json_data, "physicalProperties.foam.solubility.Cyclopentane", Sg(4))
-	endif
-	call fson_get(json_data, &
-		"physicalProperties.foam.diffusivityModel.O2", strval)
-	if (strval=="constant") then
-	    diffModel(1)=0
+	do i = 1, ngas
 		call fson_get(json_data, &
-			"physicalProperties.foam.diffusivity.O2", Dg(1))
-	elseif ( strval=="modena" ) then
-		diffModel(1)=1
-	elseif (strval == "foam") then
-		diffModel(1) = 2
+			"physicalProperties.molarMass."//&
+			trim(adjustl(gasname(i))), Mg(i))
 		call fson_get(json_data, &
-			"physicalProperties.foam.diffusivity.O2", Deff(1))
-	else
-		print*, "Diffusivity model must be constant, foam or modena"
-	endif
-	call fson_get(json_data, &
-		"physicalProperties.foam.diffusivityModel.N2", strval)
-	if (strval=="constant") then
-	    diffModel(2)=0
+			"physicalProperties.foam.solubilityModel."//&
+			trim(adjustl(gasname(i))), strval)
+		if (strval=="constant") then
+			solModel(i)=0
+			call fson_get(json_data, &
+				"physicalProperties.foam.solubility."//&
+				trim(adjustl(gasname(i))), Sg(i))
+		elseif ( strval=="modena" ) then
+			solModel(i)=1
+		else
+			print*, "Solubility model must be constant or modena"
+		endif
 		call fson_get(json_data, &
-			"physicalProperties.foam.diffusivity.N2", Dg(2))
-	elseif ( strval=="modena" ) then
-		diffModel(2)=1
-	elseif (strval == "foam") then
-		diffModel(2) = 2
-		call fson_get(json_data, &
-			"physicalProperties.foam.diffusivity.N2", Deff(2))
-	else
-		print*, "Diffusivity model must be constant, foam or modena"
-	endif
-	call fson_get(json_data, &
-		"physicalProperties.foam.diffusivityModel.CO2",strval)
-	if (strval=="constant") then
-		diffModel(3)=0
-		call fson_get(json_data, &
-			"physicalProperties.foam.diffusivity.CO2", Dg(3))
-	elseif ( strval=="modena" ) then
-		diffModel(3)=1
-	elseif (strval == "foam") then
-		diffModel(3) = 2
-		call fson_get(json_data, &
-			"physicalProperties.foam.diffusivity.CO2", Deff(3))
-	else
-		print*, "Diffusivity model must be constant, foam or modena"
-	endif
-	call fson_get(json_data, &
-		"physicalProperties.foam.diffusivityModel.Cyclopentane", strval)
-	if (strval=="constant") then
-		diffModel(4)=0
-		call fson_get(json_data, &
-			"physicalProperties.foam.diffusivity.Cyclopentane", Dg(4))
-	elseif ( strval=="modena" ) then
-		diffModel(4)=1
-	elseif (strval == "foam") then
-		diffModel(4) = 2
-		call fson_get(json_data, &
-			"physicalProperties.foam.diffusivity.Cyclopentane", Deff(4))
-	else
-		print*, "Diffusivity model must be constant, foam or modena"
-	endif
-	if (sheet) then
-		call fson_get(json_data, &
-			"physicalProperties.sheet.solubility.O2", sheetSg(1))
-		call fson_get(json_data, &
-			"physicalProperties.sheet.solubility.N2", sheetSg(2))
-		call fson_get(json_data, &
-			"physicalProperties.sheet.solubility.CO2", sheetSg(3))
-		call fson_get(json_data, &
-			"physicalProperties.sheet.solubility.Cyclopentane", sheetSg(4))
-		call fson_get(json_data, &
-			"physicalProperties.sheet.diffusivity.O2", sheetDg(1))
-		call fson_get(json_data, &
-			"physicalProperties.sheet.diffusivity.N2", sheetDg(2))
-		call fson_get(json_data, &
-			"physicalProperties.sheet.diffusivity.CO2", sheetDg(3))
-		call fson_get(json_data, &
-			"physicalProperties.sheet.diffusivity.Cyclopentane", sheetDg(4))
-	endif
+			"physicalProperties.foam.diffusivityModel."//&
+			trim(adjustl(gasname(i))), strval)
+		if (strval=="constant") then
+			diffModel(i)=0
+			call fson_get(json_data, &
+				"physicalProperties.foam.diffusivity."//&
+			trim(adjustl(gasname(i))), Dg(i))
+		elseif ( strval=="modena" ) then
+			diffModel(i)=1
+		elseif (strval == "foam") then
+			diffModel(i) = 2
+			call fson_get(json_data, &
+				"physicalProperties.foam.diffusivity."//&
+				trim(adjustl(gasname(i))), Deff(i))
+		else
+			print*, "Diffusivity model must be constant, foam or modena"
+		endif
+		if (sheet) then
+			call fson_get(json_data, &
+				"physicalProperties.sheet.solubility."//&
+				trim(adjustl(gasname(i))), sheetSg(i))
+			call fson_get(json_data, &
+				"physicalProperties.sheet.diffusivity."//&
+				trim(adjustl(gasname(i))), sheetDg(i))
+		endif
+	enddo
 	call fson_destroy(json_data)
 end subroutine input
 !***********************************END****************************************
@@ -352,7 +265,8 @@ subroutine output(iprof, time, ystate, neq, keq, fi)
 	integer :: i, j, fi2, fi3
 	integer :: spp
 	real(dp) :: pos
-	real(dp), dimension(:), allocatable :: pp
+	real(dp), dimension(:), allocatable :: pp,vals
+	character(len=255) :: fmt ! format for writing
 
 	character(len=1) :: name_1	! one character
 	character(len=2) :: name_2	! two characters
@@ -372,22 +286,29 @@ subroutine output(iprof, time, ystate, neq, keq, fi)
         write(name_f,'(I4)') iprof
     endif
 
+	allocate(vals(ngas))
 	if (modelType == "heterogeneous") then
 		open(newunit(fi2),file='conc_'//trim(name_f)//'.csv')
-		write (fi2,'(A, 5(",", A))') &
-			'time', 'position', 'O2', 'N2', 'CO2', 'CP'
+		write(fmt,*) ngas + 1
+		fmt = '(1x, A23, '//trim(adjustl(fmt))//'(",", A23))'
+		write (fi2,fmt) 'time', 'position', gasname
+		write(fmt,*) ngas + 1
+		fmt = '(1x, ES23.15, '//trim(adjustl(fmt))//'(",", ES23.15))'
 		do i = 1, neq/ngas
-			write (fi2,'(1x, ES23.15, 5(",", ES23.15))') time/(3600*24),pos,&
-				ystate(ngas*(i-1)+1)*sol(ngas*(i-1)+1),&
-				ystate(ngas*(i-1)+2)*sol(ngas*(i-1)+2),&
-				ystate(ngas*(i-1)+3)*sol(ngas*(i-1)+3),&
-				ystate(ngas*(i-1)+4)*sol(ngas*(i-1)+4)
+			do j = 1, ngas
+				vals(j) = ystate(ngas*(i-1)+j)*sol(ngas*(i-1)+j)
+			enddo
+			write (fi2,fmt) time/(3600*24),pos,vals
 		enddo
+    	close(fi2)
 	endif
 
 	open(newunit(fi3),file='pres_'//trim(name_f)//'.csv')
-	write (fi3,'(A, 5(",", A))') &
-		'time', 'position', 'O2', 'N2', 'CO2', 'CP'
+	write(fmt,*) ngas + 1
+	fmt = '(1x, A23, '//trim(adjustl(fmt))//'(",", A23))'
+	write (fi3,fmt) 'time', 'position', gasname
+	write(fmt,*) ngas + 1
+	fmt = '(1x, ES23.15, '//trim(adjustl(fmt))//'(",", ES23.15))'
 	allocate(pp(ngas))
 	pp=0
 	spp=0
@@ -407,28 +328,50 @@ subroutine output(iprof, time, ystate, neq, keq, fi)
 			enddo
 			spp=spp+1
 			if (modelType == "heterogeneous") then
-				write (fi3,'(1x, ES23.15, 5(",", ES23.15))') &
-					time/(3600*24),pos,&
-					ystate(ngas*(i-1)+1)*Rg*temp,&
-					ystate(ngas*(i-1)+2)*Rg*temp,&
-					ystate(ngas*(i-1)+3)*Rg*temp,&
-					ystate(ngas*(i-1)+4)*Rg*temp
+				do j = 1, ngas
+					vals(j) = ystate(ngas*(i-1)+j)*Rg*temp
+				enddo
+				write (fi3,fmt) time/(3600*24),pos,vals
 			elseif ( modelType == "homogeneous" ) then
-				write (fi3,'(1x, ES23.15, 5(",", ES23.15))') &
-					time/(3600*24),pos,&
-					ystate(ngas*(i-1)+1)/Seff(1),&
-					ystate(ngas*(i-1)+2)/Seff(2),&
-					ystate(ngas*(i-1)+3)/Seff(3),&
-					ystate(ngas*(i-1)+4)/Seff(4)
+				do j = 1, ngas
+					vals(j) = ystate(ngas*(i-1)+j)/Seff(j)
+				enddo
+				write (fi3,fmt) &
+					time/(3600*24),pos,vals
 			endif
 		endif
 	enddo
-	pp=pp/spp
-    write(fi,'(1x, ES23.15, 6(",", ES23.15))') &
-		time/(3600*24),keq*1.0e3_dp,sum(pp),pp
-    close(fi2)
 	close(fi3)
+	pp=pp/spp
+	write(fmt,*) ngas + 2
+	fmt = '(1x, ES23.15, '//trim(adjustl(fmt))//'(",", ES23.15))'
+    write(fi,fmt) time/(3600*24),keq*1.0e3_dp,sum(pp),pp
+	deallocate(vals)
 end subroutine output
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> Writes header of degas_scalar.csv.
+!!
+!! Outputs evolution of conductivity and average gas composition.
+subroutine write_header(fi)
+	use globals
+	use ioutils, only: newunit
+	integer, intent(out) :: fi
+	character(len=255), dimension(:), allocatable :: pres_names(:)
+	integer :: i
+	character(len=255) :: fmt
+	allocate(pres_names(ngas))
+	do i = 1, ngas
+		pres_names(i) = 'p_'//trim(adjustl(gasname(i)))
+	enddo
+	write(fmt,*) ngas + 2
+	fmt = '(1x, A23, '//trim(adjustl(fmt))//'(",", A23))'
+	open (newunit(fi),file='degas_scalar.csv')
+    write(fi, fmt) 'time', 'eq_conductivity', 'total_pressure', pres_names
+	deallocate(pres_names)
+end subroutine write_header
 !***********************************END****************************************
 
 

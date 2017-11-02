@@ -53,4 +53,5 @@ module globals
 	real(dp), dimension(:), allocatable :: sheetDg !< gas diffusivity in sheet
 	real(dp), dimension(:), allocatable :: xg !< molar fractions of gases
 	real(dp), dimension(:), allocatable :: pBg !< boundary conditions
+	real(dp), dimension(:), allocatable :: Mg !< molar mass
 end module globals
