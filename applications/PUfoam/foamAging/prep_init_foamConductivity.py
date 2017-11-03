@@ -1,5 +1,5 @@
-"""Creates input file, so that foamConductivity can be initialized."""
 #!/usr/bin/env python
+"""Creates input file, so that foamConductivity can be initialized."""
 from __future__ import print_function
 import sys
 import os

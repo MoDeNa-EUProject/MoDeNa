@@ -23,18 +23,22 @@
         "inProtectiveSheet": false,
         "agingTemperature": 343.0,
         "conductivityTemperature": 283.0,
-        "initialPressure": 1.0e5,
+        "initialPressure": 0.6e5,
         "initialComposition": {
             "O2": 0.0,
             "N2": 0.0,
-            "CO2": 1.0,
-            "Cyclopentane": 0.0
+            "CO2": 0.5,
+            "CyP": 0.5,
+            "Opt": 0.0,
+            "Sol": 0.0
         },
         "boundaryPressure": {
             "O2": 21278.25,
             "N2": 80046.75,
             "CO2": 0.0,
-            "Cyclopentane": 0.0
+            "CyP": 0.0,
+            "Opt": 0.0,
+            "Sol": 0.0
         }
     },
     "morphology": {
@@ -45,24 +49,38 @@
     },
     "physicalProperties": {
         "polymerDensity": 1.1e3,
+        "molarMass": {
+            "O2": 32e-3,
+            "N2": 28e-3,
+            "CO2": 44e-3,
+            "CyP": 70e-3,
+            "Opt": 164e-3,
+            "Sol": 130e-3
+        },
         "foam": {
             "solubilityModel": {
                 "O2": "modena",
                 "N2": "modena",
                 "CO2": "modena",
-                "Cyclopentane": "modena"
+                "CyP": "modena",
+                "Opt": "modena",
+                "Sol": "modena"
             },
             "diffusivityModel": {
                 "O2": "foam",
                 "N2": "foam",
                 "CO2": "foam",
-                "Cyclopentane": "foam"
+                "CyP": "foam",
+                "Opt": "foam",
+                "Sol": "foam"
             },
             "diffusivity": {
                 "O2": 1.7996336072e-10,
                 "N2": 5.09229881418e-11,
                 "CO2": 5.85539723664e-10,
-                "Cyclopentane": 1.34453792484e-12
+                "CyP": 1.34453792484e-12,
+                "Opt": 1.34453792484e-13,
+                "Sol": 1.34453792484e-13
             }
         }
     }
