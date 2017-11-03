@@ -6,5 +6,5 @@
 *.txt
 *.dat
 
-!examples/*.json
-!spectra/*.csv
+!examples/**/*.json
+!spectra/**/*.csv
