@@ -7,7 +7,6 @@
 !! Also defines all Modena variables and models.
 module physicalProperties
     use constants
-    use globals, only: solModel,diffModel,ngas,gasname
     use fmodena
     implicit none
     !modena variables
@@ -49,6 +48,7 @@ contains
 !!
 !! Names of models and inputs are hardcoded here.
 subroutine createModels(ngas)
+    use globals, only: solModel,diffModel,gasname
     integer :: ngas
     integer :: i
     kfoamModena = modena_model_new (c_char_"foamConductivity"//c_null_char);
@@ -136,6 +136,7 @@ end subroutine createModels
 !!
 !! Cleans Modena models, inputs and outputs from memory.
 subroutine destroyModels(ngas)
+    use globals, only: solModel,diffModel
     integer, intent(in) :: ngas
     integer :: i
     call modena_inputs_destroy (kfoamInputs);
