@@ -103,14 +103,19 @@ def make_csd(npart, mean, var, show_plot=False):
     """Create cell size distribution and save it to file."""
     muu = log(mean / sqrt(1 + var / mean**2))
     sigma = sqrt(log(1 + var / mean**2))
-    print(muu, sigma)
     scale = exp(muu)
-    rads = lognorm.rvs(sigma, scale=scale, size=npart)
+    if sigma == 0:
+        rads = [scale + 0 * x for x in range(npart)]
+    else:
+        rads = lognorm.rvs(sigma, scale=scale, size=npart)
     with open('diameters.txt', 'w') as fout:
         for rad in rads:
             fout.write('{0}\n'.format(rad))
-    xpos = linspace(lognorm.ppf(0.01, sigma, scale=scale),
-                    lognorm.ppf(0.99, sigma, scale=scale), 100)
+    if sigma == 0:
+        xpos = linspace(scale / 2, scale * 2, 100)
+    else:
+        xpos = linspace(lognorm.ppf(0.01, sigma, scale=scale),
+                        lognorm.ppf(0.99, sigma, scale=scale), 100)
     plt.plot(xpos, lognorm.pdf(xpos, sigma, scale=scale))
     plt.hist(rads, normed=True)
     plt.savefig('packing_histogram.png')

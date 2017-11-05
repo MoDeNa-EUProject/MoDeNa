@@ -26,7 +26,6 @@ def tessellate(filename, number_of_cells, visualize_tessellation):
     centers_rads[:, 3] = centers_rads[:, 3] / 2.0
     centers = centers_rads[:, :3]  # All centers of spheres
     rads = centers_rads[:, 3]  # All radii of spheres
-    rads = rads / 2
     max_centers = max(centers.tolist())
     min_centers = min(centers.tolist())
     edge_cube_size = [math.ceil(max_centers[0] - min_centers[0]),
