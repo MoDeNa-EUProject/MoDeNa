@@ -1,31 +1,31 @@
 {
-    "filename": "Foam",
-    "packing": false,
+    "structured_grid_options": {
+        "render_box": false, 
+        "strut_content": 0.6, 
+        "porosity": 0.92, 
+        "strut_size_guess": 6, 
+        "binarize_box": true, 
+        "move_to_periodic_box": true
+    }, 
+    "tessellation": true, 
+    "unstructured_grid": false, 
+    "filename": "Foam", 
+    "unstructured_grid_options": {
+        "create_geometry": true, 
+        "convert_mesh": true, 
+        "wall_thickness": 0.02, 
+        "mesh_domain": true
+    }, 
+    "packing": true, 
+    "structured_grid": false, 
     "packing_options": {
-        "alternative_algorithm": false,
-        "average_radius": 0.15,
-        "deviance": 0.01,      
-        "number_of_cells": 8,
-        "domain_size": 1
-    },
-    "tessellation": false,
+        "shape": 0.195909940771, 
+        "domain_size": 1, 
+        "number_of_cells": 125, 
+        "scale": 0.216136876376, 
+        "algorithm": "-fba"
+    }, 
     "tessellation_options": {
         "visualize_tessellation": false
-    },
-    "structured_grid": false,
-    "structured_grid_options": {
-        "porosity": 0.92,
-        "strut_content": 0.6,
-        "move_to_periodic_box": true,
-        "render_box": false,
-        "binarize_box": true,
-        "strut_size_guess": 6
-    },
-    "unstructured_grid": false,
-    "unstructured_grid_options": {
-        "create_geometry": true,
-        "wall_thickness": 0.02,
-        "mesh_domain": true,
-        "convert_mesh": true
     }
 }

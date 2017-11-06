@@ -22,9 +22,11 @@ import matplotlib.pyplot as plt
 import spack
 
 
-def simple_packing(average_radius, deviance, number_of_cells):
+def simple_packing(shape, scale, number_of_cells):
     "Simple and fast algorithm for packing"
-    Rad = abs((np.random.normal(average_radius, deviance, number_of_cells)))
+    Rad = lognorm.rvs(shape, scale=scale, size=number_of_cells)
+    print(Rad)
+    Rad /= 2
     Rads1 = list(range(number_of_cells))
     t = 0
     for i in range(number_of_cells):
@@ -99,24 +101,21 @@ Contraction rate: 1.328910e-005
         fout.write(txt)
 
 
-def make_csd(npart, mean, var, show_plot=False):
+def make_csd(shape, scale, npart, show_plot=False):
     """Create cell size distribution and save it to file."""
-    muu = log(mean / sqrt(1 + var / mean**2))
-    sigma = sqrt(log(1 + var / mean**2))
-    scale = exp(muu)
-    if sigma == 0:
+    if shape == 0:
         rads = [scale + 0 * x for x in range(npart)]
     else:
-        rads = lognorm.rvs(sigma, scale=scale, size=npart)
+        rads = lognorm.rvs(shape, scale=scale, size=npart)
     with open('diameters.txt', 'w') as fout:
         for rad in rads:
             fout.write('{0}\n'.format(rad))
-    if sigma == 0:
+    if shape == 0:
         xpos = linspace(scale / 2, scale * 2, 100)
     else:
-        xpos = linspace(lognorm.ppf(0.01, sigma, scale=scale),
-                        lognorm.ppf(0.99, sigma, scale=scale), 100)
-    plt.plot(xpos, lognorm.pdf(xpos, sigma, scale=scale))
+        xpos = linspace(lognorm.ppf(0.01, shape, scale=scale),
+                        lognorm.ppf(0.99, shape, scale=scale), 100)
+    plt.plot(xpos, lognorm.pdf(xpos, shape, scale=scale))
     plt.hist(rads, normed=True)
     plt.savefig('packing_histogram.png')
     plt.savefig('packing_histogram.pdf')
@@ -148,7 +147,8 @@ def render_packing(data, domain=1.0, pixels=1000):
     pack = spack.Packing(data[:, 0:3], data[:, 3], L=domain)
     print(pack.contacts())
     scene = pack.scene(rot=pi / 4, camera_height=0.5,
-                       camera_dist=2.5e1, angle=4, cmap='autumn', floater_color=None)
+                       camera_dist=2.5e1, angle=4, cmap='autumn',
+                       floater_color=None)
     scene.render('packing.png', width=pixels,
                  height=pixels, antialiasing=0.0001)
 
@@ -164,17 +164,17 @@ def generate_structure(flag):
         raise Exception('Packing algorithm failed.')
 
 
-def pack_spheres(average_radius, variance, number_of_cells, algorithm):
+def pack_spheres(shape, scale, number_of_cells, algorithm):
     """Packs spheres into a periodic domain. Creates Project01.rco with sphere
-    centers and radii. Simple model is implemented directly, other algorithms use
-    Vasili Baranov's code: https://github.com/VasiliBaranov/packing-generation."""
+    centers and radii. Simple model is implemented directly, other algorithms
+    use Vasili Baranov's code:
+    https://github.com/VasiliBaranov/packing-generation."""
     if algorithm == 'simple':
-        data = simple_packing(average_radius, variance, number_of_cells)
+        data = simple_packing(shape, scale, number_of_cells)
     else:
         create_input(number_of_cells)
-        make_csd(number_of_cells, 2 * average_radius, variance)
+        make_csd(shape, scale, number_of_cells)
         generate_structure(algorithm)
         data = read_results()
     np.savetxt('Project01.rco', data)
     render_packing(data)
-

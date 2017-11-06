@@ -312,9 +312,6 @@ def main():
     Executed when running the script from command line.
     """
     time_start = datetime.datetime.now()
-    dx = dy = dz = INPUTS["packing_options"]["domain_size"]
-    porosity = INPUTS["structured_grid_options"]["porosity"]
-    strut_content = INPUTS["structured_grid_options"]["strut_content"]
     if INPUTS["packing"]:
         print(
             TERM.yellow +
@@ -322,8 +319,8 @@ def main():
             TERM.normal
         )
         packing.pack_spheres(
-            INPUTS["packing_options"]["average_radius"],
-            INPUTS["packing_options"]["variance"],
+            INPUTS["packing_options"]["shape"],
+            INPUTS["packing_options"]["scale"],
             INPUTS["packing_options"]["number_of_cells"],
             INPUTS["packing_options"]["algorithm"])
     if INPUTS["tessellation"]:
