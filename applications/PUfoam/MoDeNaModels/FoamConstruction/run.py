@@ -150,9 +150,9 @@ def periodic_box(filename, render_box):
         "Move to periodic box" +
         TERM.normal
     )
-    xmin = dx
-    ymin = dy
-    zmin = dz
+    xmin = 0
+    ymin = 0
+    zmin = 0
     periodicBox.main(
         filename + ".stl", filename + "Box.stl", xmin, ymin, zmin, dx, dy, dz,
         render_box
