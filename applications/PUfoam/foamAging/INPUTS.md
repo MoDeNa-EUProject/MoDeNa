@@ -30,15 +30,9 @@ The following key-pairs should be defined:
     - `conductivityTemperature`: temperature of conductivity measurements (K)
     - `initialPressure`: initial pressure in foam (Pa)
     - `initialComposition`: used when "DirectInput" was selected
-        - `O2`: molar fraction of oxygen in initial foam
-        - `N2`: molar fraction of nitrogen in initial foam
-        - `CO2`: molar fraction of CO2 in initial foam
-        - `Cyclopentane`: molar fraction of cyclopentane in initial foam
+        - `{gasname}`: molar fraction of gas in initial foam, gases are defined in gasConductivity index set
     - `boundaryPressure`:
-        - `O2`: pressure of oxygen at the outer boundary (Pa)
-        - `N2`: pressure of nitrogen at the outer boundary (Pa)
-        - `CO2`: pressure of CO2 at the outer boundary (Pa)
-        - `Cyclopentane`: pressure of cyclopentane at the outer boundary (Pa)
+        - `{gasname}`: pressure of gas at the outer boundary (Pa)
 - `morphology`:
     - `foamDensity`: foam density, if "DirectInput" was selected (kg/m3)
     - `cellSize`: cell size, if "DirectInput" was selected (m)
@@ -46,38 +40,22 @@ The following key-pairs should be defined:
     - `wallThickness`: wall thickness, if "DirectInput" was selected (m)
 - `physicalProperties`:
     - `polymerDensity`: polymer density (kg/m3)
+    - `molarMass`:
+        - `{gasname}`: molar mass of gas (kg/mol)
     - `foam`:
         - `solubilityModel`: When "constant" is used, property must be given in the input file. When "modena" is used, surrogate Solubility model is used for given temperature of aging.
-            - `O2`: solubility model ["constant","modena"]
-            - `N2`: solubility model ["constant","modena"]
-            - `CO2`: solubility model ["constant","modena"]
-            - `Cyclopentane`: solubility model ["constant","modena"]
+            - `{gasname}`: solubility model ["constant","modena"]
         - `solubility`:
-            - `O2`: solubility of oxygen, if "constant" model is used (g/g/bar)
-            - `N2`: solubility of nitrogen, if "constant" model is used (g/g/bar)
-            - `CO2`: solubility of CO2, if "constant" model is used (g/g/bar)
-            - `Cyclopentane`: solubility of cyclopentane, if "constant" model is used (g/g/bar)
+            - `{gasname}`: solubility of gas, if "constant" model is used (g/g/bar)
         - `diffusivityModel`: When "constant" is used, diffusivity in polymer must be given in the input file. When "modena" is used, surrogate Diffusivity model is used for given temperature of aging. When "foam" is used, diffusivity in foam (effective diffusivity) must be given in the input file. 
-            - `O2`: diffusivity model ["constant","modena","foam"]
-            - `N2`: diffusivity model ["constant","modena","foam"]
-            - `CO2`: diffusivity model ["constant","modena","foam"]
-            - `Cyclopentane`: diffusivity model ["constant","modena","foam"]
+            - `{gasname}`: diffusivity model ["constant","modena","foam"]
         - `diffusivity`:
-            - `O2`: diffusivity of oxygen, if "constant" or "foam" model is used (m2/s)
-            - `N2`: diffusivity of nitrogen, if "constant" or "foam" model is used (m2/s)
-            - `CO2`: diffusivity of CO2, if "constant" or "foam" model is used (m2/s)
-            - `Cyclopentane`: diffusivity of cyclopentane, if "constant" or "foam" model is used (m2/s)
+            - `{gasname}`: diffusivity of gas, if "constant" or "foam" model is used (m2/s)
     - `sheet`:
         - `solubility`:
-            - `O2`: solubility of oxygen, if "constant" model is used (g/g/bar)
-            - `N2`: solubility of nitrogen, if "constant" model is used (g/g/bar)
-            - `CO2`: solubility of CO2, if "constant" model is used (g/g/bar)
-            - `Cyclopentane`: solubility of cyclopentane, if "constant" model is used (g/g/bar)
+            - `{gasname}`: solubility of gas in sheet, if "constant" model is used (g/g/bar)
         - `diffusivity`:
-            - `O2`: diffusivity of oxygen, if "constant" model is used (m2/s)
-            - `N2`: diffusivity of nitrogen, if "constant" model is used (m2/s)
-            - `CO2`: diffusivity of CO2, if "constant" model is used (m2/s)
-            - `Cyclopentane`: diffusivity of cyclopentane, if "constant" model is used (m2/s)
+            - `{gasname}`: diffusivity of gas in sheet, if "constant" model is used (m2/s)
 
 ### Preparing foamConductivity.json
 - `upperBoundary`:
@@ -95,10 +73,7 @@ The following key-pairs should be defined:
     - `strutContent`: ["DirectInput","StrutContent"]
     - `wallThickness`: ["DirectInput"]
 - `gasComposition`:
-    - `Cyclopentane`: molar fraction of cyclopentane
-    - `CO2`: molar fraction of CO2
-    - `O2`: molar fraction of oxygen
-    - `N2`: molar fraction of nitrogen
+    - `{gasname}`: molar fraction of gas, gases are defined in gasConductivity index set
 - `porosity`: foam porosity, if "DirectInput" is used
 - `cellSize`: cell size, if "DirectInput" is used (m)
 - `morphologyInput`: when we know foam porosity and cell size, foam morphology is fully specified, if we additionally know either wall thickness, strut content, or strut size. Specify, which property you know, the others will be used as initial guesses to calculate them precisely. "strutSize" is recommended. "strutSize2" uses slightly different model to calculate strut size and wall thickness. ["wallThickness","strutContent","strutSize","strutContent2"]
@@ -123,7 +98,17 @@ The following key-pairs should be defined:
 - `dcell`: list of cell sizes (m)
 - `eps`: list of porosities
 - `fstrut`: list of strut contents
-- `x[CO2]`: list of CO2 molar fractions
-- `x[CyP]`: list of cyclopentane molar fractions
-- `x[N2]`: list of nitrogen molar fractions
-- `x[O2]`: list of carbon dioxide molar fractions
+- `x[{gasname}]`: list of gas molar fractions, gases are defined in gasConductivity index set
+
+### Preparing cell_gas.json
+- `temperature`: 
+    - `min`: minimum of temperature interval (K),
+    - `max`: maximum of temperature interval (K),
+    - `points`: number of points in temperature interval
+- `initial_weight_fraction`: 
+    `{gasname}`: initial weight fraction in foam recipe, blowing agents defined in gasConductivity index set and H2O are supported
+- `molar_mass`: 
+    `{gasname}`: molar mass for H2O and all used gases (kg/mol)
+- `polymer_density`: polymer density (kg/m3),
+- `foam_density`: foam density (kg/m3),
+- `cell_size`: cell size (m)

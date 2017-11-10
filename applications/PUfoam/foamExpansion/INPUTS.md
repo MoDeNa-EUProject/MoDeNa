@@ -59,7 +59,7 @@ The following key-pairs should be defined:
     - `ModenaFoamViscosityModel`: use TUE model to calculate foam viscosity (t/f)
 - `bubbleGrowth`:
     - `geometry`: [`3D`,`2D`]
-    - `integrator`: [`dlsode`, `dlsodes`, 'cvode'] dlsodes is recommended
+    - `integrator`: [`dlsode`, `dlsodes`, `cvode`] dlsodes is recommended
     - `method`: [`nonstiff`, `stiff`] stiff is recommended
     - `inertialTerm`: [t/f] use inertial term in bubble growth model
     - `solubilityCorrection`: [t/f] use solubility correction on surface tension

@@ -1,7 +1,7 @@
 @ingroup app_aging
 
 # Aging of polyurethane foam thermal properties
-PU foam is blown by CO<sub>2</sub> and cyclo-pentane. In time, CO<sub>2</sub> is diffusing out of the foam, whereas air is diffusing into the foam. CO<sub>2</sub> has lower thermal conductivity than air. Thus, thermal conductivity of the foam is increasing in time.
+PU foam is usually blown by CO<sub>2</sub> and physical blowing agents. In time, blowing agents are diffusing out of the foam, whereas air is diffusing into the foam. Blowing agents have lower thermal conductivity than air. Thus, thermal conductivity of the foam is increasing in time.
 
 Mathematical models in this software simulate the diffusion of gases through the foam and estimate thermal properties of the foam based on its morphology and composition of gases in the cells.
 
@@ -48,3 +48,15 @@ Input morphology and gas composition can be specified manually or taken from res
 
 ## Results
 The results can be found in the `results` folder. They can be visualized using python scripts and VEUSZ.
+
+## Cell gas utility
+This application also contains `cell_gas.py` utility for determination of initial partial pressures and gas fractions of blowing agents immediately after foaming.
+
+Depending on your system, you may need to install `docopt` module before first use.
+```
+sudo -H pip install docopt
+```
+
+It is controlled by `cell_gas.json` input file. You need to know foam recipe and final foam density. It assumes that no blowing agent escapes foam, and that it is either dissolved in polymer, condensed, or in gas phase.
+
+Results are stored in `results/cell_gas`, and can be viewed by `plot_cell_gas.vsz`.
