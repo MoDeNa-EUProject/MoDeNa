@@ -185,11 +185,15 @@ subroutine loadParameters
     type(fson_value), pointer :: json_data
     integer :: fi,ios,i,j
     logical :: file_exists
-    real(dp) :: xO2,xN2,xCO2,xCyP,matr(7)
+    real(dp) :: matr(7),ttt
+    real(dp), dimension(:), allocatable :: xgas
     character(len=80) :: strval !name of the file with morphology
     character(len=99) :: nspec
     character(len=99) :: kspec
     character(len=99) :: gasspec
+    character(len=255), dimension(:), allocatable :: gasname
+    call get_names(gasname)
+    allocate(xgas(size(gasname)))
     inputs=TRIM(ADJUSTL(fileplacein_par))//TRIM(ADJUSTL(inputs))
     inquire(file=inputs,exist=file_exists) !first try current folder
     if (.not. file_exists) then
@@ -271,46 +275,43 @@ subroutine loadParameters
         open(unit=newunit(fi),file=after_foaming)
         read(fi,*)
         read(fi,*) matr(1:4)
-        xO2=0
-        xN2=0
-        xCyP=matr(3)
-        xCO2=matr(4)
-        xCyP=xCyP/(xCyP+xCO2)
-        xCO2=1-xCyP
+        xgas = 0
+        ! this works only for cyclopentane and CO2
+        xgas(1) = matr(4)
+        xgas(2) = matr(3)
         close(fi)
     elseif (strval=="Qmom0D") then
         after_foaming=TRIM(ADJUSTL(qmom0D_res))//TRIM(ADJUSTL(after_foaming0))
         open(unit=newunit(fi),file=after_foaming)
         read(fi,*)
         read(fi,*) matr(1:4)
-        xO2=0
-        xN2=0
-        xCyP=matr(3)
-        xCO2=matr(4)
-        xCyP=xCyP/(xCyP+xCO2)
-        xCO2=1-xCyP
+        xgas = 0
+        ! this works only for cyclopentane and CO2
+        xgas(1) = matr(4)
+        xgas(2) = matr(3)
         close(fi)
     elseif (strval=="Qmom3D") then
         after_foaming=TRIM(ADJUSTL(qmom3D_res))//TRIM(ADJUSTL(after_foaming0))
         open(unit=newunit(fi),file=after_foaming)
         read(fi,*)
         read(fi,*) matr(1:4)
-        xO2=0
-        xN2=0
-        xCyP=matr(3)
-        xCO2=matr(4)
-        xCyP=xCyP/(xCyP+xCO2)
-        xCO2=1-xCyP
+        xgas = 0
+        ! this works only for cyclopentane and CO2
+        xgas(1) = matr(4)
+        xgas(2) = matr(3)
         close(fi)
     elseif (strval=="DirectInput") then
-        call fson_get(json_data, "gasComposition.O2", xO2)
-        call fson_get(json_data, "gasComposition.N2", xN2)
-        call fson_get(json_data, "gasComposition.CO2", xCO2)
-        call fson_get(json_data, "gasComposition.Cyclopentane", xCyP)
+        do i=1,size(xgas)
+            call fson_get(&
+                json_data,&
+                "gasComposition."//TRIM(ADJUSTL(gasname(i))),&
+                xgas(i))
+        enddo
     else
         write(*,*) 'unknown source for gas composition'
         stop
     endif
+    xgas = xgas / sum(xgas)
     call fson_get(json_data, "sourceOfProperty.strutContent", strval)
     if (strval=="StrutContent") then
         call strutContent(fs,rhof)
@@ -362,7 +363,7 @@ subroutine loadParameters
         temp2=tmean
     endif
     tmean=(temp1+temp2)/2
-    call gasConductivity(cond1,tmean,xO2,xN2,xCO2,xCyP)
+    call gasConductivity(cond1,tmean,xgas,gasname)
     call polymerConductivity(cond2,tmean)
     cond2 = 0.1455_dp+1e-6_dp*(tmean - 273.2_dp)**2
     n1=1

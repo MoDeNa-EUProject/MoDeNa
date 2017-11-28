@@ -22,7 +22,7 @@ subroutine integrate
     use conductivity, only: equcond
     use ioutils, only: newunit
     use models, only: model
-    use inout, only: input,output,print_header
+    use inout, only: input,output,print_header,write_header
     integer :: i, j, k, l, fi
     integer :: itol, itask, istate, iopt
     integer :: MF, ML, MU, LRW, LIW, LENRAT, NNZ, LWM, NEQ
@@ -33,24 +33,6 @@ subroutine integrate
 
     real(dp), allocatable :: ystate(:), yprime(:) ! vector of state
     real(dp), allocatable :: RWORK(:)
-
-    ! model should be general, but physical properties and conductivity are
-    ! hardcoded for ngas=4
-    ngas=4
-    allocate(gasname(ngas))
-    allocate(solModel(ngas),diffModel(ngas))
-    allocate(Sg(ngas),Dg(ngas),Pg(ngas),Deff(ngas),Seff(ngas))
-    allocate(sheetSg(ngas),sheetDg(ngas))
-    allocate(pBg(ngas),xg(ngas),kfoamXg(ngas),kgasXg(ngas))
-    allocate(sgModena(ngas),sgInputs(ngas),sgOutputs(ngas))
-    allocate(sgTemppos(ngas),sgxl1pos(ngas),sgxl2pos(ngas))
-    allocate(dgModena(ngas),dgInputs(ngas),dgOutputs(ngas),dgTemppos(ngas))
-    allocate(kgModena(ngas),kgInputs(ngas),kgOutputs(ngas),kgTemppos(ngas))
-    ! gas names must correspond to physical properties in constants module
-    gasname(1)="O2"
-    gasname(2)="N2"
-    gasname(3)="CO2"
-    gasname(4)="CyP"
 ! -----------------------------------
 ! load inputs
 ! -----------------------------------
@@ -187,10 +169,7 @@ subroutine integrate
 ! ----------------------------------
 ! Integration loop
 ! ----------------------------------
-    open (newunit(fi),file='degas_scalar.csv')
-    write(fi, '(1x, A23, 6(",", A23))') &
-        'time', 'eq_conductivity', 'total_pressure', 'p_O2', &
-        'p_N2', 'p_CO2', 'p_CP'
+    call write_header(fi)
     call equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp_cond)
     call output(0, 0.0_dp, ystate, neq, keq, fi)
     do i=1,nroutputs

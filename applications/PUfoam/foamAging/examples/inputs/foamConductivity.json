@@ -17,14 +17,16 @@
         "wallThickness": "DirectInput"
     },
     "gasComposition": {
-        "O2": 0.1,
-        "N2": 0.4,
-        "CO2": 0.2,
-        "Cyclopentane": 0.3
+        "O2": 0.0,
+        "N2": 0.0,
+        "CO2": 0.0,
+        "CyP": 1.0,
+        "Opt": 0.0,
+        "Sol": 0.0
     },
-    "porosity": 9.678182e-01,
-    "cellSize": 5.100000e-04,
-    "strutContent": 6.258000e-01,
+    "porosity": 0.939,
+    "cellSize": 8.06e-04,
+    "strutContent": 8e-01,
     "wallThickness": 0.5e-6,
     "morphologyInput": "strutContent",
     "strutSize": 1e-6,

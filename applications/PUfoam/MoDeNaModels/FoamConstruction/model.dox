@@ -2,22 +2,25 @@
  *  @section dep_foamConstruction Dependencies of Foam construction utility
  *
  *
- *   | Dependency      | Type                            | Tested Version |
- *   | --------------- | ------------------------------- | -------------- |
- *   | gfortran        | compiler                        | 5.4            |
- *   | Neper           | Library - Tessellation          | 2.0            |
- *   | voro++          | Library - Tessellation          | 0.4.6          |
- *   | gmsh            | Library - Meshing               | 2.10.1         |
- *   | VTK             | Library - Mesh manipulation     | 5.8.0          |
- *   | libmatheval     | Library - Symbolic mathematics  | 1.1.11         |
- *   | GSL             | Library - Numerics              | 2.1            |
- *   | lib3ds          | Library - 3DS files             | 1.3            |
- *   | libjpeg         | Library - JPEG files            | 6.2            |
- *   | freeglut        | Library - GLUT                  | 3              |
- *   | NLOpt           | Library - Optimization          | 2.4.2          |
- *   | meshconv        | Executable - Mesh conversion    | *              |
- *   | binvox          | Executable - Mesh conversion    | *              |
- *   | POV-Ray         | Library - Visualization         | 3.7.0          |
+ *   | Dependency         | Type                            | Tested Version |
+ *   | ------------------ | ------------------------------- | -------------- |
+ *   | gfortran           | compiler                        | 5.4            |
+ *   | Neper              | Library - Tessellation          | 2.0            |
+ *   | voro++             | Library - Tessellation          | 0.4.6          |
+ *   | gmsh               | Library - Meshing               | 2.10.1         |
+ *   | VTK                | Library - Mesh manipulation     | 5.8.0          |
+ *   | libmatheval        | Library - Symbolic mathematics  | 1.1.11         |
+ *   | GSL                | Library - Numerics              | 2.1            |
+ *   | lib3ds             | Library - 3DS files             | 1.3            |
+ *   | libjpeg            | Library - JPEG files            | 6.2            |
+ *   | freeglut           | Library - GLUT                  | 3              |
+ *   | NLOpt              | Library - Optimization          | 2.4.2          |
+ *   | meshconv           | Executable - Mesh conversion    | *              |
+ *   | binvox             | Executable - Mesh conversion    | *              |
+ *   | POV-Ray            | Library - Visualization         | 3.7.0          |
+ *   | spack              | Library - Visualization         | 0.5.2          |
+ *   | vapory             | Library - Visualization         | 0.1.1          |
+ *   | packing-generation | Library - Packing               | *              |
  *   * Library releases are not versioned.
 */
 

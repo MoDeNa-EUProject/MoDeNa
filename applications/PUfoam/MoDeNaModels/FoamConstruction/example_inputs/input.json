@@ -1,19 +1,31 @@
 {
-    "MU": 0.15,
-    "SIGMA": 0.01,
-    "NumOfCells": 27,
-    "porosity": 0.92,
-    "strutContent": 0.6,
-    "filename": "PeriodicRVE",
-    "deleteFiles": 0,
-    "packing": 1,
-    "alternativePackingAlgorithm": 0,
-    "tesselation": 1,
-    "visualizeTesselation": 0,
-    "geometry": 1,
-    "statistics": 0,
-    "hypermesh": 0,
-    "moveToPeriodicBox": 1,
-    "renderBox": 0,
-    "binarizeBox": 0
+    "filename": "Foam", 
+    "packing": true, 
+    "packing_options": {
+        "shape": 0.195909940771, 
+        "domain_size": 1, 
+        "number_of_cells": 27, 
+        "scale": 0.216136876376, 
+        "algorithm": "-fba"
+    }, 
+    "tessellation": true, 
+    "tessellation_options": {
+        "visualize_tessellation": false
+    },
+    "structured_grid": false, 
+    "structured_grid_options": {
+        "render_box": false, 
+        "strut_content": 0.6, 
+        "porosity": 0.94, 
+        "strut_size_guess": 4, 
+        "binarize_box": true, 
+        "move_to_periodic_box": true
+    }, 
+    "unstructured_grid": true, 
+    "unstructured_grid_options": {
+        "create_geometry": true, 
+        "convert_mesh": true, 
+        "wall_thickness": 0.02, 
+        "mesh_domain": true
+    } 
 }

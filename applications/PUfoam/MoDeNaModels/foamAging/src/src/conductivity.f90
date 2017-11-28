@@ -8,6 +8,7 @@ module conductivity
     use constants
     use fmodena
     use physicalProperties
+    use globals, only: Mg
     implicit none
     private
     public equcond
@@ -32,10 +33,6 @@ subroutine equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp)
     integer :: i,j,k
     integer :: gasModel=2
     !calculate average concentrations
-    cpg(1)=oxyHeatCapacity(temp)
-    cpg(2)=nitrHeatCapacity(temp)
-    cpg(3)=cdHeatCapacity(temp)
-    cpg(4)=cypHeatCapacity(temp)
     cc=0
     j=0
     do i=1,nfv
@@ -54,18 +51,6 @@ subroutine equcond(keq,ystate,ngas,nfv,mor,eps,dcell,fstrut,temp)
             yg(i)=0
         endif
     enddo
-    select case(gasModel) ! determine conductivity of gas mixture
-    case (1)
-        kgas = weightedAverage(kg,yg)
-    case (2)
-        kgas = extWassiljewa(kg,yg,Tc,pc,Mg,temp,1._dp)
-    case (3)
-        kgas = lindsayBromley(kg,yg,Tb,cpg,Mg,temp)
-    case (4)
-        kgas = pandeyPrajapati(kg,yg,Tb,Mg,temp)
-    case default
-        stop 'unknown gas conductivity model'
-    end select
     call modena_inputs_set(kfoamInputs, kfoamEpspos, eps)
     call modena_inputs_set(kfoamInputs, kfoamDcellpos, dcell)
     call modena_inputs_set(kfoamInputs, kfoamFstrutpos, fstrut)

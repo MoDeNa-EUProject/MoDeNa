@@ -1,20 +1,29 @@
 {
-    "filename": "FoamBoxFixed",
-    "mesh_domain": false,
-    "convert_mesh": false,
+    "filename": "Foam_uns",
+    "mode": "diffusivity",
     "boundary_conditions": {
-        "top": 2,
-        "bottom": 1
+        "top": 1,
+        "bottom": 0
     },
     "conductivity": {
-        "gas": 1,
-        "solid": 10
+        "gas": 25e-3,
+        "solid": 210e-3
     },
+    "diffusivity": {
+        "gas": 1.68e-5,
+        "solid": 1.49e-12
+    },
+    "solubility": 7.74e-4,
+    "morphology": {
+        "cell_size": 500e-6,
+        "strut_content": 0.0,
+        "enhancement_par": 1.0
+    },
+    "temperature": 298,
     "element_type": "CG",
     "element_degree": 1,
     "saving": {
         "mesh": false,
-        "boundaries": false,
         "subdomains": false,
         "flux": false,
         "flux_divergence": false,
@@ -22,8 +31,7 @@
     },
     "plotting": {
         "mesh": false,
-        "boundaries": false,
-        "subdomains": false,
+        "subdomains": true,
         "solution": true,
         "flux": false,
         "flux_divergence": false,

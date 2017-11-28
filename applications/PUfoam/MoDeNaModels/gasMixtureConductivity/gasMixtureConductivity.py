@@ -71,6 +71,7 @@ void gasMixtureConductivity
 ## Dohrn model
 #
 #  see [link](http://dx.doi.org/10.1016/j.fluid.2007.07.059)
+#  Implemented for mixture of CO2, O2, N2, and CyP 
 dohrnCode=r'''
 #include "modena.h"
 #include "math.h"
@@ -125,6 +126,7 @@ void gasMixtureConductivity
 ## Lindsay-Bromley model
 #
 #  see [link](http://dx.doi.org/10.1021/ie50488a017)
+#  Implemented for mixture of CO2, O2, N2, and CyP
 lindsayBromleyCode=r'''
 #include "modena.h"
 #include "math.h"
@@ -215,9 +217,6 @@ f_gasMixtureConductivity = CFunction(
 m_gasMixtureConductivity = ForwardMappingModel(
     _id='gasMixtureConductivity',
     surrogateFunction=f_gasMixtureConductivity,
-    substituteModels=[gasConductivity.m_CO2_thermal_conductivity,\
-                      gasConductivity.m_CyP_thermal_conductivity,\
-                      gasConductivity.m_O2_thermal_conductivity,\
-                      gasConductivity.m_N2_thermal_conductivity],
+    substituteModels=gasConductivity.substituteModels,
     parameters=[1, 1, 1],
 )

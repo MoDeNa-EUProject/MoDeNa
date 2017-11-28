@@ -45,7 +45,7 @@ from modena import CFunction, ForwardMappingModel, IndexSet
 ## List of components, for which surrogate model is provided
 species = IndexSet(
     name= 'gas_thermal_conductivity_species',
-    names= [ 'CO2', 'CyP', 'O2', 'N2' ]
+    names= [ 'CO2', 'CyP', 'O2', 'N2', 'Opt', 'Sol' ]
 )
 
 ## Surrogate function for thermal conductivity of blowing agents.
@@ -87,6 +87,7 @@ void gas_thermal_conductivity
     },
 )
 
+substituteModels = []
 ## Surrogate model for thermal conductivity of blowing agent
 #
 # Forward mapping model is used.
@@ -96,6 +97,8 @@ m_CO2_thermal_conductivity = ForwardMappingModel(
     substituteModels=[],
     parameters=[0.0807e-3, -6.96e-3],
 )
+if 'CO2' in species.names:
+    substituteModels.append(m_CO2_thermal_conductivity)
 
 ## Surrogate model for thermal conductivity of blowing agent
 #
@@ -106,6 +109,8 @@ m_Air_thermal_conductivity = ForwardMappingModel(
     substituteModels=[],
     parameters=[0.0720e-3, 4.23e-3],
 )
+if 'Air' in species.names:
+    substituteModels.append(m_Air_thermal_conductivity)
 
 ## Surrogate model for thermal conductivity of blowing agent
 #
@@ -116,6 +121,34 @@ m_CyP_thermal_conductivity = ForwardMappingModel(
     substituteModels=[],
     parameters=[0.0956e-3, -14.89e-3],
 )
+if 'CyP' in species.names:
+    substituteModels.append(m_CyP_thermal_conductivity)
+
+## Surrogate model for thermal conductivity of blowing agent
+#
+# Forward mapping model is used. Cyclopentane temeprature dependence used.
+# Fitted to data from product sheet.
+m_Opt_thermal_conductivity = ForwardMappingModel(
+    _id='gas_thermal_conductivity[A=Opt]',
+    surrogateFunction=f_gas_thermal_conductivity,
+    substituteModels=[],
+    parameters=[0.0956e-3, -0.0177888],
+)
+if 'Opt' in species.names:
+    substituteModels.append(m_Opt_thermal_conductivity)
+
+## Surrogate model for thermal conductivity of blowing agent
+#
+# Forward mapping model is used.  Cyclopentane temeprature dependence used.
+# Fitted to data from product sheet.
+m_Sol_thermal_conductivity = ForwardMappingModel(
+    _id='gas_thermal_conductivity[A=Sol]',
+    surrogateFunction=f_gas_thermal_conductivity,
+    substituteModels=[],
+    parameters=[0.0956e-3, -0.0178108],
+)
+if 'Sol' in species.names:
+    substituteModels.append(m_Sol_thermal_conductivity)
 
 ## Surrogate model for thermal conductivity of blowing agent
 #
@@ -126,6 +159,8 @@ m_O2_thermal_conductivity = ForwardMappingModel(
     substituteModels=[],
     parameters=[7.79027851e-05, 3.08485612e-03],
 )
+if 'O2' in species.names:
+    substituteModels.append(m_O2_thermal_conductivity)
 
 ## Surrogate model for thermal conductivity of blowing agent
 #
@@ -136,3 +171,5 @@ m_N2_thermal_conductivity = ForwardMappingModel(
     substituteModels=[],
     parameters=[6.93333072e-05, 4.87189502e-03],
 )
+if 'N2' in species.names:
+    substituteModels.append(m_N2_thermal_conductivity)

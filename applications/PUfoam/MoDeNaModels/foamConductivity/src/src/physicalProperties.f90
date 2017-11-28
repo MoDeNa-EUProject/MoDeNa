@@ -10,7 +10,7 @@ module physicalProperties
     use fmodena
     implicit none
     private
-    public polymerConductivity,gasConductivity,strutContent
+    public polymerConductivity,gasConductivity,strutContent,get_names
 contains
 !********************************BEGINNING*************************************
 !> Calculation of thermal conductivity of polymer.
@@ -50,25 +50,20 @@ end subroutine polymerConductivity
 
 !********************************BEGINNING*************************************
 !> Calculation of thermal conductivity of gas.
-subroutine gasConductivity(kgas,temp,xO2,xN2,xCO2,xCyP)
+subroutine gasConductivity(kgas,temp,xgas,gasname)
     real(dp), intent(out) :: kgas !< thermal conductivity
     real(dp), intent(in) :: temp !< temperature
-    real(dp), intent(in) :: xO2 !< molar fraction of O2
-    real(dp), intent(in) :: xN2 !< molar fraction of N2
-    real(dp), intent(in) :: xCO2 !< molar fraction of CO2
-    real(dp), intent(in) :: xCyP !< molar fraction of cyclopentane
+    real(dp), dimension(:), intent(in) :: xgas !< molar fraction of gases
+    character(len=255), dimension(:), intent(in) :: gasname !< names of gases
+    integer :: i
     !modena variables
     integer(c_size_t) :: kgasTemppos
-    integer(c_size_t) :: kgasXCO2pos
-    integer(c_size_t) :: kgasXCyPpos
-    integer(c_size_t) :: kgasXO2pos
-    integer(c_size_t) :: kgasXN2pos
-
+    integer(c_size_t), dimension(:), allocatable :: kgasXpos
     integer(c_int) :: ret
-
     type(c_ptr) :: kgasModena = c_null_ptr
     type(c_ptr) :: kgasInputs = c_null_ptr
     type(c_ptr) :: kgasOutputs = c_null_ptr
+    allocate(kgasXpos(size(xgas)))
     kgasModena = modena_model_new (&
         c_char_"gasMixtureConductivity"//c_null_char)
     if (modena_error_occurred()) then
@@ -78,20 +73,16 @@ subroutine gasConductivity(kgas,temp,xO2,xN2,xCO2,xCyP)
     kgasOutputs = modena_outputs_new (kgasModena)
     kgasTemppos = modena_model_inputs_argPos(&
         kgasModena, c_char_"T"//c_null_char)
-    kgasXCO2pos = modena_model_inputs_argPos(&
-        kgasModena, c_char_"x[A=CO2]"//c_null_char)
-    kgasXCyPpos = modena_model_inputs_argPos(&
-        kgasModena, c_char_"x[A=CyP]"//c_null_char)
-    kgasXO2pos = modena_model_inputs_argPos(&
-        kgasModena, c_char_"x[A=O2]"//c_null_char)
-    kgasXN2pos = modena_model_inputs_argPos(&
-        kgasModena, c_char_"x[A=N2]"//c_null_char)
+    do i=1,size(xgas)
+        kgasXpos(i) = modena_model_inputs_argPos(&
+            kgasModena,&
+            c_char_"x[A="//TRIM(ADJUSTL(gasname(i)))//"]"//c_null_char)
+    enddo
     call modena_model_argPos_check(kgasModena)
     call modena_inputs_set(kgasInputs, kgasTemppos, temp)
-    call modena_inputs_set(kgasInputs, kgasXCO2pos, xCO2)
-    call modena_inputs_set(kgasInputs, kgasXCyPpos, xCyP)
-    call modena_inputs_set(kgasInputs, kgasXO2pos, xO2)
-    call modena_inputs_set(kgasInputs, kgasXN2pos, xN2)
+    do i=1,size(xgas)
+        call modena_inputs_set(kgasInputs, kgasXpos(i), xgas(i))
+    enddo
     ret = modena_model_call (kgasModena, kgasInputs, kgasOutputs)
     if(ret /= 0) then
         call exit(ret)
@@ -137,5 +128,47 @@ subroutine strutContent(strut_content,foam_density)
     call modena_outputs_destroy (fsOutputs)
     call modena_model_destroy (fsModena)
 end subroutine strutContent
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+!> Get names of the species.
+subroutine get_names(gasname)
+    character(len=255), dimension(:), allocatable :: gasname
+    integer(c_size_t) :: i
+    !modena variables
+    type(c_ptr) :: index_set = c_null_ptr
+    type(c_ptr) :: name = c_null_ptr
+    integer(c_size_t) :: itbeg,itend
+    index_set = modena_index_set_new(&
+        c_char_"gas_thermal_conductivity_species"//c_null_char)
+    itbeg = modena_index_set_iterator_start(index_set)
+    itend = modena_index_set_iterator_end(index_set)
+    allocate(gasname(itend))
+    do i = itbeg, itend - 1
+        gasname(i+1) = modena_index_set_get_name(index_set, i)
+    enddo
+    call modena_index_set_destroy(index_set)
+end subroutine get_names
+!***********************************END****************************************
+
+
+!********************************BEGINNING*************************************
+function modena_index_set_get_name(indexSet, ind) result(ret)
+    type(c_ptr) :: indexSet
+    integer(c_size_t) :: ind
+    character*255 :: ret
+    type(c_ptr) :: name_ptr = c_null_ptr
+    character, pointer, dimension(:) :: last_message_array
+    character*255 :: last_message
+    integer :: message_length, i
+    name_ptr = modena_index_set_get_name_ptr(indexSet, ind)
+    call C_F_POINTER(name_ptr, last_message_array, [ 255 ])
+    do i=1, 255
+        last_message(i:i+1) = last_message_array(i)
+    enddo
+    message_length = LEN_TRIM(last_message(1:INDEX(last_message, CHAR(0))))
+    ret = last_message(1:message_length-1)
+end function modena_index_set_get_name
 !***********************************END****************************************
 end module physicalProperties

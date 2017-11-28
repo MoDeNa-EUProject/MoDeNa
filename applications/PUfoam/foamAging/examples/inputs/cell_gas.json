@@ -1,0 +1,23 @@
+{
+    "temperature": {
+        "min": 270,
+        "max": 420,
+        "points": 30
+    },
+    "initial_weight_fraction": {
+        "H2O": 0.0066,
+        "CyP": 0.0256,
+        "Opt": 0.0,
+        "Sol": 0.0
+    },
+    "molar_mass": {
+        "CyP": 72e-3,
+        "CO2": 44e-3,
+        "H2O": 18e-3,
+        "Opt": 164e-3,
+        "Sol": 130e-3
+    },
+    "polymer_density": 1100,
+    "foam_density": 39.8,
+    "cell_size": 400e-6
+}

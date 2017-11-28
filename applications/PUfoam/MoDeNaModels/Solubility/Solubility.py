@@ -36,27 +36,29 @@ License
 
 This is the Solubility python module. Basically, it contains the following:
 
-The FireTask which controls the call of the detailed model. This detailed model is called
-at the very beginning of the simulation in order to generate initial data points
-which can be used to fit the parameters of the surrogate model and during a running simulation
-as soon as the Solubility model is called with input parameters which lie outside the range
-the parameters of the surrogate model was so far fitted for. This FireTask is stored in the class
-"SolubilityExactSim" and a more detailed description of the detailed model can be found
-in the description of this class.
+The FireTask which controls the call of the detailed model. This detailed model
+is called at the very beginning of the simulation in order to generate initial
+data points which can be used to fit the parameters of the surrogate model and
+during a running simulation as soon as the Solubility model is called with input
+parameters which lie outside the range the parameters of the surrogate model was
+so far fitted for. This FireTask is stored in the class "SolubilityExactSim" and
+a more detailed description of the detailed model can be found in the
+description of this class.
 
-Furthermore, this module contains the code of the surrogate model function as well as the
-definitions of its input and output values and its fittable parameters. Care should be
-taken to set reasonable bounds for these variables.
+Furthermore, this module contains the code of the surrogate model function as
+well as the definitions of its input and output values and its fittable
+parameters. Care should be taken to set reasonable bounds for these variables.
 
 Also, this module contains the backward mapping model. This model consits of the
-surrogate model function, an initialisation strategy, the out of bounds strategy and the
-parameter fitting strategy. The initialisation strategy defines the initial data points where the
-detailed model will be evaluated at simulation start for an initial fit of the surrogate model parameters.
-The out of bounds strategy determines, how many new points and where to place these new
-points, once the Solubility model is called for input values outside of the
-fitted range. The parameter fitting strategy defines tolerances and maximal iterations
-which are passed to the numerical solver which performs the actual fitting of the
-surrogate model parameters.
+surrogate model function, an initialisation strategy, the out of bounds strategy
+and the parameter fitting strategy. The initialisation strategy defines the
+initial data points where the detailed model will be evaluated at simulation
+start for an initial fit of the surrogate model parameters. The out of bounds
+strategy determines, how many new points and where to place these new points,
+once the Solubility model is called for input values outside of the fitted
+range. The parameter fitting strategy defines tolerances and maximal iterations
+which are passed to the numerical solver which performs the actual fitting of
+the surrogate model parameters.
 
 @author    Jonas Mairhofer, Pavel Ferkl
 @copyright 2014-2016, MoDeNa Project. GNU Public License.
@@ -69,97 +71,102 @@ from modena import Strategy, ForwardMappingModel
 
 
 species = IndexSet(
-    name= 'solubility_pol_species',
-    names= [ 'Air', 'CO2', 'CyP', 'O2', 'N2' ]
+    name='solubility_pol_species',
+    names=['Air', 'CO2', 'CyP', 'O2', 'N2', 'Opt', 'Sol']
 )
 system = IndexSet(
-    name= 'solubility_num_of_components',
-    names= [ '2', '3' ]
+    name='solubility_num_of_components',
+    names=['2', '3']
 )
+
 
 @explicit_serialize
 class SolubilityExactSim(ModenaFireTask):
     """
-    This FireTask controls the execution of the detailed model of the Solubility model.
-    The detailed model uses the PC-SAFT equation of state. A
-    detailed description of PC-SAFT model can be found in Deliverable 1.3 on the MoDeNa website.
+    This FireTask controls the execution of the detailed model of the Solubility
+    model. The detailed model uses the PC-SAFT equation of state. A detailed
+    description of PC-SAFT model can be found in Deliverable 1.3 on the MoDeNa
+    website.
 
-    In order to start the detailed model, the input values for the model are first written to the
-    file "in.txt". The detailed model code picks them up from this file and performs the according
-    calculation. Once it is done, the output value is written to the file "out.txt". This FireTask
-    then reads in the calculated solubility from "out.txt" and inserts this value into the
+    In order to start the detailed model, the input values for the model are
+    first written to the file "in.txt". The detailed model code picks them up
+    from this file and performs the according calculation. Once it is done, the
+    output value is written to the file "out.txt". This FireTask then reads in
+    the calculated solubility from "out.txt" and inserts this value into the
     database.
     """
+
     def task(self, fw_spec):
         # Write input for detailed model
         ff = open('in.txt', 'w')
         Tstr = str(self['point']['T'])
-        ff.write('%s \n' %(Tstr))
-        if (self['indices']['B']=='2'):
-            ff.write('2 \n')       #number of components in system
-            if (self['indices']['A']=='CO2'):
+        ff.write('%s \n' % (Tstr))
+        if (self['indices']['B'] == '2'):
+            ff.write('2 \n')  # number of components in system
+            if (self['indices']['A'] == 'CO2'):
                 ff.write('co2 \n')
-            elif (self['indices']['A']=='Air'):
+            elif (self['indices']['A'] == 'Air'):
                 ff.write('air \n')
-            elif (self['indices']['A']=='CyP'):
+            elif (self['indices']['A'] == 'CyP'):
                 ff.write('cyclopentane \n')
-            elif (self['indices']['A']=='O2'):
+            elif (self['indices']['A'] == 'O2'):
                 ff.write('o2 \n')
-            elif (self['indices']['A']=='N2'):
+            elif (self['indices']['A'] == 'N2'):
                 ff.write('n2 \n')
-            #pass molar liquid composition
+            # pass molar liquid composition
             x1l_str = str(self['point']['xl1'])
             x2l_str = str(self['point']['xl2'])
-            ff.write('%s \n' %(x1l_str))
-            ff.write('%s \n' %(x2l_str))
-        elif (self['indices']['B']=='3'):
-            ff.write('3 \n')       #number of components in system
-            if (self['indices']['A']=='CO2'):
+            ff.write('%s \n' % (x1l_str))
+            ff.write('%s \n' % (x2l_str))
+        elif (self['indices']['B'] == '3'):
+            ff.write('3 \n')  # number of components in system
+            if (self['indices']['A'] == 'CO2'):
                 ff.write('co2 \n')
-            elif (self['indices']['A']=='Air'):
+            elif (self['indices']['A'] == 'Air'):
                 ff.write('air \n')
-            elif (self['indices']['A']=='CyP'):
+            elif (self['indices']['A'] == 'CyP'):
                 ff.write('cyclopentane \n')
-            elif (self['indices']['A']=='O2'):
+            elif (self['indices']['A'] == 'O2'):
                 ff.write('o2 \n')
-            elif (self['indices']['A']=='N2'):
+            elif (self['indices']['A'] == 'N2'):
                 ff.write('n2 \n')
-            #pass molar liquid composition
+            # pass molar liquid composition
             x1l_str = str(self['point']['xl1'])
             x2l_str = str(self['point']['xl2'])
             x3l_str = str(self['point']['xl3'])
-            ff.write('%s \n' %(x1l_str))
-            ff.write('%s \n' %(x2l_str))
-            ff.write('%s \n' %(x3l_str))
+            ff.write('%s \n' % (x1l_str))
+            ff.write('%s \n' % (x2l_str))
+            ff.write('%s \n' % (x3l_str))
         ff.close()
 
-        #create output file for detailed code
+        # create output file for detailed code
         fff = open('out.txt', 'w+')
         fff.close()
 
         # Execute the detailed model
         # path to **this** file + /src/...
         # will break if distributed computing
-        ret = os.system(os.path.dirname(os.path.abspath(__file__))+\
-            '/src/pcsaft')
+        ret = os.system(os.path.dirname(os.path.abspath(__file__)) +
+                        '/src/pcsaft')
         # This call enables backward mapping capabilities
         self.handleReturnCode(ret)
         # Analyse output
         # os.getcwd() returns the path to the "launcher" directory
         try:
-            FILE = open(os.getcwd()+'/out.txt','r')
+            FILE = open(os.getcwd() + '/out.txt', 'r')
         except IOError:
             raise IOError("File not found")
         self['point']['H'] = float(FILE.readline())
         FILE.close()
 
-## @var Ccode2
+
+# @var Ccode2
 # @brief Surrogate Function
 # @details
 #
 # $$f(T) := \\theta_0 + \\theta_1 \\cdot T + \\theta_2 \cdot T^2$$
 #
-Ccode2='''
+Ccode2 = '''
 #include "modena.h"
 #include "math.h"
 
@@ -182,9 +189,11 @@ const double term2 = exp(term1);
 outputs[0] = P0*term2;
 
 outputs[0] = P0 + T*P1 + P2*T*T;
+
+outputs[0] = P0*exp(P1*T);
 }
 '''
-Ccode3='''
+Ccode3 = '''
 #include "modena.h"
 #include "math.h"
 
@@ -212,52 +221,56 @@ outputs[0] = P0 + T*P1 + P2*T*T;
 outputs[0] = P0+P1*exp(-pow((T-P2),2)/P3);
 }
 '''
-outputs={
-    'H': { 'min': 9e99, 'max': -9e99, 'argPos': 0 }
+outputs = {
+    'H': {'min': 9e99, 'max': -9e99, 'argPos': 0}
 }
-parameters={
-    'param0': { 'min': 1e-12, 'max': 1E1, 'argPos': 0 },    #check if boundaries are reasonable!!!
-    'param1': { 'min': -1e-1, 'max': 1e-1, 'argPos': 1 },
-    'param2': { 'min': -1e-1, 'max': 1e-1, 'argPos': 2 },
+parameters = {
+    # check if boundaries are reasonable!!!
+    'param0': {'min': 1e-12, 'max': 1E1, 'argPos': 0},
+    'param1': {'min': -1e-1, 'max': 1e-1, 'argPos': 1},
+    'param2': {'min': -1e-1, 'max': 1e-1, 'argPos': 2},
 }
-parameters4={
-    'param0': { 'min': -9e9, 'max': 9e9+2*1.42885440e-04, 'argPos': 0 },    #check if boundaries are reasonable!!!
-    'param1': { 'min': -9e9, 'max': 9e9+2*1.22132172e+00, 'argPos': 1 },
-    'param2': { 'min': -9e9, 'max': 9e9+2*-7.97789449e+02, 'argPos': 2 },
-    'param3': { 'min': -9e9, 'max': 9e9+2*1.33835999e+05, 'argPos': 3 },
+parameters4 = {
+    # check if boundaries are reasonable!!!
+    'param0': {'min': -9e9, 'max': 9e9 + 2 * 1.42885440e-04, 'argPos': 0},
+    'param1': {'min': -9e9, 'max': 9e9 + 2 * 1.22132172e+00, 'argPos': 1},
+    'param2': {'min': -9e9, 'max': 9e9 + 2 * -7.97789449e+02, 'argPos': 2},
+    'param3': {'min': -9e9, 'max': 9e9 + 2 * 1.33835999e+05, 'argPos': 3},
 }
-indices={
+indices = {
     'A': species,
     'B': system
 }
-inputs2={
-    'T': { 'min': 200.0, 'max': 550.0},        #check if boundaries reasonable, from this range, the random values for the DOE are chosen!
-    'xl1': { 'min': 0.0, 'max': 1.0 },
-    'xl2': { 'min': 0.0, 'max': 1.0 },
+inputs2 = {
+    # check if boundaries reasonable, from this range, the random values for the DOE are chosen!
+    'T': {'min': 200.0, 'max': 550.0},
+    'xl1': {'min': 0.0, 'max': 1.0},
+    'xl2': {'min': 0.0, 'max': 1.0},
 }
-inputs3={
-    'T': { 'min': 200.0, 'max': 550.0},        #check if boundaries reasonable, from this range, the random values for the DOE are chosen!
-    'xl1': { 'min': 0.0, 'max': 1.0 },
-    'xl2': { 'min': 0.0, 'max': 1.0 },
-    'xl3': { 'min': 0.0, 'max': 1.0 },
+inputs3 = {
+    # check if boundaries reasonable, from this range, the random values for the DOE are chosen!
+    'T': {'min': 200.0, 'max': 550.0},
+    'xl1': {'min': 0.0, 'max': 1.0},
+    'xl2': {'min': 0.0, 'max': 1.0},
+    'xl3': {'min': 0.0, 'max': 1.0},
 }
 f2 = CFunction(Ccode=Ccode2,
-    inputs=inputs2,
-    outputs=outputs,
-    parameters=parameters,
-    indices=indices
-)
+               inputs=inputs2,
+               outputs=outputs,
+               parameters=parameters,
+               indices=indices
+               )
 f3 = CFunction(Ccode=Ccode3,
-    inputs=inputs3,
-    outputs=outputs,
-    parameters=parameters4,
-    indices=indices
-)
+               inputs=inputs3,
+               outputs=outputs,
+               parameters=parameters4,
+               indices=indices
+               )
 
-outOfBoundsStrategy=Strategy.ExtendSpaceStochasticSampling(
+outOfBoundsStrategy = Strategy.ExtendSpaceStochasticSampling(
     nNewPoints=4
 )
-parameterFittingStrategy=Strategy.NonLinFitWithErrorContol(
+parameterFittingStrategy = Strategy.NonLinFitWithErrorContol(
     testDataPercentage=0.2,
     maxError=0.1,
     improveErrorStrategy=Strategy.StochasticSampling(
@@ -272,7 +285,7 @@ m_solubilityCO2PU = BackwardMappingModel(
     substituteModels=[],
     initialisationStrategy=Strategy.InitialPoints(
         initialPoints={
-            'T': [290, 320, 350, 380],
+            'T': [270, 320, 370, 420],
             'xl1': [1.1e-3, 1.0e-3, 1.0e-3, 1.0e-4],
             'xl2': [0.9989, 0.999, 0.999, 0.9999],
         },
@@ -287,7 +300,7 @@ m_solubilityAirPU = BackwardMappingModel(
     substituteModels=[],
     initialisationStrategy=Strategy.InitialPoints(
         initialPoints={
-            'T': [290, 320, 350, 380],
+            'T': [270, 320, 370, 420],
             'xl1': [1.1e-3, 1.0e-3, 1.0e-3, 1.0e-4],
             'xl2': [0.9989, 0.999, 0.999, 0.9999],
         },
@@ -302,13 +315,25 @@ m_solubilityCyclopentanePU = BackwardMappingModel(
     substituteModels=[],
     initialisationStrategy=Strategy.InitialPoints(
         initialPoints={
-            'T': [290, 320, 350, 380],
+            'T': [270, 320, 370, 420],
             'xl1': [1.1e-3, 1.0e-3, 1.0e-3, 1.0e-4],
             'xl2': [0.9989, 0.999, 0.999, 0.9999],
         },
     ),
     outOfBoundsStrategy=outOfBoundsStrategy,
     parameterFittingStrategy=parameterFittingStrategy
+)
+m_solubilityOptPU = ForwardMappingModel(
+    _id='Solubility[A=Opt,B=2]',
+    surrogateFunction=f2,
+    substituteModels=[],
+    parameters=[10.0, -0.0182038808728673, 0.0],
+)
+m_solubilitySolPU = ForwardMappingModel(
+    _id='Solubility[A=Sol,B=2]',
+    surrogateFunction=f2,
+    substituteModels=[],
+    parameters=[10.0, -0.0182038808728673, 0.0],
 )
 m_solubilityO2PU = BackwardMappingModel(
     _id='Solubility[A=O2,B=2]',
@@ -317,7 +342,7 @@ m_solubilityO2PU = BackwardMappingModel(
     substituteModels=[],
     initialisationStrategy=Strategy.InitialPoints(
         initialPoints={
-            'T': [290, 320, 350, 380],
+            'T': [270, 320, 370, 420],
             'xl1': [1.1e-3, 1.0e-3, 1.0e-3, 1.0e-4],
             'xl2': [0.9989, 0.999, 0.999, 0.9999],
         },
@@ -332,7 +357,7 @@ m_solubilityN2PU = BackwardMappingModel(
     substituteModels=[],
     initialisationStrategy=Strategy.InitialPoints(
         initialPoints={
-            'T': [290, 320, 350, 380],
+            'T': [270, 320, 370, 420],
             'xl1': [1.1e-3, 1.0e-3, 1.0e-3, 1.0e-4],
             'xl2': [0.9989, 0.999, 0.999, 0.9999],
         },
@@ -391,10 +416,10 @@ m_solubilityCyclopentane = BackwardMappingModel(
 )
 # below are experimental solubility models
 # they are needed, because we want substitute model for bubble growth model
-inputsExp={
-    'T': { 'min': 200.0, 'max': 550.0}
+inputsExp = {
+    'T': {'min': 200.0, 'max': 550.0}
 }
-CcodeR11Baser='''
+CcodeR11Baser = '''
 #include "modena.h"
 #include "math.h"
 
@@ -415,18 +440,18 @@ const double P3 = parameters[3];
 outputs[0] = (P0 + P1*exp(-pow(T-P2,2)/(2*P3*P3)))*1100.0/137.37e-3/101e3;
 }
 '''
-parameters4={
-    'param0': { 'min': 1e-12, 'max': 1E1, 'argPos': 0 },
-    'param1': { 'min': -1e-1, 'max': 1e-1, 'argPos': 1 },
-    'param2': { 'min': -1e-1, 'max': 1e-1, 'argPos': 2 },
-    'param3': { 'min': -1e-1, 'max': 1e-1, 'argPos': 3 },
+parameters4 = {
+    'param0': {'min': 1e-12, 'max': 1E1, 'argPos': 0},
+    'param1': {'min': -1e-1, 'max': 1e-1, 'argPos': 1},
+    'param2': {'min': -1e-1, 'max': 1e-1, 'argPos': 2},
+    'param3': {'min': -1e-1, 'max': 1e-1, 'argPos': 3},
 }
 fR11Baser = CFunction(Ccode=CcodeR11Baser,
-    inputs=inputsExp,
-    outputs=outputs,
-    parameters=parameters4
-)
-## [R11, Baser](http://dx.doi.org/10.1002/pen.760340804)
+                      inputs=inputsExp,
+                      outputs=outputs,
+                      parameters=parameters4
+                      )
+# [R11, Baser](http://dx.doi.org/10.1002/pen.760340804)
 parR11Baser = [1e-7, 4.2934, 203.3556, 40.016]
 m_solubilityR11Baser = ForwardMappingModel(
     _id='SolubilityR11Baser',
@@ -436,7 +461,7 @@ m_solubilityR11Baser = ForwardMappingModel(
     inputs=inputsExp,
     outputs=outputs,
 )
-CcodeCO2Baser='''
+CcodeCO2Baser = '''
 #include "modena.h"
 #include "math.h"
 
@@ -454,17 +479,17 @@ const double P0 = parameters[0];
 outputs[0] = P0;
 }
 '''
-parameters1={
-    'param0': { 'min': 1e-12, 'max': 1E1, 'argPos': 0 },
+parameters1 = {
+    'param0': {'min': 1e-12, 'max': 1E1, 'argPos': 0},
 }
-if 'argPos' in inputsExp['T']: #added by previous CFunction
+if 'argPos' in inputsExp['T']:  # added by previous CFunction
     inputsExp['T'].pop('argPos')
 fCO2Baser = CFunction(Ccode=CcodeCO2Baser,
-    inputs=inputsExp,
-    outputs=outputs,
-    parameters=parameters1
-)
-## [CO2, Baser](http://dx.doi.org/10.1002/pen.760340804)
+                      inputs=inputsExp,
+                      outputs=outputs,
+                      parameters=parameters1
+                      )
+# [CO2, Baser](http://dx.doi.org/10.1002/pen.760340804)
 parCO2Baser = [1.1e-4]
 m_solubilityCO2Baser = ForwardMappingModel(
     _id='SolubilityCO2Baser',
@@ -474,7 +499,7 @@ m_solubilityCO2Baser = ForwardMappingModel(
     inputs=inputsExp,
     outputs=outputs,
 )
-CcodePentGupta='''
+CcodePentGupta = '''
 #include "modena.h"
 #include "math.h"
 
@@ -496,21 +521,21 @@ const double P4 = parameters[4];
 outputs[0] = P0/(exp((P1-P2*T)/(P3-T))-P4)*1100.0/72.15e-3/101e3;
 }
 '''
-parameters5={
-    'param0': { 'min': 1e-12, 'max': 1E1, 'argPos': 0 },
-    'param1': { 'min': -1e-1, 'max': 1e-1, 'argPos': 1 },
-    'param2': { 'min': -1e-1, 'max': 1e-1, 'argPos': 2 },
-    'param3': { 'min': -1e-1, 'max': 1e-1, 'argPos': 3 },
-    'param4': { 'min': -1e-1, 'max': 1e-1, 'argPos': 4 },
+parameters5 = {
+    'param0': {'min': 1e-12, 'max': 1E1, 'argPos': 0},
+    'param1': {'min': -1e-1, 'max': 1e-1, 'argPos': 1},
+    'param2': {'min': -1e-1, 'max': 1e-1, 'argPos': 2},
+    'param3': {'min': -1e-1, 'max': 1e-1, 'argPos': 3},
+    'param4': {'min': -1e-1, 'max': 1e-1, 'argPos': 4},
 }
-if 'argPos' in inputsExp['T']: #added by previous CFunction
+if 'argPos' in inputsExp['T']:  # added by previous CFunction
     inputsExp['T'].pop('argPos')
 fPentGupta = CFunction(Ccode=CcodePentGupta,
-    inputs=inputsExp,
-    outputs=outputs,
-    parameters=parameters5
-)
-## [n-pentane, Gupta](http://dx.doi.org/10.1002/pen.11405)
+                       inputs=inputsExp,
+                       outputs=outputs,
+                       parameters=parameters5
+                       )
+# [n-pentane, Gupta](http://dx.doi.org/10.1002/pen.11405)
 parPentGupta = [-3.3e-4, 2.09e4, 67.5, 8.69e4, 1.01]
 m_solubilityPentGupta = ForwardMappingModel(
     _id='SolubilityPentGupta',
@@ -520,7 +545,7 @@ m_solubilityPentGupta = ForwardMappingModel(
     inputs=inputsExp,
     outputs=outputs,
 )
-CcodePentWinkler='''
+CcodePentWinkler = '''
 #include "modena.h"
 #include "math.h"
 
@@ -541,15 +566,15 @@ const double P3 = parameters[3];
 outputs[0] = (P0 + P1*exp(-pow(T-P2,2)/(2*P3*P3)))*1100.0/72.15e-3/101e3;
 }
 '''
-if 'argPos' in inputsExp['T']: #added by previous CFunction
+if 'argPos' in inputsExp['T']:  # added by previous CFunction
     inputsExp['T'].pop('argPos')
 fPentWinkler = CFunction(Ccode=CcodePentWinkler,
-    inputs=inputsExp,
-    outputs=outputs,
-    parameters=parameters4
-)
+                         inputs=inputsExp,
+                         outputs=outputs,
+                         parameters=parameters4
+                         )
 ## n-pentane, Winkler
-parPentWinkler = [0.0064,0.0551,298.0,17.8]
+parPentWinkler = [0.0064, 0.0551, 298.0, 17.8]
 m_solubilityPentWinkler = ForwardMappingModel(
     _id='SolubilityPentWinkler',
     surrogateFunction=fPentWinkler,

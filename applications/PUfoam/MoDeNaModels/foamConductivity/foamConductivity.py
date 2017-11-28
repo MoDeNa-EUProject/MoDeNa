@@ -90,19 +90,13 @@ class FoamConductivityExactTask(ModenaFireTask):
         dcell = self['point']['dcell']
         fstrut = self['point']['fstrut']
         temp = self['point']['T']
-        xCO2 = self['point']['x[CO2]']
-        xCyP = self['point']['x[CyP]']
-        xO2 = self['point']['x[O2]']
-        xN2 = self['point']['x[N2]']
+        names = gasConductivity.species.names
         # Write input
         inputs={"upperBoundary": {"temperature": temp+1,"emittance": 0.9}}
         inputs["lowerBoundary"]={"temperature": temp-1,"emittance": 0.9}
-        inputs["gasComposition"]={
-            "O2": xO2,
-            "N2": xN2,
-            "CO2": xCO2,
-            "Cyclopentane": xCyP
-        }
+        inputs["gasComposition"] = dict()
+        for name in names:
+            inputs["gasComposition"][name] = self['point']['x[{}]'.format(name)]
         inputs["gasDensity"]=1.2
         inputs["solidDensity"]=1.1e3
         inputs["sourceOfProperty"]={
@@ -147,11 +141,7 @@ class FoamConductivityExactTask(ModenaFireTask):
             FILE = open(os.getcwd()+'/foamConductivity.out','r')
         except IOError:
             raise IOError("File not found")
-
         self['point']['kfoam'] = float(FILE.readline())
-
-        # os.remove('foamConductivity.json')
-        # os.remove('foamConductivity.out')
 
 ## Surrogate function for thermal conductivity of the foam.
 #
