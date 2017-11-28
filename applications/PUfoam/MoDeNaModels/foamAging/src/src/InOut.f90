@@ -297,6 +297,7 @@ subroutine output(iprof, time, ystate, neq, keq, fi)
 		do i = 1, neq/ngas
 			do j = 1, ngas
 				vals(j) = ystate(ngas*(i-1)+j)*sol(ngas*(i-1)+j)
+				if (vals(j) < 1e-80_dp) vals(j) = 0 ! fix error in saving
 			enddo
 			write (fi2,fmt) time/(3600*24),pos,vals
 		enddo
@@ -330,14 +331,15 @@ subroutine output(iprof, time, ystate, neq, keq, fi)
 			if (modelType == "heterogeneous") then
 				do j = 1, ngas
 					vals(j) = ystate(ngas*(i-1)+j)*Rg*temp
+					if (vals(j) < 1e-80_dp) vals(j) = 0 ! fix error in saving
 				enddo
 				write (fi3,fmt) time/(3600*24),pos,vals
 			elseif ( modelType == "homogeneous" ) then
 				do j = 1, ngas
 					vals(j) = ystate(ngas*(i-1)+j)/Seff(j)
+					if (vals(j) < 1e-80_dp) vals(j) = 0 ! fix error in saving
 				enddo
-				write (fi3,fmt) &
-					time/(3600*24),pos,vals
+				write (fi3,fmt) time/(3600*24),pos,vals
 			endif
 		endif
 	enddo
