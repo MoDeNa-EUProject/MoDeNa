@@ -111,7 +111,8 @@ main(int argc, char *argv[])
                 model.inputs_set(p1Byp0Pos, p1/p0);
 
                 // Call the model
-                model.call();
+                // auto model(inputs);
+                model();
 
                 // Fetch result
                 double mdot = model.outputs_get(0);
@@ -128,7 +129,7 @@ main(int argc, char *argv[])
                 model.inputs_set(p1Byp0Pos, p0/p1);
 
                 // Call the model
-                model.call();
+                model();
 
                 // Fetch result
                 double mdot = model.outputs_get(0);

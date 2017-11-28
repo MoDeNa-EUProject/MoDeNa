@@ -35,7 +35,9 @@ License
 @ingroup   twoTank
 """
 
-import os
+from os import system
+from os.path import abspath, dirname, join
+
 import modena
 from modena import ForwardMappingModel, BackwardMappingModel, SurrogateModel, CFunction, ModenaFireTask
 import modena.Strategy as Strategy
@@ -54,7 +56,6 @@ class FlowRateExactSim(ModenaFireTask):
 
     def task(self, fw_spec):
         # Write input
-
         # See http://jinja.pocoo.org/docs/dev/templates/
         Template('''
 {{ s['point']['D'] }}
@@ -67,7 +68,7 @@ class FlowRateExactSim(ModenaFireTask):
         # In this simple example, this call stands for a complex microscopic
         # code - such as full 3D CFD simulation.
         # Source code in src/flowRateExact.C
-        ret = os.system(os.path.dirname(os.path.abspath(__file__))+'/src/flowRateExact')
+        ret = system(join(abspath(dirname(__file__)),'src','flowRateExact'))
 
         # This enables backward mapping capabilities (not needed in this example)
         self.handleReturnCode(ret)
@@ -76,10 +77,6 @@ class FlowRateExactSim(ModenaFireTask):
         f = open('out.txt', 'r')
         self['point']['flowRate'] = float(f.readline())
         f.close()
-
-
-
-
 
 
 f = CFunction(
@@ -121,31 +118,6 @@ void two_tank_flowRate
 )
 
 
-import rpy2.rinterface as rinterface
-from rpy2.robjects.packages import importr
-from numpy import array
-from numpy.random import normal
-
-rinterface.initr()
-lhs = importr('lhs')
-
-
-class TemporaryClass(modena.Strategy.StochasticSampling):
-
-    def samplePoints(self, model, sr, nPoints):
-        """
-        """
-        sampleRange = { k: {'min': min(model.fitData[k]) , 'max': max(model.fitData[k]) } for k in model.inputs.keys() }
-
-        points = array(lhs.randomLHS(nPoints, len(model.inputs))).tolist()
-        points[0] = [ normal(0.5, p) for p in point[0] ]
-        points[1] = [ normal(0.5, p) for p in point[1] ]
-
-        return { key: [ sr[key]['min'] + (sr[key]['min'] - sr[key]['min'])*points[j][i] for j in xrange(nPoints) ] for (i, key) in enumerate(sr) }
-
-
-
-
 
 m = BackwardMappingModel(
     _id= 'flowRate',
@@ -164,10 +136,10 @@ m = BackwardMappingModel(
     outOfBoundsStrategy= Strategy.ExtendSpaceStochasticSampling(
         nNewPoints= 4
     ),
-    parameterFittingStrategy= Strategy.Test(
+    parameterFittingStrategy= Strategy. NonLinFitWithErrorContol(
         testDataPercentage= 0.2,
         maxError= 0.5,
-        improveErrorStrategy= TemporaryClass(
+        improveErrorStrategy= Strategy. NonLinFitWithErrorContol(
             nNewPoints= 2,
             constraints = "p0 / p1 > 0"
         ),
